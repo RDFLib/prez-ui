@@ -1,10 +1,6 @@
 <script setup>
-import { ref, watch, computed } from "vue";
+import { computed } from "vue";
 import { RouterLink } from "vue-router";
-// import { DataFactory } from "n3";
-// import { useRdfStore } from "@/composables/rdfStore";
-
-// const { namedNode } = DataFactory;
 
 const mediatypeNames = {
     "text/html": "HTML",
@@ -16,43 +12,10 @@ const mediatypeNames = {
     "application/geo+json": "GeoJSON"
 };
 
-// const { store, prefixes, parseIntoStore, qname, clearStore } = useRdfStore();
-
 const props = defineProps({
     profiles: Array,
     currentUrl: String
 });
-
-// watch(() => props.profileData, (newData, oldData) => {
-//     // clear profiles
-//     clearStore();
-//     profiles.value = [];
-
-//     if (!!newData) {
-//         parseIntoStore(newData);
-
-//         store.value.forSubjects(subject => { // for each profile
-//             let p = {
-//                 uri: subject.id,
-//                 mediatypes: []
-//             };
-//             store.value.forEach(q => { // get preds & objs for each subj
-//                 if (q.predicate.value === qname("dcterms:title")) {
-//                     p.title = q.object.value;
-//                 } else if (q.predicate.value === qname("dcterms:identifier")) {
-//                     p.id = q.object.value;
-//                 } else if (q.predicate.value === qname("dcterms:description")) {
-//                     p.description = q.object.value;
-//                 } else if (q.predicate.value === qname("altr-ext:hasDefaultResourceFormat")) {
-//                     p.defaultMediatype = q.object.value;
-//                 } else if (q.predicate.value === qname("altr-ext:hasResourceFormat")) {
-//                     p.mediatypes.push(q.object.value);
-//                 }
-//             }, subject, null, null);
-//             profiles.value.push(p);
-//         }, namedNode(qname("a")), namedNode(qname("prof:Profile")));
-//     }
-// });
 
 const orderedProfiles = computed(() => {
     return !!props.profiles ? props.profiles.sort((a, b) => b.default - a.default) : [];
@@ -65,13 +28,21 @@ const orderedProfiles = computed(() => {
         <p>View alternate views &amp; formats</p>
         <div id="profiles">
             <div v-for="profile in orderedProfiles" class="profile">
-                <div><RouterLink :to="`${props.currentUrl}?_profile=${profile.token}`" class="profile-title"><h5>{{ profile.name }}</h5></RouterLink> <span v-if="profile.default" class="badge outline">default</span></div>
+                <div class="profile-title-container">
+                    <RouterLink
+                        :to="`${props.currentUrl}?_profile=${profile.token}`"
+                        class="profile-title"
+                    >
+                        <h5>{{ profile.title }}</h5>
+                    </RouterLink>
+                    <span v-if="profile.default" class="badge outline">default</span>
+                </div>
                 <div class="mediatypes">
                     <RouterLink
                         v-for="mediatype in profile.mediatypes"
                         :to="`${props.currentUrl}?_profile=${profile.token}&_mediatype=${mediatype.mediatype}`"
                         class="mediatype"
-                    >{{ mediatypeNames[mediatype.mediatype] }}</RouterLink>
+                    >{{ mediatypeNames[mediatype.mediatype] || mediatype.mediatype }}</RouterLink>
                 </div>
             </div>
         </div>
@@ -101,12 +72,19 @@ p {
         flex-direction: column;
         gap: 8px;
 
-        .profile-title {
-            h5 {
-                font-size: 1rem;
-                margin: 0;
+        .profile-title-container {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            
+            .profile-title {
+                h5 {
+                    font-size: 1rem;
+                    margin: 0;
+                }
             }
         }
+        
         .mediatypes {
             display: flex;
             flex-direction: row;

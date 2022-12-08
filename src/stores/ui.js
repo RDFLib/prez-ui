@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { defineStore } from "pinia";
 
 export const useUiStore = defineStore("ui", () => {
@@ -15,6 +15,8 @@ export const useUiStore = defineStore("ui", () => {
         url: "/"
     });
     const breadcrumbs = ref([]);
+    const profiles = ref({});
+    const apiVersion = ref("");
 
     // getters
 
@@ -27,12 +29,22 @@ export const useUiStore = defineStore("ui", () => {
         breadcrumbs.value = breadcrumbsList;
     }
 
+    if (localStorage.getItem("profiles")) {
+        profiles.value = JSON.parse(localStorage.getItem("profiles"));
+    }
+
+    watch(profiles, (state) => {
+        localStorage.setItem("profiles", JSON.stringify(state));
+    }, { deep: true });
+
     return {
         // state
         rightNavConfig,
         pageTitle,
         pageHeading,
         breadcrumbs,
+        profiles,
+        apiVersion,
 
         // getters
 
@@ -41,3 +53,4 @@ export const useUiStore = defineStore("ui", () => {
         setBreadcrumbs,
     }
 });
+

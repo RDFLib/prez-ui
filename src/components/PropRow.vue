@@ -5,7 +5,7 @@ import ObjCell from "@/components/ObjCell.vue";
 const props = defineProps({
     iri: String,
     qname: String,
-    title: String,
+    label: String,
     description: String,
     explanation: String,
     order: Number,
@@ -18,7 +18,7 @@ const props = defineProps({
         <PredCell
             :iri="props.iri"
             :qname="props.qname"
-            :title="props.title"
+            :label="props.label"
             :description="props.description"
             :explanation="props.explanation"
         />

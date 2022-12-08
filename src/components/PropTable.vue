@@ -20,21 +20,39 @@ function getNamedNodeQname(n) {
     return qname;
 }
 
+function qname(s) {
+    if (s === "a") { // special handling for "a" as rdf:type
+        return props.prefixes.rdf + "type";
+    } else {
+        const [prefix, pred] = s.split(":");
+        return props.prefixes[prefix] + pred;
+    }
+}
+
+function getAnnotation(predicate, annotationPred) {
+    const annotationQuad = predicate.annotations.find(annotation => annotation.predicate.value === qname(annotationPred));
+    if (annotationQuad) {
+        return annotationQuad.object.value;
+    } else {
+        return null;
+    }
+}
+
 onMounted(() => {
     props.properties.filter(p => !props.hiddenPreds.includes(p.predicate.value)).forEach(p => {
         rows.value[p.predicate.value] ??= {
             iri: p.predicate.id,
             objs: [],
             qname: getNamedNodeQname(p.predicate),
-            label: null,
-            description: null,
-            explanation: null,
+            label: getAnnotation(p.predicate, "rdfs:label"),
+            description: getAnnotation(p.predicate, "dcterms:description"),
+            explanation: getAnnotation(p.predicate, "dcterms:provenance"),
             order: 0
         };
         rows.value[p.predicate.value].objs.push({
             value: p.object.value,
             qname: getNamedNodeQname(p.object),
-            datatype: p.object.datatype ? {value: p.object.datatype.value, qname: getNamedNodeQname(p.object.datatype)} : null,
+            datatype: p.object.datatype ? { value: p.object.datatype.value, qname: getNamedNodeQname(p.object.datatype) } : null,
             language: p.object.language,
             description: null,
             termType: p.object.termType,
@@ -48,34 +66,6 @@ onMounted(() => {
 <template>
     <table>
         <slot name="top"></slot>
-        <!-- <tr v-for="property in props.properties">
-            <th>
-                <ToolTip>
-                    <a :href="property.predicate.value" target="_blank" rel="noopener noreferrer">
-                        {{ getNamedNodeQname(property.predicate) }}
-                    </a>
-                    <template #text>some text</template>
-                </ToolTip>
-            </th>
-            <td>
-                <template v-if="property.object.termType === 'NamedNode'">
-                    <template v-if="!!getNamedNodeQname(property.object)">
-                        <a :href="property.object.value" target="_blank" rel="noopener noreferrer">{{ getNamedNodeQname(property.object) }}</a>
-                    </template>
-                    <template v-else>
-                        <a :href="property.object.value" target="_blank" rel="noopener noreferrer">{{ property.object.value }}</a>
-                    </template>
-                </template>
-                <template v-else>
-                    <template v-if="property.object.value.startsWith('http')">
-                        <a :href="property.object.value" target="_blank" rel="noopener noreferrer">{{ property.object.value }}</a>
-                    </template>
-                    <template v-else>{{ property.object.value }}</template>
-                </template>
-                <template v-if="!!property.object.language">@{{ property.object.language }}</template>
-                <template v-else-if="!!property.object.datatype"> ^^{{ getNamedNodeQname(property.object.datatype) }}</template>
-            </td>
-        </tr> -->
         <PropRow v-for="row in Object.values(rows).sort((a, b) => a.order - b.order)" v-bind="row" />
         <slot name="bottom"></slot>
     </table>

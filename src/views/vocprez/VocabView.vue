@@ -10,128 +10,11 @@ import ConceptComponent from "@/components/ConceptComponent.vue";
 
 const { namedNode } = DataFactory;
 
-// function sleep(ms) {
-//     return new Promise(resolve => setTimeout(resolve, ms));
-// }
-
-// const today = new Date().toISOString().slice(0, 10);
-
 const apiBaseUrl = inject("config").apiBaseUrl;
 const route = useRoute();
 const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qname } = useRdfStore();
 const { data, profiles, loading, error, doRequest } = useGetRequest();
-
-// const profileData = `PREFIX altr-ext: <http://www.w3.org/ns/dx/conneg/altr-ext#>
-// PREFIX dcterms: <http://purl.org/dc/terms/>
-// PREFIX prof: <http://www.w3.org/ns/dx/prof/>
-// PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-
-// <https://w3id.org/profile/vocpub>
-//     a prof:Profile ;
-//     dcterms:description "This is a profile of the taxonomy data model SKOS - i.e. SKOS with additional constraints." ;
-//     dcterms:identifier "vocpub" ;
-//     dcterms:title "VocPub" ;
-//     altr-ext:hasDefaultResourceFormat "text/html" ;
-//     altr-ext:hasResourceFormat
-//         "application/ld+json" ,
-//         "application/rdf+xml" ,
-//         "text/html" ,
-//         "text/turtle" ;
-// .
-
-// <https://www.w3.org/TR/vocab-dcat/>
-//     a prof:Profile ;
-//     dcterms:description "Dataset Catalog Vocabulary (DCAT) is a W3C-authored RDF vocabulary designed to facilitate interoperability between data catalogs" ;
-//     dcterms:identifier "dcat" ;
-//     dcterms:title "DCAT" ;
-//     altr-ext:hasDefaultResourceFormat "text/html" ;
-//     altr-ext:hasResourceFormat
-//         "application/ld+json" ,
-//         "application/rdf+xml" ,
-//         "text/html" ,
-//         "text/turtle" ;
-// .
-
-// altr-ext:alt-profile
-//     a prof:Profile ;
-//     dcterms:description "The representation of the resource that lists all other representations (profiles and Media Types)" ;
-//     dcterms:identifier "alt" ;
-//     dcterms:title "Alternates Profile" ;
-//     altr-ext:hasDefaultResourceFormat "text/html" ;
-//     altr-ext:hasResourceFormat
-//         "application/ld+json" ,
-//         "application/rdf+xml" ,
-//         "text/html" ,
-//         "text/turtle" ;
-// .`;
-
-// const turtleData = `PREFIX dcterms: <http://purl.org/dc/terms/>
-// PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-// PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
-// <https://example.com/${route.params.vocabId}> a skos:ConceptScheme ;
-//     skos:prefLabel "Vocab ${route.params.vocabId}"@en ;
-//     dcterms:identifier "vocab${route.params.vocabId}"^^xsd:token ;
-//     dcterms:description """some desc""" ;
-//     dcterms:created "${today}"^^xsd:date ;
-//     dcterms:modified "${today}"^^xsd:date ;
-//     dcterms:source "https://example.com/some_source"^^xsd:anyURI ;
-//     dcterms:creator <https://example.com/creator> ;
-//     dcterms:publisher <https://example.com/publisher> ;
-//     skos:hasTopConcept
-//         <https://example.com/concept1> ,
-//         <https://example.com/concept2> ,
-//         <https://example.com/concept3> ;
-// .`;
-
-// const conceptData = `PREFIX dcterms: <http://purl.org/dc/terms/>
-// PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-// PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-// PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
-// <https://example.com/concept1>
-//     a skos:Concept ;
-//     dcterms:identifier "concept1"^^xsd:token ;
-//     skos:prefLabel "Concept 1"@en ;
-//     skos:narrower <https://example.com/concept1_1> ;
-// .
-
-// <https://example.com/concept2>
-//     a skos:Concept ;
-//     dcterms:identifier "concept2"^^xsd:token ;
-//     skos:prefLabel "Concept 2"@en ;
-//     skos:narrower <https://example.com/concept2_1> ;
-// .
-
-// <https://example.com/concept3>
-//     a skos:Concept ;
-//     dcterms:identifier "concept3"^^xsd:token ;
-//     skos:prefLabel "Concept 3"@en ;
-//     skos:topConceptOf <https://example.com/${route.params.vocabId}> ;
-// .
-
-// <https://example.com/concept1_1>
-//     a skos:Concept ;
-//     dcterms:identifier "concept1_1"^^xsd:token ;
-//     skos:prefLabel "Concept 1.1"@en ;
-//     skos:broader <https://example.com/concept1> ;
-// .
-
-// <https://example.com/concept2_1>
-//     a skos:Concept ;
-//     dcterms:identifier "concept2_1"^^xsd:token ;
-//     skos:prefLabel "Concept 2.1"@en ;
-//     skos:broader <https://example.com/concept2> ;
-//     skos:narrower <https://example.com/concept2_1_1> ;
-// .
-
-// <https://example.com/concept2_1_1>
-//     a skos:Concept ;
-//     dcterms:identifier "concept2_1_1"^^xsd:token ;
-//     skos:prefLabel "Concept 2.1.1"@en ;
-//     skos:broader <https://example.com/concept2_1> ;
-// .`;
 
 const hiddenPreds = [
     "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -152,14 +35,15 @@ onMounted(() => {
     doRequest(`${apiBaseUrl}/v/vocab/${route.params.vocabId}`, () => {
         parseIntoStore(data.value);
 
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode("http://www.w3.org/2004/02/skos/core#ConceptScheme"))[0];
+        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("skos:ConceptScheme")))[0];
         vocab.value.iri = subject.id;
         store.value.forEach(q => { // get preds & objs
-            if (q.predicate.value === "http://www.w3.org/2004/02/skos/core#prefLabel") {
+            if (q.predicate.value === qname("skos:prefLabel")) {
                 vocab.value.title = q.object.value;
-            } else if (q.predicate.value === "http://www.w3.org/2004/02/skos/core#definition") {
+            } else if (q.predicate.value === qname("skos:definition")) {
                 vocab.value.description = q.object.value;
             }
+            q.predicate.annotations = store.value.getQuads(q.predicate, null, null);
             properties.value.push(q);
         }, subject, null, null);
 
@@ -188,20 +72,20 @@ function getConcepts() {
         store.value.forEach(q => { // get preds & objs for each subj
             if (q.predicate.value === qname("rdfs:label")) {
                 c.title = q.object.value;
-            } else if (q.predicate.value === qname("dcterms:identifier")) {
-                c.id = q.object.value;
-            } else if (q.predicate.value === "http://www.w3.org/2004/02/skos/core#narrower") {
+            } else if (q.predicate.value === qname("prez:link")) {
+                c.link = q.object.value;
+            } else if (q.predicate.value === qname("skos:narrower")) {
                 c.narrower.push(q.object.value);
-            } else if (q.predicate.value === "http://www.w3.org/2004/02/skos/core#broader") {
+            } else if (q.predicate.value === qname("skos:broader")) {
                 c.broader = q.object.value;
             }
         }, subject, null, null);
         conceptArray.push(c);
-    }, namedNode("http://www.w3.org/2004/02/skos/core#inScheme"), namedNode(vocab.value.iri));
+    }, namedNode(qname("skos:inScheme")), namedNode(vocab.value.iri));
 
     // get top concepts
-    const hasTopConcepts = store.value.getObjects(namedNode(vocab.value.iri), namedNode("http://www.w3.org/2004/02/skos/core#hasTopConcept")).map(o => o.id);
-    const topConceptsOf = store.value.getSubjects(namedNode("http://www.w3.org/2004/02/skos/core#topConceptOf", namedNode(vocab.value.iri))).map(s => s.id);
+    const hasTopConcepts = store.value.getObjects(namedNode(vocab.value.iri), namedNode(qname("skos:hasTopConcept"))).map(o => o.id);
+    const topConceptsOf = store.value.getSubjects(namedNode(qname("skos:topConceptOf"), namedNode(vocab.value.iri))).map(s => s.id);
     const topConcepts = [...new Set([...hasTopConcepts, ...topConceptsOf])]; // merge & remove duplicates
 
     // build concept hierarchy tree

@@ -14,7 +14,10 @@ const props = defineProps({
 <template>
     <div>
         <template v-if="props.termType === 'NamedNode'">
-            <template v-if="!!props.qname">
+            <template v-if="!!props.label">
+                <a :href="props.value" target="_blank" rel="noopener noreferrer">{{ props.label }}</a>
+            </template>
+            <template v-else-if="!!props.qname">
                 <a :href="props.value" target="_blank" rel="noopener noreferrer">{{ props.qname }}</a>
             </template>
             <template v-else>
@@ -27,14 +30,32 @@ const props = defineProps({
             </template>
             <template v-else>{{ props.value }}</template>
         </template>
-        <template v-if="!!props.language">@{{ props.language }}</template>
-        <template v-else-if="!!props.datatype"> ^^
+        <span v-if="!!props.language" class="badge outline">@{{ props.language }}</span>
+        <a
+            v-else-if="!!props.datatype"
+            :href="props.datatype.value"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="badge outline"
+        >
+            <span class="double-carets">
+                <i class="fa-regular fa-chevron-up"></i>
+                <i class="fa-regular fa-chevron-up"></i>
+            </span>
             <template v-if="!!props.datatype.qname">{{ props.datatype.qname }}</template>
             <template v-else>{{ props.datatype.value }}</template>
-        </template>
+        </a>
     </div>
 </template>
 
 <style lang="scss" scoped>
+.badge {
+    margin-left: 6px;
+}
 
+.double-carets {
+    font-size: 0.8em;
+    margin-right: 1px;
+    vertical-align: text-top;
+}
 </style>

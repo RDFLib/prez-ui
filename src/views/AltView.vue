@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, inject } from "vue";
+import { onMounted, computed, inject } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { useUiStore } from "@/stores/ui";
 import { useGetRequest } from "@/composables/api";
@@ -20,39 +20,18 @@ const apiBaseUrl = inject("config").apiBaseUrl;
 
 const { data, profiles, loading, error, doRequest } = useGetRequest();
 
-// const profileData = [
-//     {
-//         token: "alt",
-//         name: "Alternates Profile",
-//         mediatypes: [
-//             {
-//                 name: "HTML",
-//                 format: "text/html"
-//             },
-//             {
-//                 name: "JSON",
-//                 format: "application/json"
-//             },
-//             {
-//                 name: "Turtle",
-//                 format: "text/turtle"
-//             }
-//         ],
-//         languages: ["en", "de"],
-//         description: "The representation of the resource that lists all other representations (profiles and Media Types)",
-//         namespace: "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile",
-//         default: false
-//     }
-// ];
-
-// const profiles = ref([]);
-
 const orderedProfiles = computed(() => {
-    return profiles.value.sort((a, b) => b.default - a.default);
+    const includedProfiles = profiles.value.map(prof => prof.token);
+    return Object.values(ui.profiles).filter(prof => includedProfiles.includes(prof.token)).sort((a, b) => a.token === defaultToken - b.token === defaultToken);
 });
 
+const defaultToken = computed(() => {
+    const defaultProfile = profiles.value.find(p => p.default);
+    return defaultProfile.token;
+})
+
 onMounted(() => {
-    doRequest(`${apiBaseUrl}${route.path}`);
+    doRequest(`${apiBaseUrl}${route.path}`); // needs to be HEAD request
     ui.updateRightNavConfig({ enabled: false });
 });
 </script>
@@ -65,24 +44,24 @@ onMounted(() => {
             <th>Token</th>
             <th>Name</th>
             <th>Formats</th>
-            <th>Languages</th>
             <th>Description</th>
             <th>Namespace</th>
         </tr>
         <tr v-for="profile in orderedProfiles">
-            <td><RouterLink :to="`${route.path}?_profile=${profile.token}`">{{ profile.token }}</RouterLink> <span v-if="profile.default" class="badge outline">default</span></td>
-            <td>{{ profile.name }}</td>
             <td>
-                <template v-for="mediatype in profile.mediatypes">
-                    <RouterLink :to="`${route.path}?_profile=${profile.token}&_mediatype=${mediatype.mediatype}`">{{ mediatypeNames[mediatype.mediatype] }}</RouterLink>
-                    <br/>
-                </template>
+                <RouterLink :to="`${route.path}?_profile=${profile.token}`">
+                    {{ profile.token }}
+                </RouterLink>
+                <span v-if="(profile.token === defaultToken)" class="badge outline">default</span>
             </td>
+            <td>{{ profile.title }}</td>
             <td>
-                <template v-for="language in profile.languages">
-                    <span>{{ language }}</span>
-                    <br/>
-                </template>
+                <div v-for="mediatype in profile.mediatypes">
+                    <RouterLink :to="`${route.path}?_profile=${profile.token}&_mediatype=${mediatype}`">
+                        {{ mediatypeNames[mediatype] || mediatype }}
+                    </RouterLink>
+                    <span v-if="(mediatype === profile.defaultMediatype)" class="badge outline">default</span>
+                </div>
             </td>
             <td>{{ profile.description }}</td>
             <td><a :href="profile.namespace" target="_blank">{{ profile.namespace }}</a></td>
@@ -109,5 +88,9 @@ table {
             background-color: $tableBg;
         }
     }
+}
+
+.badge {
+    margin-left: 4px;
 }
 </style>

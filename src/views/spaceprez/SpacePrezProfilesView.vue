@@ -1,5 +1,22 @@
 <script setup>
+import { ref, onMounted, inject } from "vue";
+import { useUiStore } from "@/stores/ui";
+import { useGetRequest } from "@/composables/api";
 
+const apiBaseUrl = inject("config").apiBaseUrl;
+const ui = useUiStore();
+const { data, loading, error, doRequest } = useGetRequest();
+
+onMounted(() => {
+    doRequest(`${apiBaseUrl}/s/profiles`, () => {
+        // parse profile data
+
+        ui.updateRightNavConfig({ enabled: false });
+        document.title = "SpacePrez Profiles | Prez";
+        ui.pageHeading = { name: "SpacePrez", url: "/s"};
+        ui.breadcrumbs = [{ name: "SpacePrez", url: "/s" }, { name: "Profiles", url: "/s/profiles" }];
+    });
+});
 </script>
 
 <template>

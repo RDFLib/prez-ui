@@ -36,17 +36,17 @@ export function useGetRequest() {
                 default: false,
                 token: l.token,
                 mediatypes: [],
-                name: "",
+                title: l.title,
                 description: "",
                 uri: l.anchor
             };
         });
 
-        const defaultProfile = links.find(l => l.rel === "profile");
-        profileObj[defaultProfile.uriRef].default = true;
+        const defaultProfile = links.find(l => l.rel === "self");
+        profileObj[defaultProfile.profile].default = true;
 
         links.filter(l => l.rel === "alternate").forEach(l => {
-            profileObj[l.profile].mediatypes.push({ name: "", mediatype: l.type, default: false });
+            profileObj[l.profile].mediatypes.push({ title: "", mediatype: l.type, default: false });
         });
 
         return Object.values(profileObj);

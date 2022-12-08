@@ -20,44 +20,43 @@ const hiddenPreds = [
     "http://purl.org/dc/terms/identifier",
     "http://www.w3.org/2004/02/skos/core#definition",
     "http://www.w3.org/2004/02/skos/core#prefLabel",
-    // "http://www.w3.org/2004/02/skos/core#member"
+    "http://www.w3.org/2004/02/skos/core#member"
 ];
 
 const properties = ref([]);
 const collection = ref({});
+const concepts = ref([]);
 
 onMounted(() => {
     doRequest(`${apiBaseUrl}/v/collection/${route.params.collectionId}`, () => {
         parseIntoStore(data.value);
 
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode("http://www.w3.org/2004/02/skos/core#Collection"))[0];
+        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("skos:Collection")))[0];
         collection.value.iri = subject.id;
         store.value.forEach(q => { // get preds & objs
-            if (q.predicate.value === "http://www.w3.org/2004/02/skos/core#prefLabel") {
+            if (q.predicate.value === qname("skos:prefLabel")) {
                 collection.value.title = q.object.value;
-            } else if (q.predicate.value === "http://www.w3.org/2004/02/skos/core#definition") {
+            } else if (q.predicate.value === qname("skos:definition")) {
                 collection.value.description = q.object.value;
             }
+            q.predicate.annotations = store.value.getQuads(q.predicate, null, null);
             properties.value.push(q);
         }, subject, null, null);
         
-        // let conceptArray = [];
-
-        // store.value.forSubjects(subject => { // for each concept
-        //     let c = {
-        //         iri: subject.id,
-        //         narrower: [],
-        //         broader: null
-        //     };
-        //     store.value.forEach(q => { // get preds & objs for each subj
-        //         if (q.predicate.value === qname("rdfs:label")) {
-        //             c.title = q.object.value;
-        //         } else if (q.predicate.value === qname("dcterms:identifier")) {
-        //             c.id = q.object.value;
-        //         }
-        //     }, subject, null, null);
-        //     conceptArray.push(c);
-        // }, namedNode("http://www.w3.org/2004/02/skos/core#inScheme"), namedNode(vocab.value.iri));
+        // concept list
+        store.value.forObjects(concept => {
+            let c = {
+                iri: concept.id
+            }
+            store.value.forEach(q => {
+                if (q.predicate.value === qname("rdfs:label")) {
+                    c.title = q.object.value;
+                } else if (q.predicate.value === qname("prez:link")) {
+                    c.link = q.object.value;
+                }
+            }, concept, null, null);
+            concepts.value.push(c);
+        }, namedNode(collection.value.iri), namedNode(qname("skos:member")));
 
         ui.updateRightNavConfig({ enabled: true, profiles: profiles, currentUrl: route.path });
         document.title = `${collection.value.title} | Prez`;
@@ -76,7 +75,17 @@ onMounted(() => {
             <tr>
                 <th>Concepts</th>
                 <td>
-                    <!-- <RouterLink :to="`${route.path}/collections`" class="btn">Collections</RouterLink> -->
+                    <div class="concept-list">
+                        <component
+                            v-for="concept in concepts"
+                            :is="concept.link ? RouterLink : 'a'"
+                            :to="concept.link || ''"
+                            :href="concept.link ? '' : concept.iri"
+                            :target="concept.link ? '' : '_blank'"
+                        >
+                            {{ concept.title || concept.iri }}
+                        </component>
+                    </div>
                 </td>
             </tr>
         </template>
@@ -86,5 +95,8 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-
+.concept-list {
+    display: flex;
+    flex-direction: column;
+}
 </style>
