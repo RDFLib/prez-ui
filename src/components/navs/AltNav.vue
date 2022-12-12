@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
 
@@ -12,10 +12,10 @@ const mediatypeNames = {
     "application/geo+json": "GeoJSON"
 };
 
-const props = defineProps({
-    profiles: Array,
-    currentUrl: String
-});
+const props = defineProps<{
+    profiles: any[];
+    currentUrl: string;
+}>();
 
 const orderedProfiles = computed(() => {
     return !!props.profiles ? props.profiles.sort((a, b) => b.default - a.default) : [];

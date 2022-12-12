@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { inject, computed, ref } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 
@@ -57,8 +57,9 @@ const routes = {
 
 const route = useRoute();
 
-const enabledPrezs = computed(() => {
-    return inject("config").enabledPrezs.sort((a, b) => a.localeCompare(b));
+const enabledPrezs = computed<string[]>(() => {
+    const config = inject<any>("config");
+    return config.enabledPrezs.sort((a: string, b: string) => a.localeCompare(b));
 });
 
 const activePrez = computed(() => {
@@ -67,9 +68,9 @@ const activePrez = computed(() => {
 
 const collapse = ref(false);
 
-const props = defineProps({
-    sidenav: Boolean
-});
+const props = defineProps<{
+    sidenav: boolean;
+}>();
 
 </script>
 
@@ -77,28 +78,20 @@ const props = defineProps({
     <component :is="props.sidenav ? 'slot' : 'div'" id="nav-wrapper">
         <nav id="main-nav" :class="`${props.sidenav ? 'sidenav' : ''} ${collapse ? 'collapse' : ''}`">
             <RouterLink to="/" class="nav-item">Home</RouterLink>
-            <template v-if="enabledPrezs.length > 1" v-for="prez in enabledPrezs">
+            <template v-for="prez in enabledPrezs">
                 <RouterLink :to="`/${prez.toLowerCase()[0]}`" class="nav-item">
                     {{ prez }} <i class="fa-regular fa-chevron-down"></i>
                 </RouterLink>
                 <nav v-if="prez === activePrez && props.sidenav" id="sub-nav" class="col">
                     <RouterLink
-                        v-for="route in routes[prez]"
-                        :to="route.to"
-                        class="nav-item"
+                        v-for="subroute in routes[prez]"
+                        :to="subroute.to"
+                        :class="`nav-item ${route.path.startsWith(subroute.to) ? 'active' : ''}`"
                     >
-                        {{ route.label }}
+                        {{ subroute.label }}
                     </RouterLink>
                 </nav>
             </template>
-            <RouterLink
-                v-else
-                v-for="route in routes[enabledPrezs[0]]"
-                :to="route.to"
-                class="nav-item"
-            >
-                {{ route.label }}
-            </RouterLink>
             <RouterLink to="/search" class="nav-item">Search</RouterLink>
             <RouterLink to="/sparql" class="nav-item">SPARQL</RouterLink>
             <RouterLink to="/profiles" class="nav-item">Profiles</RouterLink>
@@ -157,7 +150,7 @@ a.nav-item {
         color: white;
     }
 
-    &.router-link-active {
+    &.router-link-active, &.active {
         background-color: $navColor;
         color: white;
     }

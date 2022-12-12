@@ -1,29 +1,4 @@
-# prez-ui
+# Prez UI
+Prez UI is the front end of [Prez](https://github.com/RDFLib/prez) - a linked data API.
 
-This template should help get you started developing with Vue 3 in Vite.
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
+Prez UI is a [Vue.js](https://vuejs.org/) single page application (SPA) that uses [N3.js](https://github.com/rdfjs/N3.js) to process RDF data from the Prez API.

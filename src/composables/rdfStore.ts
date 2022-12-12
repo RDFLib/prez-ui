@@ -7,7 +7,7 @@ const defaultPrefixes = {
     "dcterms": "http://purl.org/dc/terms/",
     "geo": "http://www.opengis.net/ont/geosparql#",
     "owl": "http://www.w3.org/2002/07/owl#",
-    "prez": "https://kurrawong.net/prez/",
+    "prez": "https://prez.dev/",
     "prof": "http://www.w3.org/ns/dx/prof/",
     "prov": "http://www.w3.org/ns/prov#",
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",

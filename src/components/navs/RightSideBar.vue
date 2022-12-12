@@ -1,10 +1,10 @@
-<script setup>
+<script lang="ts" setup>
 import AltNav from "@/components/navs/AltNav.vue";
 
-const props = defineProps({
-    profiles: Array,
-    currentUrl: String
-});
+const props = defineProps<{
+    profiles: any[];
+    currentUrl: string;
+}>();
 </script>
 
 <template>

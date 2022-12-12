@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { inject, onMounted } from "vue";
 import { RouterView, useRoute } from "vue-router";
 import { DataFactory } from "n3";

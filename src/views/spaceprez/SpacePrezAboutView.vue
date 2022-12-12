@@ -1,11 +1,11 @@
-<script setup>
+<script lang="ts" setup>
 import { onMounted } from "vue";
 import { useUiStore } from "@/stores/ui";
 
 const ui = useUiStore();
 
 onMounted(() => {
-    ui.updateRightNavConfig({ enabled: false });
+    ui.rightNavConfig = { enabled: false };
     document.title = "About SpacePrez | Prez";
     ui.pageHeading = { name: "SpacePrez", url: "/s"};
     ui.breadcrumbs = [{ name: "SpacePrez", url: "/s" }, { name: "About", url: "/s/about" }];

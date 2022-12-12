@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import PredCell from "@/components/PredCell.vue";
 import ObjCell from "@/components/ObjCell.vue";
 

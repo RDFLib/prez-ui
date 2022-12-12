@@ -1,11 +1,11 @@
-<script setup>
+<script lang="ts" setup>
 import { onMounted } from "vue";
 import { useUiStore } from "@/stores/ui";
 
 const ui = useUiStore();
 
 onMounted(() => {
-    ui.updateRightNavConfig({ enabled: false });
+    ui.rightNavConfig = { enabled: false };
     document.title = "Not Found | Prez";
     ui.pageHeading = { name: "Prez", url: "/"};
     ui.breadcrumbs = [];

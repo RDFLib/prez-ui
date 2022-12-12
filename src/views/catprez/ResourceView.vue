@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, inject } from "vue";
 import { useRoute } from "vue-router";
 import { DataFactory } from "n3";
@@ -41,7 +41,7 @@ onMounted(() => {
             properties.value.push(q);
         }, subject, null, null);
 
-        ui.updateRightNavConfig({ enabled: true, profiles: profiles, currentUrl: route.path });
+        ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
         document.title = `${resource.value.title} | Prez`;
         ui.pageHeading = { name: "CatPrez", url: "/c"};
         ui.breadcrumbs = [

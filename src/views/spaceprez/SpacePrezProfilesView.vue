@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, inject } from "vue";
 import { useUiStore } from "@/stores/ui";
 import { useGetRequest } from "@/composables/api";
@@ -11,7 +11,7 @@ onMounted(() => {
     doRequest(`${apiBaseUrl}/s/profiles`, () => {
         // parse profile data
 
-        ui.updateRightNavConfig({ enabled: false });
+        ui.rightNavConfig = { enabled: false };
         document.title = "SpacePrez Profiles | Prez";
         ui.pageHeading = { name: "SpacePrez", url: "/s"};
         ui.breadcrumbs = [{ name: "SpacePrez", url: "/s" }, { name: "Profiles", url: "/s/profiles" }];

@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, inject } from "vue";
 import { useRoute } from "vue-router";
 import { DataFactory } from "n3";
@@ -29,6 +29,7 @@ const dataset = ref({});
 onMounted(() => {
     doRequest(`${apiBaseUrl}/s/datasets/${route.params.datasetId}`, () => {
         parseIntoStore(data.value);
+        console.log(data.value)
 
         const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("dcat:Dataset")))[0];
         dataset.value.iri = subject.id;
@@ -42,7 +43,7 @@ onMounted(() => {
             properties.value.push(q);
         }, subject, null, null);
         
-        ui.updateRightNavConfig({ enabled: true, profiles: profiles, currentUrl: route.path });
+        ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
         document.title = `${dataset.value.title} | Prez`;
         ui.pageHeading = { name: "SpacePrez", url: "/s"};
         ui.breadcrumbs = [{ name: "SpacePrez", url: "/s" }, { name: "Datasets", url: "/s/datasets" }, { name: dataset.value.title, url: route.path }];

@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { onMounted, inject } from "vue";
 import { useUiStore } from "@/stores/ui";
 import { useGetRequest } from "@/composables/api";
@@ -9,7 +9,7 @@ const { data, profiles, loading, error, doRequest } = useGetRequest();
 
 onMounted(() => {
     doRequest(`${apiBaseUrl}/v`, () => {
-        ui.updateRightNavConfig({ enabled: true, profiles: profiles, currentUrl: route.path });
+        ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
         document.title = "VocPrez | Prez";
         ui.pageHeading = { name: "VocPrez", url: "/v"};
         ui.breadcrumbs = [{ name: "VocPrez", url: "/v" }];

@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, inject } from "vue";
 import { useRoute } from "vue-router";
 import { DataFactory } from "n3";
@@ -38,7 +38,7 @@ onMounted(() => {
             datasets.value.push(d);
         }, subject, namedNode(qname("rdfs:member")));
     });
-    ui.updateRightNavConfig({ enabled: true, profiles: profiles, currentUrl: route.path });
+    ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
     document.title = "Datasets | Prez";
     ui.pageHeading = { name: "SpacePrez", url: "/s"};
     ui.breadcrumbs = [{ name: "SpacePrez", url: "/s" }, { name: "Datasets", url: route.path }];

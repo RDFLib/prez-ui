@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import ToolTip from "@/components/ToolTip.vue";
 
 const props = defineProps({

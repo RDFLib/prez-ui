@@ -1,11 +1,11 @@
-<script setup>
+<script lang="ts" setup>
 import { onMounted } from "vue";
 import { useUiStore } from "@/stores/ui";
 
 const ui = useUiStore();
 
 onMounted(() => {
-    ui.updateRightNavConfig({ enabled: false });
+    ui.rightNavConfig = { enabled: false };
     document.title = "Get Object by IRI | Prez";
     ui.pageHeading = { name: "Prez", url: "/"};
     ui.breadcrumbs = [{ name: "Get Object by IRI", url: "/object" }];

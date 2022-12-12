@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { inject, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { useUiStore } from "@/stores/ui";
@@ -8,7 +8,7 @@ const ui = useUiStore();
 const enabledPrezs = inject("config").enabledPrezs;
 
 onMounted(() => {
-    ui.updateRightNavConfig({ enabled: false });
+    ui.rightNavConfig = { enabled: false };
     document.title = "Prez";
     ui.pageHeading = { name: "Prez", url: "/"};
     ui.breadcrumbs = [];

@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, inject } from "vue";
 import { useRoute } from "vue-router";
 import { useUiStore } from "@/stores/ui";
@@ -11,7 +11,7 @@ const { data, profiles, loading, error, doRequest } = useGetRequest();
 
 onMounted(() => {
     doRequest(`${apiBaseUrl}/s`, () => {
-        ui.updateRightNavConfig({ enabled: true, profiles: profiles, currentUrl: route.path });
+        ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
         document.title = "SpacePrez | Prez";
         ui.pageHeading = { name: "SpacePrez", url: "/s"};
         ui.breadcrumbs = [{ name: "SpacePrez", url: "/s" }];

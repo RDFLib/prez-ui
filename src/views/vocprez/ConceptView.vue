@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, inject } from "vue";
 import { useRoute } from "vue-router";
 import { DataFactory } from "n3";
@@ -101,7 +101,7 @@ onMounted(() => {
             narrower.value.push(c);
         }, namedNode(concept.value.iri), namedNode(qname("skos:narrower")));
 
-        ui.updateRightNavConfig({ enabled: true, profiles: profiles, currentUrl: route.path });
+        ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
         document.title = `${concept.value.title} | Prez`;
         ui.pageHeading = { name: "VocPrez", url: "/v"};
         ui.breadcrumbs = [

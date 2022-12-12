@@ -1,10 +1,10 @@
-<script setup>
+<script lang="ts" setup>
 import { onMounted, computed, inject } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { useUiStore } from "@/stores/ui";
 import { useGetRequest } from "@/composables/api";
 
-const mediatypeNames = {
+const mediatypeNames: {[key: string]: string} = {
     "text/html": "HTML",
     "application/json": "JSON",
     "application/ld+json": "JSON-LD",
@@ -32,7 +32,7 @@ const defaultToken = computed(() => {
 
 onMounted(() => {
     doRequest(`${apiBaseUrl}${route.path}`); // needs to be HEAD request
-    ui.updateRightNavConfig({ enabled: false });
+    ui.rightNavConfig = { enabled: false };
 });
 </script>
 

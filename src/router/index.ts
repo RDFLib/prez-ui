@@ -171,7 +171,7 @@ const router = createRouter({
 });
 
 router.beforeEach(() => {
-    ui.updateRightNavConfig({ enabled: true, profiles: [], currentUrl: "" });
+    ui.rightNavConfig = { enabled: true, profiles: [], currentUrl: "" };
     // if (to.query && to.query._profile === "alt" && to.name !== "alternate profiles") {
     //     next({ name: "alternate profiles", params: { path: to.path.slice(1) }, query: { _profile: "alt" } });
     // } else {

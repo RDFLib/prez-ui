@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, inject } from "vue";
 import { useRoute } from "vue-router";
 import { DataFactory } from "n3";
@@ -43,7 +43,7 @@ onMounted(() => {
     // }, namedNode(qname("a")), namedNode(qname("skos:ConceptScheme")));
 
     // // update alt profiles nav
-    // ui.updateRightNavConfig({enabled: true, profileData: profileData, currentUrl: route.path});
+    // ui.rightNavConfig = {enabled: true, profileData: profileData, currentUrl: route.path};
 
     doRequest(`${apiBaseUrl}/v/vocab`, () => {
         parseIntoStore(data.value);
@@ -67,7 +67,7 @@ onMounted(() => {
         }, subject, namedNode(qname("rdfs:member")));
     });
 
-    ui.updateRightNavConfig({ enabled: true, profiles: profiles, currentUrl: route.path });
+    ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
     document.title = "Vocabs | Prez";
     ui.pageHeading = { name: "VocPrez", url: "/v"};
     ui.breadcrumbs = [{ name: "VocPrez", url: "/v" }, { name: "Vocabs", url: route.path }];

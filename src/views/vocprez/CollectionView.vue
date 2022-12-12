@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, inject } from "vue";
 import { useRoute } from "vue-router";
 import { DataFactory } from "n3";
@@ -58,7 +58,7 @@ onMounted(() => {
             concepts.value.push(c);
         }, namedNode(collection.value.iri), namedNode(qname("skos:member")));
 
-        ui.updateRightNavConfig({ enabled: true, profiles: profiles, currentUrl: route.path });
+        ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
         document.title = `${collection.value.title} | Prez`;
         ui.pageHeading = { name: "VocPrez", url: "/v"};
         ui.breadcrumbs = [{ name: "VocPrez", url: "/v" }, { name: "Collections", url: "/v/collection" }, { name: collection.value.title, url: route.path }];

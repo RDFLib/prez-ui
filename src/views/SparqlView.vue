@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { nextTick, onMounted } from "vue";
 import Yasqe from "@triply/yasqe";
 import { useUiStore } from "@/stores/ui";
@@ -6,7 +6,7 @@ import { useUiStore } from "@/stores/ui";
 const ui = useUiStore();
 
 onMounted(() => {
-    ui.updateRightNavConfig({ enabled: false });
+    ui.rightNavConfig = { enabled: false };
     document.title = "SPARQL | Prez";
     ui.pageHeading = { name: "Prez", url: "/"};
     ui.breadcrumbs = [{ name: "SPARQL", url: "/sparql" }];
