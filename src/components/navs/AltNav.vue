@@ -35,7 +35,7 @@ const orderedProfiles = computed(() => {
                     >
                         <h5>{{ profile.title }}</h5>
                     </RouterLink>
-                    <span v-if="profile.default" class="badge outline">default</span>
+                    <span v-if="profile.default" class="badge" title="This is the default profile for this endpoint">default</span>
                 </div>
                 <div class="mediatypes">
                     <RouterLink
@@ -51,6 +51,7 @@ const orderedProfiles = computed(() => {
 
 <style lang="scss" scoped>
 @import "@/assets/sass/_variables.scss";
+@import "@/assets/sass/_mixins.scss";
 
 h4 {
     font-size: 1.1rem;
@@ -93,10 +94,15 @@ p {
 
             a.mediatype {
                 padding: 6px;
-                background-color: #55828b;
+                background-color: $navColor;
                 color: white;
                 border-radius: $borderRadius;
-                font-size: 0.8rem;  
+                font-size: 0.8rem;
+                @include transition(background-color);
+
+                &:hover {
+                    background-color: adjust-color($color: $navColor, $saturation: 5%, $lightness: -10%);
+                }
             }
         }
     }

@@ -52,7 +52,7 @@ onMounted(() => {
                 <RouterLink :to="`${route.path}?_profile=${profile.token}`">
                     {{ profile.token }}
                 </RouterLink>
-                <span v-if="(profile.token === defaultToken)" class="badge outline">default</span>
+                <span v-if="(profile.token === defaultToken)" class="badge" title="This is the default profile for this endpoint">default</span>
             </td>
             <td>{{ profile.title }}</td>
             <td>
@@ -60,7 +60,7 @@ onMounted(() => {
                     <RouterLink :to="`${route.path}?_profile=${profile.token}&_mediatype=${mediatype}`">
                         {{ mediatypeNames[mediatype] || mediatype }}
                     </RouterLink>
-                    <span v-if="(mediatype === profile.defaultMediatype)" class="badge outline">default</span>
+                    <span v-if="(mediatype === profile.defaultMediatype)" class="badge" title="This is the default format for this profile">default</span>
                 </div>
             </td>
             <td>{{ profile.description }}</td>

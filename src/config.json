@@ -1,5 +1,5 @@
 {
     "enabledPrezs": ["VocPrez", "SpacePrez", "CatPrez"],
     "sidenav": true,
-    "apiBaseUrl": "http://localhost:8000"
+    "apiBaseUrl": "https://idn-prez-fuseki.australiaeast.azurecontainer.io"
 }

@@ -19,32 +19,6 @@ const { data, profiles, loading, error, doRequest } = useGetRequest();
 const vocabs = ref([]);
 
 onMounted(() => {
-    // API request
-
-    // RDF parsing
-    // parseIntoStore(turtleData);
-
-    // // RDF querying
-    // store.value.forSubjects(subject => { // for each concept scheme
-    //     let v = {
-    //         iri: subject.id
-    //     };
-    //     store.value.forEach(q => { // get preds & objs for each subj
-    //         if (q.predicate.value === qname("skos:prefLabel")) {
-    //             v.title = q.object.value;
-    //         } else if (q.predicate.value === qname("dcterms:identifier")) {
-    //             v.id = q.object.value;
-    //             v.link = `/v/vocab/${q.object.value}`;
-    //         } else if (q.predicate.value === qname("dcterms:description")) {
-    //             v.description = q.object.value;
-    //         }
-    //     }, subject, null, null);
-    //     vocabs.value.push(v);
-    // }, namedNode(qname("a")), namedNode(qname("skos:ConceptScheme")));
-
-    // // update alt profiles nav
-    // ui.rightNavConfig = {enabled: true, profileData: profileData, currentUrl: route.path};
-
     doRequest(`${apiBaseUrl}/v/vocab`, () => {
         parseIntoStore(data.value);
 

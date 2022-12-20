@@ -1,16 +1,29 @@
 <script lang="ts" setup>
 import { RouterLink } from "vue-router";
 
-const props = defineProps({
-    items: Array
-});
+export interface ListItem {
+    title: string;
+    link: string;
+    description?: string;
+};
+
+export interface Props {
+    items: ListItem[];
+    childName?: string;
+    childLink?: string;
+};
+
+const props = defineProps<Props>();
 </script>
 
 <template>
     <div class="list">
         <RouterLink class="list-item" v-for="item in props.items" :to="!!item.link ? item.link : ''">
-            <h4 class="list-item-title">{{ item.title }}</h4>
-            <div v-if="!!item.description" class="list-item-desc">{{ item.description }}</div>
+            <div class="list-item-left">
+                <h4 class="list-item-title">{{ item.title }}</h4>
+                <div v-if="!!item.description" class="list-item-desc">{{ item.description }}</div>
+            </div>
+            <RouterLink v-if="props.childLink" @click.stop :to="item.link + props.childLink" class="btn outline sm child-btn">{{ props.childName }}</RouterLink>
         </RouterLink>
     </div>
 </template>
@@ -25,19 +38,32 @@ const props = defineProps({
 
     a.list-item {
         display: flex;
-        flex-direction: column;
-        gap: 6px;
+        flex-direction: row;
+        gap: 10px;
         background-color: $cardBg;
         padding: 10px;
+        border-radius: $borderRadius;
 
-        .list-item-title {
-            margin: 0;
+        .list-item-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+
+            .list-item-title {
+                margin: 0;
+            }
+
+            .list-item-desc {
+                font-style: italic;
+                color: grey;
+                font-size: 0.8rem;
+            }
         }
 
-        .list-item-desc {
-            font-style: italic;
-            color: grey;
-            font-size: 0.8rem;
+        .child-btn {
+            align-self: baseline;
+            flex-shrink: 0;
         }
     }
 }

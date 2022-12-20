@@ -126,6 +126,7 @@ a {
 }
 
 .btn {
+    display: inline-block;
     cursor: pointer;
     background-color: $primary;
     color: white;
@@ -156,13 +157,14 @@ a {
 
 .badge {
     padding: 2px 4px;
-    border: 1px solid $secondary;
-    background-color: $secondary;
+    // border: 1px solid $secondary;
+    background-color: $badgeBg;
     color: white;
     border-radius: $borderRadius;
     font-size: 0.7rem;  
 
     &.outline {
+        border: 1px solid $secondary;
         background-color: transparent;
         color: $secondary;
     }

@@ -33,6 +33,8 @@ onMounted(() => {
                     d.title = q.object.value;
                 } else if (q.predicate.value === qname("prez:link")) {
                     d.link = q.object.value;
+                } else if (q.predicate.value === qname("dcterms:description")) {
+                    d.description = q.object.value;
                 }
             }, member, null, null);
             datasets.value.push(d);
@@ -47,9 +49,9 @@ onMounted(() => {
 
 <template>
     <h1>Datasets</h1>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis in libero qui earum rem facilis optio culpa nobis magnam commodi. Sunt aspernatur obcaecati eos expedita aperiam magnam ipsum incidunt impedit?</p>
+    <p>The listing of <a :href="qname('dcat:Dataset')" target="_blank" rel="noopener noreferrer">dcat:Datasets</a>.</p>
     <div>
-        <ItemList v-if="data" :items="datasets" />
+        <ItemList v-if="data" :items="datasets" childName="Feature Collections" childLink="/collections" />
         <template v-else-if="loading">loading...</template>
         <template v-else-if="error">Network error: {{ error }}</template>
     </div>

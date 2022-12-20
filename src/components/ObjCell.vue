@@ -13,7 +13,10 @@ const props = defineProps({
 
 <template>
     <div>
-        <template v-if="props.termType === 'NamedNode'">
+        <template v-if="props.termType === 'BlankNode'">
+            blank node
+        </template>
+        <template v-else-if="props.termType === 'NamedNode'">
             <template v-if="!!props.label">
                 <a :href="props.value" target="_blank" rel="noopener noreferrer">{{ props.label }}</a>
             </template>
@@ -30,13 +33,14 @@ const props = defineProps({
             </template>
             <template v-else>{{ props.value }}</template>
         </template>
-        <span v-if="!!props.language" class="badge outline">@{{ props.language }}</span>
+        <span v-if="!!props.language" class="badge outline" title="Language">@{{ props.language }}</span>
         <a
             v-else-if="!!props.datatype"
             :href="props.datatype.value"
             target="_blank"
             rel="noopener noreferrer"
             class="badge outline"
+            title="Datatype"
         >
             <span class="double-carets">
                 <i class="fa-regular fa-chevron-up"></i>

@@ -33,6 +33,8 @@ onMounted(() => {
                     c.title = q.object.value;
                 } else if (q.predicate.value === qname("prez:link")) {
                     c.link = q.object.value;
+                } else if (q.predicate.value === qname("dcterms:description")) {
+                    c.description = q.object.value;
                 }
             }, member, null, null);
             collections.value.push(c);
@@ -55,7 +57,7 @@ onMounted(() => {
     <h1>Feature Collections</h1>
     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis in libero qui earum rem facilis optio culpa nobis magnam commodi. Sunt aspernatur obcaecati eos expedita aperiam magnam ipsum incidunt impedit?</p>
     <div>
-        <ItemList v-if="data" :items="collections" />
+        <ItemList v-if="data" :items="collections" childName="Features" childLink="/items"/>
         <template v-else-if="loading">loading...</template>
         <template v-else-if="error">Network error: {{ error }}</template>
     </div>

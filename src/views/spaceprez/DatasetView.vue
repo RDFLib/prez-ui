@@ -16,11 +16,11 @@ const { store, prefixes, parseIntoStore, qname } = useRdfStore();
 const { data, profiles, loading, error, doRequest } = useGetRequest();
 
 const hiddenPreds = [
-    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-    "http://purl.org/dc/terms/identifier",
-    "http://purl.org/dc/terms/description",
-    "http://purl.org/dc/terms/title",
-    "http://www.w3.org/2000/01/rdf-schema#member"
+    // "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+    // "http://purl.org/dc/terms/identifier",
+    // "http://purl.org/dc/terms/description",
+    // "http://purl.org/dc/terms/title",
+    // "http://www.w3.org/2000/01/rdf-schema#member"
 ];
 
 const properties = ref([]);
@@ -29,7 +29,6 @@ const dataset = ref({});
 onMounted(() => {
     doRequest(`${apiBaseUrl}/s/datasets/${route.params.datasetId}`, () => {
         parseIntoStore(data.value);
-        console.log(data.value)
 
         const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("dcat:Dataset")))[0];
         dataset.value.iri = subject.id;

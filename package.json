@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@triply/yasqe": "^4.2.27",
+        "@triply/yasr": "^4.2.28",
         "n3": "^1.16.2",
         "pinia": "^2.0.26",
         "vue": "^3.2.45",
