@@ -56,6 +56,7 @@ const selectedEndpoint = ref("all");
 const queryType = ref(null);
 const graphFormat = ref("text/turtle");
 const selectFormat = ref("application/sparql-results+json");
+const queryOptionsElement = ref(null);
 
 const sparqlEndpoint = computed(() => {
     if (selectedEndpoint.value === "catprez") {
@@ -158,22 +159,20 @@ onMounted(() => {
     });
 });
 
-function loadExample(query) {
+function loadExample(query: string) {
     toRaw(yasqe.value).setValue(query); // fixes errors when loading example then clicking in editor - proxy issues with setValue() in Vue
     yasqe.value.saveQuery();
+}
+
+function copy(text: string) {
+    navigator.clipboard.writeText(text.trim());
 }
 </script>
 
 <template>
     <h1>SPARQL Endpoint</h1>
-    <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aspernatur maiores voluptate quibusdam. Earum nostrum
-        ipsum, quas eos quidem deserunt expedita illo labore amet ipsam molestiae officia veritatis recusandae, quo
-        magnam?</p>
-    <h2>Interactive UI</h2>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, assumenda. Natus vero nostrum velit, eius iusto
-        cupiditate alias quidem in dolorem suscipit veritatis magnam minima. Eveniet quisquam similique molestiae
-        dolorum.</p>
-    <div class="query-options">
+    <p>Here you can perform more advanced querying using <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener noreferrer">SPARQL</a> (SPARQL Protocol and RDF Query Language). This page acts both as an interactive querying page as well as an endpoint for clients.</p>
+    <div id="query-options" ref="queryOptionsElement">
         <div class="query-option">
             <div class="query-option-title">Endpoint</div>
             <select name="endpoint" id="endpoint" @change="selectedEndpoint = $event.target.value">
@@ -198,20 +197,41 @@ function loadExample(query) {
         <div class="query-option">
             <div class="query-option-title">Examples</div>
             <div class="example-buttons">
-                <button v-for="[label, query] in Object.entries(sparqlExamples)" class="btn sm outline" @click="loadExample(query)">{{ label }}</button>
+                <button v-for="example in sparqlExamples" class="btn sm outline" @click="loadExample(example.query)">{{ example.shortTitle }}</button>
             </div>
         </div>
     </div>
     <div id="yasqe"></div>
     <div id="yasr"></div>
     <h2>Example Queries</h2>
-    <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Mollitia quo, maiores saepe alias consectetur
-        accusantium ipsum architecto impedit sed temporibus, ipsam commodi enim vitae porro! Deleniti numquam facilis
-        distinctio doloribus.</p>
+    <div v-for="example in sparqlExamples">
+        <h3>{{ example.title }}</h3>
+        <p>{{ example.description }}</p>
+        <pre>
+            <code>{{ example.query.trim() }}</code>
+            <div class="code-btns">
+                <button
+                    class="code-btn"
+                    title="Load into SPARQL editor"
+                    @click="queryOptionsElement.scrollIntoView({ behavior: 'smooth' }); loadExample(example.query)"
+                >
+                    Load
+                </button>
+                <button
+                    class="code-btn"
+                    title="Copy"
+                    @click="copy(example.query)"
+                >
+                    <i class="fa-regular fa-copy"></i>
+                </button>
+            </div>
+        </pre>
+    </div>
+    
 </template>
 
 <style lang="scss" scoped>
-.query-options {
+#query-options {
     display: flex;
     flex-direction: row;
     gap: 20px;
@@ -227,12 +247,59 @@ function loadExample(query) {
             font-size: 0.9em;
         }
 
+        select {
+            padding: 4px 6px;
+        }
+
         .example-buttons {
             display: flex;
             flex-direction: row;
             gap: 8px;
             align-items: center;
         }
+    }
+}
+
+pre {
+    background-color: #e5e5e5;
+    padding: 12px;
+    border-radius: $borderRadius;
+    position: relative;
+    white-space: normal;
+
+    code {
+        white-space: pre;
+    }
+
+    .code-btns {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: inherit;
+        visibility: hidden;
+        opacity: 0;
+        @include transition(opacity);
+
+        button.code-btn {
+            padding: 4px 6px;
+            cursor: pointer;
+            background-color: transparent;
+            border: 1px solid #bcbcbc;
+            border-radius: $borderRadius;
+            @include transition(background-color);
+
+            &:hover {
+                background-color: #d5d5d5;
+            }
+        }
+    }
+
+    &:hover .code-btns {
+        visibility: visible;
+        opacity: 1;
     }
 }
 </style>

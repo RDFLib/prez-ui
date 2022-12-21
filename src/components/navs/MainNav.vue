@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { inject, computed, ref } from "vue";
+import { inject, computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 
-const routes = {
+const routes: {[key: string]: any[]} = {
     "VocPrez": [
         {
             "label": "Vocabs",
@@ -67,36 +67,53 @@ const activePrez = computed(() => {
 });
 
 const collapse = ref(false);
+const dropdowns = ref(enabledPrezs.value.reduce((obj: Partial<{[key: string]: boolean}>, prez) => (obj[prez] = prez === activePrez.value, obj), {}));
+
+watch(() => route.path, (newValue) => {
+    Object.keys(dropdowns.value).forEach(prez => dropdowns.value[prez] = prez === activePrez.value);
+});
 
 const props = defineProps<{
     sidenav: boolean;
 }>();
-
 </script>
 
 <template>
     <component :is="props.sidenav ? 'slot' : 'div'" id="nav-wrapper">
         <nav id="main-nav" :class="`${props.sidenav ? 'sidenav' : ''} ${collapse ? 'collapse' : ''}`">
-            <RouterLink to="/" class="nav-item">Home</RouterLink>
+            <div id="search">
+                <div id="search-box">
+                    <input type="text" name="" id="" placeholder="Search" />
+                    <button id="clear-btn"><i class="fa-regular fa-xmark"></i></button>
+                </div>
+                <button id="search-btn" class="btn"><i class="fa-regular fa-magnifying-glass"></i></button>
+            </div>
+            <div class="nav-item"><RouterLink to="/" class="nav-link">Home</RouterLink></div>
             <template v-for="prez in enabledPrezs">
-                <RouterLink :to="`/${prez.toLowerCase()[0]}`" class="nav-item">
-                    {{ prez }} <i class="fa-regular fa-chevron-down"></i>
-                </RouterLink>
-                <nav v-if="prez === activePrez && props.sidenav" id="sub-nav" class="col">
-                    <RouterLink
-                        v-for="subroute in routes[prez]"
-                        :to="subroute.to"
-                        :class="`nav-item ${route.path.startsWith(subroute.to) ? 'active' : ''}`"
-                    >
-                        {{ subroute.label }}
+                <div class="nav-item">
+                    <RouterLink :to="`/${prez.toLowerCase()[0]}`" class="nav-link">
+                        {{ prez }}
                     </RouterLink>
+                    <button class="dropdown-btn" @click="dropdowns[prez] = !dropdowns[prez]">
+                        <i :class="`fa-regular fa-chevron-${dropdowns[prez] ? 'up' : 'down'}`"></i>
+                    </button>
+                </div>
+                <nav v-if="dropdowns[prez] && props.sidenav" id="sub-nav" class="col">
+                    <div class="nav-item" v-for="subroute in routes[prez]">
+                        <RouterLink
+                            :to="subroute.to"
+                            :class="`nav-link ${route.path.startsWith(subroute.to) ? 'active' : ''}`"
+                        >
+                            {{ subroute.label }}
+                        </RouterLink>
+                    </div>
                 </nav>
             </template>
-            <RouterLink to="/search" class="nav-item">Search</RouterLink>
-            <RouterLink to="/sparql" class="nav-item">SPARQL</RouterLink>
-            <RouterLink to="/profiles" class="nav-item">Profiles</RouterLink>
-            <RouterLink to="/about" class="nav-item">About</RouterLink>
-            <RouterLink to="/docs" class="nav-item">API Docs</RouterLink>
+            <div class="nav-item"><RouterLink to="/search" class="nav-link">Search</RouterLink></div>
+            <div class="nav-item"><RouterLink to="/sparql" class="nav-link">SPARQL</RouterLink></div>
+            <div class="nav-item"><RouterLink to="/profiles" class="nav-link">Profiles</RouterLink></div>
+            <div class="nav-item"><RouterLink to="/about" class="nav-link">About</RouterLink></div>
+            <div class="nav-item"><RouterLink to="/docs" class="nav-link">API Docs</RouterLink></div>
         </nav>
         <nav v-if="!!activePrez && !props.sidenav" id="sub-nav" class="row">
             <RouterLink
@@ -108,13 +125,9 @@ const props = defineProps<{
             </RouterLink>
         </nav>
     </component>
-    
 </template>
 
 <style lang="scss" scoped>
-@import "@/assets/sass/_variables.scss";
-@import "@/assets/sass/_mixins.scss";
-
 div#nav-wrapper {
     display: flex;
     flex-direction: column;
@@ -137,33 +150,78 @@ nav#main-nav {
         }
     }
 }
+div.nav-item {
+    display: flex;
+    flex-direction: row;
 
-a.nav-item {
-    color: $navColor;
-    font-weight: bold;
-    text-decoration: none;
-    padding: 6px 10px;
-    @include transition(color, background-color);
+    a.nav-link {
+        flex-grow: 1;
+        color: $navColor;
+        // font-weight: bold;
+        font-size: 1.1rem;
+        text-decoration: none;
+        padding: 6px 10px;
+        display: flex;
+        @include transition(color, background-color);
 
-    &:hover {
-        background-color: $navColor;
-        color: white;
+        &:hover {
+            background-color: $navColor;
+            color: white;
+        }
+
+        &.router-link-active, &.active {
+            background-color: $navColor;
+            color: white;
+        }
     }
 
-    &.router-link-active, &.active {
-        background-color: $navColor;
-        color: white;
+    button.dropdown-btn {
+        margin-left: auto;
+        cursor: pointer;
+        color: $navColor;
+        background-color: $navBg;
+        border: none;
+        padding: 6px 8px;
+        @include transition(color, background-color);
+
+        &:hover {
+            background-color: $navColor;
+            color: white;
+        }
     }
 }
+
+// a.nav-item {
+//     color: $navColor;
+//     // font-weight: bold;
+//     text-decoration: none;
+//     padding: 6px 10px;
+//     display: flex;
+//     @include transition(color, background-color);
+
+//     &:hover {
+//         background-color: $navColor;
+//         color: white;
+//     }
+
+//     &.router-link-active, &.active {
+//         background-color: $navColor;
+//         color: white;
+//     }
+// }
 
 #sub-nav {
     display: flex;
     background-color: $navBg;
 
+    a.nav-link {
+        font-size: 1rem;
+    }
+
     &.row {
         flex-direction: row;
         
-        a.nav-item {
+        a.nav-link {
             flex: 1;
             text-align: center;
         }
@@ -173,6 +231,50 @@ a.nav-item {
         margin-left: 16px;
         border-left: 2px solid $navColor;
         flex-direction: column;
+    }
+}
+
+#search {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    padding: 6px;
+
+    #search-box {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        background-color: white;
+        border-top-left-radius: $borderRadius;
+        border-bottom-left-radius: $borderRadius;
+        border: 1px solid #aaaaaa;
+        border-right: none;
+
+        input {
+            background-color: unset;
+            border: none;
+            width: 100%;
+        }
+
+        #clear-btn {
+            padding: 8px 10px;
+            background-color: transparent;
+            border: none;
+            color: #aaaaaa;
+            cursor: pointer;
+            @include transition(color);
+
+            &:hover {
+                color: #888888;
+            }
+        }
+    }
+
+    #search-btn {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-top-right-radius: $borderRadius;
+        border-bottom-right-radius: $borderRadius;
     }
 }
 </style>

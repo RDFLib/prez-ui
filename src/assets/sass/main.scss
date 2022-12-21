@@ -1,0 +1,77 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    font-family: $bodyFont;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: $headerFont;
+}
+
+a {
+    color: $linkColor;
+    text-decoration: none;
+}
+
+.btn {
+    display: inline-block;
+    cursor: pointer;
+    background-color: $primary;
+    color: white;
+    border: 1px solid $primary;
+    padding: 6px 8px;
+    border-radius: $borderRadius;
+    @include transition(color, background-color);
+
+    &:hover {
+        background-color: adjust-color($color: $primary, $saturation: 10%, $lightness: -7%)
+    }
+
+    &.outline {
+        background-color: transparent;
+        color: $primary;
+
+        &:hover {
+            background-color: $primary;
+            color: white;
+        }
+    }
+
+    &.sm {
+        font-size: 0.7em;
+        padding: 4px 6px;
+    }
+}
+
+.badge {
+    padding: 2px 4px;
+    // border: 1px solid $secondary;
+    background-color: $badgeBg;
+    color: white;
+    border-radius: $borderRadius;
+    font-size: 0.8rem;  
+    float:right;
+
+    &.outline {
+        border: 1px solid $secondary;
+        background-color: transparent;
+        color: $secondary;
+    }
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]), select, textarea {
+    border: 1px solid #aaaaaa;
+    padding: 8px;
+    border-radius: $borderRadius;
+    background-color: white;
+}

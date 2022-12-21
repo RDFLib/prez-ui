@@ -101,158 +101,85 @@ onMounted(() => {
     </footer>
 </template>
 
-<style lang="scss">
-@import "@/assets/sass/_variables.scss";
-@import "@/assets/sass/_mixins.scss";
-@import "@/assets/sass/_transitions.scss";
+<style lang="scss" scoped>
+$contentPadding: 16px;
 
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    height: 100vh;
-    font-family: $bodyFont;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    font-family: $headerFont;
-}
-
-a {
-    color: $linkColor;
-    text-decoration: none;
-}
-
-.btn {
-    display: inline-block;
-    cursor: pointer;
-    background-color: $primary;
-    color: white;
-    border: 1px solid $primary;
-    padding: 6px 8px;
-    border-radius: $borderRadius;
-    @include transition(color, background-color);
-
-    &:hover {
-        background-color: adjust-color($color: $primary, $saturation: 10%, $lightness: -7%)
-    }
-
-    &.outline {
-        background-color: transparent;
-        color: $primary;
-
-        &:hover {
-            background-color: $primary;
-            color: white;
-        }
-    }
-
-    &.sm {
-        font-size: 0.7em;
-        padding: 4px 6px;
-    }
-}
-
-.badge {
-    padding: 2px 4px;
-    // border: 1px solid $secondary;
-    background-color: $badgeBg;
-    color: white;
-    border-radius: $borderRadius;
-    font-size: 0.7rem;  
-
-    &.outline {
-        border: 1px solid $secondary;
-        background-color: transparent;
-        color: $secondary;
-    }
-}
-
-#app {
+header {
+    background-color: $headerBg;
+    color: $headerColor;
     display: flex;
-    flex-direction: column;
-    height: 100%;
 
-    $contentPadding: 16px;
-
-    header {
-        background-color: $headerBg;
-        color: $headerColor;
+    #header-content {
+        width: 100%;
+        // max-width: $pageMaxWidth;
+        margin: 0 auto;
+        padding: $contentPadding $contentPadding 6px $contentPadding;
         display: flex;
+        flex-direction: column;
+        gap: 16px;
 
-        #header-content {
-            width: 100%;
-            // max-width: $pageMaxWidth;
-            margin: 0 auto;
-            padding: $contentPadding $contentPadding 6px $contentPadding;
+        #header-html {
             display: flex;
-            flex-direction: column;
-            gap: 16px;
 
-            #header-html {
-                display: flex;
-
-                #page-heading {
-                    color: $headerColor;
-                    margin: auto;
-                }
-            }
-        }
-    }
-
-    main {
-        flex-grow: 1;
-        display: flex;
-        background-color: $mainBg;
-
-        #main-content {
-            width: 100%;
-            // max-width: $pageMaxWidth;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-
-            &.sidenav {
-                flex-direction: row;
-            }
-
-            #content {
-                flex-grow: 1;
-                display: flex;
-                flex-direction: row;
-
-                #content-body {
-                    display: flex;
-                    flex-direction: column;
-                    padding: $contentPadding;
-                    flex-grow: 1;
-                }
-            }
-        }
-    }
-
-    footer {
-        background-color: $footerBg;
-        color: $footerColor;
-        display: flex;
-
-        #footer-content {
-            width: 100%;
-            // max-width: $pageMaxWidth;
-            margin: 0 auto;
-            padding: $contentPadding;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-
-            #prez-footer {
-                display: flex;
-                flex-direction: row;
-                gap: 12px;
+            #page-heading {
+                color: $headerColor;
+                margin: auto;
             }
         }
     }
 }
+
+main {
+    flex-grow: 1;
+    display: flex;
+    background-color: $mainBg;
+
+    #main-content {
+        width: 100%;
+        // max-width: $pageMaxWidth;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+
+        &.sidenav {
+            flex-direction: row;
+        }
+
+        #content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: row;
+
+            #content-body {
+                display: flex;
+                flex-direction: column;
+                padding: $contentPadding;
+                flex-grow: 1;
+            }
+        }
+    }
+}
+
+footer {
+    background-color: $footerBg;
+    color: $footerColor;
+    display: flex;
+
+    #footer-content {
+        width: 100%;
+        // max-width: $pageMaxWidth;
+        margin: 0 auto;
+        padding: $contentPadding;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        #prez-footer {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+        }
+    }
+}
+
 </style>

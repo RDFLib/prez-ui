@@ -73,10 +73,6 @@ onMounted(() => {
             flex-direction: column;
             gap: 12px;
 
-            input, select, textarea {
-                padding: 6px;
-            }
-
             button[type="submit"] {
                 align-self: flex-start;
             }
