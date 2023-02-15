@@ -29,7 +29,7 @@ const parts = ref([]);
 onMounted(() => {
     doRequest(`${apiBaseUrl}/c/catalogs/${route.params.catalogId}`, () => {
         parseIntoStore(data.value);
-
+        
         const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("dcat:Catalog")))[0];
         catalog.value.iri = subject.id;
         store.value.forEach(q => { // get preds & objs

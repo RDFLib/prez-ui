@@ -30,7 +30,7 @@ export function useRdfStore() {
      * 
      * @param {String} s RDF Turtle string
      */
-    function parseIntoStore(s) {
+    function parseIntoStore(s: string) {
         const p = parser.parse(s);
         store.value.addQuads(p);
         const defaultPrefixValues = Object.values(defaultPrefixes);
@@ -46,7 +46,7 @@ export function useRdfStore() {
      * @param {String} s qname string
      * @returns Predicate IRI string
      */
-    function qname(s) {
+    function qname(s: string) {
         if (s === "a") { // special handling for "a" as rdf:type
             return prefixes.value.rdf + "type";
         } else {

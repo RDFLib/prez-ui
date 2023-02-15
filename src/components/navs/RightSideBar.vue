@@ -21,6 +21,7 @@ const props = defineProps<{
 
 #right-nav {
     min-width: 260px;
+    max-width: 320px;
     display: flex;
     flex-direction: column;
     padding: 16px;

@@ -98,7 +98,7 @@ const props = defineProps<{
                         <i :class="`fa-regular fa-chevron-${dropdowns[prez] ? 'up' : 'down'}`"></i>
                     </button>
                 </div>
-                <nav v-if="dropdowns[prez] && props.sidenav" id="sub-nav" class="col">
+                <nav v-if="dropdowns[prez] && props.sidenav" class="sub-nav col">
                     <div class="nav-item" v-for="subroute in routes[prez]">
                         <RouterLink
                             :to="subroute.to"
@@ -115,7 +115,7 @@ const props = defineProps<{
             <div class="nav-item"><RouterLink to="/about" class="nav-link">About</RouterLink></div>
             <div class="nav-item"><RouterLink to="/docs" class="nav-link">API Docs</RouterLink></div>
         </nav>
-        <nav v-if="!!activePrez && !props.sidenav" id="sub-nav" class="row">
+        <nav v-if="!!activePrez && !props.sidenav" class="sub-nav row">
             <RouterLink
                 v-for="route in routes[activePrez]"
                 :to="route.to"
@@ -210,12 +210,12 @@ div.nav-item {
 //     }
 // }
 
-#sub-nav {
+.sub-nav {
     display: flex;
-    background-color: $navBg;
+    background-color: darken($navBg, 10%);
 
     a.nav-link {
-        font-size: 1rem;
+        font-size: 1rem !important;
     }
 
     &.row {
@@ -228,9 +228,8 @@ div.nav-item {
     }
 
     &.col {
-        margin-left: 16px;
-        border-left: 2px solid $navColor;
         flex-direction: column;
+        padding: 10px;
     }
 }
 

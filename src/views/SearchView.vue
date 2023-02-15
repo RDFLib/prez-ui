@@ -23,7 +23,7 @@ onMounted(() => {
             <form action="">
                 <div class="search-form">
                     <input type="text" name="" id="" placeholder="Enter search term...">
-                    <button type="submit">Search</button>
+                    <button class="btn" type="submit">Search</button>
                 </div>
             </form>
         </div>
@@ -40,7 +40,7 @@ onMounted(() => {
                         <option value="">Something</option>
                     </select>
                     <textarea name="" id="" cols="30" rows="10"></textarea>
-                    <button type="submit">Search</button>
+                    <button class="btn" type="submit">Search</button>
                 </div>
             </form>
         </div>
@@ -52,7 +52,7 @@ onMounted(() => {
                     <select name="" id="" multiple>
                         <option value="">Something</option>
                     </select>
-                    <button type="submit">Search</button>
+                    <button class="btn" type="submit">Search</button>
                 </div>
             </form>
         </div>

@@ -1,4 +1,4 @@
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { defineStore } from "pinia";
 
 interface Breadcrumb {

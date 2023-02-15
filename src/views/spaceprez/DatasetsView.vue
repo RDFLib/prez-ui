@@ -29,7 +29,7 @@ onMounted(() => {
                 iri: member.id
             };
             store.value.forEach(q => { // get preds & objs for each subj
-                if (q.predicate.value === qname("rdfs:label")) {
+                if (q.predicate.value === qname("dcterms:title")) {
                     d.title = q.object.value;
                 } else if (q.predicate.value === qname("prez:link")) {
                     d.link = q.object.value;

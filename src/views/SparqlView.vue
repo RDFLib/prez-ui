@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { nextTick, onMounted, ref, inject, computed, watch, toRaw } from "vue";
-import Yasqe from "@triply/yasqe";
-import Yasr from "@triply/yasr";
+import { loadScript } from "vue-plugin-load-script";
+// import Yasqe from "@triply/yasqe";
+// import Yasr from "@triply/yasr";
 import { useUiStore } from "@/stores/ui";
 import sparqlExamples from "@/util/sparqlExamples";
 
@@ -125,28 +126,29 @@ onMounted(() => {
         }));
     }
 
-    // yasqe & yasr config
-    nextTick(() => {
-        yasqe.value = new Yasqe(document.getElementById("yasqe"), {
-            showQueryButton: true,
-            resizeable: false,
-            requestConfig: {
-                endpoint: sparqlEndpoint.value,
-                method: "GET",
-                adjustQueryBeforeRequest: (y) => { // add comment in query for Accept header to address caching issue
-                    return `# ${(queryType.value === "SELECT" || queryType.value === "ASK") ? selectFormat.value : graphFormat.value}\n${y.getValue()}`;
-                }
-            },
-        });
-        yasr.value = new Yasr(document.getElementById("yasr"));
+    loadScript("https://unpkg.com/@triply/yasqe/build/yasqe.min.js").then(() => {
+        nextTick(() => {
+            yasqe.value = new Yasqe(document.getElementById("yasqe"), {
+                showQueryButton: true,
+                resizeable: false,
+                requestConfig: {
+                    endpoint: sparqlEndpoint.value,
+                    method: "GET",
+                    adjustQueryBeforeRequest: (y) => { // add comment in query for Accept header to address caching issue
+                        return `# ${(queryType.value === "SELECT" || queryType.value === "ASK") ? selectFormat.value : graphFormat.value}\n${y.getValue()}`;
+                    }
+                },
+            });
 
-        // initialise options
-        yasqe.value.options.requestConfig.acceptHeaderGraph = graphFormat.value;
-        yasqe.value.options.requestConfig.acceptHeaderSelect = selectFormat.value;
-        queryType.value = yasqe.value.getQueryType();
+            yasqe.value.options.requestConfig.acceptHeaderGraph = graphFormat.value;
+            yasqe.value.options.requestConfig.acceptHeaderSelect = selectFormat.value;
+            queryType.value = yasqe.value.getQueryType();
+        })
+    })
+    loadScript("https://unpkg.com/@triply/yasr/build/yasr.min.js").then(() => {
+        yasr.value = new Yasr(document.getElementById("yasr"));
         yasr.value.config.prefixes = yasqe.value.getPrefixesFromQuery();
 
-        // events
         yasqe.value.on("change", (y) => {
             queryType.value = y.getQueryType();
         });
@@ -156,7 +158,40 @@ onMounted(() => {
         yasqe.value.on("queryResponse", (y, response, duration) => {
             yasr.value.setResponse(response, duration);
         });
-    });
+    })
+
+    // yasqe & yasr config
+    // nextTick(() => {
+    //     yasqe.value = new Yasqe(document.getElementById("yasqe"), {
+    //         showQueryButton: true,
+    //         resizeable: false,
+    //         requestConfig: {
+    //             endpoint: sparqlEndpoint.value,
+    //             method: "GET",
+    //             adjustQueryBeforeRequest: (y) => { // add comment in query for Accept header to address caching issue
+    //                 return `# ${(queryType.value === "SELECT" || queryType.value === "ASK") ? selectFormat.value : graphFormat.value}\n${y.getValue()}`;
+    //             }
+    //         },
+    //     });
+    //     yasr.value = new Yasr(document.getElementById("yasr"));
+
+    //     // initialise options
+    //     yasqe.value.options.requestConfig.acceptHeaderGraph = graphFormat.value;
+    //     yasqe.value.options.requestConfig.acceptHeaderSelect = selectFormat.value;
+    //     queryType.value = yasqe.value.getQueryType();
+    //     yasr.value.config.prefixes = yasqe.value.getPrefixesFromQuery();
+
+    //     // events
+    //     yasqe.value.on("change", (y) => {
+    //         queryType.value = y.getQueryType();
+    //     });
+    //     yasqe.value.on("query", (y, request) => {
+    //         yasr.value.config.prefixes = y.getPrefixesFromQuery();
+    //     });
+    //     yasqe.value.on("queryResponse", (y, response, duration) => {
+    //         yasr.value.setResponse(response, duration);
+    //     });
+    // });
 });
 
 function loadExample(query: string) {
