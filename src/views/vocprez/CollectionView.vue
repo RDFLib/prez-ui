@@ -1,15 +1,22 @@
 <script lang="ts" setup>
 import { ref, onMounted, inject } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, RouterLink } from "vue-router";
 import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
+import { configKey, defaultConfig, type AnnotatedPredicate, type AnnotatedQuad, type ListItem } from "@/types";
 import PropTable from "@/components/PropTable.vue";
+
+interface Child {
+    iri: string,
+    title?: string,
+    link?: string
+};
 
 const { namedNode } = DataFactory;
 
-const apiBaseUrl = inject("config").apiBaseUrl;
+const { apiBaseUrl } = inject(configKey, defaultConfig);
 const route = useRoute();
 const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qname } = useRdfStore();
@@ -23,15 +30,15 @@ const hiddenPreds = [
     "http://www.w3.org/2004/02/skos/core#member"
 ];
 
-const properties = ref([]);
-const collection = ref({});
-const concepts = ref([]);
+const properties = ref<AnnotatedQuad[]>([]);
+const collection = ref<ListItem>({} as ListItem);
+const concepts = ref<Child[]>([]);
 
 onMounted(() => {
     doRequest(`${apiBaseUrl}/v/collection/${route.params.collectionId}`, () => {
         parseIntoStore(data.value);
 
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("skos:Collection")))[0];
+        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("skos:Collection")), null)[0];
         collection.value.iri = subject.id;
         store.value.forEach(q => { // get preds & objs
             if (q.predicate.value === qname("skos:prefLabel")) {
@@ -39,29 +46,46 @@ onMounted(() => {
             } else if (q.predicate.value === qname("skos:definition")) {
                 collection.value.description = q.object.value;
             }
-            q.predicate.annotations = store.value.getQuads(q.predicate, null, null);
-            properties.value.push(q);
-        }, subject, null, null);
+
+            const annoPred: AnnotatedPredicate = {
+                termType: q.predicate.termType,
+                value: q.predicate.value,
+                id: q.predicate.id,
+                annotations: store.value.getQuads(q.predicate, null, null, null)
+            };
+            const annoQuad: AnnotatedQuad = {
+                subject: q.subject,
+                predicate: annoPred,
+                object: q.object,
+                value: q.value,
+                graph: q.graph,
+                termType: q.termType,
+                equals: q.equals,
+                toJSON: q.toJSON
+            };
+
+            properties.value.push(annoQuad);
+        }, subject, null, null, null);
         
         // concept list
         store.value.forObjects(concept => {
-            let c = {
+            let c: Child = {
                 iri: concept.id
-            }
+            };
             store.value.forEach(q => {
                 if (q.predicate.value === qname("rdfs:label")) {
                     c.title = q.object.value;
                 } else if (q.predicate.value === qname("prez:link")) {
                     c.link = q.object.value;
                 }
-            }, concept, null, null);
+            }, concept, null, null, null);
             concepts.value.push(c);
-        }, namedNode(collection.value.iri), namedNode(qname("skos:member")));
+        }, namedNode(collection.value.iri), namedNode(qname("skos:member")), null);
 
-        ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
+        ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
         document.title = `${collection.value.title} | Prez`;
         ui.pageHeading = { name: "VocPrez", url: "/v"};
-        ui.breadcrumbs = [{ name: "VocPrez", url: "/v" }, { name: "Collections", url: "/v/collection" }, { name: collection.value.title, url: route.path }];
+        ui.breadcrumbs = [{ name: "VocPrez", url: "/v" }, { name: "Collections", url: "/v/collection" }, { name: collection.value.title || "Collection", url: route.path }];
     });
 });
 </script>

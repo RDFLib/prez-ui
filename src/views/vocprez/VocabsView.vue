@@ -5,27 +5,28 @@ import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
+import { configKey, defaultConfig, type ListItem } from "@/types";
 import ItemList from "@/components/ItemList.vue";
 
 const { namedNode } = DataFactory;
 
-const apiBaseUrl = inject("config").apiBaseUrl;
+const { apiBaseUrl } = inject(configKey, defaultConfig);
 const route = useRoute();
 const ui = useUiStore();
-const { store, prefixes, parseIntoStore, qname } = useRdfStore();
+const { store, parseIntoStore, qname } = useRdfStore();
 
 const { data, profiles, loading, error, doRequest } = useGetRequest();
 
-const vocabs = ref([]);
+const vocabs = ref<ListItem[]>([]);
 
 onMounted(() => {
     doRequest(`${apiBaseUrl}/v/vocab`, () => {
         parseIntoStore(data.value);
 
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("rdf:bag")))[0];
+        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("rdf:bag")), null)[0];
 
         store.value.forObjects(member => {
-            let v = {
+            let v: ListItem = {
                 iri: member.id
             };
             store.value.forEach(q => { // get preds & objs for each subj
@@ -36,12 +37,12 @@ onMounted(() => {
                 } else if (q.predicate.value === qname("dcterms:description")) {
                     v.description = q.object.value;
                 }
-            }, member, null, null);
+            }, member, null, null, null);
             vocabs.value.push(v);
-        }, subject, namedNode(qname("rdfs:member")));
+        }, subject, namedNode(qname("rdfs:member")), null);
     });
 
-    ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
+    ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
     document.title = "Vocabs | Prez";
     ui.pageHeading = { name: "VocPrez", url: "/v"};
     ui.breadcrumbs = [{ name: "VocPrez", url: "/v" }, { name: "Vocabs", url: route.path }];

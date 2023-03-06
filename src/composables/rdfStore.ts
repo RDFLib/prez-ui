@@ -1,7 +1,7 @@
 import { ref } from "vue";
-import { Store, Writer, DataFactory, Parser } from "n3";
+import { Store, Parser } from "n3";
 
-const defaultPrefixes = {
+const defaultPrefixes: {[token: string]: string} = {
     "altr-ext": "http://www.w3.org/ns/dx/conneg/altr-ext#",
     "dcat": "http://www.w3.org/ns/dcat#",
     "dcterms": "http://purl.org/dc/terms/",
@@ -31,11 +31,15 @@ export function useRdfStore() {
      * @param {String} s RDF Turtle string
      */
     function parseIntoStore(s: string) {
-        const p = parser.parse(s);
+        const p = parser.parse(s, null, (prefixName, prefixNode) => {
+            // callback for each prefix parsed
+            if (!Object.values(defaultPrefixes).includes(prefixNode.value)) {
+                prefixes.value[prefixName] = prefixNode.value;
+            }
+            // const newPrefixes = Object.keys(parser._prefixes).filter(key => !Object.values(defaultPrefixes).includes(parser._prefixes[key]));
+            // prefixes.value = {...prefixes.value, ...newPrefixes};
+        });
         store.value.addQuads(p);
-        const defaultPrefixValues = Object.values(defaultPrefixes);
-        const newPrefixes = Object.keys(parser._prefixes).filter(key => !defaultPrefixValues.includes(parser._prefixes[key]));
-        prefixes.value = {...prefixes.value, ...newPrefixes};
     }
 
     /**

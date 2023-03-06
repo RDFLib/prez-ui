@@ -5,12 +5,13 @@ import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
+import { configKey, defaultConfig, type AnnotatedPredicate, type AnnotatedQuad, type Concept, type ListItem } from "@/types";
 import PropTable from "@/components/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 
 const { namedNode } = DataFactory;
 
-const apiBaseUrl = inject("config").apiBaseUrl;
+const { apiBaseUrl } = inject(configKey, defaultConfig);
 const route = useRoute();
 const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qname } = useRdfStore();
@@ -25,9 +26,9 @@ const hiddenPreds = [
     "http://www.w3.org/2000/01/rdf-schema#member"
 ];
 
-const properties = ref([]);
-const vocab = ref({});
-const concepts = ref([]);
+const properties = ref<AnnotatedQuad[]>([]);
+const vocab = ref<ListItem>({} as ListItem);
+const concepts = ref<Concept[]>([]);
 const hideConcepts = ref(true);
 const collapseAll = ref(true);
 
@@ -35,7 +36,7 @@ onMounted(() => {
     doRequest(`${apiBaseUrl}/v/vocab/${route.params.vocabId}`, () => {
         parseIntoStore(data.value);
 
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("skos:ConceptScheme")))[0];
+        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("skos:ConceptScheme")), null)[0];
         vocab.value.iri = subject.id;
         store.value.forEach(q => { // get preds & objs
             if (q.predicate.value === qname("skos:prefLabel")) {
@@ -43,14 +44,31 @@ onMounted(() => {
             } else if (q.predicate.value === qname("skos:definition")) {
                 vocab.value.description = q.object.value;
             }
-            q.predicate.annotations = store.value.getQuads(q.predicate, null, null);
-            properties.value.push(q);
-        }, subject, null, null);
 
-        ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
+            const annoPred: AnnotatedPredicate = {
+                termType: q.predicate.termType,
+                value: q.predicate.value,
+                id: q.predicate.id,
+                annotations: store.value.getQuads(q.predicate, null, null, null)
+            };
+            const annoQuad: AnnotatedQuad = {
+                subject: q.subject,
+                predicate: annoPred,
+                object: q.object,
+                value: q.value,
+                graph: q.graph,
+                termType: q.termType,
+                equals: q.equals,
+                toJSON: q.toJSON
+            };
+
+            properties.value.push(annoQuad);
+        }, subject, null, null, null);
+
+        ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
         document.title = `${vocab.value.title} | Prez`;
         ui.pageHeading = { name: "VocPrez", url: "/v"};
-        ui.breadcrumbs = [{ name: "VocPrez", url: "/v" }, { name: "Vocabs", url: "/v/vocab" }, { name: vocab.value.title, url: route.path }];
+        ui.breadcrumbs = [{ name: "VocPrez", url: "/v" }, { name: "Vocabs", url: "/v/vocab" }, { name: vocab.value.title || "Vocab", url: route.path }];
     });
 });
 
@@ -60,14 +78,16 @@ function getConcepts() {
     // RDF parsing
     // parseIntoStore(conceptData);
 
-    let conceptArray = [];
+    let conceptArray: Concept[] = [];
     
     // RDF querying
     store.value.forSubjects(subject => { // for each concept
-        let c = {
+        let c: Concept = {
             iri: subject.id,
             narrower: [],
-            broader: null
+            broader: "",
+            title: "",
+            link: ""
         };
         store.value.forEach(q => { // get preds & objs for each subj
             if (q.predicate.value === qname("rdfs:label")) {
@@ -79,29 +99,29 @@ function getConcepts() {
             } else if (q.predicate.value === qname("skos:broader")) {
                 c.broader = q.object.value;
             }
-        }, subject, null, null);
+        }, subject, null, null, null);
         conceptArray.push(c);
-    }, namedNode(qname("skos:inScheme")), namedNode(vocab.value.iri));
+    }, namedNode(qname("skos:inScheme")), namedNode(vocab.value.iri), null);
 
     // get top concepts
-    const hasTopConcepts = store.value.getObjects(namedNode(vocab.value.iri), namedNode(qname("skos:hasTopConcept"))).map(o => o.id);
-    const topConceptsOf = store.value.getSubjects(namedNode(qname("skos:topConceptOf"), namedNode(vocab.value.iri))).map(s => s.id);
+    const hasTopConcepts = store.value.getObjects(namedNode(vocab.value.iri), namedNode(qname("skos:hasTopConcept")), null).map(o => o.id);
+    const topConceptsOf = store.value.getSubjects(namedNode(qname("skos:topConceptOf")), namedNode(vocab.value.iri), null).map(s => s.id);
     const topConcepts = [...new Set([...hasTopConcepts, ...topConceptsOf])]; // merge & remove duplicates
 
     // build concept hierarchy tree
-    const indexMap = conceptArray.reduce((obj, c, i) => {
+    const indexMap = conceptArray.reduce<{[iri: string]: number}>((obj, c, i) => {
         obj[c.iri] = i;
         return obj;
     }, {});
 
-    let root = { children: [] };
+    let children: Concept[] = [];
     conceptArray.forEach(c => {
         if (c.narrower.length > 0) {
             c.narrower.forEach(n => conceptArray[indexMap[n]].broader = c.iri);
         }
 
         if (topConcepts.includes(c.iri)) {
-            root.children.push(c);
+            children.push(c);
             return;
         }
 
@@ -110,7 +130,7 @@ function getConcepts() {
             parent.children = [...(parent.children || []), c];
         }
     });
-    concepts.value = root.children;
+    concepts.value = children;
 }
 </script>
 

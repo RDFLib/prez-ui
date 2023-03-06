@@ -1,16 +1,9 @@
 <script lang="ts" setup>
 import PredCell from "@/components/PredCell.vue";
 import ObjCell from "@/components/ObjCell.vue";
+import type { RowPred } from "@/types";
 
-const props = defineProps({
-    iri: String,
-    qname: String,
-    label: String,
-    description: String,
-    explanation: String,
-    order: Number,
-    objs: Array
-});
+const props = defineProps<RowPred>();
 </script>
 
 <template>
@@ -22,12 +15,16 @@ const props = defineProps({
             :description="props.description"
             :explanation="props.explanation"
         />
-        <td>
+        <td class="prop-objs">
             <ObjCell v-for="obj in props.objs" v-bind="obj" />
         </td>
     </tr>
 </template>
 
 <style lang="scss" scoped>
-
+.prop-objs {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
 </style>

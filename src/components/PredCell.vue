@@ -1,13 +1,8 @@
 <script lang="ts" setup>
 import ToolTip from "@/components/ToolTip.vue";
+import type { PredCellProps } from "@/types";
 
-const props = defineProps({
-    iri: String,
-    qname: String,
-    label: String,
-    description: String,
-    explanation: String,
-});
+const props = defineProps<PredCellProps>();
 </script>
 
 <template>

@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import { nextTick, onMounted, ref, inject, computed, watch, toRaw } from "vue";
 import { loadScript } from "vue-plugin-load-script";
-// import Yasqe from "@triply/yasqe";
-// import Yasr from "@triply/yasr";
+import Yasqe from "@triply/yasqe";
+import Yasr from "@triply/yasr";
 import { useUiStore } from "@/stores/ui";
 import sparqlExamples from "@/util/sparqlExamples";
+import { configKey, defaultConfig } from "@/types";
 
 const graphFormats = [
     {
@@ -49,15 +50,15 @@ const selectFormats = [
 ];
 
 const ui = useUiStore();
-const apiBaseUrl = inject("config").apiBaseUrl;
+const { apiBaseUrl } = inject(configKey, defaultConfig);
 
-const yasqe = ref(null);
-const yasr = ref(null);
+const yasqe = ref<Yasqe | null>(null);
+const yasr = ref<Yasr | null>(null);
 const selectedEndpoint = ref("all");
-const queryType = ref(null);
+const queryType = ref<string | null>(null);
 const graphFormat = ref("text/turtle");
 const selectFormat = ref("application/sparql-results+json");
-const queryOptionsElement = ref(null);
+const queryOptionsElement = ref<HTMLElement | null>(null);
 
 const sparqlEndpoint = computed(() => {
     if (selectedEndpoint.value === "catprez") {
@@ -128,7 +129,7 @@ onMounted(() => {
 
     loadScript("https://unpkg.com/@triply/yasqe/build/yasqe.min.js").then(() => {
         nextTick(() => {
-            yasqe.value = new Yasqe(document.getElementById("yasqe"), {
+            yasqe.value = new Yasqe(document.getElementById("yasqe")!, {
                 showQueryButton: true,
                 resizeable: false,
                 requestConfig: {
@@ -146,17 +147,19 @@ onMounted(() => {
         })
     })
     loadScript("https://unpkg.com/@triply/yasr/build/yasr.min.js").then(() => {
-        yasr.value = new Yasr(document.getElementById("yasr"));
-        yasr.value.config.prefixes = yasqe.value.getPrefixesFromQuery();
+        nextTick(() => {
+            yasr.value = new Yasr(document.getElementById("yasr")!);
+            yasr.value.config.prefixes = yasqe.value!.getPrefixesFromQuery();
 
-        yasqe.value.on("change", (y) => {
-            queryType.value = y.getQueryType();
-        });
-        yasqe.value.on("query", (y, request) => {
-            yasr.value.config.prefixes = y.getPrefixesFromQuery();
-        });
-        yasqe.value.on("queryResponse", (y, response, duration) => {
-            yasr.value.setResponse(response, duration);
+            yasqe.value!.on("change", () => {
+                queryType.value = yasqe.value!.getQueryType();
+            });
+            yasqe.value!.on("query", (y) => {
+                yasr.value!.config.prefixes = y.getPrefixesFromQuery();
+            });
+            yasqe.value!.on("queryResponse", (y, response, duration) => {
+                yasr.value!.setResponse(response, duration);
+            });
         });
     })
 
@@ -195,8 +198,8 @@ onMounted(() => {
 });
 
 function loadExample(query: string) {
-    toRaw(yasqe.value).setValue(query); // fixes errors when loading example then clicking in editor - proxy issues with setValue() in Vue
-    yasqe.value.saveQuery();
+    toRaw(yasqe.value!).setValue(query); // fixes errors when loading example then clicking in editor - proxy issues with setValue() in Vue
+    yasqe.value!.saveQuery();
 }
 
 function copy(text: string) {
@@ -210,7 +213,7 @@ function copy(text: string) {
     <div id="query-options" ref="queryOptionsElement">
         <div class="query-option">
             <div class="query-option-title">Endpoint</div>
-            <select name="endpoint" id="endpoint" @change="selectedEndpoint = $event.target.value">
+            <select name="endpoint" id="endpoint" @change="selectedEndpoint = ($event.target as HTMLInputElement).value">
                 <option value="all" :selected="selectedEndpoint === 'all'">All</option>
                 <option value="catprez" :selected="selectedEndpoint === 'catprez'">CatPrez</option>
                 <option value="spaceprez" :selected="selectedEndpoint === 'spaceprez'">SpacePrez</option>
@@ -219,13 +222,13 @@ function copy(text: string) {
         </div>
         <div v-if="queryType === 'SELECT' || queryType === 'ASK'" class="query-option">
             <div class="query-option-title">Results Format</div>
-            <select name="select-format" id="select-format" @change="selectFormat = $event.target.value">
+            <select name="select-format" id="select-format" @change="selectFormat = ($event.target as HTMLInputElement).value">
                 <option v-for="option in selectFormats" :value="option.value" :selected="selectFormat === option.value">{{ option.label }}</option>
             </select>
         </div>
         <div v-else-if="queryType === 'CONSTRUCT' || queryType === 'DESCRIBE'" class="query-option">
             <div class="query-option-title">Results Format</div>
-            <select name="graph-format" id="graph-format" @change="graphFormat = $event.target.value">
+            <select name="graph-format" id="graph-format" @change="graphFormat = ($event.target as HTMLInputElement).value">
                 <option v-for="option in graphFormats" :value="option.value" :selected="graphFormat === option.value">{{ option.label }}</option>
             </select>
         </div>
@@ -248,7 +251,7 @@ function copy(text: string) {
                 <button
                     class="code-btn"
                     title="Load into SPARQL editor"
-                    @click="queryOptionsElement.scrollIntoView({ behavior: 'smooth' }); loadExample(example.query)"
+                    @click="queryOptionsElement!.scrollIntoView({ behavior: 'smooth' }); loadExample(example.query)"
                 >
                     Load
                 </button>

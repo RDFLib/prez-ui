@@ -5,16 +5,17 @@ import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
+import { configKey, defaultConfig, type ListItem } from "@/types";
 import ItemList from "@/components/ItemList.vue";
 
 const { namedNode } = DataFactory;
 
-const apiBaseUrl = inject("config").apiBaseUrl;
+const { apiBaseUrl } = inject(configKey, defaultConfig);
 const route = useRoute();
 const ui = useUiStore();
-const { store, prefixes, parseIntoStore, qname } = useRdfStore();
+const { store, parseIntoStore, qname } = useRdfStore();
 
-const collections = ref([]);
+const collections = ref<ListItem[]>([]);
 
 const { data, profiles, loading, error, doRequest } = useGetRequest();
 
@@ -22,10 +23,10 @@ onMounted(() => {
     doRequest(`${apiBaseUrl}/v/collection`, () => {
         parseIntoStore(data.value);
 
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("rdf:bag")))[0];
+        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("rdf:bag")), null)[0];
 
         store.value.forObjects(member => {
-            let c = {
+            let c: ListItem = {
                 iri: member.id
             };
             store.value.forEach(q => { // get preds & objs for each subj
@@ -34,11 +35,11 @@ onMounted(() => {
                 } else if (q.predicate.value === qname("prez:link")) {
                     c.link = q.object.value;
                 }
-            }, member, null, null);
+            }, member, null, null, null);
             collections.value.push(c);
-        }, subject, namedNode(qname("rdfs:member")));
+        }, subject, namedNode(qname("rdfs:member")), null);
     });
-    ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
+    ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
     document.title = "Collections | Prez";
     ui.pageHeading = { name: "VocPrez", url: "/v"};
     ui.breadcrumbs = [{ name: "VocPrez", url: "/v" }, { name: "Collections", url: route.path }];

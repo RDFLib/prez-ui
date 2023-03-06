@@ -5,32 +5,33 @@ import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
+import { configKey, defaultConfig, type AnnotatedPredicate, type AnnotatedQuad, type ListItem } from "@/types";
 import PropTable from "@/components/PropTable.vue";
 
 const { namedNode } = DataFactory;
 
-const apiBaseUrl = inject("config").apiBaseUrl;
+const { apiBaseUrl } = inject(configKey, defaultConfig);
 const route = useRoute();
 const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qname } = useRdfStore();
 const { data, profiles, loading, error, doRequest } = useGetRequest();
 
-const hiddenPreds = [
-    // "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-    // "http://purl.org/dc/terms/identifier",
-    // "http://purl.org/dc/terms/description",
-    // "http://purl.org/dc/terms/title",
-    // "http://www.w3.org/2000/01/rdf-schema#member"
+const hiddenPreds: string[] = [
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+    "http://purl.org/dc/terms/identifier",
+    "http://purl.org/dc/terms/description",
+    "http://purl.org/dc/terms/title",
+    "http://www.w3.org/2000/01/rdf-schema#member"
 ];
 
-const properties = ref([]);
-const dataset = ref({});
+const properties = ref<AnnotatedQuad[]>([]);
+const dataset = ref<ListItem>({} as ListItem);
 
 onMounted(() => {
     doRequest(`${apiBaseUrl}/s/datasets/${route.params.datasetId}`, () => {
         parseIntoStore(data.value);
 
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("dcat:Dataset")))[0];
+        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("dcat:Dataset")), null)[0];
         dataset.value.iri = subject.id;
         store.value.forEach(q => { // get preds & objs
             if (q.predicate.value === qname("dcterms:title")) {
@@ -38,14 +39,31 @@ onMounted(() => {
             } else if (q.predicate.value === qname("dcterms:description")) {
                 dataset.value.description = q.object.value;
             }
-            q.predicate.annotations = store.value.getQuads(q.predicate, null, null);
-            properties.value.push(q);
-        }, subject, null, null);
+            
+            const annoPred: AnnotatedPredicate = {
+                termType: q.predicate.termType,
+                value: q.predicate.value,
+                id: q.predicate.id,
+                annotations: store.value.getQuads(q.predicate, null, null, null)
+            };
+            const annoQuad: AnnotatedQuad = {
+                subject: q.subject,
+                predicate: annoPred,
+                object: q.object,
+                value: q.value,
+                graph: q.graph,
+                termType: q.termType,
+                equals: q.equals,
+                toJSON: q.toJSON
+            };
+
+            properties.value.push(annoQuad);
+        }, subject, null, null, null);
         
-        ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
+        ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
         document.title = `${dataset.value.title} | Prez`;
         ui.pageHeading = { name: "SpacePrez", url: "/s"};
-        ui.breadcrumbs = [{ name: "SpacePrez", url: "/s" }, { name: "Datasets", url: "/s/datasets" }, { name: dataset.value.title, url: route.path }];
+        ui.breadcrumbs = [{ name: "SpacePrez", url: "/s" }, { name: "Datasets", url: "/s/datasets" }, { name: dataset.value.title || "Dataset", url: route.path }];
     });
 });
 </script>

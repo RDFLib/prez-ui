@@ -5,11 +5,12 @@ import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
+import { configKey, defaultConfig, type ListItem, type AnnotatedPredicate, type AnnotatedQuad } from "@/types";
 import PropTable from "@/components/PropTable.vue";
 
 const { namedNode } = DataFactory;
 
-const apiBaseUrl = inject("config").apiBaseUrl;
+const { apiBaseUrl } = inject(configKey, defaultConfig);
 const route = useRoute();
 const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qname } = useRdfStore();
@@ -22,15 +23,15 @@ const hiddenPreds = [
     "http://purl.org/dc/terms/title"
 ];
 
-const properties = ref([]);
-const catalog = ref({});
-const parts = ref([]);
+const properties = ref<AnnotatedQuad[]>([]);
+const catalog = ref<ListItem>({} as ListItem);
+const parts = ref<ListItem[]>([]);
 
 onMounted(() => {
     doRequest(`${apiBaseUrl}/c/catalogs/${route.params.catalogId}`, () => {
         parseIntoStore(data.value);
         
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("dcat:Catalog")))[0];
+        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("dcat:Catalog")), null)[0];
         catalog.value.iri = subject.id;
         store.value.forEach(q => { // get preds & objs
             if (q.predicate.value === qname("dcterms:title")) {
@@ -38,12 +39,29 @@ onMounted(() => {
             } else if (q.predicate.value === qname("dcterms:description")) {
                 catalog.value.description = q.object.value;
             }
-            q.predicate.annotations = store.value.getQuads(q.predicate, null, null);
-            properties.value.push(q);
-        }, subject, null, null);
+
+            const annoPred: AnnotatedPredicate = {
+                termType: q.predicate.termType,
+                value: q.predicate.value,
+                id: q.predicate.id,
+                annotations: store.value.getQuads(q.predicate, null, null, null)
+            };
+            const annoQuad: AnnotatedQuad = {
+                subject: q.subject,
+                predicate: annoPred,
+                object: q.object,
+                value: q.value,
+                graph: q.graph,
+                termType: q.termType,
+                equals: q.equals,
+                toJSON: q.toJSON
+            };
+
+            properties.value.push(annoQuad);
+        }, subject, null, null, null);
         
         store.value.forObjects(part => {
-            let p = {
+            let p: ListItem = {
                 iri: part.id
             }
             store.value.forEach(q => {
@@ -52,14 +70,14 @@ onMounted(() => {
                 } else if (q.predicate.value === qname("prez:link")) {
                     p.link = q.object.value;
                 }
-            }, part, null, null);
+            }, part, null, null, null);
             parts.value.push(p);
-        }, namedNode(catalog.value.iri), namedNode(qname("dcterms:hasPart")));
+        }, namedNode(catalog.value.iri), namedNode(qname("dcterms:hasPart")), null);
 
-        ui.rightNavConfig = { enabled: true, profiles: profiles, currentUrl: route.path };
+        ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
         document.title = `${catalog.value.title} | Prez`;
         ui.pageHeading = { name: "CatPrez", url: "/c"};
-        ui.breadcrumbs = [{ name: "CatPrez", url: "/c" }, { name: "Catalogs", url: "/c/catalogs" }, { name: catalog.value.title, url: route.path }];
+        ui.breadcrumbs = [{ name: "CatPrez", url: "/c" }, { name: "Catalogs", url: "/c/catalogs" }, { name: catalog.value.title || "Catalog", url: route.path }];
     });
 });
 </script>

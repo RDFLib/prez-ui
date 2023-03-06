@@ -1,10 +1,14 @@
 <script lang="ts" setup>
-import { inject, onMounted } from "vue";
+import { ref, inject, onMounted } from "vue";
 import { useUiStore } from "@/stores/ui";
+import { configKey, defaultConfig } from "@/types";
+import CatPrezSearch from "@/components/CatPrezSearch.vue";
+import SpacePrezSearch from "@/components/SpacePrezSearch.vue";
+import VocPrezSearch from "@/components/VocPrezSearch.vue";
 
 const ui = useUiStore();
 
-const enabledPrezs = inject("config").enabledPrezs;
+const { enabledPrezs } = inject(configKey, defaultConfig);
 
 onMounted(() => {
     ui.rightNavConfig = { enabled: false };
@@ -17,44 +21,22 @@ onMounted(() => {
 <template>
     <h1>Search</h1>
     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Non dolore earum, vero corporis saepe iste, minus blanditiis tenetur amet corrupti id perferendis quos nisi est ducimus magnam voluptates repellat delectus!</p>
+    <div>
+        <input type="search" name="" id="" placeholder="Search...">
+        
+    </div>
     <div id="search-container">
         <div v-if="enabledPrezs.includes('CatPrez')" class="search-type">
             <h2>Catalogue Search</h2>
-            <form action="">
-                <div class="search-form">
-                    <input type="text" name="" id="" placeholder="Enter search term...">
-                    <button class="btn" type="submit">Search</button>
-                </div>
-            </form>
+            <CatPrezSearch />
         </div>
         <div v-if="enabledPrezs.includes('SpacePrez')" class="search-type">
             <h2>Feature Search</h2>
-            <form action="">
-                <div class="search-form">
-                    <input type="text" name="" id="" placeholder="Enter search term...">
-                    <input type="text" name="" id="" placeholder="Enter search term...">
-                    <select name="" id="" multiple>
-                        <option value="">Something</option>
-                    </select>
-                    <select name="" id="" multiple>
-                        <option value="">Something</option>
-                    </select>
-                    <textarea name="" id="" cols="30" rows="10"></textarea>
-                    <button class="btn" type="submit">Search</button>
-                </div>
-            </form>
+            <SpacePrezSearch />
         </div>
         <div v-if="enabledPrezs.includes('VocPrez')" class="search-type">
             <h2>Concept Search</h2>
-            <form action="">
-                <div class="search-form">
-                    <input type="text" name="" id="" placeholder="Enter search term...">
-                    <select name="" id="" multiple>
-                        <option value="">Something</option>
-                    </select>
-                    <button class="btn" type="submit">Search</button>
-                </div>
-            </form>
+            <VocPrezSearch />
         </div>
     </div>
 </template>
@@ -67,16 +49,6 @@ onMounted(() => {
 
     .search-type {
         flex: 1;
-
-        .search-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-
-            button[type="submit"] {
-                align-self: flex-start;
-            }
-        }
     }
 }
 </style>

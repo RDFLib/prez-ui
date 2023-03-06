@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { inject, computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
+import { configKey, defaultConfig } from "@/types";
 
 const routes: {[key: string]: any[]} = {
     "VocPrez": [
@@ -58,7 +59,7 @@ const routes: {[key: string]: any[]} = {
 const route = useRoute();
 
 const enabledPrezs = computed<string[]>(() => {
-    const config = inject<any>("config");
+    const config = inject(configKey, defaultConfig);
     return config.enabledPrezs.sort((a: string, b: string) => a.localeCompare(b));
 });
 
@@ -67,7 +68,7 @@ const activePrez = computed(() => {
 });
 
 const collapse = ref(false);
-const dropdowns = ref(enabledPrezs.value.reduce((obj: Partial<{[key: string]: boolean}>, prez) => (obj[prez] = prez === activePrez.value, obj), {}));
+const dropdowns = ref(enabledPrezs.value.reduce<{[key: string]: boolean}>((obj, prez) => (obj[prez] = prez === activePrez.value, obj), {}));
 
 watch(() => route.path, (newValue) => {
     Object.keys(dropdowns.value).forEach(prez => dropdowns.value[prez] = prez === activePrez.value);
@@ -140,7 +141,8 @@ nav#main-nav {
 
     &.sidenav {
         flex-direction: column;
-        min-width: 200px;
+        width: 240px;
+        flex-shrink: 0;
     }
 
     &:not(.sidenav) {

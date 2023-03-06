@@ -5,17 +5,18 @@ import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
+import { configKey, defaultConfig, type Profile } from "@/types";
 import MainNav from "@/components/navs/MainNav.vue";
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
 import RightSideBar from "@/components/navs/RightSideBar.vue";
 import AltView from "@/views/AltView.vue";
+import packageJson from "../package.json";
 
 const { namedNode } = DataFactory;
 
-const version = __APP_VERSION__;
+const version = JSON.stringify(packageJson.version);
 
-const sidenav = inject("config").sidenav;
-const apiBaseUrl = inject("config").apiBaseUrl;
+const { sidenav, apiBaseUrl } = inject(configKey, defaultConfig);
 const route = useRoute();
 const ui = useUiStore();
 
@@ -30,10 +31,10 @@ onMounted(() => {
         profDoRequest(`${apiBaseUrl}/s/profiles`, () => {
             parseIntoStore(profData.value);
 
-            let profs = [];
+            let profs: Profile[] = [];
 
             store.value.forSubjects(subject => {
-                let p = {
+                let p: Profile = {
                     namespace: subject.id,
                     token: "",
                     title: "",
@@ -53,12 +54,12 @@ onMounted(() => {
                     } else if (q.predicate.value === qname("altr-ext:hasDefaultResourceFormat")) {
                         p.defaultMediatype = q.object.value;
                     }
-                }, subject, null, null);
+                }, subject, null, null, null);
                 // const sortedMediatypes = p.mediatypes.sort((a, b) => b === p.defaultMediatype - a === p.defaultMediatype);
                 profs.push(p);
-            }, namedNode(qname("a")), namedNode(qname("prof:Profile")));
+            }, namedNode(qname("a")), namedNode(qname("prof:Profile")), null);
 
-            ui.profiles = profs.reduce((obj, prof) => (obj[prof.token] = prof, obj), {}); // {"dcat": {...}, "vocpub": {...}, ...}
+            ui.profiles = profs.reduce<{[token: string]: Profile}>((obj, prof) => (obj[prof.token] = prof, obj), {}); // {"dcat": {...}, "vocpub": {...}, ...}
         });
     }
 });
@@ -85,7 +86,7 @@ onMounted(() => {
                     </Transition>
                 </RouterView>
                 <Transition name="fade">
-                    <RightSideBar v-show="ui.rightNavConfig.enabled" :profiles="ui.rightNavConfig.profiles" :currentUrl="ui.rightNavConfig.currentUrl" />
+                    <RightSideBar v-show="ui.rightNavConfig.enabled" :profiles="ui.rightNavConfig.profiles || []" :currentUrl="ui.rightNavConfig.currentUrl || ''" />
                 </Transition>
             </div>
         </div>
@@ -149,11 +150,12 @@ main {
             flex-grow: 1;
             display: flex;
             flex-direction: row;
+            padding: $contentPadding;
+            gap: $contentPadding;
 
             #content-body {
                 display: flex;
                 flex-direction: column;
-                padding: $contentPadding;
                 flex-grow: 1;
             }
         }

@@ -1,23 +1,14 @@
-import { ref, watch, onMounted } from "vue";
+import { ref, watch } from "vue";
 import { defineStore } from "pinia";
-
-interface Breadcrumb {
-    name: string,
-    url: string
-};
-
-interface ProfileObject {
-    token: string;
-    title: string;
-    defaultMediatype: string;
-    mediatypes: string[];
-    namespace: string;
-    description: string;
-};
+import type { Profile, Breadcrumb, ProfileHeader } from "@/types";
 
 export const useUiStore = defineStore("ui", () => {
     // state
-    const rightNavConfig = ref({
+    const rightNavConfig = ref<{
+        enabled: boolean;
+        profiles?: ProfileHeader[];
+        currentUrl?: string;
+    }>({
         enabled: true,
         profiles: [],
         currentUrl: ""
@@ -28,7 +19,7 @@ export const useUiStore = defineStore("ui", () => {
         url: "/"
     });
     const breadcrumbs = ref<Breadcrumb[]>([]);
-    const profiles = ref<{[token: string]: ProfileObject}>({} as {[token: string]: ProfileObject});
+    const profiles = ref<{[token: string]: Profile}>({});
     const apiVersion = ref("");
 
     // getters

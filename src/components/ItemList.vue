@@ -1,26 +1,19 @@
 <script lang="ts" setup>
 import { RouterLink } from "vue-router";
+import type { ListItem } from "@/types";
 
-export interface ListItem {
-    title: string;
-    link: string;
-    description?: string;
-};
-
-export interface Props {
+const props = defineProps<{
     items: ListItem[];
     childName?: string;
     childLink?: string;
-};
-
-const props = defineProps<Props>();
+}>();
 </script>
 
 <template>
     <div class="list">
         <RouterLink class="list-item" v-for="item in props.items" :to="!!item.link ? item.link : ''">
             <div class="list-item-left">
-                <h4 class="list-item-title">{{ item.title }}</h4>
+                <h4 class="list-item-title">{{ item.title || item.iri }}</h4>
                 <div v-if="!!item.description" class="list-item-desc">{{ item.description }}</div>
             </div>
             <RouterLink v-if="props.childLink" @click.stop :to="item.link + props.childLink" class="btn outline sm child-btn">{{ props.childName }}</RouterLink>

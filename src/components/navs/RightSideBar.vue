@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import AltNav from "@/components/navs/AltNav.vue";
+import type { ProfileHeader } from "@/types";
 
 const props = defineProps<{
-    profiles: any[];
+    profiles: ProfileHeader[];
     currentUrl: string;
 }>();
 </script>
@@ -20,11 +21,10 @@ const props = defineProps<{
 @import "@/assets/sass/_transitions.scss";
 
 #right-nav {
-    min-width: 260px;
-    max-width: 320px;
+    width: 260px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    padding: 16px;
     gap: 16px;
 }
 </style>

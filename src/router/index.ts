@@ -1,11 +1,11 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import pinia from "@/stores/pinia";
 import { useUiStore } from "@/stores/ui";
 
 const ui = useUiStore(pinia);
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHashHistory(import.meta.env.BASE_URL),
     routes: [
         {
             path: "/",
@@ -153,6 +153,11 @@ const router = createRouter({
             component: () => import("@/views/ProfilesView.vue")
         },
         {
+            path: "/profiles/:profileId",
+            name: "profile",
+            component: () => import("@/views/ProfileView.vue"),
+        },
+        {
             path: "/object",
             name: "object",
             component: () => import("@/views/ObjectView.vue")
@@ -176,7 +181,7 @@ const router = createRouter({
 });
 
 router.beforeEach(() => {
-    ui.rightNavConfig = { enabled: true, profiles: [], currentUrl: "" };
+    ui.rightNavConfig = { enabled: false, profiles: [], currentUrl: "" };
     // if (to.query && to.query._profile === "alt" && to.name !== "alternate profiles") {
     //     next({ name: "alternate profiles", params: { path: to.path.slice(1) }, query: { _profile: "alt" } });
     // } else {

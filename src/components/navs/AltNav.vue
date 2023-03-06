@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
+import type { ProfileHeader } from "@/types";
 
-const mediatypeNames = {
+const mediatypeNames: {[key: string]: string} = {
     "text/html": "HTML",
     "application/json": "JSON",
     "application/ld+json": "JSON-LD",
@@ -13,12 +14,12 @@ const mediatypeNames = {
 };
 
 const props = defineProps<{
-    profiles: any[];
+    profiles: ProfileHeader[];
     currentUrl: string;
 }>();
 
 const orderedProfiles = computed(() => {
-    return !!props.profiles ? props.profiles.sort((a, b) => b.default - a.default) : [];
+    return !!props.profiles ? props.profiles.sort((a, b) => Number(b.default) - Number(a.default)) : [];
 });
 </script>
 

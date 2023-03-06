@@ -1,16 +1,18 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
+import { Literal, NamedNode } from "n3";
+import type { AnnotatedPredicate, AnnotatedQuad, RowPred } from "@/types";
 import PropRow from "@/components/PropRow.vue";
 
-const props = defineProps({
-    properties: Array,
-    prefixes: Object,
-    hiddenPreds: Array
-});
+const props = defineProps<{
+    properties: AnnotatedQuad[];
+    prefixes: {[token: string]: string};
+    hiddenPreds: string[];
+}>();
 
-const rows = ref({});
+const rows = ref<{[uri: string]: RowPred}>({});
 
-function getNamedNodeQname(n) {
+function getNamedNodeQname(n: NamedNode | AnnotatedPredicate): string {
     let qname = "";
     Object.entries(props.prefixes).forEach(([prefix, prefixIri]) => {
         if (n.value.startsWith(prefixIri)) {
@@ -20,7 +22,7 @@ function getNamedNodeQname(n) {
     return qname;
 }
 
-function qname(s) {
+function qname(s: string): string {
     if (s === "a") { // special handling for "a" as rdf:type
         return props.prefixes.rdf + "type";
     } else {
@@ -29,19 +31,19 @@ function qname(s) {
     }
 }
 
-function getAnnotation(predicate, annotationPred) {
-    const annotationQuad = predicate.annotations.find(annotation => annotation.predicate.value === qname(annotationPred));
-    if (annotationQuad) {
-        return annotationQuad.object.value;
-    } else {
-        return null;
-    }
+function getAnnotation(predicate: AnnotatedPredicate, annotationPred: string): string | undefined {
+    return predicate.annotations.find(annotation => annotation.predicate.value === qname(annotationPred))?.object.value;
+    // if (annotationQuad) {
+    //     return annotationQuad.object.value;
+    // } else {
+    //     return undefined;
+    // }
 }
 
 onMounted(() => {
     props.properties.filter(p => !props.hiddenPreds.includes(p.predicate.value)).forEach(p => {
         rows.value[p.predicate.value] ??= {
-            iri: p.predicate.id,
+            iri: p.predicate.value,
             objs: [],
             qname: getNamedNodeQname(p.predicate),
             label: getAnnotation(p.predicate, "rdfs:label"),
@@ -51,12 +53,12 @@ onMounted(() => {
         };
         rows.value[p.predicate.value].objs.push({
             value: p.object.value,
-            qname: getNamedNodeQname(p.object),
-            datatype: p.object.datatype ? { value: p.object.datatype.value, qname: getNamedNodeQname(p.object.datatype) } : null,
-            language: p.object.language,
-            description: null,
+            qname: p.object instanceof NamedNode ? getNamedNodeQname(p.object) : undefined,
+            datatype: p.object instanceof Literal ? { value: p.object.datatype.value, qname: getNamedNodeQname(p.object.datatype) } : undefined,
+            language: p.object instanceof Literal ? p.object.language : undefined,
+            description: undefined,
             termType: p.object.termType,
-            label: null,
+            label: undefined,
             rows: []
         });
     });
@@ -85,6 +87,7 @@ table {
 
         th {
             text-align: left;
+            vertical-align: top;
         }
     }
 

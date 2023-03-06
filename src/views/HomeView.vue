@@ -2,10 +2,11 @@
 import { inject, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { useUiStore } from "@/stores/ui";
+import { configKey, defaultConfig } from "@/types";
 
 const ui = useUiStore();
 
-const enabledPrezs = inject("config").enabledPrezs;
+const { enabledPrezs } = inject(configKey, defaultConfig);
 
 onMounted(() => {
     ui.rightNavConfig = { enabled: false };
