@@ -68,8 +68,7 @@ const sparqlEndpoint = computed(() => {
     } else if (selectedEndpoint.value === "vocprez") {
         return apiBaseUrl + "/v/sparql";
     } else {
-        return "https://dbpedia.org/sparql"; // temporary until API /sparql endpoints are fixed (also no top-level /sparql endpoint seems to exist)
-        // return apiBaseUrl + "/sparql";
+        return apiBaseUrl + "/sparql";
     }
 });
 

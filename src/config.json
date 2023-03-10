@@ -1,5 +1,5 @@
 {
     "enabledPrezs": ["VocPrez", "SpacePrez", "CatPrez"],
     "sidenav": true,
-    "apiBaseUrl": "https://d26ymx92nuuei.cloudfront.net"
+    "apiBaseUrl": "http://localhost:8000"
 }

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted } from "vue";
 import { useUiStore } from "@/stores/ui";
-import CatPrezSearch from "@/components/CatPrezSearch.vue";
+import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 
 const ui = useUiStore();
 
@@ -16,7 +16,7 @@ onMounted(() => {
 <template>
     <h1>CatPrez Home</h1>
     <p>Welcome to CatPrez</p>
-    <CatPrezSearch />
+    <AdvancedSearch flavour="catprez" fullPage />
 </template>
 
 <style lang="scss" scoped>

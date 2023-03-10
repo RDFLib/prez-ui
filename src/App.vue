@@ -10,6 +10,7 @@ import MainNav from "@/components/navs/MainNav.vue";
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
 import RightSideBar from "@/components/navs/RightSideBar.vue";
 import AltView from "@/views/AltView.vue";
+import GlobalSearch from "@/components/search/GlobalSearch.vue";
 import packageJson from "../package.json";
 
 const { namedNode } = DataFactory;
@@ -71,7 +72,11 @@ onMounted(() => {
             <div id="header-html">
                 <RouterLink id="page-heading" :to="ui.pageHeading.url"><h1>{{ ui.pageHeading.name }}</h1></RouterLink>
             </div>
-            <Breadcrumbs />
+            <div id="header-bottom">
+                <Breadcrumbs />
+                <GlobalSearch v-if="route.path !== '/search'" />
+                <div></div>
+            </div>
         </div>
     </header>
     <main>
@@ -126,6 +131,12 @@ header {
                 color: $headerColor;
                 margin: auto;
             }
+        }
+
+        #header-bottom {
+            display: grid;
+            grid-template-columns:  1fr 1fr 1fr  ;
+            gap: 20px;
         }
     }
 }

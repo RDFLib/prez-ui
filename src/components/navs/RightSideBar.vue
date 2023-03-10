@@ -1,19 +1,30 @@
 <script lang="ts" setup>
-import AltNav from "@/components/navs/AltNav.vue";
+import { computed, ref } from "vue";
 import type { ProfileHeader } from "@/types";
+import AltNav from "@/components/navs/AltNav.vue";
 
 const props = defineProps<{
     profiles: ProfileHeader[];
     currentUrl: string;
 }>();
+
+const teleportRef = ref<HTMLElement | null>(null);
+const teleportChildren = computed(() => {
+    if (teleportRef.value) {
+        return teleportRef.value.children.length;
+    } else {
+        return 0;
+    }
+});
 </script>
 
 <template>
     <div id="right-nav">
+        <div id="right-bar-content" ref="teleportRef"></div>
+        <hr v-if="(props.profiles && props.profiles.length > 0) && teleportChildren > 0"/>
         <Transition name="fade">
             <AltNav v-show="!!props.profiles && props.profiles.length > 0" :profiles="props.profiles" :currentUrl="props.currentUrl" />
         </Transition>
-        <div>Optional other content</div>
     </div>
 </template>
 
@@ -25,6 +36,12 @@ const props = defineProps<{
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
+}
+
+hr {
+    width: 80%;
+    border: none;
+    border-top: 1px solid #e4e4e4;
 }
 </style>

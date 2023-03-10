@@ -18,6 +18,29 @@ h1, h2, h3, h4, h5, h6 {
     font-family: $headerFont;
 }
 
+h1.page-title {
+    margin-top: 0;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    small {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+
+        &.iri {
+            font-size: 0.5em;
+        }
+
+        &.type {
+            font-size: 0.4em;
+        }
+    }
+}
+
 a {
     color: $linkColor;
     text-decoration: none;
@@ -60,7 +83,7 @@ a {
     color: white;
     border-radius: $borderRadius;
     font-size: 0.8rem;  
-    float:right;
+    // float:right;
 
     &.outline {
         border: 1px solid $secondary;

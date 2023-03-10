@@ -59,6 +59,7 @@ export interface ListItem {
     title?: string;
     description?: string;
     link?: string;
+    type?: string;
 };
 
 export interface AnnotatedPredicate {

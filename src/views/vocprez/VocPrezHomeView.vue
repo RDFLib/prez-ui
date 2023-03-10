@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted } from "vue";
 import { useUiStore } from "@/stores/ui";
-import VocPrezSearch from "@/components/VocPrezSearch.vue";
+import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 
 const ui = useUiStore();
 
@@ -16,7 +16,7 @@ onMounted(() => {
 <template>
     <h1>VocPrez Home</h1>
     <p>Welcome to VocPrez</p>
-    <VocPrezSearch />
+    <AdvancedSearch flavour="vocprez" fullPage />
 </template>
 
 <style lang="scss" scoped>

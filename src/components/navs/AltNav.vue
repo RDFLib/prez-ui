@@ -56,7 +56,7 @@ const orderedProfiles = computed(() => {
 
 h4 {
     font-size: 1.1rem;
-    margin: 0.6em 0;
+    margin: 0;
 }
 
 p {

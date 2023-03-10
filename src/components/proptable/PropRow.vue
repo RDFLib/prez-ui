@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import PredCell from "@/components/PredCell.vue";
-import ObjCell from "@/components/ObjCell.vue";
+import PredCell from "@/components/proptable/PredCell.vue";
+import ObjCell from "@/components/proptable/ObjCell.vue";
 import type { RowPred } from "@/types";
 
 const props = defineProps<RowPred>();
