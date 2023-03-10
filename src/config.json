@@ -1,5 +1,16 @@
 {
     "enabledPrezs": ["VocPrez", "SpacePrez", "CatPrez"],
     "sidenav": true,
-    "apiBaseUrl": "https://d26ymx92nuuei.cloudfront.net"
+    "apiBaseUrl": "https://d26ymx92nuuei.cloudfront.net",
+    "mapSettings": {
+        "apiKey": "AIzaSyDIaoFyutbNuJ85eXOmUb0xXqfY75wptMI",
+        "options": {
+            "center": {
+                "lat": -28.8908,
+                "lng": 132.3757
+            },
+            "streetViewControl": false,
+            "zoom": 4
+        }
+    }
 }

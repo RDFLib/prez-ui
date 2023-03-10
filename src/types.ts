@@ -1,16 +1,42 @@
 import type { InjectionKey } from "vue";
 import type { Quad } from "n3";
 
+export interface MapOptions {
+    center: {
+        lat: number;
+        lng: number;
+    };
+    streetViewController: boolean;
+    zoom: number;
+}
+
+export interface MapSettings {
+    apiKey: string;
+    options: MapOptions;
+}
+
 export interface PrezConfig {
     enabledPrezs: string[];
     sidenav: boolean;
     apiBaseUrl: string;
+    mapSettings: MapSettings; 
 };
 
 export const defaultConfig: PrezConfig = {
     enabledPrezs: ["VocPrez", "SpacePrez", "CatPrez"],
     sidenav: true,
-    apiBaseUrl: "http://localhost:8000"
+    apiBaseUrl: "http://localhost:8000",
+    mapSettings: {
+        apiKey: "",
+        options: {
+            center: {
+                lat: 0,
+                lng: 0
+            },
+            streetViewController: false,
+            zoom: 1
+        }
+    }
 };
 
 export const configKey: InjectionKey<PrezConfig> = Symbol();

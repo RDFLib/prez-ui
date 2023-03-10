@@ -12,9 +12,11 @@
         "deploy": "az storage blob upload-batch --account-name devprezfrontendidn --source ./dist --destination '$web' --overwrite"
     },
     "dependencies": {
+        "@fawmi/vue-google-maps": "^0.9.79",
         "@triply/yasqe": "^4.2.27",
         "@triply/yasr": "^4.2.27",
         "@types/n3": "^1.10.4",
+        "axios": "^1.3.4",
         "n3": "^1.16.2",
         "pinia": "^2.0.26",
         "vue": "^3.2.45",
