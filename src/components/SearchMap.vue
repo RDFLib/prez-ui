@@ -40,7 +40,7 @@ watch(mapRef, googleMap => {
                     ]
                 },
                 markerOptions: {
-                    icon: 'icons/blue-dot.png'
+                    icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
                 },
                 rectangleOptions: shapeOptions
             });
@@ -124,7 +124,7 @@ watch(mapRef, googleMap => {
 </script>
 
 <template>
-    <div>{{ shape.value }}</div>
+    <div>SELECTED SHAPE: {{ shape.value }}</div>
     <GMapMap
         ref="mapRef"
         :center="mapSettings.options.center" 

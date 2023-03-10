@@ -1,50 +1,50 @@
-//https://d26ymx92nuuei.cloudfront.net/s/sparql?query=PREFIX%20geo%3A%20%3Chttp%3A%2F%2Fwww.opengis.net%2Font%2Fgeosparql%23%3E%0APREFIX%20dcat%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2Fns%2Fdcat%23%3E%0APREFIX%20dcterms%3A%20%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%3E%0APREFIX%20rdf%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0APREFIX%20rdfs%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0APREFIX%20prez%3A%20%3Chttps%3A%2F%2Fprez.dev%2F%3E%0A%0ACONSTRUCT%20{%20%3Ffc_or_ds%20a%20%3Fclass%20%3B%0A%20%20%20%20dcterms%3Atitle%20%3Flabel%20%0A}%0AWHERE%20{%3Ffc_or_ds%20a%20%3Fclass%20%3B%0A%20%20%20%20dcterms%3Atitle%20%3Flabel%20.%0A%20%20VALUES%20%3Fclass%20{geo%3AFeatureCollection%20dcat%3ADataset}%0A}
-
-//const url = 'https://d26ymx92nuuei.cloudfront.net/s/sparql?query=PREFIX%20geo%3A%20%3Chttp%3A%2F%2Fwww.opengis.net%2Font%2Fgeosparql%23%3E%0APREFIX%20dcat%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2Fns%2Fdcat%23%3E%0APREFIX%20dcterms%3A%20%3Chttp%3A%2F%2Fpurl.org%2Fdc%2Fterms%2F%3E%0APREFIX%20rdf%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0APREFIX%20rdfs%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0APREFIX%20prez%3A%20%3Chttps%3A%2F%2Fprez.dev%2F%3E%0A%0ACONSTRUCT%20{%20%3Ffc_or_ds%20a%20%3Fclass%20%3B%0A%20%20%20%20dcterms%3Atitle%20%3Flabel%20%0A}%0AWHERE%20{%3Ffc_or_ds%20a%20%3Fclass%20%3B%0A%20%20%20%20dcterms%3Atitle%20%3Flabel%20.%0A%20%20VALUES%20%3Fclass%20{geo%3AFeatureCollection%20dcat%3ADataset}%0A}'
-
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { configKey, defaultConfig } from '@/types'
 import { inject } from 'vue';
-import { Store, Parser, Quad, NamedNode, DataFactory } from "n3";
+import { Util, Literal, Store, Parser, DataFactory, type Term } from "n3";
 const { namedNode, literal } = DataFactory;
+
+
+
+export type MatchFilter = {
+    subject?: Term | null,
+    object?: Term | null,
+    predicate?: Term | null
+}
+
+export const matchDatasets:MatchFilter = {object: namedNode('http://www.w3.org/ns/dcat#Dataset')}
+export const matchFeatureCollections:MatchFilter = {predicate: namedNode('http://purl.org/dc/terms/title')}
 
 export const queryStore = defineStore({
   id: 'queryStore',
   state: () => ({
     apiBaseUrl: inject(configKey, defaultConfig).apiBaseUrl,
-    data: [],
+    data: {},
     store: new Store(),
     loading: false,
     error: null
   }),
   actions: {
 
+    // filter out only the triples we need, and simplify the result data array
+    matchData(filter:MatchFilter) {
+        const data = []
+
+        const { subject=null, predicate=null, object=null } = filter
+        for (const triple of this.store.match(subject, predicate, object)) {
+            data.push({subject: triple.subject.id, predicate: triple.predicate.id, object: Util.isLiteral(triple.object) ? triple.object.value : triple.object.id})
+        }
+        return data
+    },
+
     async fetchData(apiUrl, query:string) {
       try {
         const parser = new Parser();
         this.loading = true
-        const response = await axios.get(apiUrl, {
-            params: {
-                query
-            }
-        })
-        const pdata = parser.parse(response.data)
-        this.data = pdata.map(quad=>{
-            return {
-                subject: quad.subject.value, type: quad.object.value
-            }
-        })
-        this.store = new Store(pdata)
-        
-        for (const quad of this.store.match(namedNode('http://purl.org/dc/terms/title'), null, null))
-        console.log(quad);
-        
-        
-        console.log("QUAD", this.data)
-        //this.store.match()
-        console.log("STORE", this.store)
-        //this.store.getSubjects(NamedNode(qname("a")), namedNode(qname("rdf:bag")), null)[0];
+        const response = await axios.get(apiUrl, { params: { query }})
+        this.data = parser.parse(response.data)
+        this.store = new Store(this.data)
         this.error = null
       } catch (error) {
         this.error = error.message

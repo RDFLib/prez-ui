@@ -1,25 +1,32 @@
 <script lang="ts" setup>
 import SearchMap from "@/components/SearchMap.vue";
-import { queryStore } from "@/stores/query";
-import { QUERY_DATASETS } from '@/queries'
+import { queryStore, matchDatasets, matchFeatureCollections } from "@/stores/query";
+import { QUERY_DATASETS, QUERY_DATASETS_FC } from '@/QUERIES'
 import { configKey, defaultConfig } from '@/types'
-import { inject } from "vue";
+import { inject, onMounted } from "vue";
+
 const { apiBaseUrl } = inject(configKey, defaultConfig);
 
 const data = queryStore()
 
-const fetchData = () => {
-  data.fetchData(`${apiBaseUrl}/s/sparql`, QUERY_DATASETS)
+const fetchData = async () => {
+  await data.fetchData(`${apiBaseUrl}/s/sparql`, QUERY_DATASETS_FC)
 }
+
+onMounted(async ()=>{
+    await fetchData()
+})
 
 </script>
 
 <template>
     <div>
-        <button @click="fetchData">Fetch Data</button>
         <div v-if="data.loading">Loading...</div>
         <div v-else-if="data.error">{{ data.error }}</div>
-        <div v-else>xx{{ JSON.stringify(data.data) }}</div>
+        <div v-else>
+            <b>Datasets:</b> <ul><li v-for="item of data.matchData(matchDatasets)">{{  item.subject }}</li></ul>
+            <b>Feature Collections:</b> <ul><li v-for="item of data.matchData(matchFeatureCollections)">{{  item.object }}</li></ul>
+        </div>
     </div>
     <SearchMap />
     <form action="">
