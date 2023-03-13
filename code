@@ -1,0 +1,6 @@
+<VirtualHost *:88>
+   ServerName d26ymx92nuuei.cloudfront.net
+
+   ProxyPass / https://d26ymx92nuuei.cloudfront.net/
+   ProxyPassReverse / https://d26ymx92nuuei.cloudfront.net/
+</VirtualHost>

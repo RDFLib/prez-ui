@@ -11,6 +11,7 @@ import "@/assets/sass/main.scss";
 
 const app = createApp(App);
 
+
 app.provide(configKey, config);
 app.use(pinia);
 app.use(router);
@@ -20,5 +21,6 @@ app.use(VueGoogleMaps, {
         libraries: "drawing"
     },
 })
+
 
 app.mount("#app");

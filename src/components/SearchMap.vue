@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 
-import { inject, reactive, ref, watch } from 'vue'
+import { inject, reactive, ref, defineEmits, watch } from 'vue'
 import { configKey, defaultConfig } from "@/types";
+
+const emits = defineEmits(['selectionUpdated'])
 
 const { mapSettings } = inject(configKey, defaultConfig);
 
 const mapRef = ref()
-
 
 const shape = reactive({
   value: {}
@@ -47,6 +48,7 @@ watch(mapRef, googleMap => {
             drawingManager.setMap(map);
 
             const clearShapes = () => {
+                emits("selectionUpdated", [])
                 if(lastPoint) {
                     lastPoint.setMap(null)
                 }
@@ -76,6 +78,7 @@ watch(mapRef, googleMap => {
             map.controls[google.maps.ControlPosition.TOP_CENTER].push(clearBtnMenu);
 
             let pointToWKT = (coord) => {
+                emits("selectionUpdated", [coord]);
                 return `POINT (${coord[0]} ${coord[1]})`;
             }
             let onPointDraw = (pnt) => {
@@ -96,6 +99,7 @@ watch(mapRef, googleMap => {
                 wkt = wkt.slice(0, -2); // removes last ", "
 
                 wkt += "))";
+                emits("selectionUpdated", coords);
 
                 return wkt;
             }
@@ -121,10 +125,11 @@ watch(mapRef, googleMap => {
         })
       }
 });
+
 </script>
 
 <template>
-    <div>SELECTED SHAPE: {{ shape.value }}</div>
+    <!-- <div>SELECTED SHAPE: {{ shape.value }}</div> -->
     <GMapMap
         ref="mapRef"
         :center="mapSettings.options.center" 
