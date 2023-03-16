@@ -9,7 +9,7 @@ import VocPrezSearch from "@/components/search/VocPrezSearch.vue";
 const { enabledPrezs } = inject(configKey, defaultConfig);
 
 const props = withDefaults(defineProps<{
-    flavour?: "catprez" | "spaceprez" | "vocprez";
+    flavour?: "CatPrez" | "SpacePrez" | "VocPrez";
     query?: {[key: string]: string};
     fullPage?: boolean;
 }>(), {
@@ -63,22 +63,22 @@ function clearSearch() {
             <div class="search-below">
                 <select v-if="!props.flavour" name="searchType" id="" class="search-type" v-model="searchType">
                     <option value="all">All</option>
-                    <option v-if="enabledPrezs.includes('CatPrez')" value="catprez">CatPrez</option>
-                    <option v-if="enabledPrezs.includes('SpacePrez')" value="spaceprez">SpacePrez</option>
-                    <option v-if="enabledPrezs.includes('VocPrez')" value="vocprez">VocPrez</option>
+                    <option v-if="enabledPrezs.includes('CatPrez')" value="CatPrez">CatPrez</option>
+                    <option v-if="enabledPrezs.includes('SpacePrez')" value="SpacePrez">SpacePrez</option>
+                    <option v-if="enabledPrezs.includes('VocPrez')" value="VocPrez">VocPrez</option>
                 </select>
                 <button v-if="searchType !== 'all'" type="button" class="collapse-btn" @click.prevent="expanded = !expanded">
                     <template v-if="expanded">Collapse <i class="fa-regular fa-chevron-up"></i></template>
                     <template v-else>Expand <i class="fa-regular fa-chevron-down"></i></template>
                 </button>
             </div>
-            <div v-show="searchType === 'catprez' && expanded">
+            <div v-show="searchType === 'CatPrez' && expanded">
                 <CatPrezSearch @updateOptions="searchOptions = $event" :defaultSelected="props.query?.catalog" />
             </div>
-            <div v-show="searchType === 'spaceprez' && expanded">
+            <div v-show="searchType === 'SpacePrez' && expanded">
                 <SpacePrezSearch @updateOptions="searchOptions = $event" :defaultSelected="{dataset: props.query?.dataset, collection: props.query?.collection}" />
             </div>
-            <div v-show="searchType === 'vocprez' && expanded">
+            <div v-show="searchType === 'VocPrez' && expanded">
                 <VocPrezSearch @updateOptions="searchOptions = $event" :defaultSelected="props.query?.vocab" />
             </div>
             <button v-if="expanded" type="submit" class="btn submit-btn">Search <i class="fa-regular fa-magnifying-glass"></i></button>

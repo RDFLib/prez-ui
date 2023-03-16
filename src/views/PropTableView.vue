@@ -18,17 +18,22 @@ const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qname } = useRdfStore();
 const { data, profiles, loading, error, doRequest } = useGetRequest();
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     type: string;
-    getChildren?: boolean;
-    childPred?: string; // soon replaced with default profile hasLabelPredicate?
-    childTitlePred?: string; // soon replaced with default profile hasLabelPredicate?
-    childDisplayTitle?: string; // for display in table th
+    getChildren: boolean;
+    childPred: string; // soon replaced with default profile hasLabelPredicate?
+    childTitlePred: string; // soon replaced with default profile hasLabelPredicate?
+    childDisplayTitle: string; // for display in table th
     childButton?: { name: string, url: string }; // undefined or link to children (/collections or /items)
     titlePred: string; // soon replaced with default profile hasLabelPredicate
     descPred: string; // soon replaced with default profile hasLabelPredicate
     enableSearch?: boolean;
-}>();
+}>(), {
+    getChildren: false,
+    childPred: "",
+    childTitlePred: "",
+    childDisplayTitle: "Members"
+});
 
 const hiddenPreds = [
     qname("a"),
@@ -226,7 +231,7 @@ onMounted(() => {
         parseIntoStore(data.value);
         getProperties();
         
-        if (props.getChildren && props.childTitlePred && props.childPred) {
+        if (props.getChildren) {
             getChildren();
         }
 
@@ -288,7 +293,7 @@ onMounted(() => {
     <template v-else-if="loading">loading...</template>
     <template v-else-if="error">Network error: {{ error }}</template>
     <Teleport v-if="props.enableSearch" to="#right-bar-content">
-        <AdvancedSearch :flavour="flavour ? flavour.toLowerCase() : undefined" :query="getSearchDefaults()" />
+        <AdvancedSearch :flavour="flavour" :query="getSearchDefaults()" />
     </Teleport>
 </template>
 

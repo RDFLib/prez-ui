@@ -16,7 +16,7 @@ onMounted(() => {
 <template>
     <h1>VocPrez Home</h1>
     <p>Welcome to VocPrez</p>
-    <AdvancedSearch flavour="vocprez" fullPage />
+    <AdvancedSearch flavour="VocPrez" fullPage />
 </template>
 
 <style lang="scss" scoped>

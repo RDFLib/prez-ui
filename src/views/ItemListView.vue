@@ -114,7 +114,7 @@ onMounted(() => {
         <template v-else-if="error">Network error: {{ error }}</template>
     </div>
     <Teleport v-if="props.enableSearch" to="#right-bar-content">
-        <AdvancedSearch :flavour="flavour ? flavour.toLowerCase() : undefined" :query="getSearchDefaults()" />
+        <AdvancedSearch :flavour="flavour" :query="getSearchDefaults()" />
     </Teleport>
 </template>
 
