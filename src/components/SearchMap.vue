@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 
-import { inject, reactive, ref, defineEmits, watch } from 'vue'
+import { inject, reactive, ref, defineEmits, watch, type PropType } from 'vue'
 import { configKey, defaultConfig } from "@/types";
+import type { MapOptionsCenter } from '@/types'
 
 const emits = defineEmits(['selectionUpdated'])
 
@@ -12,6 +13,12 @@ const mapRef = ref()
 const shape = reactive({
   value: {}
 });
+
+const props = {
+  center: Object as PropType<MapOptionsCenter>,
+  zoom: Number,
+  streetViewController: Boolean
+}
 
 watch(mapRef, googleMap => {
       if (googleMap) {
@@ -132,9 +139,9 @@ watch(mapRef, googleMap => {
     <!-- <div>SELECTED SHAPE: {{ shape.value }}</div> -->
     <GMapMap
         ref="mapRef"
-        :center="mapSettings.options.center" 
-        :street-view-control="mapSettings.options.streetViewController"
-        :zoom="mapSettings.options.zoom"
+        :center="props.center || mapSettings.options.center" 
+        :street-view-control="props.streetViewController || mapSettings.options.streetViewController"
+        :zoom="props.zoom || mapSettings.options.zoom"
         map-type-id="terrain"
         style="width: 100%; height: 500px" 
     >

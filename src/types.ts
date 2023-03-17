@@ -1,11 +1,13 @@
 import type { InjectionKey } from "vue";
 import type { Quad } from "n3";
 
+export interface MapOptionsCenter {
+    lat: number;
+    lng: number;
+}
+
 export interface MapOptions {
-    center: {
-        lat: number;
-        lng: number;
-    };
+    center: MapOptionsCenter;
     streetViewController: boolean;
     zoom: number;
 }
