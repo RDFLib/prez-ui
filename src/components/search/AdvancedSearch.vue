@@ -1,15 +1,15 @@
 <script lang="ts" setup>
 import { ref, inject, watch } from "vue";
 import router from "@/router";
-import { configKey, defaultConfig } from "@/types";
+import { enabledPrezsConfigKey, type PrezFlavour } from "@/types";
 import CatPrezSearch from "@/components/search/CatPrezSearch.vue";
 import SpacePrezSearch from "@/components/search/SpacePrezSearch.vue";
 import VocPrezSearch from "@/components/search/VocPrezSearch.vue";
 
-const { enabledPrezs } = inject(configKey, defaultConfig);
+const enabledPrezs = inject(enabledPrezsConfigKey) as PrezFlavour[];
 
 const props = withDefaults(defineProps<{
-    flavour?: "CatPrez" | "SpacePrez" | "VocPrez";
+    flavour?: PrezFlavour;
     query?: {[key: string]: string};
     fullPage?: boolean;
 }>(), {

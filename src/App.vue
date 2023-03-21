@@ -5,7 +5,7 @@ import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { configKey, defaultConfig, type Profile } from "@/types";
+import { sidenavConfigKey, apiBaseUrlConfigKey, type Profile } from "@/types";
 import MainNav from "@/components/navs/MainNav.vue";
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
 import RightSideBar from "@/components/navs/RightSideBar.vue";
@@ -15,9 +15,10 @@ import packageJson from "../package.json";
 
 const { namedNode } = DataFactory;
 
-const version = JSON.stringify(packageJson.version);
+const version = packageJson.version;
 
-const { sidenav, apiBaseUrl } = inject(configKey, defaultConfig);
+const sidenav = inject(sidenavConfigKey) as boolean;
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
 

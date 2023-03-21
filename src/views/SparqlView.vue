@@ -4,7 +4,7 @@ import Yasqe from "@triply/yasqe";
 import Yasr from "@triply/yasr";
 import { useUiStore } from "@/stores/ui";
 import sparqlExamples from "@/util/sparqlExamples";
-import { configKey, defaultConfig } from "@/types";
+import { apiBaseUrlConfigKey } from "@/types";
 
 const graphFormats = [
     {
@@ -49,7 +49,7 @@ const selectFormats = [
 ];
 
 const ui = useUiStore();
-const { apiBaseUrl } = inject(configKey, defaultConfig);
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 
 const yasqe = ref<Yasqe | null>(null);
 const yasr = ref<Yasr | null>(null);

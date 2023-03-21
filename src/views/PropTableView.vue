@@ -5,14 +5,14 @@ import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { configKey, defaultConfig, type ListItem, type AnnotatedPredicate, type AnnotatedQuad, type Breadcrumb, type Concept } from "@/types";
+import { apiBaseUrlConfigKey, type ListItem, type AnnotatedPredicate, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour } from "@/types";
 import PropTableNew from "@/components/proptable/PropTableNew.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 
 const { namedNode } = DataFactory;
 
-const { apiBaseUrl } = inject(configKey, defaultConfig);
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qname } = useRdfStore();
@@ -45,7 +45,7 @@ const hiddenPreds = [
     ... props.childPred ? [qname(props.childPred)] : []
 ];
 
-const flavour = computed(() => {
+const flavour = computed<PrezFlavour | undefined>(() => {
     if (route.path.startsWith("/c/")) {
         return "CatPrez";
     } else if (route.path.startsWith("/s/")) {

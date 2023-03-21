@@ -31,5 +31,5 @@ export default defineConfig({
             }
         }
     },
-    // base: process.env.NODE_ENV === "production" ? "/idn-metadata-creator/" : "/",
+    base: process.env.GH_PAGES_DEMO ? "/prez-ui/" : "/",
 });

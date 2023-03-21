@@ -1,19 +1,11 @@
 import type { InjectionKey } from "vue";
 import type { Quad } from "n3";
 
-export interface PrezConfig {
-    enabledPrezs: string[];
-    sidenav: boolean;
-    apiBaseUrl: string;
-};
+export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
 
-export const defaultConfig: PrezConfig = {
-    enabledPrezs: ["VocPrez", "SpacePrez", "CatPrez"],
-    sidenav: true,
-    apiBaseUrl: "http://localhost:8000"
-};
-
-export const configKey: InjectionKey<PrezConfig> = Symbol();
+export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
+export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
+export const apiBaseUrlConfigKey: InjectionKey<string> = Symbol();
 
 export interface Profile {
     namespace: string;

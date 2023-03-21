@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { inject, computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
-import { configKey, defaultConfig } from "@/types";
+import { enabledPrezsConfigKey, type PrezFlavour } from "@/types";
 
 const routes: {[key: string]: any[]} = {
     "VocPrez": [
@@ -59,8 +59,8 @@ const routes: {[key: string]: any[]} = {
 const route = useRoute();
 
 const enabledPrezs = computed<string[]>(() => {
-    const config = inject(configKey, defaultConfig);
-    return config.enabledPrezs.sort((a: string, b: string) => a.localeCompare(b));
+    const enabledPrezsFlavours = inject(enabledPrezsConfigKey) as PrezFlavour[];
+    return enabledPrezsFlavours.sort((a: string, b: string) => a.localeCompare(b));
 });
 
 const activePrez = computed(() => {

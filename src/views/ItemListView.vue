@@ -5,13 +5,13 @@ import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { configKey, defaultConfig, type Breadcrumb, type ListItem } from "@/types";
+import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type PrezFlavour } from "@/types";
 import ItemList from "@/components/ItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 
 const { namedNode } = DataFactory;
 
-const { apiBaseUrl } = inject(configKey, defaultConfig);
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
 const { store, parseIntoStore, qname } = useRdfStore();
@@ -29,7 +29,7 @@ const props = defineProps<{
 
 const items = ref<ListItem[]>([]);
 
-const flavour = computed(() => {
+const flavour = computed<PrezFlavour | undefined>(() => {
     if (route.path.startsWith("/c/")) {
         return "CatPrez";
     } else if (route.path.startsWith("/s/")) {

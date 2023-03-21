@@ -3,7 +3,7 @@ import { onMounted, computed, inject } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { useUiStore } from "@/stores/ui";
 import { useGetRequest } from "@/composables/api";
-import { configKey, defaultConfig } from "@/types";
+import { apiBaseUrlConfigKey } from "@/types";
 
 const mediatypeNames: {[key: string]: string} = {
     "text/html": "HTML",
@@ -17,7 +17,7 @@ const mediatypeNames: {[key: string]: string} = {
 
 const route = useRoute();
 const ui = useUiStore();
-const { apiBaseUrl } = inject(configKey, defaultConfig);
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 
 const { data, profiles, loading, error, doRequest } = useGetRequest();
 

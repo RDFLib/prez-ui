@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import { ref, onMounted, inject, watch } from "vue";
 import { DataFactory } from "n3";
-import { configKey, defaultConfig } from "@/types";
+import { apiBaseUrlConfigKey } from "@/types";
 import { useGetRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 
 const { namedNode } = DataFactory;
 
-const { apiBaseUrl } = inject(configKey, defaultConfig);
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const { data, loading, error, doRequest } = useGetRequest();
 const { store, parseIntoStore, qname } = useRdfStore();
 
