@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-
-import { inject, reactive, ref, defineEmits, watch, type PropType } from 'vue'
+import { wktToGeoJSON } from "@terraformer/wkt"
+import { inject, reactive, ref, defineEmits, defineExpose, watch, type PropType } from 'vue'
 import { configKey, defaultConfig } from "@/types";
 import type { MapOptionsCenter } from '@/types'
+import type { WKTResult } from '@/stores/mapsearch';
+import { ShapeTypes } from "./SearchMap.d";
 
 const emits = defineEmits(['selectionUpdated'])
 
@@ -14,11 +16,31 @@ const shape = reactive({
   value: {}
 });
 
-const props = {
-  center: Object as PropType<MapOptionsCenter>,
-  zoom: Number,
-  streetViewController: Boolean
+const props = defineProps({
+    center: Object as PropType<MapOptionsCenter>,
+    zoom: Number,
+    streetViewController: Boolean,
+    geoWKT: Object as PropType<WKTResult[]>
+})
+
+let drawFunc = null
+const setDrawFunc = (func) => {
+    drawFunc = func
 }
+
+const trigger = (data) => {
+    console.log("DRAW DATA", data)
+    drawFunc(data)
+//    alert("HI")
+}
+
+defineExpose({trigger})
+
+// const xprops = {
+//   center: Object,// as PropType<MapOptionsCenter>,
+//   zoom: Number,
+//   streetViewController: Boolean
+// }
 
 watch(mapRef, googleMap => {
       if (googleMap) {
@@ -32,10 +54,11 @@ watch(mapRef, googleMap => {
             };
             const setShape = (value) => {
                 shape.value = value
-                console.log(shape.value)
+                //console.log(shape.value)
             }
             let lastRectangle = null
             let lastPoint = null
+            var infowindow = new google.maps.InfoWindow();
 
             var drawingManager = new google.maps.drawing.DrawingManager({
                 drawingMode: google.maps.drawing.OverlayType.MARKER,
@@ -44,7 +67,8 @@ watch(mapRef, googleMap => {
                     position: google.maps.ControlPosition.TOP_CENTER,
                     drawingModes: [
                         google.maps.drawing.OverlayType.MARKER,
-                        google.maps.drawing.OverlayType.RECTANGLE
+                        google.maps.drawing.OverlayType.RECTANGLE,
+                        google.maps.drawing.OverlayType.POLYGON
                     ]
                 },
                 markerOptions: {
@@ -53,9 +77,52 @@ watch(mapRef, googleMap => {
                 rectangleOptions: shapeOptions
             });
             drawingManager.setMap(map);
+            let features = []
+
+            const drawResults = (results: WKTResult[]) => {
+                //console.log("TERRA", wktToGeoJSON)
+                // for(var i = 0; i < features.length; i++) {
+                //     map.data.remove(features[i]);
+                // }
+                map.data.forEach(function(feature) {
+                    map.data.remove(feature)
+                })
+                features = []
+                results.forEach(result=>{
+                    try {
+                        const geoJson = wktToGeoJSON(result.wkt.replace('(((', '((').replace(')))', '))'))
+                        const featureGeoJson = {
+                            type: 'Feature',
+                            geometry: geoJson,
+                            properties: {
+                                uri: result.uri,
+                                label: result.label,
+                                id: result.id
+                            }
+                        }
+                        features.push(map.data.addGeoJson(featureGeoJson))
+                        const bounds = new google.maps.LatLngBounds();
+                        map.data.forEach(function (feature) {
+                            feature.getGeometry().forEachLatLng(function (latlng) {
+                                bounds.extend(latlng);
+                            });
+                        });
+                        setShape(result.wkt)
+                        map.fitBounds(bounds);                
+                    } catch (ex) {
+                        console.log(ex.message, 'Unable to process ', result)
+                        //alert(ex.message + " - " + JSON.stringify(result))
+                    }
+                })
+            }
+            setDrawFunc(drawResults)
+
+            if(props.geoWKT) {
+                drawResults(props.geoWKT)
+            }
 
             const clearShapes = () => {
-                emits("selectionUpdated", [])
+                emits("selectionUpdated", [], ShapeTypes.None)
                 if(lastPoint) {
                     lastPoint.setMap(null)
                 }
@@ -85,7 +152,7 @@ watch(mapRef, googleMap => {
             map.controls[google.maps.ControlPosition.TOP_CENTER].push(clearBtnMenu);
 
             let pointToWKT = (coord) => {
-                emits("selectionUpdated", [coord]);
+                emits("selectionUpdated", [coord], ShapeTypes.Point);
                 return `POINT (${coord[0]} ${coord[1]})`;
             }
             let onPointDraw = (pnt) => {
@@ -106,7 +173,6 @@ watch(mapRef, googleMap => {
                 wkt = wkt.slice(0, -2); // removes last ", "
 
                 wkt += "))";
-                emits("selectionUpdated", coords);
 
                 return wkt;
             }
@@ -124,11 +190,43 @@ watch(mapRef, googleMap => {
                 ];
                 let wkt = rectangleToWKT(coords)
                 setShape(wkt)
+                emits("selectionUpdated", coords, ShapeTypes.Rectangle);
+            }
+            const onPolygonDraw = (poly) => {
+                clearShapes()
+                lastRectangle = poly
+                const coordinates = poly.getPath().getArray();
+                const coords = []
+                for (var i = 0; i < coordinates.length; i++) {
+                    coords.push([coordinates[i].lng(), coordinates[i].lat()])
+                }
+                // make sure the polygon is closed
+                if(coords.length > 0) {
+                    coords.push(coords[0])
+                }
+                const wkt = rectangleToWKT(coords)
+                setShape(wkt)
+                emits("selectionUpdated", coords, ShapeTypes.Polygon);
             }
 
+            drawingManager.addListener("", onPointDraw);
             drawingManager.addListener("markercomplete", onPointDraw);
             drawingManager.addListener("rectanglecomplete", onRectangleDraw);
-            
+            drawingManager.addListener("polygoncomplete", onPolygonDraw);
+
+            map.data.addListener('click', function(event) {
+                console.log("CLICK", event)
+                var feat = event.feature;
+                var html = `<b>${feat.getProperty('label')}</b>
+                    <b style="float:right">(${feat.getProperty('id')})</b>
+                    <br>
+                    ${feat.getProperty('uri')}
+                    <br><a class="normal_link" target="_blank" href="${feat.getProperty('uri')}">uri</a>`
+                infowindow.setContent(html);
+                infowindow.setPosition(event.latLng);
+                infowindow.setOptions({pixelOffset: new google.maps.Size(0,-34)});
+                infowindow.open(map);
+            });
         })
       }
 });
@@ -146,4 +244,6 @@ watch(mapRef, googleMap => {
         style="width: 100%; height: 500px" 
     >
     </GMapMap>
+
+
 </template>

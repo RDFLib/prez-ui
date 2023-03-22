@@ -1,26 +1,84 @@
+
 <script lang="ts" setup>
 
-// search map imports
+// the searchable map component and related map type definitions
 import SearchMap from "@/components/SearchMap.vue";
 import { AreaTypes, ShapeTypes, type Coords } from "@/components/SearchMap.d";
 
-// search store imports
+// the pinia search store and related type definitions to manage the returned dataset tree
 import { searchStore } from "@/stores/search";
-import type { SimpleQueryResult, DatasetTree, DatasetTreeNode } from '@/stores/search.d'
+import type { DatasetTree, DatasetTreeNode } from '@/stores/search.d'
+
+// sparql query generation
+import { mapSearchToSparql } from '@/util/helper'
 
 import { ref, onMounted } from "vue";
+
+// a general button group component to render a set of buttons
 import ButtonGroup from "./ButtonGroup.vue";
-import { enumToOptions, simpleQueryResultToOptions } from '../util/helper'
+
+// turn a list of enums into a a set of options for the button group
+import { enumToOptions } from '../util/helper'
+import { mapsearchStore, WKTResult } from "@/stores/mapsearch";
 
 // the search store setup
 const search = searchStore()
-const datasetTree = ref<DatasetTree>([])
-const selectedDatasets:string[] = []
+const mapsearch = mapsearchStore()
+const datasetTreeRef = ref<DatasetTree>([])
+const selectedDatasetsRef = ref<string[]>([])
 const selectedFeaturesRef = ref<string[]>([])
 
-// toggle selected features under a dataset
-const toggleAllFeatures = (datasetNode:DatasetTreeNode, checked:boolean) => {
+// map info refs
+const searchMapRef = ref()
+const shapeTypeRef = ref(ShapeTypes.None)
+const coordsRef = ref<Coords>([])
+const areaTypeRef = ref(AreaTypes.Nearby)
+const radiusRef = ref(5)
+const limitRef = ref(10)
+
+const responseRef = ref<WKTResult[]>()
+
+const geoSearch = async () => {
+    const query = mapSearchToSparql(selectedFeaturesRef.value, coordsRef.value, areaTypeRef.value, radiusRef.value, limitRef.value)
+    responseRef.value = await mapsearch.fetchMapData(query)
+    //console.log("MAP REF = ", searchMapRef.value)
+    searchMapRef.value.trigger(responseRef.value)
+}
+
+/** get the data from the search store  */
+const fetchData = async () => {
+    await search.fetchSpacePrezData()
+    if(search.success) {
+        datasetTreeRef.value = search.getDatasetTree()
+    }
+}
+
+// start off by loading the SPARQL query result data into the search store
+onMounted(async ()=>{
+    await fetchData()
+})
+
+// called when a selection has changed
+const updateSelection = async (selectedCoords:Coords, shapeType:ShapeTypes) => {
+    //shapeTypeRef.value = selectedCoords.length == 0 ? ShapeTypes.None : (selectedCoords.length == 1 ? ShapeTypes.Point : ShapeTypes.Polygon)
+    shapeTypeRef.value = shapeType
+    coordsRef.value = selectedCoords
+    await geoSearch()
+}
+
+// convert out areatypes into a list of options format to show as buttons
+const areaButtons = enumToOptions(AreaTypes)
+
+// triggered when a change of area type has been clicked
+const handleAreaButtonChange = async (values: AreaTypes[]) => {
+    areaTypeRef.value = values[0]
+    await geoSearch()
+}
+
+/** toggle selected features under a dataset */
+const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) => {
     // If the "select all" checkbox is checked, add all feature collections to selectedFeatures
+    //alert(checked + ',' + JSON.stringify(selectedDatasetsRef.toString()))
     if (checked) {
         datasetNode.featureCollections.forEach(fc => {
             if (!selectedFeaturesRef.value.includes(fc.subject)) {
@@ -36,40 +94,10 @@ const toggleAllFeatures = (datasetNode:DatasetTreeNode, checked:boolean) => {
             }
         });
     }
+    await geoSearch()
     return true
 }
 
-// get the data from the search store
-const fetchData = async () => {
-    await search.fetchSpacePrezData()
-    if(search.success) {
-        datasetTree.value = search.getDatasetTree()
-    }
-}
-
-// start off by searching the store
-onMounted(async ()=>{
-    await fetchData()
-})
-
-// map info refs
-const areaTypeRef = ref(AreaTypes.Nearby)
-const shapeTypeRef = ref(ShapeTypes.None)
-const coordsRef = ref<Coords>([])
-
-// called when a selection has changed
-const updateSelection = (selectedCoords:Coords) => {
-    shapeTypeRef.value = selectedCoords.length == 0 ? ShapeTypes.None : (selectedCoords.length == 1 ? ShapeTypes.Point : ShapeTypes.Polygon)
-    coordsRef.value = selectedCoords
-}
-
-// convert out areatypes into a list of options format to show as buttons
-const areaButtons = enumToOptions(AreaTypes)
-
-// triggered when a change of area type has been clicked
-const handleAreaButtonChange = (values: AreaTypes[]) => {
-    areaTypeRef.value = values[0]
-}
 
 </script>
 
@@ -86,23 +114,22 @@ const handleAreaButtonChange = (values: AreaTypes[]) => {
                     <p />
                     <ButtonGroup v-if="shapeTypeRef != ShapeTypes.None" @change="handleAreaButtonChange" :buttons="areaButtons" :allowMultipleSelection="false" />
                     <div v-if="shapeTypeRef != ShapeTypes.None && areaTypeRef == AreaTypes.Nearby" style="padding-top:10px;font-size:0.7em">
-                        within <input style="font-size:small;height:1.5em;width:3em;" type="text" value="5"/> km
+                        within <input class="small-input" v-model="radiusRef" /> km
                     </div>
                     <p />
-                    
                 </div>
 
                 <div class="query-option">
                     <h4 class="query-option-title">Find features and datasets</h4>
                     <div v-if="search.loading">Loading...</div>
                     <div class="error" v-else-if="search.error">Unable to load datasets: {{ search.error }}</div>
-                    <div v-for="datasetNode in datasetTree">
+                    <div v-for="datasetNode in datasetTreeRef">
                         <ul>
                             <li>
                                 <label>
                                     <input type="checkbox" 
                                         :value="datasetNode.item.subject" 
-                                        v-model="selectedDatasets" 
+                                        v-model="selectedDatasetsRef" 
                                         @change="toggleAllFeatures(datasetNode, $event.target.checked)"
                                     /> {{ datasetNode.item.object }}
                                 </label>
@@ -112,6 +139,7 @@ const handleAreaButtonChange = (values: AreaTypes[]) => {
                                             <input type="checkbox"
                                                 :value="fc.subject" 
                                                 v-model="selectedFeaturesRef" 
+                                                @change="geoSearch()"
                                             />{{ fc.object }}
                                         </label>
                                     </li>
@@ -121,23 +149,32 @@ const handleAreaButtonChange = (values: AreaTypes[]) => {
                     </div>
                 </div>
                 <p />
-                <button v-bind:disabled="shapeTypeRef == ShapeTypes.None" class="btn" type="submit">Search</button>
+                Results limit: <input @change="geoSearch()" v-model="limitRef" style="width:5em"/>
+                <button @click="geoSearch" v-bind:disabled="shapeTypeRef == ShapeTypes.None" class="btn" type="submit">Search</button>
             </form>    
 
         </div>
         <div class="right-panel">
-            <SearchMap @selectionUpdated="updateSelection" />            
+            <SearchMap ref="searchMapRef" :geo-w-k-t="responseRef" @selectionUpdated="updateSelection" />            
         </div>
     </div>
 
-<pre style="padding-left: 0;">
+<pre style="padding-left: 0;white-space: break-spaces;">
 <b>Debug area</b>
 
 - <button @click="fetchData">Fetch Data</button>
 
 - Selected shape type = {{ shapeTypeRef }}
 
-- Selected coords = <div style="white-space: normal;">{{  JSON.stringify(coordsRef) }}</div>
+- Selected coords = {{  JSON.stringify(coordsRef) }}
+
+- SPARQL query:
+
+{{ mapSearchToSparql(selectedFeaturesRef, coordsRef, areaTypeRef, radiusRef, limitRef) }}
+
+- RESPONSE:
+
+{{ responseRef }}
 
 </pre>
 
@@ -158,6 +195,11 @@ const handleAreaButtonChange = (values: AreaTypes[]) => {
 .right-panel {
 }
 
+.small-input {
+    font-size:small;
+    height:1.5em;
+    width:3em; 
+}
 .query-options {
     gap: 10px;
     background-color: $cardBg;

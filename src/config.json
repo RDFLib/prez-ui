@@ -12,5 +12,16 @@
             "streetViewControl": false,
             "zoom": 4
         }
+    },
+    "defaultProperties": {
+        "spatial": {
+            "datasetClass": "http://www.w3.org/ns/dcat#Dataset",
+            "membershipRelation": "http://www.w3.org/2000/01/rdf-schema#member"
+        },
+        "labels": {
+            "f_label_prop": "http://www.w3.org/2000/01/rdf-schema#label",
+            "fc_label_prop": "http://purl.org/dc/terms/title",
+            "ds_label_prop": "http://purl.org/dc/terms/title"
+        }
     }
 }

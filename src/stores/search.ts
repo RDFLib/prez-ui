@@ -32,18 +32,6 @@ WHERE {<https://prez.dev/DatasetList> rdfs:member ?ds.
   ?fc dcterms:title ?fc_title
       }`
 
-/**
- * A match object to match all dataset triples
- * @type {MatchFilter}
- */
-export const matchDatasets:MatchFilter = {object: namedNode('http://www.w3.org/ns/dcat#Dataset')}
-
-/**
- * A match object to match all feature collections triples
- * @type {MatchFilter}
- */
-export const matchFeatureCollections:MatchFilter = {predicate: namedNode('http://purl.org/dc/terms/title')}
-
 
 /**
  * Converts a quad/triple object from N3 into a simple result type for easier template processing
@@ -125,7 +113,7 @@ export const searchStore = defineStore({
      */
     getDatasets() {
       let results: SimpleQueryResult[] = []
-      const matched = this.getMatchedData(matchDatasets)
+      const matched = this.getMatchedData({object: namedNode('http://www.w3.org/ns/dcat#Dataset')})
       matched.forEach(itemLink=>{
         for(const item of this.store.match(namedNode(itemLink.subject), namedNode('http://purl.org/dc/terms/title'))) {
           results.push(quadToSimpleQueryResult(item))
@@ -144,8 +132,9 @@ export const searchStore = defineStore({
     getFeatureCollections(datasetSubjects:string[]):SimpleQueryResult[] {
       console.log(datasetSubjects)
       if(datasetSubjects.length == 0) {
+        return []
         // simply returns all matching feature collections
-        return this.getMatchedData(matchFeatureCollections)
+        //        return this.getMatchedData({predicate: namedNode('http://purl.org/dc/terms/title')})
       } else {
         // narrow down to a specific dataset
         let results:SimpleQueryResult[] = []

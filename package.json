@@ -13,6 +13,8 @@
     },
     "dependencies": {
         "@fawmi/vue-google-maps": "^0.9.79",
+        "@terraformer/arcgis": "^2.1.2",
+        "@terraformer/wkt": "^2.1.2",
         "@triply/yasqe": "^4.2.27",
         "@triply/yasr": "^4.2.27",
         "@types/n3": "^1.10.4",
@@ -26,6 +28,7 @@
     "devDependencies": {
         "@types/jsdom": "^20.0.1",
         "@types/node": "^18.11.9",
+        "@types/terraformer__arcgis": "^2.0.2",
         "@vitejs/plugin-vue": "^3.2.0",
         "@vue/test-utils": "^2.2.4",
         "@vue/tsconfig": "^0.1.3",
