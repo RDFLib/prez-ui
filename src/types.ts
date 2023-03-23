@@ -21,7 +21,7 @@ export interface PrezConfig {
     enabledPrezs: string[];
     sidenav: boolean;
     apiBaseUrl: string;
-    mapSettings: MapSettings; 
+    mapSettings: MapSettings;
 };
 
 export const defaultConfig: PrezConfig = {
@@ -39,7 +39,7 @@ export const defaultConfig: PrezConfig = {
             zoom: 1
         }
     }
-};
+}
 
 export const configKey: InjectionKey<PrezConfig> = Symbol();
 

@@ -1,12 +1,14 @@
 /**
- * This is a pinia store module that provides search functionality for a triple store. It uses the N3.js library for parsing and querying RDF data, and axios for HTTP requests.
- * The searchStore provides a method to get a full tree representation of the datasets and their child feature collections, and a method to get a list of datasets with their titles.
+ * This is a pinia store module that makes a sparql API query to get datasets and feature collection information. 
+ * It uses the N3.js library for parsing and querying RDF data, and axios for HTTP requests.
+ * This store provides a method to get a full tree representation of the datasets and their child feature collections, 
+ * and a method to get a list of datasets with their titles.
  */
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { Util, Store, Parser, DataFactory, type Term, Quad } from "n3";
+import { Util, Store, Parser, DataFactory, Quad } from "n3";
 const { namedNode } = DataFactory;
-import type { DatasetTree, MatchFilter, SimpleQueryResult } from '@/stores/search.d'
+import type { DatasetTree, MatchFilter, SimpleQueryResult } from '@/stores/datasetsStore.d'
 
 import { configKey, defaultConfig } from '@/types'
 import { inject } from 'vue';
@@ -50,8 +52,8 @@ export const quadToSimpleQueryResult = (quad:any):SimpleQueryResult => {
 /**
  * Main search store for processing the results of a search SPARQL query
  */
-export const searchStore = defineStore({
-  id: 'searchStore',
+export const datasetsStore = defineStore({
+  id: 'datasetsStore',
 
   /**
    * The initial store state

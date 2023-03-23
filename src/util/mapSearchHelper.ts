@@ -1,23 +1,18 @@
 import { AreaTypes, type Coords } from "@/components/SearchMap.d";
-import type { SimpleQueryResult } from "@/stores/search.d";
 
+/** button option attributes */
 export type ButtonOption = {
   value: string;
   text: string;
 }
 
+/** turn an enum into button options */
 export function enumToOptions<T extends Record<string, string>>(myEnum: T): ButtonOption[] {
     return Object.keys(myEnum)
       .map(key => ({
         value: myEnum[key],
         text: key,
       }));
-  }
-
-export function simpleQueryResultToOptions(queryResults: SimpleQueryResult[]): ButtonOption[] {
-  return queryResults.map(item=>{
-    return {value: item.subject, text: item.object}
-  })
 }
 
 /** Main query function to return a sparql query given a set of feature collections, area type, radius, coordinate data and result limit */

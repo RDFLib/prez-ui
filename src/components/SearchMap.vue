@@ -3,11 +3,14 @@ import { wktToGeoJSON } from "@terraformer/wkt"
 import { inject, reactive, ref, defineEmits, defineExpose, watch, type PropType } from 'vue'
 import { configKey, defaultConfig } from "@/types";
 import type { MapOptionsCenter } from '@/types'
-import type { WKTResult } from '@/stores/mapsearch';
-import { ShapeTypes } from "./SearchMap.d";
+import type { WKTResult } from '@/stores/mapSearch';
+import { ShapeTypes } from "@/components/SearchMap.d";
 
+// selectionUpdated is emitted when a selection has changed on map
+// the coords of the selection along with the type of selection is provided
 const emits = defineEmits(['selectionUpdated'])
 
+// get the default map settings
 const { mapSettings } = inject(configKey, defaultConfig);
 
 const mapRef = ref()
@@ -23,24 +26,18 @@ const props = defineProps({
     geoWKT: Object as PropType<WKTResult[]>
 })
 
-let drawFunc = null
-const setDrawFunc = (func) => {
-    drawFunc = func
+// when the map object has loaded, it will call this function to set mapDrawFunc, so an external component can call it when needed
+let mapDrawFunc = null
+const setMapDrawFunc = (func) => {
+    mapDrawFunc = func
 }
 
-const trigger = (data) => {
-    console.log("DRAW DATA", data)
-    drawFunc(data)
-//    alert("HI")
+// draw shape is exposed so another component can draw on the map
+const drawShape = (data) => {
+    mapDrawFunc(data)
 }
 
-defineExpose({trigger})
-
-// const xprops = {
-//   center: Object,// as PropType<MapOptionsCenter>,
-//   zoom: Number,
-//   streetViewController: Boolean
-// }
+defineExpose({drawShape})
 
 watch(mapRef, googleMap => {
       if (googleMap) {
@@ -80,17 +77,14 @@ watch(mapRef, googleMap => {
             let features = []
 
             const drawResults = (results: WKTResult[]) => {
-                //console.log("TERRA", wktToGeoJSON)
-                // for(var i = 0; i < features.length; i++) {
-                //     map.data.remove(features[i]);
-                // }
+                // remove the previously drawn features
                 map.data.forEach(function(feature) {
                     map.data.remove(feature)
                 })
                 features = []
                 results.forEach(result=>{
                     try {
-                        const geoJson = wktToGeoJSON(result.wkt.replace('(((', '((').replace(')))', '))'))
+                        const geoJson = wktToGeoJSON(result.wkt)
                         const featureGeoJson = {
                             type: 'Feature',
                             geometry: geoJson,
@@ -110,12 +104,13 @@ watch(mapRef, googleMap => {
                         setShape(result.wkt)
                         map.fitBounds(bounds);                
                     } catch (ex) {
+                        // can happen if we're unable to parse the result, just consoled out for now
                         console.log(ex.message, 'Unable to process ', result)
-                        //alert(ex.message + " - " + JSON.stringify(result))
                     }
                 })
             }
-            setDrawFunc(drawResults)
+
+            setMapDrawFunc(drawResults)
 
             if(props.geoWKT) {
                 drawResults(props.geoWKT)
@@ -214,8 +209,8 @@ watch(mapRef, googleMap => {
             drawingManager.addListener("rectanglecomplete", onRectangleDraw);
             drawingManager.addListener("polygoncomplete", onPolygonDraw);
 
+            // show an info box with the details of the object clicked
             map.data.addListener('click', function(event) {
-                console.log("CLICK", event)
                 var feat = event.feature;
                 var html = `<b>${feat.getProperty('label')}</b>
                     <b style="float:right">(${feat.getProperty('id')})</b>
@@ -234,7 +229,6 @@ watch(mapRef, googleMap => {
 </script>
 
 <template>
-    <!-- <div>SELECTED SHAPE: {{ shape.value }}</div> -->
     <GMapMap
         ref="mapRef"
         :center="props.center || mapSettings.options.center" 

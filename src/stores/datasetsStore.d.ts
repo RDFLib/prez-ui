@@ -1,7 +1,4 @@
-import { defineStore } from 'pinia'
-import axios from 'axios'
-import { Util, Store, Parser, DataFactory, type Term } from "n3";
-
+import { Term } from "n3"
 
 /**
  * @typedef {Object} MatchFilter - A match object type to provide to the N3 match function to filter results
