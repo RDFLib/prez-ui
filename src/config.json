@@ -3,7 +3,7 @@
     "sidenav": true,
     "apiBaseUrl": "https://d26ymx92nuuei.cloudfront.net",
     "mapSettings": {
-        "apiKey": "AIzaSyDIaoFyutbNuJ85eXOmUb0xXqfY75wptMI",
+        "apiKey": "",
         "options": {
             "center": {
                 "lat": -28.8908,
