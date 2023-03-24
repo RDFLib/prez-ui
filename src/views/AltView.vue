@@ -31,18 +31,20 @@ const defaultToken = computed(() => {
 
 const orderedProfiles = computed(() => {
     const includedProfiles = profiles.value.map(prof => prof.token);
-    return Object.values(ui.profiles).filter(prof => includedProfiles.includes(prof.token)).sort((a, b) => Number(a.token === defaultToken.value) - Number(b.token === defaultToken.value));
+    return Object.values(ui.profiles)
+        .filter(prof => includedProfiles.includes(prof.token))
+        .sort((a, b) => Number(b.token === defaultToken.value) - Number(a.token === defaultToken.value))
+        .sort((a, b) => Number(a.namespace === "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile") - Number(b.namespace === "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile"));
 });
 
 onMounted(() => {
-    doRequest(`${apiBaseUrl}${route.path}`); // needs to be HEAD request?
+    doRequest(`${apiBaseUrl}${route.path}`);
     ui.rightNavConfig = { enabled: false };
 });
 </script>
 
 <template>
-    <h1>Alternate Profiles</h1>
-    <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Hic ex at nobis obcaecati? Praesentium tenetur inventore ratione temporibus cumque incidunt quo, recusandae, labore voluptatibus repudiandae iure deserunt maxime similique placeat.</p>
+    <h1 class="page-title">Alternate Profiles</h1>
     <table>
         <tr>
             <th>Token</th>
@@ -58,7 +60,7 @@ onMounted(() => {
                 </RouterLink>
                 <span v-if="(profile.token === defaultToken)" class="badge" title="This is the default profile for this endpoint">default</span>
             </td>
-            <td>{{ profile.title }}</td>
+            <td><RouterLink :to="`/profiles/${profile.token}`">{{ profile.title }}</RouterLink></td>
             <td>
                 <div v-for="mediatype in profile.mediatypes">
                     <RouterLink :to="`${route.path}?_profile=${profile.token}&_mediatype=${mediatype}`">

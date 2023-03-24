@@ -168,7 +168,7 @@ function copy(text: string) {
 </script>
 
 <template>
-    <h1>SPARQL Endpoint</h1>
+    <h1 class="page-title">SPARQL Search</h1>
     <p>Here you can perform more advanced querying using <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener noreferrer">SPARQL</a> (SPARQL Protocol and RDF Query Language). This page acts both as an interactive querying page as well as an endpoint for clients.</p>
     <div id="query-options" ref="queryOptionsElement">
         <div class="query-option">

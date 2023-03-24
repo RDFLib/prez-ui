@@ -11,7 +11,7 @@ const app = createApp(App);
 
 app.provide(sidenavConfigKey, config.sidenav === "true");
 app.provide(enabledPrezsConfigKey, config.enabledPrezs.split(","));
-app.provide(apiBaseUrlConfigKey, config.apiBaseUrl);
+app.provide(apiBaseUrlConfigKey, config.apiBaseUrl.replace(/\/$/, ""));
 
 app.use(pinia);
 app.use(router);

@@ -13,7 +13,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <h1>Not Found</h1>
+    <h1 class="page-title">Not Found</h1>
     <p>Sorry, this page does not exist.</p>
     <p><RouterLink class="btn" to="/">Go home</RouterLink></p>
 </template>

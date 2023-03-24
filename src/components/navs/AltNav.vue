@@ -19,7 +19,12 @@ const props = defineProps<{
 }>();
 
 const orderedProfiles = computed(() => {
-    return !!props.profiles ? props.profiles.sort((a, b) => Number(b.default) - Number(a.default)) : [];
+    // sort profiles - default profile first, alternates profile last
+    return !!props.profiles
+        ? props.profiles
+            .sort((a, b) => Number(b.default) - Number(a.default))
+            .sort((a, b) => Number(a.uri === "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile") - Number(b.uri === "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile"))
+        : [];
 });
 </script>
 
@@ -36,7 +41,27 @@ const orderedProfiles = computed(() => {
                     >
                         <h5>{{ profile.title }}</h5>
                     </RouterLink>
-                    <span v-if="profile.default" class="badge" title="This is the default profile for this endpoint">default</span>
+                    <RouterLink
+                        :to="`/profiles/${profile.token}`"
+                        title="Profile information"
+                    >
+                        <i class="fa-regular fa-file-circle-info"></i>
+                    </RouterLink>
+                    <a
+                        :href="profile.uri"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Profile namespace"
+                    >
+                        <i class="fa-regular fa-arrow-up-right-from-square"></i>
+                    </a>
+                    <span
+                        v-if="profile.default"
+                        class="badge"
+                        title="This is the default profile for this page"
+                    >
+                        default
+                    </span>
                 </div>
                 <div class="mediatypes">
                     <RouterLink
@@ -55,7 +80,7 @@ const orderedProfiles = computed(() => {
 @import "@/assets/sass/_mixins.scss";
 
 h4 {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     margin: 0;
 }
 

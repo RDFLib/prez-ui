@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import { ref, inject, watch } from "vue";
 import router from "@/router";
+import { useUiStore } from "@/stores/ui";
 import { enabledPrezsConfigKey, type PrezFlavour } from "@/types";
 import CatPrezSearch from "@/components/search/CatPrezSearch.vue";
 import SpacePrezSearch from "@/components/search/SpacePrezSearch.vue";
 import VocPrezSearch from "@/components/search/VocPrezSearch.vue";
 
 const enabledPrezs = inject(enabledPrezsConfigKey) as PrezFlavour[];
+const ui = useUiStore();
 
 const props = withDefaults(defineProps<{
     flavour?: PrezFlavour;
@@ -16,23 +18,28 @@ const props = withDefaults(defineProps<{
     fullPage: false
 });
 
+const defaultSearchMethod = "exactMatch";
+
 const expanded = ref(false);
-const searchType = ref(props.flavour ? props.flavour : (props.query ? props.query.searchType || "all" : "all"));
-const searchTerm = ref(props.query ? props.query.filter : "");
+const prez = ref(props.flavour ? props.flavour : (props.query ? props.query.prez || "all" : "all"));
+const searchTerm = ref(props.query ? props.query.term : "");
+const searchMethod = ref(props.query ? (props.query.method ? props.query.method : defaultSearchMethod) : defaultSearchMethod);
 const searchOptions = ref<{[key: string]: string}>({});
 
-watch(searchType, (newValue, oldValue) => {
+watch(prez, (newValue, oldValue) => {
     if (newValue !== oldValue && newValue === "all") {
         expanded.value = false;
     }
+    searchMethod.value = defaultSearchMethod;
 });
 
 function submit() {
     router.push({
         name: "search",
         query: {
-            filter: searchTerm.value,
-            searchType: searchType.value !== "all" ? searchType.value : undefined,
+            term: searchTerm.value,
+            prez: prez.value !== "all" ? prez.value : undefined,
+            method: searchMethod.value || undefined,
             ...searchOptions.value
         }
     });
@@ -40,6 +47,11 @@ function submit() {
 
 function clearSearch() {
     searchTerm.value = "";
+}
+
+function camelToTitleCase(s: string): string {
+    const result = s.replace(/([A-Z])/g, " $1");
+    return result.charAt(0).toUpperCase() + result.slice(1);
 }
 </script>
 
@@ -50,37 +62,48 @@ function clearSearch() {
                 <div :class="`search-bar ${expanded ? 'full-width' : ''}`">
                     <input
                         type="search"
-                        name="filter"
+                        name="term"
                         id=""
                         class="search-input"
                         v-model="searchTerm"
-                        :placeholder="`${searchType === 'all' ? 'Global search...' : 'Search...'}`"
+                        :placeholder="`${prez === 'all' ? 'Global search...' : 'Search...'}`"
                     >
                     <button type="button" @click="clearSearch()" class="clear-btn"><i class="fa-regular fa-xmark"></i></button>
                 </div>
                 <button v-if="!expanded" type="submit" class="btn submit-btn"><i class="fa-regular fa-magnifying-glass"></i></button>
             </div>
             <div class="search-below">
-                <select v-if="!props.flavour" name="searchType" id="" class="search-type" v-model="searchType">
+                <select v-if="!props.flavour" name="prez" id="" class="search-type" v-model="prez">
                     <option value="all">All</option>
-                    <option v-if="enabledPrezs.includes('CatPrez')" value="CatPrez">CatPrez</option>
-                    <option v-if="enabledPrezs.includes('SpacePrez')" value="SpacePrez">SpacePrez</option>
-                    <option v-if="enabledPrezs.includes('VocPrez')" value="VocPrez">VocPrez</option>
+                    <option v-for="prezFlavour in enabledPrezs" :value="prezFlavour">{{ prezFlavour }}</option>
                 </select>
-                <button v-if="searchType !== 'all'" type="button" class="collapse-btn" @click.prevent="expanded = !expanded">
+                <button v-if="prez !== 'all'" type="button" class="collapse-btn" @click.prevent="expanded = !expanded">
                     <template v-if="expanded">Collapse <i class="fa-regular fa-chevron-up"></i></template>
                     <template v-else>Expand <i class="fa-regular fa-chevron-down"></i></template>
                 </button>
             </div>
-            <div v-show="searchType === 'CatPrez' && expanded">
-                <CatPrezSearch @updateOptions="searchOptions = $event" :defaultSelected="props.query?.catalog" />
+            <div v-if="prez !== 'all' && expanded">
+                <label for="search-method">Search Method</label>
+                <br/>
+                <select name="search-method" id="search-method" v-model="searchMethod">
+                    <option v-for="method in ui.searchMethods[prez]" :value="method">{{ camelToTitleCase(method) }}</option>
+                </select>
             </div>
-            <div v-show="searchType === 'SpacePrez' && expanded">
-                <SpacePrezSearch @updateOptions="searchOptions = $event" :defaultSelected="{dataset: props.query?.dataset, collection: props.query?.collection}" />
-            </div>
-            <div v-show="searchType === 'VocPrez' && expanded">
-                <VocPrezSearch @updateOptions="searchOptions = $event" :defaultSelected="props.query?.vocab" />
-            </div>
+            <template v-if="!props.flavour || (props.flavour === 'CatPrez')">
+                <div v-show="prez === 'CatPrez' && expanded">
+                    <CatPrezSearch @updateOptions="searchOptions = $event" :defaultSelected="props.query?.catalog" />
+                </div>
+            </template>
+            <template v-if="!props.flavour || (props.flavour === 'SpacePrez')">
+                <div v-show="prez === 'SpacePrez' && expanded">
+                    <SpacePrezSearch @updateOptions="searchOptions = $event" :defaultSelected="{ dataset: props.query?.dataset, collection: props.query?.collection }" />
+                </div>
+            </template>
+            <template v-if="!props.flavour || (props.flavour === 'VocPrez')">
+                <div v-show="prez === 'VocPrez' && expanded">
+                    <VocPrezSearch @updateOptions="searchOptions = $event" :defaultSelected="props.query?.vocab" />
+                </div>
+            </template>
             <button v-if="expanded" type="submit" class="btn submit-btn">Search <i class="fa-regular fa-magnifying-glass"></i></button>
         </div>
     </form>

@@ -15,8 +15,8 @@ onMounted(() => {
 </script>
 
 <template>
-    <h1>API Docs</h1>
-    <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Hic ex at nobis obcaecati? Praesentium tenetur inventore ratione temporibus cumque incidunt quo, recusandae, labore voluptatibus repudiandae iure deserunt maxime similique placeat.</p>
+    <h1 class="page-title">API Docs</h1>
+    <p>This page lists the available endpoints of the Prez API for this instance.</p>
     <iframe :src="`${apiBaseUrl}/docs`" frameborder="0" name="docs" title="Prez API Swagger Docs"></iframe>
 </template>
 
