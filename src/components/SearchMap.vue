@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+
 import { wktToGeoJSON } from "@terraformer/wkt"
 import { inject, reactive, ref, watch, type PropType } from 'vue'
 import { mapConfigKey, type MapConfig } from "@/types";
@@ -6,6 +7,7 @@ import { convertConfigTypes } from '@/util/mapSearchHelper'
 import type { MapOptionsCenter } from '@/types'
 import type { WKTResult } from '@/stores/mapSearchStore.d';
 import { ShapeTypes } from "@/components/SearchMap.d";
+
 
 // selectionUpdated is emitted when a selection has changed on map
 // the coords of the selection along with the type of selection is provided

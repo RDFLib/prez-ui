@@ -79,6 +79,15 @@ const fetchData = async () => {
 // start off by loading the SPARQL query result data into the search store
 onMounted(async ()=>{
     await fetchData()
+
+    // start with all items selected
+    datasetTreeRef.value.forEach(ds=>{
+        selectedDatasetsRef.value.push(ds.item.subject)
+        ds.featureCollections.forEach(fc=>{
+            selectedFeaturesRef.value.push(fc.subject)
+        })
+    })
+
 })
 
 // called when a selection has changed
@@ -152,7 +161,7 @@ const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) =
                                     <input type="checkbox" 
                                         :value="datasetNode.item.subject" 
                                         v-model="selectedDatasetsRef" 
-                                        @change="toggleAllFeatures(datasetNode, $event.target.checked)"
+                                        @change="(event) => toggleAllFeatures(datasetNode, (event.target as HTMLInputElement)?.checked)"
                                     /> {{ datasetNode.item.object }}
                                 </label>
                                 <ul v-if="datasetNode.featureCollections.length > 0">
@@ -179,7 +188,27 @@ const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) =
 
         </div>
         <div class="right-panel">
-            <SearchMap ref="searchMapRef" :geo-w-k-t="responseRef" @selectionUpdated="updateSelection" />            
+            <SearchMap ref="searchMapRef" :geo-w-k-t="responseRef" @selectionUpdated="updateSelection" />
+            <div v-if="mapSearch.data && mapSearch.data.length > 0">
+                <h3>Result set</h3>
+                <table>
+                    <thead>
+                        <th>Feature collection</th>
+                        <th>Label</th>
+                        <th>URI</th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="result in mapSearch.data">
+                            <td>{{ result.fcLabel }}</td>
+                            <td>{{ result.label }}</td>
+                            <td><a v-bind:href="`/s/object?uri=${result.uri}`">{{ result.uri }}</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>    
+            <div v-else>
+                <h3>No results</h3>
+            </div>
         </div>
     </div>
 
@@ -209,6 +238,38 @@ const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) =
 
 <style lang="scss" scoped>
 @import "@/assets/sass/_variables.scss";
+
+table {
+    border-collapse: collapse;
+    background-color: white;
+    width:100%;
+    thead {
+        th {
+            padding: 10px;
+            background-color: #ccc;
+        }
+    }
+    tbody {
+        td {
+            padding: 5px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+    tr {
+        th, td {
+        }
+
+        th {
+            text-align: center;
+        }
+
+        &:nth-child(2n) {
+            background-color: $tableBg;
+        }
+    }
+}
+
 
 .container {
     display: grid;
