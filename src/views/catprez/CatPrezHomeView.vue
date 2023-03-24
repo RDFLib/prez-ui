@@ -1,22 +1,19 @@
 <script lang="ts" setup>
-import { onMounted } from "vue";
-import { useUiStore } from "@/stores/ui";
-import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
+import FlavourHome from "@/components/FlavourHome.vue";
 
-const ui = useUiStore();
-
-onMounted(() => {
-    ui.rightNavConfig = { enabled: false };
-    document.title = "CatPrez | Prez";
-    ui.pageHeading = { name: "CatPrez", url: "/c"};
-    ui.breadcrumbs = [{ name: "CatPrez", url: "/c" }];
-});
+const links = [
+    {
+        label: "Catalogs",
+        url: "/c/catalogs",
+        description: "A list of DCAT Catalogs"
+    }
+];
 </script>
 
 <template>
-    <h1>CatPrez Home</h1>
-    <p>Welcome to CatPrez</p>
-    <AdvancedSearch flavour="CatPrez" fullPage />
+    <FlavourHome flavour="CatPrez" :links="links">
+        <p>Welcome to CatPrez - a read-only web delivery system for Data Catalog Vocabulary (DCAT) information.</p>
+    </FlavourHome>
 </template>
 
 <style lang="scss" scoped>

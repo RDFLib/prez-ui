@@ -8,6 +8,7 @@ import { useGetRequest } from "@/composables/api";
 import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type PrezFlavour } from "@/types";
 import ItemList from "@/components/ItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
+import ProfilesTable from "@/components/ProfilesTable.vue";
 
 const { namedNode } = DataFactory;
 
@@ -25,9 +26,12 @@ const props = defineProps<{
     titlePred: string; // soon replaced with default profile hasLabelPredicate
     descPred: string; // soon replaced with default profile hasLabelPredicate
     enableSearch?: boolean;
+    content?: string;
 }>();
 
 const items = ref<ListItem[]>([]);
+
+const isAltView = ref(false);
 
 const flavour = computed<PrezFlavour | undefined>(() => {
     if (route.path.startsWith("/c/")) {
@@ -70,7 +74,22 @@ function getSearchDefaults(): {[key: string]: string} { // need IRI of parent to
 }
 
 onMounted(() => {
-    doRequest(`${apiBaseUrl.replace(/\/$/, "")}${route.path}`, () => {
+    doRequest(`${apiBaseUrl}${route.path}`, () => {
+        // check for default profile, potentially render ProfilesTable or redirect to API endpoint
+        if (route.query && route.query._profile) {
+            const defaultProfile = profiles.value.find(p => p.default)!;
+            if (route.query._profile === defaultProfile.token && !route.query._mediatype) {
+                isAltView.value = false;
+            } else if (route.query._profile === "alt" && !route.query._mediatype) {
+                isAltView.value = true;
+            } else {
+                // redirect to API
+                window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`)
+            }
+        } else {
+            isAltView.value = false;
+        }
+
         parseIntoStore(data.value);
 
         const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("rdf:bag")), null)[0]; // need a consistent way to select the parent (previously was rdf:bag)
@@ -91,7 +110,12 @@ onMounted(() => {
             items.value.push(c);
         }, subject, namedNode(qname(props.itemPred)), null);
 
-        ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
+        if (isAltView.value) {
+            ui.rightNavConfig = { enabled: false };
+        } else {
+            ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
+        }
+        
         document.title = `${props.title} | Prez`;
         if (flavour.value) {
             ui.pageHeading = { name: flavour.value, url: `/${flavour.value[0].toLowerCase()}`};
@@ -100,22 +124,27 @@ onMounted(() => {
         }
         ui.breadcrumbs = [
             ...getBreadcrumbs(),
-            { name: props.title, url: route.path }
+            { name: props.title, url: route.path },
+            ... isAltView.value ? [{ name: "Alternate Profiles", url: `${route.path}?_profile=alt` }] : []
         ];
     });
 });
 </script>
 
 <template>
-    <h1 class="page-title">{{ props.title }}</h1>
-    <div>
-        <ItemList v-if="data" :items="items" :childName="props.childButton?.name" :childLink="props.childButton?.url" />
-        <template v-else-if="loading">loading...</template>
-        <template v-else-if="error">Network error: {{ error }}</template>
-    </div>
-    <Teleport v-if="props.enableSearch" to="#right-bar-content">
-        <AdvancedSearch :flavour="flavour" :query="getSearchDefaults()" />
-    </Teleport>
+    <ProfilesTable v-if="isAltView" :profiles="profiles" :path="route.path" />
+    <template v-else>
+        <h1 class="page-title">{{ props.title }}</h1>
+        <p v-if="props.content" v-html="props.content"></p>
+        <div>
+            <ItemList v-if="data" :items="items" :childName="props.childButton?.name" :childLink="props.childButton?.url" />
+            <template v-else-if="loading">loading...</template>
+            <template v-else-if="error">Network error: {{ error }}</template>
+        </div>
+        <Teleport v-if="props.enableSearch" to="#right-bar-content">
+            <AdvancedSearch :flavour="flavour" :query="getSearchDefaults()" />
+        </Teleport>
+    </template>
 </template>
 
 <style lang="scss" scoped>

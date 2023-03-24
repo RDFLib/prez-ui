@@ -31,6 +31,7 @@ export function useRdfStore() {
      * @param {String} s RDF Turtle string
      */
     function parseIntoStore(s: string) {
+        s = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + s; // temp fix for missing rdf: prefix from API
         const p = parser.parse(s, null, (prefixName, prefixNode) => {
             // callback for each prefix parsed
             if (!Object.values(defaultPrefixes).includes(prefixNode.value)) {

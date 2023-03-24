@@ -41,8 +41,12 @@ export function useGetRequest() {
         profileObj[defaultProfile.profile].default = true;
 
         links.filter(l => l.rel === "alternate").forEach(l => {
-            profileObj[l.profile].mediatypes.push({ title: "", mediatype: l.type, default: false });
+            if (!profileObj[l.profile].mediatypes.map(m => m.mediatype).includes(l.type)) {
+                profileObj[l.profile].mediatypes.push({ title: "", mediatype: l.type, default: false });
+            }
         });
+
+        // need to sort mediatypes by default first - need to use ui.profiles
 
         return Object.values(profileObj);
     }
@@ -55,7 +59,7 @@ export function useGetRequest() {
             if (!r.ok) {
                 throw new Error("Response was not OK");
             }
-            profiles.value = getProfilesFromHeaders(r.headers.get("link")!);
+            profiles.value = r.headers.get("link") ? getProfilesFromHeaders(r.headers.get("link")!) : [];
             return r.text();
         })
         .then(text => {

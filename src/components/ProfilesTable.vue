@@ -15,7 +15,7 @@ const mediatypeNames: {[key: string]: string} = {
 
 const props = defineProps<{
     profiles: ProfileHeader[];
-    path?: string;
+    path: string;
 }>();
 
 const ui = useUiStore();
@@ -30,7 +30,10 @@ const defaultToken = computed(() => {
 
 const orderedProfiles = computed(() => {
     const includedProfiles = props.profiles.map(prof => prof.token);
-    return Object.values(ui.profiles).filter(prof => includedProfiles.includes(prof.token)).sort((a, b) => Number(a.token === defaultToken.value) - Number(b.token === defaultToken.value));
+    return Object.values(ui.profiles)
+        .filter(prof => includedProfiles.includes(prof.token))
+        .sort((a, b) => Number(b.token === defaultToken.value) - Number(a.token === defaultToken.value))
+        .sort((a, b) => Number(a.namespace === "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile") - Number(b.namespace === "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile"));
 });
 </script>
 
@@ -45,12 +48,12 @@ const orderedProfiles = computed(() => {
         </tr>
         <tr v-for="profile in orderedProfiles">
             <td>
-                <RouterLink :to="`${props.path}?_profile=${profile.token}`">
+                <RouterLink :to="`${props.path}?_profile=${profile.token}`" title="Get profile representation">
                     {{ profile.token }}
                 </RouterLink>
                 <span v-if="(profile.token === defaultToken)" class="badge" title="This is the default profile for this endpoint">default</span>
             </td>
-            <td>{{ profile.title }}</td>
+            <td><RouterLink :to="`/profiles/${profile.token}`" title="Go to profile page">{{ profile.title }}</RouterLink></td>
             <td>
                 <div v-for="mediatype in profile.mediatypes">
                     <RouterLink :to="`${props.path}?_profile=${profile.token}&_mediatype=${mediatype}`">

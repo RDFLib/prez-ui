@@ -72,7 +72,7 @@ onMounted(() => {
 
 <template>
     <h1 class="page-title">
-        {{ props.item.title }}
+        {{ props.item.title || props.item.iri }}
         <small class="iri">
             <span class="badge">IRI</span>
             <a :href="props.item.iri" target="_blank" rel="noopener noreferrer">{{ props.item.iri }}</a>
@@ -100,20 +100,25 @@ h1.page-title {
     margin-bottom: 8px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
 
     small {
         display: flex;
         flex-direction: row;
         align-items: center;
         gap: 4px;
+        font-weight: normal;
 
         &.iri {
             font-size: 0.5em;
         }
 
         &.type {
-            font-size: 0.4em;
+            font-size: 0.45em;
+        }
+
+        .badge {
+            font-size: 0.9em;
         }
     }
 }

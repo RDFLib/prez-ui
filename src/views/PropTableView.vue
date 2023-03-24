@@ -9,6 +9,7 @@ import { apiBaseUrlConfigKey, type ListItem, type AnnotatedPredicate, type Annot
 import PropTableNew from "@/components/proptable/PropTableNew.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
+import ProfilesTable from "@/components/ProfilesTable.vue";
 
 const { namedNode } = DataFactory;
 
@@ -64,6 +65,8 @@ const properties = ref<AnnotatedQuad[]>([]);
 const hideConcepts = ref(true); // only for vocab
 const collapseAll = ref(true); // only for vocab
 
+const isAltView = ref(false);
+
 function getProperties() {
     const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname(props.type)), null)[0];
     item.value.iri = subject.id;
@@ -76,23 +79,25 @@ function getProperties() {
             item.value.type = q.object.value;
         }
 
-        const annoPred: AnnotatedPredicate = {
-            termType: q.predicate.termType,
-            value: q.predicate.value,
-            id: q.predicate.id,
-            annotations: store.value.getQuads(q.predicate, null, null, null)
-        };
-        const annoQuad: AnnotatedQuad = {
-            subject: q.subject,
-            predicate: annoPred,
-            object: q.object,
-            value: q.value,
-            graph: q.graph,
-            termType: q.termType,
-            equals: q.equals,
-            toJSON: q.toJSON
-        };
-        properties.value.push(annoQuad);
+        if (!isAltView.value) {
+            const annoPred: AnnotatedPredicate = {
+                termType: q.predicate.termType,
+                value: q.predicate.value,
+                id: q.predicate.id,
+                annotations: store.value.getQuads(q.predicate, null, null, null)
+            };
+            const annoQuad: AnnotatedQuad = {
+                subject: q.subject,
+                predicate: annoPred,
+                object: q.object,
+                value: q.value,
+                graph: q.graph,
+                termType: q.termType,
+                equals: q.equals,
+                toJSON: q.toJSON
+            };
+            properties.value.push(annoQuad);
+        }
     }, subject, null, null, null);
 }
 
@@ -227,15 +232,35 @@ function getSearchDefaults(): {[key: string]: string} {
 }
 
 onMounted(() => {
-    doRequest(`${apiBaseUrl.replace(/\/$/, "")}${route.path}`, () => {
+    doRequest(`${apiBaseUrl}${route.path}`, () => {
+        // check for default profile, potentially render ProfilesTable or redirect to API endpoint
+        if (route.query && route.query._profile) {
+            const defaultProfile = profiles.value.find(p => p.default)!;
+            if (route.query._profile === defaultProfile.token && !route.query._mediatype) {
+                isAltView.value = false;
+            } else if (route.query._profile === "alt" && !route.query._mediatype) {
+                isAltView.value = true;
+            } else {
+                // redirect to API
+                window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`)
+            }
+        } else {
+            isAltView.value = false;
+        }
+        
         parseIntoStore(data.value);
         getProperties();
         
-        if (props.getChildren) {
+        if (!isAltView.value && props.getChildren) {
             getChildren();
         }
 
-        ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
+        if (isAltView.value) {
+            ui.rightNavConfig = { enabled: false };
+        } else {
+            ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
+        }
+        
         document.title = `${item.value.title || props.type.split(":")[1]} | Prez`;
         if (flavour.value) {
             ui.pageHeading = { name: flavour.value, url: `/${flavour.value[0].toLowerCase()}`};
@@ -244,57 +269,61 @@ onMounted(() => {
         }
         ui.breadcrumbs = [
             ...getBreadcrumbs(),
-            { name: item.value.title || props.type.split(":")[1], url: route.path }
+            { name: item.value.title || props.type.split(":")[1], url: route.path },
+            ... isAltView.value ? [{ name: "Alternate Profiles", url: `${route.path}?_profile=alt` }] : []
         ];
     });
 });
 </script>
 
 <template>
-    <PropTableNew v-if="properties.length > 0" :item="item" :properties="properties" :prefixes="prefixes" :hiddenPreds="hiddenPreds">
-        <!-- <template v-if="geometry" #map></template> -->
-        <template v-if="props.type === 'skos:ConceptScheme'" #bottom>
-            <tr>
-                <th>Concepts</th>
-                <td>
-                    <button id="concept-hide-btn" class="btn" @click="hideConcepts = !hideConcepts">
-                        <template v-if="hideConcepts">Show <i class="fa-regular fa-chevron-down"></i></template>
-                        <template v-else>Hide <i class="fa-regular fa-chevron-up"></i></template>
-                    </button>
-                    <div :class="`concepts ${hideConcepts ? 'collapse' : ''}`">
-                        <button id="collapse-all-btn" @click="collapseAll = !collapseAll" class="btn">
-                            <template v-if="collapseAll"><i class="fa-regular fa-plus"></i> Expand all</template>
-                            <template v-else><i class="fa-regular fa-minus"></i> Collapse all</template>
+    <ProfilesTable v-if="isAltView" :profiles="profiles" :path="route.path" />
+    <template v-else>
+        <PropTableNew v-if="properties.length > 0" :item="item" :properties="properties" :prefixes="prefixes" :hiddenPreds="hiddenPreds">
+            <!-- <template v-if="geometry" #map></template> -->
+            <template v-if="props.type === 'skos:ConceptScheme'" #bottom>
+                <tr>
+                    <th>Concepts</th>
+                    <td>
+                        <button id="concept-hide-btn" class="btn" @click="hideConcepts = !hideConcepts">
+                            <template v-if="hideConcepts">Show <i class="fa-regular fa-chevron-down"></i></template>
+                            <template v-else>Hide <i class="fa-regular fa-chevron-up"></i></template>
                         </button>
-                        <ConceptComponent v-for="concept in concepts" v-bind="concept" :baseUrl="route.path" :collapseAll="collapseAll" />
-                    </div>
-                </td>
-            </tr>
-        </template>
-        <template v-else-if="props.getChildren" #bottom>
-            <tr>
-                <th>{{ props.childDisplayTitle }}</th>
-                <td>
-                    <div class="children-list">
-                        <RouterLink v-for="child in children" :to="child.link || ''">{{ child.title || child.iri }}</RouterLink>
-                    </div>
-                </td>
-            </tr>
-        </template>
-        <template v-else-if="props.childButton" #bottom>
-            <tr>
-                <th>Members</th>
-                <td>
-                    <RouterLink :to="`${route.path}${props.childButton.url}`" class="btn">{{ props.childButton.name }}</RouterLink>
-                </td>
-            </tr>
-        </template>
-    </PropTableNew>
-    <template v-else-if="loading">loading...</template>
-    <template v-else-if="error">Network error: {{ error }}</template>
-    <Teleport v-if="props.enableSearch" to="#right-bar-content">
-        <AdvancedSearch :flavour="flavour" :query="getSearchDefaults()" />
-    </Teleport>
+                        <div :class="`concepts ${hideConcepts ? 'collapse' : ''}`">
+                            <button id="collapse-all-btn" @click="collapseAll = !collapseAll" class="btn">
+                                <template v-if="collapseAll"><i class="fa-regular fa-plus"></i> Expand all</template>
+                                <template v-else><i class="fa-regular fa-minus"></i> Collapse all</template>
+                            </button>
+                            <ConceptComponent v-for="concept in concepts" v-bind="concept" :baseUrl="route.path" :collapseAll="collapseAll" />
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            <template v-else-if="props.getChildren" #bottom>
+                <tr>
+                    <th>{{ props.childDisplayTitle }}</th>
+                    <td>
+                        <div class="children-list">
+                            <RouterLink v-for="child in children" :to="child.link || ''">{{ child.title || child.iri }}</RouterLink>
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            <template v-else-if="props.childButton" #bottom>
+                <tr>
+                    <th>Members</th>
+                    <td>
+                        <RouterLink :to="`${route.path}${props.childButton.url}`" class="btn">{{ props.childButton.name }}</RouterLink>
+                    </td>
+                </tr>
+            </template>
+        </PropTableNew>
+        <template v-else-if="loading">loading...</template>
+        <template v-else-if="error">Network error: {{ error }}</template>
+        <Teleport v-if="props.enableSearch" to="#right-bar-content">
+            <AdvancedSearch :flavour="flavour" :query="getSearchDefaults()" />
+        </Teleport>
+    </template>
 </template>
 
 <style lang="scss" scoped>

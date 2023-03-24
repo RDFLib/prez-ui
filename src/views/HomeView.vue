@@ -17,8 +17,8 @@ onMounted(() => {
 </script>
 
 <template>
-    <h1>Welcome to Prez</h1>
-    <p>Prez is a Linked Data API that combines VocPrez, SpacePrez (OGC API), CatPrez and the upcoming TimePrez.</p>
+    <h1 class="page-title">Welcome to Prez</h1>
+    <p>Prez is a Linked Data API that combines VocPrez, SpacePrez (OGC API) and CatPrez.</p>
     <p>Each instance of Prez can either act as a collection of *Prezs or as a stand-alone instance of a single *Prez.</p>
     <div class="prez-card-container">
         <RouterLink v-if="enabledPrezs.includes('CatPrez')" class="prez-card" to="/c">

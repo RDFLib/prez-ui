@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { inject, computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
+import { useUiStore } from "@/stores/ui";
 import { enabledPrezsConfigKey, type PrezFlavour } from "@/types";
 
 const routes: {[key: string]: any[]} = {
@@ -57,6 +58,7 @@ const routes: {[key: string]: any[]} = {
 };
 
 const route = useRoute();
+const ui = useUiStore();
 
 const enabledPrezs = computed<string[]>(() => {
     const enabledPrezsFlavours = inject(enabledPrezsConfigKey) as PrezFlavour[];
@@ -76,6 +78,7 @@ watch(() => route.path, (newValue) => {
 
 const props = defineProps<{
     sidenav: boolean;
+    version: string;
 }>();
 </script>
 
@@ -108,6 +111,10 @@ const props = defineProps<{
             <div class="nav-item"><RouterLink to="/profiles" class="nav-link">Profiles</RouterLink></div>
             <div class="nav-item"><RouterLink to="/about" class="nav-link">About</RouterLink></div>
             <div class="nav-item"><RouterLink to="/docs" class="nav-link">API Docs</RouterLink></div>
+            <div class="bottom-nav-items">
+                <a href="https://github.com/RDFLib/prez-ui" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i> Prez UI v{{ props.version }}</a>
+                <a href="https://github.com/RDFLib/prez" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i> Prez API v{{ ui.apiVersion }}</a>
+            </div>
         </nav>
         <nav v-if="!!activePrez && !props.sidenav" class="sub-nav row">
             <RouterLink
@@ -145,7 +152,18 @@ nav#main-nav {
         }
     }
 }
-div.nav-item {
+
+.bottom-nav-items {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+
+    a {
+        padding: 6px 10px;
+    }
+}
+
+.nav-item {
     display: flex;
     flex-direction: row;
 

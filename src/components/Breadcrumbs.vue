@@ -8,7 +8,7 @@ const ui = useUiStore();
 <template>
     <div id="breadcrumbs">
         <!-- <i class="fa-regular fa-bread-loaf"></i> -->
-        <RouterLink to="/" class="breadcrumb">Home</RouterLink>
+        <RouterLink to="/" class="breadcrumb"><i class="fa-regular fa-house"></i></RouterLink>
         <span v-if="ui.breadcrumbs.length > 0" class="breadcrumb-separator"><i class="fa-regular fa-chevron-right"></i></span>
         <template v-for="(breadcrumb, index) in ui.breadcrumbs">
             <RouterLink :to="breadcrumb.url" class="breadcrumb">{{ breadcrumb.name }}</RouterLink>
@@ -25,12 +25,13 @@ const ui = useUiStore();
     flex-direction: row;
     gap: 8px;
     align-items: center;
-    flex-wrap: wrap;
-    // overflow-x: auto;
+    // flex-wrap: wrap;
+    overflow-x: auto;
+    margin-bottom: 12px;
 
     a.breadcrumb {
         font-size: 0.8em;
-        color: $headerColor;
+        // color: $headerColor;
     }
 
     .breadcrumb-separator {
