@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import { Literal, NamedNode } from "n3";
-import type { AnnotatedPredicate, AnnotatedQuad, RowPred } from "@/types";
-import PropRow from "@/components/PropRow.vue";
+import type { AnnotatedPredicate, AnnotatedQuad, ListItem, RowPred } from "@/types";
+import PropRow from "@/components/proptable/PropRow.vue";
 
 const props = defineProps<{
+    item: ListItem;
     properties: AnnotatedQuad[];
     prefixes: {[token: string]: string};
     hiddenPreds: string[];
@@ -40,6 +41,10 @@ function getAnnotation(predicate: AnnotatedPredicate, annotationPred: string): s
     // }
 }
 
+function copyIri() {
+    navigator.clipboard.writeText(props.item.iri.trim());
+}
+
 onMounted(() => {
     props.properties.filter(p => !props.hiddenPreds.includes(p.predicate.value)).forEach(p => {
         rows.value[p.predicate.value] ??= {
@@ -66,6 +71,20 @@ onMounted(() => {
 </script>
 
 <template>
+    <h1 class="page-title">
+        {{ props.item.title }}
+        <small class="iri">
+            <span class="badge">IRI</span>
+            <a :href="props.item.iri" target="_blank" rel="noopener noreferrer">{{ props.item.iri }}</a>
+            <button class="btn outline sm" title="Copy IRI" @click="copyIri()"><i class="fa-regular fa-clipboard"></i></button>
+        </small>
+        <small class="type">
+            <span class="badge">Type</span>
+            <a :href="props.item.type" target="_blank" rel="noopener noreferrer">{{ props.item.type }}</a>
+        </small>
+    </h1>
+    <slot name="map"></slot>
+    <p v-if="!!props.item.description"><em>{{ props.item.description }}</em></p>
     <table>
         <slot name="top"></slot>
         <PropRow v-for="row in Object.values(rows).sort((a, b) => a.order - b.order)" v-bind="row" />
@@ -75,6 +94,29 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 @import "@/assets/sass/_variables.scss";
+
+h1.page-title {
+    margin-top: 0;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    small {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+
+        &.iri {
+            font-size: 0.5em;
+        }
+
+        &.type {
+            font-size: 0.4em;
+        }
+    }
+}
 
 table {
     border-collapse: collapse;

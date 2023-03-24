@@ -2,11 +2,11 @@
 import { inject, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { useUiStore } from "@/stores/ui";
-import { configKey, defaultConfig } from "@/types";
+import { enabledPrezsConfigKey, type PrezFlavour } from "@/types";
 
 const ui = useUiStore();
 
-const { enabledPrezs } = inject(configKey, defaultConfig);
+const enabledPrezs = inject(enabledPrezsConfigKey) as PrezFlavour[];
 
 onMounted(() => {
     ui.rightNavConfig = { enabled: false };

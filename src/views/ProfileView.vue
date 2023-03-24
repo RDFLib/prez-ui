@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useRoute } from "vue-router";
-import PropTable from "@/components/PropTable.vue";
+import PropTable from "@/components/proptable/PropTable.vue";
 
 const route = useRoute();
 </script>

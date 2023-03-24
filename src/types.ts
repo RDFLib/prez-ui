@@ -23,6 +23,7 @@ export interface PrezConfig {
     apiBaseUrl: string;
     mapSettings: MapSettings;
 };
+export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
 
 export const defaultConfig: PrezConfig = {
     enabledPrezs: ["VocPrez", "SpacePrez", "CatPrez"],
@@ -42,6 +43,9 @@ export const defaultConfig: PrezConfig = {
 }
 
 export const configKey: InjectionKey<PrezConfig> = Symbol();
+export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
+export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
+export const apiBaseUrlConfigKey: InjectionKey<string> = Symbol();
 
 export interface Profile {
     namespace: string;
@@ -87,6 +91,7 @@ export interface ListItem {
     title?: string;
     description?: string;
     link?: string;
+    type?: string;
 };
 
 export interface AnnotatedPredicate {

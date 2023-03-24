@@ -30,27 +30,64 @@ const router = createRouter({
         {
             path: "/v/vocab",
             name: "vocabs",
-            component: () => import("@/views/vocprez/VocabsView.vue")
+            component: () => import("@/views/ItemListView.vue"),
+            props: {
+                title: "Vocabs",
+                itemPred: "rdfs:member",
+                titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
+                descPred: "skos:definition", // soon replaced with default profile hasDescPredicate?
+                enableSearch: true
+            }
         },
         {
             path: "/v/vocab/:vocabId",
             name: "vocab",
-            component: () => import("@/views/vocprez/VocabView.vue")
+            component: () => import("@/views/PropTableView.vue"),
+            props: {
+                type: "skos:ConceptScheme",
+                getChildren: true,
+                titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
+                descPred: "skos:definition", // soon replaced with default profile hasDescPredicate?
+                childPred: "skos:member", // placeholder
+                childTitlePred: "skos:prefLabel",
+                enableSearch: true
+            }
         },
         {
             path: "/v/vocab/:vocabId/:conceptId",
             name: "concept",
-            component: () => import("@/views/vocprez/ConceptView.vue")
+            component: () => import("@/views/PropTableView.vue"),
+            props: {
+                type: "skos:Concept",
+                titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
+                descPred: "skos:definition" // soon replaced with default profile hasDescPredicate?
+            }
         },
         {
             path: "/v/collection",
             name: "collections",
-            component: () => import("@/views/vocprez/CollectionsView.vue")
+            component: () => import("@/views/ItemListView.vue"),
+            props: {
+                title: "Collections",
+                itemPred: "rdfs:member",
+                titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
+                descPred: "skos:definition", // soon replaced with default profile hasDescPredicate?
+                enableSearch: true
+            }
         },
         {
             path: "/v/collection/:collectionId",
             name: "collection",
-            component: () => import("@/views/vocprez/CollectionView.vue")
+            component: () => import("@/views/PropTableView.vue"),
+            props: {
+                type: "skos:Collection",
+                getChildren: true,
+                childPred: "skos:member",
+                childTitlePred: "skos:prefLabel",
+                childDisplayTitle: "Concepts",
+                titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
+                descPred: "skos:definition" // soon replaced with default profile hasDescPredicate?
+            }
         },
         {
             path: "/s",
@@ -75,32 +112,77 @@ const router = createRouter({
         {
             path: "/s/datasets",
             name: "datasets",
-            component: () => import("@/views/spaceprez/DatasetsView.vue")
+            component: () => import("@/views/ItemListView.vue"),
+            props: {
+                title: "Datasets",
+                itemPred: "rdfs:member",
+                childButton: { name: "Collections", url: "/collections" },
+                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate?
+                enableSearch: true
+            }
         },
         {
             path: "/s/datasets/:datasetId",
             name: "dataset",
-            component: () => import("@/views/spaceprez/DatasetView.vue")
+            component: () => import("@/views/PropTableView.vue"),
+            props: {
+                type: "dcat:Dataset",
+                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate?
+                childPred: "rdfs:member",
+                childButton: { name: "Collections", url: "/collections" },
+                enableSearch: true
+            }
         },
         {
             path: "/s/datasets/:datasetId/collections",
             name: "feature collections",
-            component: () => import("@/views/spaceprez/FeatureCollectionsView.vue")
+            component: () => import("@/views/ItemListView.vue"),
+            props: {
+                title: "Feature Collections",
+                parentType: "dcat:Dataset",
+                itemPred: "rdfs:member",
+                childButton: { name: "Features", url: "/items" },
+                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate?
+                enableSearch: true
+            }
         },
         {
             path: "/s/datasets/:datasetId/collections/:featureCollectionId",
             name: "feature collection",
-            component: () => import("@/views/spaceprez/FeatureCollectionView.vue")
+            component: () => import("@/views/PropTableView.vue"),
+            props: {
+                type: "geo:FeatureCollection",
+                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate?
+                childPred: "rdfs:member",
+                childButton: { name: "Features", url: "/items" },
+                enableSearch: true
+            }
         },
         {
             path: "/s/datasets/:datasetId/collections/:featureCollectionId/items",
             name: "features",
-            component: () => import("@/views/spaceprez/FeaturesView.vue")
+            component: () => import("@/views/ItemListView.vue"),
+            props: {
+                title: "Features",
+                parentType: "geo:FeatureCollection",
+                itemPred: "rdfs:member",
+                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate?
+            }
         },
         {
             path: "/s/datasets/:datasetId/collections/:featureCollectionId/items/:featureId",
             name: "feature",
-            component: () => import("@/views/spaceprez/FeatureView.vue")
+            component: () => import("@/views/PropTableView.vue"),
+            props: {
+                type: "geo:Feature",
+                titlePred: "rdfs:label", // soon replaced with default profile hasLabelPredicate
+                descPred: "dcterms:description",
+            }
         },
         {
             path: "/c",
@@ -120,17 +202,39 @@ const router = createRouter({
         {
             path: "/c/catalogs",
             name: "catalogs",
-            component: () => import("@/views/catprez/CatalogsView.vue")
+            component: () => import("@/views/ItemListView.vue"),
+            props: {
+                title: "Catalogs",
+                itemPred: "rdfs:member",
+                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                descPred: "dcterms:description", // soon replaced with default profile hasLabelPredicate
+                enableSearch: true
+            }
         },
         {
             path: "/c/catalogs/:catalogId",
             name: "catalog",
-            component: () => import("@/views/catprez/CatalogView.vue")
+            component: () => import("@/views/PropTableView.vue"),
+            props: {
+                type: "dcat:Catalog",
+                getChildren: true,
+                childPred: "dcterms:hasPart",
+                childTitlePred: "rdfs:label",
+                childDisplayTitle: "Resources",
+                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate?
+                enableSearch: true
+            }
         },
         {
             path: "/c/catalogs/:catalogId/:resourceId",
             name: "resource",
-            component: () => import("@/views/catprez/ResourceView.vue")
+            component: () => import("@/views/PropTableView.vue"),
+            props: {
+                type: "dcat:Resource",
+                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate?
+            }
         },
         {
             path: "/sparql",

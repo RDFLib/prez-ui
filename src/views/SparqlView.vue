@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import { nextTick, onMounted, ref, inject, computed, watch, toRaw } from "vue";
-import { loadScript } from "vue-plugin-load-script";
 import Yasqe from "@triply/yasqe";
 import Yasr from "@triply/yasr";
 import { useUiStore } from "@/stores/ui";
 import sparqlExamples from "@/util/sparqlExamples";
-import { configKey, defaultConfig } from "@/types";
+import { apiBaseUrlConfigKey } from "@/types";
 
 const graphFormats = [
     {
@@ -50,7 +49,7 @@ const selectFormats = [
 ];
 
 const ui = useUiStore();
-const { apiBaseUrl } = inject(configKey, defaultConfig);
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 
 const yasqe = ref<Yasqe | null>(null);
 const yasr = ref<Yasr | null>(null);
@@ -68,8 +67,7 @@ const sparqlEndpoint = computed(() => {
     } else if (selectedEndpoint.value === "vocprez") {
         return apiBaseUrl + "/v/sparql";
     } else {
-        return "https://dbpedia.org/sparql"; // temporary until API /sparql endpoints are fixed (also no top-level /sparql endpoint seems to exist)
-        // return apiBaseUrl + "/sparql";
+        return apiBaseUrl + "/sparql";
     }
 });
 
@@ -127,74 +125,36 @@ onMounted(() => {
         }));
     }
 
-    loadScript("https://unpkg.com/@triply/yasqe/build/yasqe.min.js").then(() => {
-        nextTick(() => {
-            yasqe.value = new Yasqe(document.getElementById("yasqe")!, {
-                showQueryButton: true,
-                resizeable: false,
-                requestConfig: {
-                    endpoint: sparqlEndpoint.value,
-                    method: "GET",
-                    adjustQueryBeforeRequest: (y) => { // add comment in query for Accept header to address caching issue
-                        return `# ${(queryType.value === "SELECT" || queryType.value === "ASK") ? selectFormat.value : graphFormat.value}\n${y.getValue()}`;
-                    }
-                },
-            });
-
-            yasqe.value.options.requestConfig.acceptHeaderGraph = graphFormat.value;
-            yasqe.value.options.requestConfig.acceptHeaderSelect = selectFormat.value;
-            queryType.value = yasqe.value.getQueryType();
-        })
-    })
-    loadScript("https://unpkg.com/@triply/yasr/build/yasr.min.js").then(() => {
-        nextTick(() => {
-            yasr.value = new Yasr(document.getElementById("yasr")!);
-            yasr.value.config.prefixes = yasqe.value!.getPrefixesFromQuery();
-
-            yasqe.value!.on("change", () => {
-                queryType.value = yasqe.value!.getQueryType();
-            });
-            yasqe.value!.on("query", (y) => {
-                yasr.value!.config.prefixes = y.getPrefixesFromQuery();
-            });
-            yasqe.value!.on("queryResponse", (y, response, duration) => {
-                yasr.value!.setResponse(response, duration);
-            });
+    nextTick(() => {
+        yasqe.value = new Yasqe(document.getElementById("yasqe")!, {
+            showQueryButton: true,
+            resizeable: false,
+            requestConfig: {
+                endpoint: sparqlEndpoint.value,
+                method: "GET",
+                adjustQueryBeforeRequest: (y) => { // add comment in query for Accept header to address caching issue
+                    return `# ${(queryType.value === "SELECT" || queryType.value === "ASK") ? selectFormat.value : graphFormat.value}\n${y.getValue()}`;
+                }
+            },
         });
-    })
 
-    // yasqe & yasr config
-    // nextTick(() => {
-    //     yasqe.value = new Yasqe(document.getElementById("yasqe"), {
-    //         showQueryButton: true,
-    //         resizeable: false,
-    //         requestConfig: {
-    //             endpoint: sparqlEndpoint.value,
-    //             method: "GET",
-    //             adjustQueryBeforeRequest: (y) => { // add comment in query for Accept header to address caching issue
-    //                 return `# ${(queryType.value === "SELECT" || queryType.value === "ASK") ? selectFormat.value : graphFormat.value}\n${y.getValue()}`;
-    //             }
-    //         },
-    //     });
-    //     yasr.value = new Yasr(document.getElementById("yasr"));
+        yasr.value = new Yasr(document.getElementById("yasr")!);
+        yasr.value.config.prefixes = yasqe.value!.getPrefixesFromQuery();
 
-    //     // initialise options
-    //     yasqe.value.options.requestConfig.acceptHeaderGraph = graphFormat.value;
-    //     yasqe.value.options.requestConfig.acceptHeaderSelect = selectFormat.value;
-    //     queryType.value = yasqe.value.getQueryType();
-    //     yasr.value.config.prefixes = yasqe.value.getPrefixesFromQuery();
+        yasqe.value!.on("change", () => {
+            queryType.value = yasqe.value!.getQueryType();
+        });
+        yasqe.value!.on("query", (y) => {
+            yasr.value!.config.prefixes = y.getPrefixesFromQuery();
+        });
+        yasqe.value!.on("queryResponse", (y, response, duration) => {
+            yasr.value!.setResponse(response, duration);
+        });
 
-    //     // events
-    //     yasqe.value.on("change", (y) => {
-    //         queryType.value = y.getQueryType();
-    //     });
-    //     yasqe.value.on("query", (y, request) => {
-    //         yasr.value.config.prefixes = y.getPrefixesFromQuery();
-    //     });
-    //     yasqe.value.on("queryResponse", (y, response, duration) => {
-    //         yasr.value.setResponse(response, duration);
-    //     });
-    // });
+        yasqe.value.options.requestConfig.acceptHeaderGraph = graphFormat.value;
+        yasqe.value.options.requestConfig.acceptHeaderSelect = selectFormat.value;
+        queryType.value = yasqe.value.getQueryType();
+    });
 });
 
 function loadExample(query: string) {

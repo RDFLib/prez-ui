@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { inject, computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
-import { configKey, defaultConfig } from "@/types";
+import { enabledPrezsConfigKey, type PrezFlavour } from "@/types";
 
 const routes: {[key: string]: any[]} = {
     "VocPrez": [
@@ -59,8 +59,8 @@ const routes: {[key: string]: any[]} = {
 const route = useRoute();
 
 const enabledPrezs = computed<string[]>(() => {
-    const config = inject(configKey, defaultConfig);
-    return config.enabledPrezs.sort((a: string, b: string) => a.localeCompare(b));
+    const enabledPrezsFlavours = inject(enabledPrezsConfigKey) as PrezFlavour[];
+    return enabledPrezsFlavours.sort((a: string, b: string) => a.localeCompare(b));
 });
 
 const activePrez = computed(() => {
@@ -82,13 +82,6 @@ const props = defineProps<{
 <template>
     <component :is="props.sidenav ? 'slot' : 'div'" id="nav-wrapper">
         <nav id="main-nav" :class="`${props.sidenav ? 'sidenav' : ''} ${collapse ? 'collapse' : ''}`">
-            <div id="search">
-                <div id="search-box">
-                    <input type="text" name="" id="" placeholder="Search" />
-                    <button id="clear-btn"><i class="fa-regular fa-xmark"></i></button>
-                </div>
-                <button id="search-btn" class="btn"><i class="fa-regular fa-magnifying-glass"></i></button>
-            </div>
             <div class="nav-item"><RouterLink to="/" class="nav-link">Home</RouterLink></div>
             <template v-for="prez in enabledPrezs">
                 <div class="nav-item">
@@ -110,7 +103,7 @@ const props = defineProps<{
                     </div>
                 </nav>
             </template>
-            <div class="nav-item"><RouterLink to="/search" class="nav-link">Search</RouterLink></div>
+            <div class="nav-item"><RouterLink to="/search" class="nav-link">Advanced Search</RouterLink></div>
             <div class="nav-item"><RouterLink to="/sparql" class="nav-link">SPARQL</RouterLink></div>
             <div class="nav-item"><RouterLink to="/profiles" class="nav-link">Profiles</RouterLink></div>
             <div class="nav-item"><RouterLink to="/about" class="nav-link">About</RouterLink></div>
@@ -232,50 +225,6 @@ div.nav-item {
     &.col {
         flex-direction: column;
         padding: 10px;
-    }
-}
-
-#search {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    padding: 6px;
-
-    #search-box {
-        display: flex;
-        flex-direction: row;
-        align-items: stretch;
-        background-color: white;
-        border-top-left-radius: $borderRadius;
-        border-bottom-left-radius: $borderRadius;
-        border: 1px solid #aaaaaa;
-        border-right: none;
-
-        input {
-            background-color: unset;
-            border: none;
-            width: 100%;
-        }
-
-        #clear-btn {
-            padding: 8px 10px;
-            background-color: transparent;
-            border: none;
-            color: #aaaaaa;
-            cursor: pointer;
-            @include transition(color);
-
-            &:hover {
-                color: #888888;
-            }
-        }
-    }
-
-    #search-btn {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-        border-top-right-radius: $borderRadius;
-        border-bottom-right-radius: $borderRadius;
     }
 }
 </style>

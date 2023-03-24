@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { onMounted, inject } from "vue";
 import { useUiStore } from "@/stores/ui";
-import { configKey, defaultConfig } from "@/types";
+import { apiBaseUrlConfigKey } from "@/types";
 
 const ui = useUiStore();
-const { apiBaseUrl } = inject(configKey, defaultConfig);
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 
 onMounted(() => {
     ui.rightNavConfig = { enabled: false };

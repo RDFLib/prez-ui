@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { ref, onMounted, inject } from "vue";
+import { onMounted, inject } from "vue";
 import { useUiStore } from "@/stores/ui";
 import { useGetRequest } from "@/composables/api";
-import { configKey, defaultConfig } from "@/types";
+import { apiBaseUrlConfigKey } from "@/types";
 
-const { apiBaseUrl } = inject(configKey, defaultConfig);
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const ui = useUiStore();
 const { data, loading, error, doRequest } = useGetRequest();
 

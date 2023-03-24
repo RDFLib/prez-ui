@@ -1,0 +1,90 @@
+name: Deploy demo frontend to Pages, push Docker image to GHCR
+
+on:
+  # Runs on tagged releases
+  release:
+    types:
+      - published
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+permissions:
+  contents: read
+  pages: write      # to deploy to Pages
+  id-token: write   # to verify the deployment originates from an appropriate source
+  packages: read
+
+jobs:
+  # Build & upload artifact for pages
+  build_pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          cache: npm
+      - name: Install and build
+        run: |
+          npm ci
+          npm run build
+        env:
+          VITE_SIDENAV: ${{ secrets.VITE_SIDENAV }}
+          VITE_ENABLED_PREZS: ${{ secrets.VITE_ENABLED_PREZS }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          GH_PAGES_DEMO: true
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload build directory
+          path: 'dist'
+
+  # Deploy to github pages
+  deploy_pages:
+    # Add a dependency to the build job
+    needs: build_pages
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+  
+  # build & push Docker image
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Get release version tag
+        run: |
+          echo ::set-output name=version::$(echo "${{ github.ref_name }}" | sed "s/^v//g" )
+          echo ::set-output name=version_minor::$(echo "${{ github.ref_name }}" | sed -e "s/^v//g" -e "s/\.[0-9]\+$//g" )
+          echo ::set-output name=version_major::$(echo "${{ github.ref_name }}" | sed -e "s/^v//g" -e "s/\.[0-9]\+$//g" -e "s/\.[0-9]\+$//g" )
+        id: get_version
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        env:
+          IMAGE_NAME: ghcr.io/rdflib/prez-ui
+        with:
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:${{ steps.get_version.outputs.version }},${{ env.IMAGE_NAME }}:${{ steps.get_version.outputs.version_minor }},${{ env.IMAGE_NAME }}:${{ steps.get_version.outputs.version_major }},${{ env.IMAGE_NAME }}:latest
+

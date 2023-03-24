@@ -7,6 +7,7 @@ const ui = useUiStore();
 
 <template>
     <div id="breadcrumbs">
+        <!-- <i class="fa-regular fa-bread-loaf"></i> -->
         <RouterLink to="/" class="breadcrumb">Home</RouterLink>
         <span v-if="ui.breadcrumbs.length > 0" class="breadcrumb-separator"><i class="fa-regular fa-chevron-right"></i></span>
         <template v-for="(breadcrumb, index) in ui.breadcrumbs">
@@ -24,6 +25,8 @@ const ui = useUiStore();
     flex-direction: row;
     gap: 8px;
     align-items: center;
+    flex-wrap: wrap;
+    // overflow-x: auto;
 
     a.breadcrumb {
         font-size: 0.8em;
