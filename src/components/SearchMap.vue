@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { wktToGeoJSON } from "@terraformer/wkt"
-import { inject, reactive, ref, defineEmits, defineExpose, watch, type PropType } from 'vue'
-import { configKey, defaultConfig } from "@/types";
+import { inject, reactive, ref, watch, type PropType } from 'vue'
+import { mapConfigKey, type MapConfig } from "@/types";
+import { convertConfigTypes } from '@/util/mapSearchHelper'
 import type { MapOptionsCenter } from '@/types'
-import type { WKTResult } from '@/stores/mapSearch';
+import type { WKTResult } from '@/stores/mapSearchStore.d';
 import { ShapeTypes } from "@/components/SearchMap.d";
 
 // selectionUpdated is emitted when a selection has changed on map
@@ -11,7 +12,7 @@ import { ShapeTypes } from "@/components/SearchMap.d";
 const emits = defineEmits(['selectionUpdated'])
 
 // get the default map settings
-const { mapSettings } = inject(configKey, defaultConfig);
+const mapConfig = convertConfigTypes(inject(mapConfigKey)) as MapConfig;
 
 const mapRef = ref()
 
@@ -231,13 +232,12 @@ watch(mapRef, googleMap => {
 <template>
     <GMapMap
         ref="mapRef"
-        :center="props.center || mapSettings.options.center" 
-        :street-view-control="props.streetViewController || mapSettings.options.streetViewController"
-        :zoom="props.zoom || mapSettings.options.zoom"
+        :center="props.center || mapConfig.settings.options.center"
+        :street-view-control="props.streetViewController || mapConfig.settings.options.streetViewController"
+        :zoom="props.zoom || mapConfig.settings.options.zoom"
         map-type-id="terrain"
         style="width: 100%; height: 500px" 
     >
     </GMapMap>
-
 
 </template>

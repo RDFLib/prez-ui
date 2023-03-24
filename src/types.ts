@@ -1,6 +1,31 @@
 import type { InjectionKey } from "vue";
 import type { Quad } from "n3";
 
+export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
+
+export const mapConfigKey: InjectionKey<MapConfig> = Symbol();
+export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
+export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
+export const apiBaseUrlConfigKey: InjectionKey<string> = Symbol();
+
+export interface MapConfig {
+    settings: MapSettings,
+    search: MapSearchConfig
+}
+
+export interface MapSearchConfig {
+    spatial: {
+        datasetClass: string
+        membershipRelationship: string
+    },
+    props: {
+        fId: string
+        fLabel: string
+        fcLabel: string
+        dsLabel: string
+    }
+}
+
 export interface MapOptionsCenter {
     lat: number;
     lng: number;
@@ -16,36 +41,6 @@ export interface MapSettings {
     apiKey: string;
     options: MapOptions;
 }
-
-export interface PrezConfig {
-    enabledPrezs: string[];
-    sidenav: boolean;
-    apiBaseUrl: string;
-    mapSettings: MapSettings;
-};
-export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
-
-export const defaultConfig: PrezConfig = {
-    enabledPrezs: ["VocPrez", "SpacePrez", "CatPrez"],
-    sidenav: true,
-    apiBaseUrl: "http://localhost:8000",
-    mapSettings: {
-        apiKey: "",
-        options: {
-            center: {
-                lat: 0,
-                lng: 0
-            },
-            streetViewController: false,
-            zoom: 1
-        }
-    }
-}
-
-export const configKey: InjectionKey<PrezConfig> = Symbol();
-export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
-export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
-export const apiBaseUrlConfigKey: InjectionKey<string> = Symbol();
 
 export interface Profile {
     namespace: string;

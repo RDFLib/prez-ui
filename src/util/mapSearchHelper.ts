@@ -1,4 +1,5 @@
 import { AreaTypes, type Coords } from "@/components/SearchMap.d";
+import type { MapSearchConfig } from "@/types";
 
 /** button option attributes */
 export type ButtonOption = {
@@ -16,13 +17,19 @@ export function enumToOptions<T extends Record<string, string>>(myEnum: T): Butt
 }
 
 /** Main query function to return a sparql query given a set of feature collections, area type, radius, coordinate data and result limit */
-export function mapSearchToSparql(featureCollections:string[], coords:Coords, areaType:AreaTypes, radius: number, limit:number) {
+export function mapSearchToSparql(
+  featureCollections:string[], 
+  coords:Coords,
+  areaType:AreaTypes, 
+  radius: number, 
+  limit:number, 
+  config: MapSearchConfig) {
 
   return mapSearchQuery(
     // create the feature collection query requirements in a SPARQL union format
     queryUnionJoinPart(
       // map a simple list of feature collection URLs into a list of feature collection query parts in SPARQL format
-      featureCollections.map(fc=>featureCollectionQueryPart(fc))
+      featureCollections.map(fc=>featureCollectionQueryPart(fc, config))
     ),
     // turn topo specifications into a SPARQL query
     queryTopoFilterPart(
@@ -30,44 +37,39 @@ export function mapSearchToSparql(featureCollections:string[], coords:Coords, ar
       areaType, 
       radius
     ), 
-    limit
+    limit,
+    config
   )
   
 }
 
+//PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+//PREFIX dcterms: <http://purl.org/dc/terms/>
 
 const mapSearchPrefixPart = `PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX spatialF: <http://jena.apache.org/function/spatial#>
 PREFIX unit: <http://www.opengis.net/def/uom/OGC/1.0/>
-PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX sosa: <http://www.w3.org/ns/sosa/>
 PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX prez: <https://prez.dev/>
 `
 
-const featureCollectionQueryPart = (featureCollection:string) => ` <${featureCollection}> rdfs:member ?f_uri . 
-<${featureCollection}> dcterms:title ?fc_label
+const featureCollectionQueryPart = (featureCollection:string, config: MapSearchConfig) => ` <${featureCollection}> <${config.spatial.membershipRelationship}> ?f_uri . 
+<${featureCollection}> <${config.props.fcLabel}> ?fc_label
 `
 
-/*
-{ <http://example.com/datasets/sandgate/catchments> rdfs:member ?f_uri . 
-<http://example.com/datasets/sandgate/catchments> dcterms:title ?fc_label
-}
-*/
-
 /** Constructs a SPARQL query for the SpacePrez map search */
-const mapSearchQuery = (featureCollectionsQueryPart:string, topoQueryPart:string, limit:number) => `${mapSearchPrefixPart}
+const mapSearchQuery = (featureCollectionsQueryPart:string, topoQueryPart:string, limit:number, config: MapSearchConfig) => `${mapSearchPrefixPart}
 SELECT ?f_uri ?wkt ?fc_label ?f_label ?p ?o
 WHERE {
     { ?f_uri geo:hasGeometry/geo:asWKT ?wkt;
   		?p ?o.
-    VALUES ?p {dcterms:identifier}
+    VALUES ?p {<${config.props.fId}>}
     FILTER(DATATYPE(?o)!=prez:slug)
     }
     ${featureCollectionsQueryPart}
-    OPTIONAL {?f_uri rdfs:label ?potential_label }
+    OPTIONAL {?f_uri <${config.props.fcLabel}> ?potential_label }
     BIND(COALESCE(?potential_label, STR(?f_uri)) AS ?f_label)
     ${topoQueryPart}
 }
@@ -102,4 +104,23 @@ const shapeQueryPart = (coords: Coords) => {
   }
 }
 
-
+/** required to honour the object typing in the map config object, this is required when injecting config */
+export function convertConfigTypes(config: any): any {
+  // If config is a string, try to parse it as a number
+  if (typeof config === 'string') {
+    const num = Number(config);
+    if (!isNaN(num)) {
+      return num;
+    }
+  }
+  // If config is an object, recursively traverse its properties
+  else if (typeof config === 'object' && config !== null) {
+    const newObj: any = {};
+    for (const prop in config) {
+      newObj[prop] = convertConfigTypes(config[prop]);
+    }
+    return newObj;
+  }
+  // Otherwise, return the config as-is
+  return config;
+}

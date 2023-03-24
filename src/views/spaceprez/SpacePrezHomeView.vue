@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted } from "vue";
 import { useUiStore } from "@/stores/ui";
-import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
+import SpacePrezSearchMap from "@/components/search/SpacePrezSearchMap.vue";
 
 const ui = useUiStore();
 
@@ -16,7 +16,7 @@ onMounted(() => {
 <template>
     <h1>SpacePrez Home</h1>
     <p>Welcome to SpacePrez</p>
-    <AdvancedSearch flavour="SpacePrez" fullPage />
+    <SpacePrezSearchMap />
 </template>
 
 <style lang="scss" scoped>

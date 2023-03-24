@@ -9,31 +9,30 @@ import axios from 'axios'
 import { Util, Store, Parser, DataFactory, Quad } from "n3";
 const { namedNode } = DataFactory;
 import type { DatasetTree, MatchFilter, SimpleQueryResult } from '@/stores/datasetsStore.d'
-
-import { configKey, defaultConfig } from '@/types'
+import { mapConfigKey, type MapConfig, type MapSearchConfig } from "@/types";
+import { apiBaseUrlConfigKey } from "@/types";
 import { inject } from 'vue';
+import { convertConfigTypes } from '@/util/mapSearchHelper';
 
 /**
  * SPARQL query to return all datasets and feature collections required
  */
-export const QUERY_DATASETS_FC = `PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-PREFIX dcat: <http://www.w3.org/ns/dcat#>
-PREFIX dcterms: <http://purl.org/dc/terms/>
+const getDatasetFeatureQuery = (config: MapSearchConfig) => {
+  return `PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX prez: <https://prez.dev/>
 
-CONSTRUCT {?ds a dcat:Dataset ;
-    dcterms:title ?ds_title ;
-    rdfs:member ?fc .
+CONSTRUCT {?ds a <${config.spatial.datasetClass}> ;
+    <${config.props.dsLabel}> ?ds_title ;
+    <${config.spatial.membershipRelationship}> ?fc .
   ?fc a geo:FeatureCollection ;
-    dcterms:title ?fc_title}
-WHERE {<https://prez.dev/DatasetList> rdfs:member ?ds.
-  ?ds rdfs:member ?fc ;
-      dcterms:title ?ds_title .
-  ?fc dcterms:title ?fc_title
+  <${config.props.fcLabel}> ?fc_title}
+WHERE {<https://prez.dev/DatasetList> <${config.spatial.membershipRelationship}> ?ds.
+  ?ds <${config.spatial.membershipRelationship}> ?fc ;
+      <${config.props.dsLabel}> ?ds_title .
+  ?fc <${config.props.fcLabel}> ?fc_title
       }`
-
+}
 
 /**
  * Converts a quad/triple object from N3 into a simple result type for easier template processing
@@ -60,14 +59,18 @@ export const datasetsStore = defineStore({
    * @returns {Object}
    */
   state: () => {
-    const config = inject(configKey, defaultConfig)
+    // get the default map settings
+    const mapConfig = convertConfigTypes(inject(mapConfigKey)) as MapConfig;
+    const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
+    //const config = inject(configKey, defaultConfig)
     return {
       data: <Quad[]>[],
       success: false,
       store: new Store(),
       loading: false,
       error: null,
-      apiBaseUrl: config.apiBaseUrl
+      apiBaseUrl,
+      mapConfig
     }
   },
 
@@ -115,9 +118,9 @@ export const datasetsStore = defineStore({
      */
     getDatasets() {
       let results: SimpleQueryResult[] = []
-      const matched = this.getMatchedData({object: namedNode('http://www.w3.org/ns/dcat#Dataset')})
+      const matched = this.getMatchedData({object: namedNode(this.mapConfig.search.spatial.datasetClass)})
       matched.forEach(itemLink=>{
-        for(const item of this.store.match(namedNode(itemLink.subject), namedNode('http://purl.org/dc/terms/title'))) {
+        for(const item of this.store.match(namedNode(itemLink.subject), namedNode(this.mapConfig.search.props.dsLabel))) {
           results.push(quadToSimpleQueryResult(item))
         }
       })
@@ -132,18 +135,17 @@ export const datasetsStore = defineStore({
      * @returns List of SimpleQueryResult objects representing the feature collections.
      */
     getFeatureCollections(datasetSubjects:string[]):SimpleQueryResult[] {
-      console.log(datasetSubjects)
       if(datasetSubjects.length == 0) {
-        return []
+        return [] // changed to return empty
         // simply returns all matching feature collections
         //        return this.getMatchedData({predicate: namedNode('http://purl.org/dc/terms/title')})
       } else {
         // narrow down to a specific dataset
         let results:SimpleQueryResult[] = []
         datasetSubjects.forEach(subject=>{
-          const matchedFCs = this.getMatchedData({predicate: namedNode('http://www.w3.org/2000/01/rdf-schema#member'), subject: namedNode(subject)})
+          const matchedFCs = this.getMatchedData({predicate: namedNode(this.mapConfig.search.spatial.membershipRelationship), subject: namedNode(subject)})
           matchedFCs.forEach(itemLink=>{
-            for(const item of this.store.match(namedNode(itemLink.object), namedNode('http://purl.org/dc/terms/title'))) {
+            for(const item of this.store.match(namedNode(itemLink.object), namedNode(this.mapConfig.search.props.fcLabel))) {
               results.push(quadToSimpleQueryResult(item))
             }
           })
@@ -156,7 +158,7 @@ export const datasetsStore = defineStore({
      * Calls the spacePrez search endpoint using the query for spacePrez
      */
     async fetchSpacePrezData() {
-        return await this.fetchData(`${this.apiBaseUrl}/s/sparql`, QUERY_DATASETS_FC);
+        return await this.fetchData(`${this.apiBaseUrl}/s/sparql`, getDatasetFeatureQuery(this.mapConfig.search));
     },
 
     /**

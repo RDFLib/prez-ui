@@ -1,3 +1,16 @@
+## Changes for 2023-03-24
+
+Merge of map search changes for SpacePrez
+
+Configuration management:
+- Addition of new environment variables VITE_MAPSETTINGS_...
+- Creation of new map config key to allow other components to use the default map settings through the config key
+- Update components dependent on map config, add helper function to retain config types when injecting
+- Update SPARQL queries to use configuration to specify classnames and other properties
+
+Update SearchPrezHomeView to include the new SpacePrezSearchMap
+Update datasetStore and spacePrez map search to use config settings
+
 ## Changes for 2023-03-23
 
 This update provides basic UI map search functionality to the SpacePrez subsystem.
@@ -23,8 +36,9 @@ Files updated:
 - /src/util/mapSearchHelper.ts - Contains helper functions for generating the map SPARQL query, and other UI helpers for the search map
 - /src/config.json - Updated to include default map settings for the google map, can be overwritten when including the SearchMap component
 - /src/types.ts - Added type definitions for the map settings config. Note, other definitions live along side the components in .d.ts files
+- /src/main.ts - Include app use for map component 
 - /src/terraformer.d.ts - For the terraformer module
-- /vite.config.ts - update optimizeDeps to include @fawmi/vue-google-maps 
+- /vite.config.ts - update optimizeDeps to include @fawmi/vue-google-maps
 
 Updated modules:
 - @terraformer/arcgis - to create geoJSON from WKT

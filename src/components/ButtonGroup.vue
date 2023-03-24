@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, type PropType, computed, defineEmits } from 'vue'
+  import { ref, type PropType, computed } from 'vue'
 
   type Button = {
     text: string

@@ -4,9 +4,10 @@
  */
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { configKey, defaultConfig } from '@/types'
 import { inject } from 'vue';
 import type { WKTResult } from '@/stores/mapSearchStore.d'
+
+import { apiBaseUrlConfigKey } from "@/types";
 
 /**
  * Main search store for processing the results of a search SPARQL query
@@ -19,13 +20,15 @@ export const mapSearchStore = defineStore({
    * @returns {Object}
    */
   state: () => {
-    const config = inject(configKey, defaultConfig)
+    const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
+
+    //    const config = inject(configKey, defaultConfig)
     return {
       data: <WKTResult[]>[],
       success: false,
       loading: false,
       error: null,
-      apiBaseUrl: config.apiBaseUrl
+      apiBaseUrl: apiBaseUrl
     }
   },
 
