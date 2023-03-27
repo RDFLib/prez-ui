@@ -15,3 +15,14 @@ Prez UI can be deployed as a Docker container, which contains an NGINX server se
 
 ### SSL
 To enable SSL for a Docker container deployment, supply your own `nginx.conf` file containing the commented-out lines for SSL in the supplied [nginx.conf](./nginx.conf) file in a Docker volume (yet to be implemented).
+
+## Development
+[Visual Studio Code](https://code.visualstudio.com/) is the recommended IDE for development on Prez UI because of its intellisense with TypeScript. These extensions are highly recomended:
+
+- [Vue Language Features (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
+- [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin)
+    - Make sure to enable [takeover mode](https://vuejs.org/guide/typescript/overview.html#volar-takeover-mode)
+
+Nice-to-haves:
+
+- [Vue VSCode Snippets](https://marketplace.visualstudio.com/items?itemName=sdras.vue-vscode-snippets)
