@@ -121,7 +121,6 @@ onMounted(() => {
 <template>
     <header>
         <div id="header-content">
-            <div id="header-html"></div>
             <div id="header-bottom">
                 <div id="nav-header">
                     <img id="nav-logo" :src="prezLogo" alt="Prez logo">
@@ -153,11 +152,6 @@ onMounted(() => {
             </div>
         </div>
     </main>
-    <footer>
-        <div id="footer-content">
-            <div id="footer-html"></div>
-        </div>
-    </footer>
 </template>
 
 <style lang="scss" scoped>
@@ -170,21 +164,10 @@ header {
 
     #header-content {
         width: 100%;
-        // max-width: $pageMaxWidth;
         margin: 0 auto;
         padding: 6px 12px;
         display: flex;
         flex-direction: column;
-        // gap: 16px;
-
-        // #header-html {
-        //     display: flex;
-
-        //     #page-heading {
-        //         color: $headerColor;
-        //         margin: auto;
-        //     }
-        // }
 
         #header-bottom {
             display: grid;
@@ -196,7 +179,6 @@ header {
                 flex-direction: row;
                 gap: 8px;
                 align-items: center;
-                // padding: 8px;
 
                 #nav-logo {
                     width: 40px;
@@ -212,7 +194,6 @@ header {
 
                     small#nav-subtitle {
                         font-size: 0.8rem;
-                        // color: grey;
                     }
                 }
             }
@@ -227,7 +208,6 @@ main {
 
     #main-content {
         width: 100%;
-        // max-width: $pageMaxWidth;
         margin: 0 auto;
         display: flex;
         flex-direction: column;
@@ -251,27 +231,4 @@ main {
         }
     }
 }
-
-footer {
-    background-color: $footerBg;
-    color: $footerColor;
-    display: flex;
-
-    // #footer-content {
-    //     width: 100%;
-    //     // max-width: $pageMaxWidth;
-    //     margin: 0 auto;
-    //     padding: $contentPadding;
-    //     display: flex;
-    //     flex-direction: column;
-    //     gap: 16px;
-
-    //     #prez-footer {
-    //         display: flex;
-    //         flex-direction: row;
-    //         gap: 12px;
-    //     }
-    // }
-}
-
 </style>
