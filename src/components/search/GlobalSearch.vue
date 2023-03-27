@@ -28,7 +28,7 @@ function clearSearch() {
                 id=""
                 class="search-input"
                 v-model="searchTerm"
-                placeholder="Global search..."
+                placeholder="Linked Data search..."
                 @keypress.enter="submit()"
             >
             <button type="button" @click="clearSearch()" class="clear-btn"><i class="fa-regular fa-xmark"></i></button>

@@ -66,7 +66,7 @@ function camelToTitleCase(s: string): string {
                         id=""
                         class="search-input"
                         v-model="searchTerm"
-                        :placeholder="`${prez === 'all' ? 'Global search...' : 'Search...'}`"
+                        :placeholder="`${prez === 'all' ? 'Linked Data search...' : 'Search...'}`"
                     >
                     <button type="button" @click="clearSearch()" class="clear-btn"><i class="fa-regular fa-xmark"></i></button>
                 </div>
