@@ -6,8 +6,7 @@ import { mapConfigKey, type MapConfig } from "@/types";
 import { convertConfigTypes } from '@/util/mapSearchHelper'
 import type { MapOptionsCenter } from '@/types'
 import type { WKTResult } from '@/stores/mapSearchStore.d';
-import { ShapeTypes } from "@/components/SearchMap.d";
-
+import { ShapeTypes, type DrawingModes } from "@/components/SearchMap.d";
 
 // selectionUpdated is emitted when a selection has changed on map
 // the coords of the selection along with the type of selection is provided
@@ -26,7 +25,8 @@ const props = defineProps({
     center: Object as PropType<MapOptionsCenter>,
     zoom: Number,
     streetViewController: Boolean,
-    geoWKT: Object as PropType<WKTResult[]>
+    geoWKT: Object as PropType<WKTResult[]>,
+    drawingModes: Object as PropType<DrawingModes[]>
 })
 
 // when the map object has loaded, it will call this function to set mapDrawFunc, so an external component can call it when needed
@@ -65,18 +65,16 @@ watch(mapRef, googleMap => {
                 drawingControl: true,
                 drawingControlOptions: {
                     position: google.maps.ControlPosition.TOP_CENTER,
-                    drawingModes: [
-                        google.maps.drawing.OverlayType.MARKER,
-                        google.maps.drawing.OverlayType.RECTANGLE,
-                        google.maps.drawing.OverlayType.POLYGON
-                    ]
+                    drawingModes: props.drawingModes ? props.drawingModes.map(mode=>google.maps.drawing.OverlayType[mode]) : []
                 },
                 markerOptions: {
                     icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
                 },
                 rectangleOptions: shapeOptions
             });
-            drawingManager.setMap(map);
+            if(props.drawingModes) {
+                drawingManager.setMap(map);
+            }
             let features = []
 
             const drawResults = (results: WKTResult[]) => {
@@ -147,8 +145,10 @@ watch(mapRef, googleMap => {
             clearBtn.addEventListener("click", clearShapes);
             clearBtnContainer.appendChild(clearBtn);
 
-            map.controls[google.maps.ControlPosition.TOP_CENTER].push(clearBtnMenu);
-
+            if(props.drawingModes) {
+                map.controls[google.maps.ControlPosition.TOP_CENTER].push(clearBtnMenu);
+            }
+            
             let pointToWKT = (coord) => {
                 emits("selectionUpdated", [coord], ShapeTypes.Point);
                 return `POINT (${coord[0]} ${coord[1]})`;

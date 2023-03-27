@@ -188,7 +188,12 @@ const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) =
 
         </div>
         <div class="right-panel">
-            <SearchMap ref="searchMapRef" :geo-w-k-t="responseRef" @selectionUpdated="updateSelection" />
+            <SearchMap 
+                ref="searchMapRef" 
+                :geo-w-k-t="responseRef" 
+                :drawing-modes="['MARKER', 'POLYGON', 'RECTANGLE']"
+                @selectionUpdated="updateSelection" 
+            />
             <div v-if="mapSearch.data && mapSearch.data.length > 0">
                 <h3>Result set</h3>
                 <table>
