@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import VueTypeImports from "vite-plugin-vue-type-imports";
 
+
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [vue(), VueTypeImports(),],
@@ -13,12 +14,19 @@ export default defineConfig({
         }
     },
     build: {
-        target: "es2020"
+        target: "es2020",
+        rollupOptions: {
+            external: ["google.maps"]
+        }
     },
     optimizeDeps: {
         esbuildOptions: {
-            target: "es2020"
-        }
+            target: "es2020",
+        },
+        include: [
+            "@fawmi/vue-google-maps",
+            "fast-deep-equal",
+        ]
     },
     css: {
         preprocessorOptions: {

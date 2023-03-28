@@ -3,9 +3,44 @@ import type { Quad } from "n3";
 
 export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
 
+export const mapConfigKey: InjectionKey<MapConfig> = Symbol();
 export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
 export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
 export const apiBaseUrlConfigKey: InjectionKey<string> = Symbol();
+
+export interface MapConfig {
+    settings: MapSettings,
+    search: MapSearchConfig
+}
+
+export interface MapSearchConfig {
+    spatial: {
+        datasetClass: string
+        membershipRelationship: string
+    },
+    props: {
+        fId: string
+        fLabel: string
+        fcLabel: string
+        dsLabel: string
+    }
+}
+
+export interface MapOptionsCenter {
+    lat: number;
+    lng: number;
+}
+
+export interface MapOptions {
+    center: MapOptionsCenter;
+    streetViewController: boolean;
+    zoom: number;
+}
+
+export interface MapSettings {
+    apiKey: string;
+    options: MapOptions;
+}
 
 export interface Profile {
     namespace: string;
