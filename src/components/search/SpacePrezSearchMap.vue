@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 
 // the searchable map component and related map type definitions
-import SearchMap from "@/components/SearchMap.vue";
-import { AreaTypes, ShapeTypes, type Coords } from "@/components/SearchMap.d";
+import MapClient from "@/components/MapClient.vue";
+import { AreaTypes, ShapeTypes, type Coords } from "@/components/MapClient.d";
 
 // the pinia search store and related type definitions to manage the returned dataset tree
 import { datasetsStore } from "@/stores/datasetsStore";
@@ -188,7 +188,7 @@ const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) =
 
         </div>
         <div class="right-panel">
-            <SearchMap 
+            <MapClient 
                 ref="searchMapRef" 
                 :geo-w-k-t="responseRef" 
                 :drawing-modes="['MARKER', 'POLYGON', 'RECTANGLE']"
@@ -206,7 +206,7 @@ const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) =
                         <tr v-for="result in mapSearch.data">
                             <td>{{ result.fcLabel }}</td>
                             <td>{{ result.label }}</td>
-                            <td><a v-bind:href="`/s/object?uri=${result.uri}`">{{ result.uri }}</a></td>
+                            <td><a v-bind:href="`${result.link}`">{{ result.uri }}</a></td>
                         </tr>
                     </tbody>
                 </table>

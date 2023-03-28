@@ -9,6 +9,8 @@ import type { WKTResult } from '@/stores/mapSearchStore.d'
 
 import { apiBaseUrlConfigKey } from "@/types";
 
+const linkPrefix = '/s/object?uri='
+
 /**
  * Main search store for processing the results of a search SPARQL query
  */
@@ -54,6 +56,7 @@ export const mapSearchStore = defineStore({
           this.data = response.data.results.bindings.filter((item:any)=>item.fc_label?.value).map((item:any)=>{
             return {
               uri: item.f_uri.value,
+              link: `${linkPrefix}${item.f_uri.value}`,
               wkt: item.wkt.value,
               fcLabel: item.fc_label?.value,
               label: item.f_label.value,

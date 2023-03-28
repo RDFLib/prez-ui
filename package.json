@@ -24,6 +24,7 @@
         "vue-router": "^4.1.6"
     },
     "devDependencies": {
+        "@types/google.maps": "^3.52.3",
         "@types/jsdom": "^20.0.1",
         "@types/node": "^18.11.9",
         "@types/terraformer__arcgis": "^2.0.2",

@@ -1,4 +1,4 @@
-import { AreaTypes, type Coords } from "@/components/SearchMap.d";
+import { AreaTypes, type Coords } from "@/components/MapClient.d";
 import type { MapSearchConfig } from "@/types";
 
 /** button option attributes */

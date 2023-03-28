@@ -6,7 +6,9 @@ import { mapConfigKey, type MapConfig } from "@/types";
 import { convertConfigTypes } from '@/util/mapSearchHelper'
 import type { MapOptionsCenter } from '@/types'
 import type { WKTResult } from '@/stores/mapSearchStore.d';
-import { ShapeTypes, type DrawingModes } from "@/components/SearchMap.d";
+import { ShapeTypes, type DrawingModes } from "@/components/MapClient.d";
+import {} from 'google.maps';
+
 
 // selectionUpdated is emitted when a selection has changed on map
 // the coords of the selection along with the type of selection is provided
@@ -30,21 +32,24 @@ const props = defineProps({
 })
 
 // when the map object has loaded, it will call this function to set mapDrawFunc, so an external component can call it when needed
-let mapDrawFunc = null
-const setMapDrawFunc = (func) => {
+
+let mapDrawFunc: Function | null = null
+const setMapDrawFunc = (func: Function) => {
     mapDrawFunc = func
 }
 
 // draw shape is exposed so another component can draw on the map
-const drawShape = (data) => {
-    mapDrawFunc(data)
+const drawShape = (data: WKTResult[]) => {
+    if (mapDrawFunc) {
+        mapDrawFunc(data)
+    }    
 }
 
 defineExpose({drawShape})
 
 watch(mapRef, googleMap => {
       if (googleMap) {
-        googleMap.$mapPromise.then(map=> {
+        googleMap.$mapPromise.then((map: google.maps.Map) => {
             const shapeOptions = {
                 strokeColor: "green",
                 strokeOpacity: 0.8,
@@ -52,12 +57,11 @@ watch(mapRef, googleMap => {
                 fillColor: "green",
                 fillOpacity: 0.35
             };
-            const setShape = (value) => {
+            const setShape = (value: string) => {
                 shape.value = value
-                //console.log(shape.value)
             }
-            let lastRectangle = null
-            let lastPoint = null
+            let lastRectangle: google.maps.Rectangle | google.maps.Polygon | null = null
+            let lastPoint: google.maps.Marker | null = null
             var infowindow = new google.maps.InfoWindow();
 
             var drawingManager = new google.maps.drawing.DrawingManager({
@@ -91,6 +95,7 @@ watch(mapRef, googleMap => {
                             geometry: geoJson,
                             properties: {
                                 uri: result.uri,
+                                link: result.link,
                                 label: result.label,
                                 id: result.id
                             }
@@ -98,7 +103,7 @@ watch(mapRef, googleMap => {
                         features.push(map.data.addGeoJson(featureGeoJson))
                         const bounds = new google.maps.LatLngBounds();
                         map.data.forEach(function (feature) {
-                            feature.getGeometry().forEachLatLng(function (latlng) {
+                            feature.getGeometry()!.forEachLatLng(function (latlng) {
                                 bounds.extend(latlng);
                             });
                         });
@@ -106,7 +111,7 @@ watch(mapRef, googleMap => {
                         map.fitBounds(bounds);                
                     } catch (ex) {
                         // can happen if we're unable to parse the result, just consoled out for now
-                        console.log(ex.message, 'Unable to process ', result)
+                        console.log((ex as Error).message, 'Unable to process ', result)
                     }
                 })
             }
@@ -148,38 +153,28 @@ watch(mapRef, googleMap => {
             if(props.drawingModes) {
                 map.controls[google.maps.ControlPosition.TOP_CENTER].push(clearBtnMenu);
             }
-            
-            let pointToWKT = (coord) => {
+
+            let pointToWKT = (coord: [number, number]) => {
                 emits("selectionUpdated", [coord], ShapeTypes.Point);
                 return `POINT (${coord[0]} ${coord[1]})`;
             }
-            let onPointDraw = (pnt) => {
+            let onPointDraw = (pnt: google.maps.Marker) => {
                 clearShapes()
                 lastPoint = pnt
-                let coord = [pnt.getPosition().lng(), pnt.getPosition().lat()]
+                let coord:[number, number] = [pnt.getPosition()!.lng(), pnt.getPosition()!.lat()]
                 let wkt = pointToWKT(coord)
                 setShape(wkt)
             }
 
-            let rectangleToWKT = (coords) => {
-                let wkt = "POLYGON ((";
-
-                coords.forEach(coord => {
-                    wkt += `${coord[0]} ${coord[1]}, `;
-                });
-
-                wkt = wkt.slice(0, -2); // removes last ", "
-
-                wkt += "))";
-
-                return wkt;
+            let rectangleToWKT = (coords: [number, number][]) => {
+                return "POLYGON ((" + coords.map(coord=>`${coord[0]} ${coord[1]}`).join(', ') + '))';
             }
-            let onRectangleDraw = (rect) => {
+            let onRectangleDraw = (rect: google.maps.Rectangle) => {
                 clearShapes()
                 lastRectangle = rect
-                let ne = rect.getBounds().getNorthEast()
-                let sw = rect.getBounds().getSouthWest()
-                let coords = [
+                let ne = rect.getBounds()!.getNorthEast()
+                let sw = rect.getBounds()!.getSouthWest()
+                let coords:[number, number][] = [
                     [ne.lng(), ne.lat()],
                     [ne.lng(), sw.lat()],
                     [sw.lng(), sw.lat()],
@@ -190,11 +185,11 @@ watch(mapRef, googleMap => {
                 setShape(wkt)
                 emits("selectionUpdated", coords, ShapeTypes.Rectangle);
             }
-            const onPolygonDraw = (poly) => {
+            const onPolygonDraw = (poly: google.maps.Polygon) => {
                 clearShapes()
                 lastRectangle = poly
                 const coordinates = poly.getPath().getArray();
-                const coords = []
+                const coords: [number, number][] = []
                 for (var i = 0; i < coordinates.length; i++) {
                     coords.push([coordinates[i].lng(), coordinates[i].lat()])
                 }
@@ -213,13 +208,9 @@ watch(mapRef, googleMap => {
             drawingManager.addListener("polygoncomplete", onPolygonDraw);
 
             // show an info box with the details of the object clicked
-            map.data.addListener('click', function(event) {
+            map.data.addListener('click', function(event: google.maps.Data.MouseEvent) {
                 var feat = event.feature;
-                var html = `<b>${feat.getProperty('label')}</b>
-                    <b style="float:right">(${feat.getProperty('id')})</b>
-                    <br>
-                    ${feat.getProperty('uri')}
-                    <br><a class="normal_link" target="_blank" href="${feat.getProperty('uri')}">uri</a>`
+                var html = `<b><a target="_blank" href="${feat.getProperty('link')}">${feat.getProperty('label')}</a></b>`
                 infowindow.setContent(html);
                 infowindow.setPosition(event.latLng);
                 infowindow.setOptions({pixelOffset: new google.maps.Size(0,-34)});

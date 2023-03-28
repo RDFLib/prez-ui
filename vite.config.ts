@@ -14,11 +14,14 @@ export default defineConfig({
         }
     },
     build: {
-        target: "es2020"
+        target: "es2020",
+        rollupOptions: {
+            external: ["google.maps"]
+        }
     },
     optimizeDeps: {
         esbuildOptions: {
-            target: "es2020"
+            target: "es2020",
         },
         include: [
             "@fawmi/vue-google-maps",
