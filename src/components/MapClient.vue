@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 
+/// <reference path="../../node_modules/@types/google.maps/index.d.ts" /> 
+
 import { wktToGeoJSON } from "@terraformer/wkt"
 import { inject, reactive, ref, watch, type PropType } from 'vue'
 import { mapConfigKey, type MapConfig } from "@/types";
@@ -7,7 +9,6 @@ import { convertConfigTypes } from '@/util/mapSearchHelper'
 import type { MapOptionsCenter } from '@/types'
 import type { WKTResult } from '@/stores/mapSearchStore.d';
 import { ShapeTypes, type DrawingModes } from "@/components/MapClient.d";
-import {} from 'google.maps';
 
 
 // selectionUpdated is emitted when a selection has changed on map
