@@ -36,6 +36,8 @@ jobs:
           VITE_SIDENAV: ${{ secrets.VITE_SIDENAV }}
           VITE_ENABLED_PREZS: ${{ secrets.VITE_ENABLED_PREZS }}
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_MAP_SEARCH_PROPS_FC_LABEL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_MAP_SEARCH_PROPS_DS_LABEL: ${{ secrets.VITE_MAP_SEARCH_PROPS_DS_LABEL }}
           GH_PAGES_DEMO: true
       - name: Setup Pages
         uses: actions/configure-pages@v2
