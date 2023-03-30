@@ -1,20 +1,20 @@
-name: Deploy demo frontend to Pages, push Docker image to GHCR
+name: Deploy to GitHub Pages, push unstable Docker image to GHCR
 
 on:
-  # Runs on tagged releases
-  release:
-    types:
-      - published
+  # Runs on push to main branch
+  push:
+    branches:
+      - main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+# Grants permissions for GITHUB_TOKEN
 permissions:
   contents: read
   pages: write      # to deploy to Pages
   id-token: write   # to verify the deployment originates from an appropriate source
-  packages: read
+  packages: write   # to push to GHCR package
 
 jobs:
   # Build & upload artifact for pages
@@ -31,7 +31,7 @@ jobs:
       - name: Install and build
         run: |
           npm ci
-          npm run build
+          CI=false npm run build
         env:
           VITE_SIDENAV: ${{ secrets.VITE_SIDENAV }}
           VITE_ENABLED_PREZS: ${{ secrets.VITE_ENABLED_PREZS }}
@@ -68,12 +68,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-      - name: Get release version tag
-        run: |
-          echo ::set-output name=version::$(echo "${{ github.ref_name }}" | sed "s/^v//g" )
-          echo ::set-output name=version_minor::$(echo "${{ github.ref_name }}" | sed -e "s/^v//g" -e "s/\.[0-9]\+$//g" )
-          echo ::set-output name=version_major::$(echo "${{ github.ref_name }}" | sed -e "s/^v//g" -e "s/\.[0-9]\+$//g" -e "s/\.[0-9]\+$//g" )
-        id: get_version
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -86,5 +80,5 @@ jobs:
           IMAGE_NAME: ghcr.io/rdflib/prez-ui
         with:
           push: true
-          tags: ${{ env.IMAGE_NAME }}:${{ steps.get_version.outputs.version }},${{ env.IMAGE_NAME }}:${{ steps.get_version.outputs.version_minor }},${{ env.IMAGE_NAME }}:${{ steps.get_version.outputs.version_major }},${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.IMAGE_NAME }}:unstable
 

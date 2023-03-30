@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . ./
-RUN npm run build
+RUN CI=false npm run build
 
 FROM nginx:alpine AS prod
 RUN apk add --no-cache bash

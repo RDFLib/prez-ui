@@ -38,8 +38,8 @@ const homeLinks = computed(() => {
 onMounted(() => {
     ui.rightNavConfig = { enabled: false };
     document.title = `${props.flavour} | Prez`;
-    ui.pageHeading = { name: props.flavour, url: `/${letter}`};
-    ui.breadcrumbs = [{ name: props.flavour, url: `/${letter}` }];
+    ui.pageHeading = { name: props.flavour, url: `/${letter.value}`};
+    ui.breadcrumbs = [{ name: props.flavour, url: `/${letter.value}` }];
 });
 </script>
 
