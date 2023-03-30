@@ -18,7 +18,7 @@ onMounted(() => {
 <template>
     <h1 class="page-title">About Prez</h1>
     <p>
-        Prez is an oen source an Application Programming Interface (API) that implements <a
+        Prez is an open source an Application Programming Interface (API) that implements <a
             href="https://www.w3.org/standards/semanticweb/data">Linked Data</a>
         methods for providing access to a wide range of data on the web. It also implements the <a
             href="https://docs.ogc.org/is/17-069r3/17-069r3.html">OGC API:Features</a>
