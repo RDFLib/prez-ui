@@ -101,9 +101,9 @@ onMounted(() => {
                             p.mediatypes.push(q.object.value);
                         } else if (q.predicate.value === combinedQname("altr-ext:hasDefaultResourceFormat")) {
                             p.defaultMediatype = q.object.value;
-                        } else if (q.predicate.value === combinedQname("altrext:hasLabelPredicate")) {
+                        } else if (q.predicate.value === combinedQname("altr-ext:hasLabelPredicate")) {
                             p.labelPredicate = q.object.value;
-                        } else if (q.predicate.value === combinedQname("altrext:hasDescriptionPredicate")) {
+                        } else if (q.predicate.value === combinedQname("altr-ext:hasDescriptionPredicate")) {
                             p.descPredicate = q.object.value;
                         }
                     }, subject, null, null, null);

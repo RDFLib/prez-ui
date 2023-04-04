@@ -1,17 +1,19 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, inject } from "vue";
 import { useRoute } from "vue-router";
-import { DataFactory } from "n3";
+import { BlankNode, DataFactory, Quad, Store } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type ListItem, type AnnotatedPredicate, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour } from "@/types";
+import { apiBaseUrlConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour } from "@/types";
 import PropTableNew from "@/components/proptable/PropTableNew.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 
 const { namedNode } = DataFactory;
+
+const RECURSION_LIMIT = 5; // limit on recursive search of blank nodes
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
@@ -26,8 +28,8 @@ const props = withDefaults(defineProps<{
     childTitlePred: string; // soon replaced with default profile hasLabelPredicate?
     childDisplayTitle: string; // for display in table th
     childButton?: { name: string, url: string }; // undefined or link to children (/collections or /items)
-    titlePred: string; // soon replaced with default profile hasLabelPredicate
-    descPred: string; // soon replaced with default profile hasLabelPredicate
+    // titlePred: string; // soon replaced with default profile hasLabelPredicate ---> TODO: REMOVE
+    // descPred: string; // soon replaced with default profile hasLabelPredicate ---> TODO: REMOVE
     enableSearch?: boolean;
 }>(), {
     getChildren: false,
@@ -36,12 +38,12 @@ const props = withDefaults(defineProps<{
     childDisplayTitle: "Members"
 });
 
-const hiddenPreds = [
+let hiddenPreds = [
     qname("a"),
     qname("dcterms:identifier"),
     qname("prez:count"),
-    qname(props.titlePred),
-    qname(props.descPred),
+    // qname(props.titlePred),
+    // qname(props.descPred),
     ... props.type === "skos:ConceptScheme" ? [qname("skos:hasTopConcept")] : [],
     ... props.childPred ? [qname(props.childPred)] : []
 ];
@@ -62,41 +64,83 @@ const item = ref<ListItem>({} as ListItem);
 const children = ref<ListItem[]>([]);
 const concepts = ref<Concept[]>([]); // only for vocab
 const properties = ref<AnnotatedQuad[]>([]);
+const blankNodes = ref<AnnotatedQuad[]>([]);
 const hideConcepts = ref(true); // only for vocab
 const collapseAll = ref(true); // only for vocab
 
 const isAltView = ref(false);
 
+function createAnnoQuad(q: Quad, store: Store): AnnotatedQuad {
+    return {
+        subject: q.subject,
+        predicate: {
+            termType: q.predicate.termType,
+            value: q.predicate.value,
+            id: q.predicate.id,
+            annotations: store.getQuads(q.predicate, null, null, null)
+        },
+        object: q.object,
+        value: q.value,
+        graph: q.graph,
+        termType: q.termType,
+        equals: q.equals,
+        toJSON: q.toJSON
+    };
+}
+
+function findBlankNodes(q: Quad, store: Store, recursionCounter: number) {
+    if (q.object instanceof BlankNode) {
+        recursionCounter++;
+        store.forEach(q1 => {
+            const annoQuad1 = createAnnoQuad(q1, store);
+            blankNodes.value.push(annoQuad1);
+            if (recursionCounter < RECURSION_LIMIT) {
+                findBlankNodes(q1, store, recursionCounter);
+            }
+        }, q.object, null, null, null)
+    }
+}
+
 function getProperties() {
     const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname(props.type)), null)[0];
     item.value.iri = subject.id;
+
+    const defaultProfile = profiles.value.find(p => p.default)!;
+
+    // default label & description predicates
+    let labelPred = qname("rdfs:label");
+    let descPred = qname("dcterms:description");
+
+    if (Object.keys(ui.profiles).includes(defaultProfile.token)) {
+        const currentProfile = ui.profiles[defaultProfile.token];
+        
+        // get profile-specific label & description predicates if available
+        if (currentProfile.labelPredicate) {
+            labelPred = currentProfile.labelPredicate;
+        }
+        if (currentProfile.descPredicate) {
+            descPred = currentProfile.descPredicate;
+        }
+    }
+
+    // add label & desc predicates to hidden list
+    hiddenPreds.push(...[labelPred, descPred]);
+
     store.value.forEach(q => {
-        if (q.predicate.value === qname(props.titlePred)) {
+        if (q.predicate.value === labelPred) {
             item.value.title = q.object.value;
-        } else if (q.predicate.value === qname(props.descPred)) {
+        } else if (q.predicate.value === descPred) {
             item.value.description = q.object.value;
         } else if (q.predicate.value === qname("a")) {
             item.value.type = q.object.value;
         }
 
         if (!isAltView.value) {
-            const annoPred: AnnotatedPredicate = {
-                termType: q.predicate.termType,
-                value: q.predicate.value,
-                id: q.predicate.id,
-                annotations: store.value.getQuads(q.predicate, null, null, null)
-            };
-            const annoQuad: AnnotatedQuad = {
-                subject: q.subject,
-                predicate: annoPred,
-                object: q.object,
-                value: q.value,
-                graph: q.graph,
-                termType: q.termType,
-                equals: q.equals,
-                toJSON: q.toJSON
-            };
+            const annoQuad = createAnnoQuad(q, store.value);
             properties.value.push(annoQuad);
+
+            let recursionCounter = 0;
+            findBlankNodes(q, store.value, recursionCounter);
         }
     }, subject, null, null, null);
 }
@@ -233,12 +277,13 @@ function getSearchDefaults(): {[key: string]: string} {
 
 onMounted(() => {
     doRequest(`${apiBaseUrl}${route.path}`, () => {
-        // check for default profile, potentially render ProfilesTable or redirect to API endpoint
+        // check profile, potentially show Alt profiles page or redirect to API endpoint
         if (route.query && route.query._profile) {
             const defaultProfile = profiles.value.find(p => p.default)!;
             if (route.query._profile === defaultProfile.token && !route.query._mediatype) {
                 isAltView.value = false;
             } else if (route.query._profile === "alt" && !route.query._mediatype) {
+                // show alt profiles page
                 isAltView.value = true;
             } else {
                 // redirect to API
@@ -279,7 +324,7 @@ onMounted(() => {
 <template>
     <ProfilesTable v-if="isAltView" :profiles="profiles" :path="route.path" />
     <template v-else>
-        <PropTableNew v-if="properties.length > 0" :item="item" :properties="properties" :prefixes="prefixes" :hiddenPreds="hiddenPreds">
+        <PropTableNew v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPreds="hiddenPreds">
             <!-- <template v-if="geometry" #map></template> -->
             <template v-if="props.type === 'skos:ConceptScheme'" #bottom>
                 <tr>

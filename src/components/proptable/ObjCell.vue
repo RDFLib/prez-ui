@@ -1,14 +1,28 @@
 <script lang="ts" setup>
 import type { RowObj } from "@/types";
+import PropRow from "@/components/proptable/PropRow.vue";
 
 const props = defineProps<RowObj>();
+
+const geometryPreds = [
+    "http://www.opengis.net/ont/geosparql#geoJSONLiteral",
+    "http://www.opengis.net/ont/geosparql#wktLiteral"
+];
+
+const MAX_GEOM_LENGTH = 100; // max character length for geometry strings
+
+function copyString(s: string) {
+    navigator.clipboard.writeText(s.trim());
+}
 </script>
 
 <template>
     <div class="prop-obj">
         <div class="obj-value">
             <template v-if="props.termType === 'BlankNode'">
-                blank node
+                <table>
+                    <PropRow v-for="row in props.rows" v-bind="row" />
+                </table>
             </template>
             <template v-else-if="props.termType === 'NamedNode'">
                 <template v-if="!!props.label">
@@ -25,6 +39,10 @@ const props = defineProps<RowObj>();
                 <template v-if="props.value.startsWith('http')">
                     <a :href="props.value" target="_blank" rel="noopener noreferrer">{{ props.value }}</a>
                 </template>
+                <div v-else-if="props.datatype && geometryPreds.includes(props.datatype.value)" class="geom-cell">
+                    <pre>{{ props.value.length > MAX_GEOM_LENGTH ? `${props.value.slice(0, MAX_GEOM_LENGTH)}...` : props.value }}</pre>
+                    <button class="btn outline sm" title="Copy geometry" @click="copyString(props.value)"><i class="fa-regular fa-clipboard"></i></button>
+                </div>
                 <template v-else>{{ props.value }}</template>
             </template>
         </div>
@@ -52,9 +70,29 @@ const props = defineProps<RowObj>();
     gap: 4px;
     align-items: center;
     justify-content: space-between;
-}
 
-.badge {
-    margin-left: 6px;
+    table {
+        font-size: 0.95em;
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .geom-cell {
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        button {
+            align-self: center;
+        }
+    }
+
+    .badge {
+        margin-left: 6px;
+    }
 }
 </style>

@@ -23,8 +23,8 @@ const props = defineProps<{
     parentType?: string;
     itemPred: string; // soon replaced with default profile hasLabelPredicate?
     childButton?: { name: string, url: string }; // undefined or link to children (/collections or /items)
-    titlePred: string; // soon replaced with default profile hasLabelPredicate
-    descPred: string; // soon replaced with default profile hasLabelPredicate
+    // titlePred: string; // soon replaced with default profile hasLabelPredicate
+    // descPred: string; // soon replaced with default profile hasLabelPredicate
     enableSearch?: boolean;
     content?: string;
 }>();
@@ -75,12 +75,14 @@ function getSearchDefaults(): {[key: string]: string} { // need IRI of parent to
 
 onMounted(() => {
     doRequest(`${apiBaseUrl}${route.path}`, () => {
-        // check for default profile, potentially render ProfilesTable or redirect to API endpoint
+        const defaultProfile = profiles.value.find(p => p.default)!;
+        
+        // check profile, potentially show Alt profiles page or redirect to API endpoint
         if (route.query && route.query._profile) {
-            const defaultProfile = profiles.value.find(p => p.default)!;
             if (route.query._profile === defaultProfile.token && !route.query._mediatype) {
                 isAltView.value = false;
             } else if (route.query._profile === "alt" && !route.query._mediatype) {
+                // show alt profiles page
                 isAltView.value = true;
             } else {
                 // redirect to API
@@ -92,6 +94,22 @@ onMounted(() => {
 
         parseIntoStore(data.value);
 
+        // default label & description predicates
+        let labelPred = qname("rdfs:label");
+        let descPred = qname("dcterms:description");
+
+        if (Object.keys(ui.profiles).includes(defaultProfile.token)) {
+            const currentProfile = ui.profiles[defaultProfile.token];
+            
+            // get profile-specific label & description predicates if available
+            if (currentProfile.labelPredicate) {
+                labelPred = currentProfile.labelPredicate;
+            }
+            if (currentProfile.descPredicate) {
+                descPred = currentProfile.descPredicate;
+            }
+        }
+
         const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("rdf:bag")), null)[0]; // need a consistent way to select the parent (previously was rdf:bag)
 
         store.value.forObjects(member => {
@@ -99,9 +117,9 @@ onMounted(() => {
                 iri: member.id
             };
             store.value.forEach(q => { // get preds & objs for each subj
-                if (q.predicate.value === qname(props.titlePred)) {
+                if (q.predicate.value === labelPred) {
                     c.title = q.object.value;
-                } else if (q.predicate.value === qname(props.descPred)) {
+                } else if (q.predicate.value === descPred) {
                     c.description = q.object.value;
                 } else if (q.predicate.value === qname("prez:link")) {
                     c.link = q.object.value;

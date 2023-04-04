@@ -108,7 +108,7 @@ const props = defineProps<{
             </template>
             <div class="nav-item"><RouterLink to="/search" class="nav-link">Advanced Search</RouterLink></div>
             <div class="nav-item"><RouterLink to="/sparql" class="nav-link">SPARQL</RouterLink></div>
-            <div class="nav-item"><RouterLink to="/profiles" class="nav-link">Profiles</RouterLink></div>
+            <div class="nav-item"><RouterLink to="/profiles" :class="`nav-link ${route.path.startsWith('/profiles') ? 'active' : ''}`">Profiles</RouterLink></div>
             <div class="nav-item"><RouterLink to="/about" class="nav-link">About</RouterLink></div>
             <div class="nav-item"><RouterLink to="/docs" class="nav-link">API Docs</RouterLink></div>
             <div class="bottom-nav-items">

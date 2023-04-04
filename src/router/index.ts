@@ -29,8 +29,8 @@ const router = createRouter({
             props: {
                 title: "VocPrez Profiles",
                 itemPred: "rdfs:member",
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasLabelPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasLabelPredicate
                 content: `A list of <a href="http://www.w3.org/ns/dx/prof/Profile" target="_blank" rel="noopener noreferrer">prof:Profiles</a> used by VocPrez.`
             }
         },
@@ -41,8 +41,8 @@ const router = createRouter({
             props: {
                 title: "Vocabs",
                 itemPred: "rdfs:member",
-                titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
-                descPred: "skos:definition", // soon replaced with default profile hasDescPredicate
+                // titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
+                // descPred: "skos:definition", // soon replaced with default profile hasDescPredicate
                 enableSearch: true,
                 content: `A list of <a href="http://www.w3.org/2004/02/skos/core#ConceptScheme" target="_blank" rel="noopener noreferrer">skos:ConceptSchemes</a>.`
             }
@@ -54,8 +54,8 @@ const router = createRouter({
             props: {
                 type: "skos:ConceptScheme",
                 getChildren: true,
-                titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
-                descPred: "skos:definition", // soon replaced with default profile hasDescPredicate
+                // titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
+                // descPred: "skos:definition", // soon replaced with default profile hasDescPredicate
                 childPred: "skos:member", // placeholder
                 childTitlePred: "skos:prefLabel",
                 enableSearch: true
@@ -67,8 +67,8 @@ const router = createRouter({
             component: () => import("@/views/PropTableView.vue"),
             props: {
                 type: "skos:Concept",
-                titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
-                descPred: "skos:definition" // soon replaced with default profile hasDescPredicate
+                // titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
+                // descPred: "skos:definition" // soon replaced with default profile hasDescPredicate
             }
         },
         {
@@ -78,8 +78,8 @@ const router = createRouter({
             props: {
                 title: "Collections",
                 itemPred: "rdfs:member",
-                titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
-                descPred: "skos:definition", // soon replaced with default profile hasDescPredicate
+                // titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
+                // descPred: "skos:definition", // soon replaced with default profile hasDescPredicate
                 enableSearch: true,
                 content: `A list of <a href="http://www.w3.org/2004/02/skos/core#Collection" target="_blank" rel="noopener noreferrer">skos:Collections</a>.`
             }
@@ -94,8 +94,8 @@ const router = createRouter({
                 childPred: "skos:member",
                 childTitlePred: "skos:prefLabel",
                 childDisplayTitle: "Concepts",
-                titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
-                descPred: "skos:definition" // soon replaced with default profile hasDescPredicate
+                // titlePred: "skos:prefLabel", // soon replaced with default profile hasLabelPredicate
+                // descPred: "skos:definition" // soon replaced with default profile hasDescPredicate
             }
         },
         {
@@ -120,8 +120,8 @@ const router = createRouter({
             props: {
                 title: "SpacePrez Profiles",
                 itemPred: "rdfs:member",
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasLabelPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasLabelPredicate
                 content: `A list of <a href="http://www.w3.org/ns/dx/prof/Profile" target="_blank" rel="noopener noreferrer">prof:Profiles</a> used by SpacePrez.`
             }
         },
@@ -133,8 +133,8 @@ const router = createRouter({
                 title: "Datasets",
                 itemPred: "rdfs:member",
                 childButton: { name: "Collections", url: "/collections" },
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
                 enableSearch: true,
                 content: `A list of <a href="http://www.w3.org/ns/dcat#Dataset" target="_blank" rel="noopener noreferrer">dcat:Datasets</a>.`
             }
@@ -145,8 +145,8 @@ const router = createRouter({
             component: () => import("@/views/PropTableView.vue"),
             props: {
                 type: "dcat:Dataset",
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
                 childPred: "rdfs:member",
                 childButton: { name: "Collections", url: "/collections" },
                 enableSearch: true
@@ -161,8 +161,8 @@ const router = createRouter({
                 parentType: "dcat:Dataset",
                 itemPred: "rdfs:member",
                 childButton: { name: "Features", url: "/items" },
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
                 enableSearch: true,
                 content: `A list of <a href="http://www.opengis.net/ont/geosparql#FeatureCollection" target="_blank" rel="noopener noreferrer">geo:FeatureCollections</a>.`
             }
@@ -173,8 +173,8 @@ const router = createRouter({
             component: () => import("@/views/PropTableView.vue"),
             props: {
                 type: "geo:FeatureCollection",
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
                 childPred: "rdfs:member",
                 childButton: { name: "Features", url: "/items" },
                 enableSearch: true
@@ -188,8 +188,8 @@ const router = createRouter({
                 title: "Features",
                 parentType: "geo:FeatureCollection",
                 itemPred: "rdfs:member",
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
                 content: `A list of <a href="http://www.opengis.net/ont/geosparql#Feature" target="_blank" rel="noopener noreferrer">geo:Features</a>.`
             }
         },
@@ -199,8 +199,8 @@ const router = createRouter({
             component: () => import("@/views/PropTableView.vue"),
             props: {
                 type: "geo:Feature",
-                titlePred: "rdfs:label", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description",
+                // titlePred: "rdfs:label", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description",
             }
         },
         {
@@ -220,8 +220,8 @@ const router = createRouter({
             props: {
                 title: "CatPrez Profiles",
                 itemPred: "rdfs:member",
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasLabelPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasLabelPredicate
                 content: `A list of <a href="http://www.w3.org/ns/dx/prof/Profile" target="_blank" rel="noopener noreferrer">prof:Profiles</a> used by CatPrez.`
             }
         },
@@ -232,8 +232,8 @@ const router = createRouter({
             props: {
                 title: "Catalogs",
                 itemPred: "rdfs:member",
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasLabelPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasLabelPredicate
                 enableSearch: true,
                 content: `A list of <a href="http://www.w3.org/ns/dcat#Catalog" target="_blank" rel="noopener noreferrer">dcat:Catalogs</a>.`
             }
@@ -248,8 +248,8 @@ const router = createRouter({
                 childPred: "dcterms:hasPart",
                 childTitlePred: "rdfs:label",
                 childDisplayTitle: "Resources",
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
                 enableSearch: true
             }
         },
@@ -259,8 +259,8 @@ const router = createRouter({
             component: () => import("@/views/PropTableView.vue"),
             props: {
                 type: "dcat:Resource",
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate
             }
         },
         {
@@ -285,8 +285,8 @@ const router = createRouter({
             props: {
                 title: "Profiles",
                 itemPred: "rdfs:member",
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasLabelPredicate
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasLabelPredicate
                 content: `A list of <a href="http://www.w3.org/ns/dx/prof/Profile" target="_blank" rel="noopener noreferrer">prof:Profiles</a> used across Prez.`
             }
         },
@@ -296,8 +296,8 @@ const router = createRouter({
             component: () => import("@/views/PropTableView.vue"),
             props: {
                 type: "prof:Profile",
-                titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
-                descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate?
+                // titlePred: "dcterms:title", // soon replaced with default profile hasLabelPredicate
+                // descPred: "dcterms:description", // soon replaced with default profile hasDescPredicate?
             }
         },
         {
