@@ -270,7 +270,7 @@ table {
         }
 
         &:nth-child(2n) {
-            background-color: $tableBg;
+            background-color: var(--tableBg);
         }
     }
 }
@@ -313,7 +313,7 @@ pre.debug {
 }
 .query-options {
     gap: 10px;
-    background-color: $cardBg;
+    background-color: var(--cardBg);
     padding: 10px;
     border-radius: $borderRadius;
 

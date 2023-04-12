@@ -84,7 +84,7 @@ table {
         }
 
         &:nth-child(2n) {
-            background-color: $tableBg;
+            background-color: var(--tableBg);
         }
     }
 }

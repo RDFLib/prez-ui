@@ -48,14 +48,14 @@ onMounted(() => {
 
     .prez-card {
         padding: 20px;
-        background-color: $cardBg;
+        background-color: var(--cardBg);
         flex: 1;
         color: unset;
         border-radius: $borderRadius;
 
         h3 {
             margin-top: 0;
-            color: $primary;
+            color: var(--primary);
         }
     }
 }

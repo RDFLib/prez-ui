@@ -137,7 +137,7 @@ div#nav-wrapper {
 nav#main-nav {
     display: flex;
     flex-direction: row;
-    background-color: $navBg;
+    background-color: var(--navBg);
 
     &.sidenav {
         flex-direction: column;
@@ -169,7 +169,7 @@ nav#main-nav {
 
     a.nav-link {
         flex-grow: 1;
-        color: $navColor;
+        color: var(--navColor);
         // font-weight: bold;
         font-size: 1.1rem;
         text-decoration: none;
@@ -178,12 +178,12 @@ nav#main-nav {
         @include transition(color, background-color);
 
         &:hover {
-            background-color: $navColor;
+            background-color: var(--navColor);
             color: white;
         }
 
         &.router-link-active, &.active {
-            background-color: $navColor;
+            background-color: var(--navColor);
             color: white;
         }
     }
@@ -191,21 +191,21 @@ nav#main-nav {
     button.dropdown-btn {
         margin-left: auto;
         cursor: pointer;
-        color: $navColor;
-        background-color: $navBg;
+        color: var(--navColor);
+        background-color: var(--navBg);
         border: none;
         padding: 6px 8px;
         @include transition(color, background-color);
 
         &:hover {
-            background-color: $navColor;
+            background-color: var(--navColor);
             color: white;
         }
     }
 }
 
 // a.nav-item {
-//     color: $navColor;
+//     color: var(--navColor);
 //     // font-weight: bold;
 //     text-decoration: none;
 //     padding: 6px 10px;
@@ -213,19 +213,19 @@ nav#main-nav {
 //     @include transition(color, background-color);
 
 //     &:hover {
-//         background-color: $navColor;
+//         background-color: var(--navColor);
 //         color: white;
 //     }
 
 //     &.router-link-active, &.active {
-//         background-color: $navColor;
+//         background-color: var(--navColor);
 //         color: white;
 //     }
 // }
 
 .sub-nav {
     display: flex;
-    background-color: darken($navBg, 10%);
+    background-color: var(--subNavBg);
 
     a.nav-link {
         font-size: 1rem !important;

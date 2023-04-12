@@ -143,7 +143,7 @@ table {
     }
 
     & > :deep(tr:nth-child(2n + 1)) {
-        background-color: $tableBg;
+        background-color: var(--tableBg);
     }
 }
 </style>

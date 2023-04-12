@@ -78,7 +78,7 @@ onMounted(() => {
     gap: 8px;
 
     .result {
-        background-color: $cardBg;
+        background-color: var(--cardBg);
         padding: 6px;
         border-radius: $borderRadius;
     }

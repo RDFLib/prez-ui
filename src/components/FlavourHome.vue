@@ -72,7 +72,7 @@ onMounted(() => {
         flex-direction: column;
         gap: 8px;
         padding: 12px;
-        background-color: $cardBg;
+        background-color: var(--cardBg);
         border-radius: $borderRadius;
 
         h4.link-title {

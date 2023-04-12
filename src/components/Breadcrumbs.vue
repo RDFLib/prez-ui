@@ -31,7 +31,7 @@ const ui = useUiStore();
 
     a.breadcrumb {
         font-size: 0.8em;
-        // color: $headerColor;
+        // color: var(--headerColor);
     }
 
     .breadcrumb-separator {

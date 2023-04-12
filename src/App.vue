@@ -158,8 +158,8 @@ onMounted(() => {
 $contentPadding: 16px;
 
 header {
-    background-color: $headerBg;
-    color: $headerColor;
+    background-color: var(--headerBg);
+    color: var(--headerColor);
     display: flex;
 
     #header-content {
@@ -204,7 +204,7 @@ header {
 main {
     flex-grow: 1;
     display: flex;
-    background-color: $mainBg;
+    // background-color: $mainBg;
 
     #main-content {
         width: 100%;

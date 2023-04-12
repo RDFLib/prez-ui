@@ -193,7 +193,7 @@ function camelToTitleCase(s: string): string {
             margin-left: auto;
             background-color: transparent;
             border: none;
-            color: $primary;
+            color: var(--primary);
             cursor: pointer;
         }
     }

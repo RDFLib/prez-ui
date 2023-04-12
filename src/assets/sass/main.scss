@@ -5,17 +5,30 @@
 body {
     margin: 0;
     height: 100vh;
-    font-family: $bodyFont;
+    font-family: var(--bodyFont);
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background-color: var(--headerBg);
+    color: var(--headerColor);
+}
+
+footer {
+    background-color: var(--footerBg);
+    color: var(--footerColor);
 }
 
 #app {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    // height: 100%;
+    flex-grow: 1;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: $headerFont;
+    font-family: var(--headingFont);
 }
 
 h1.page-title {
@@ -42,30 +55,30 @@ h1.page-title {
 }
 
 a {
-    color: $linkColor;
+    color: var(--linkColor);
     text-decoration: none;
 }
 
 .btn {
     display: inline-block;
     cursor: pointer;
-    background-color: $primary;
+    background-color: var(--primary);
     color: white;
-    border: 1px solid $primary;
+    border: 1px solid var(--primary);
     padding: 6px 8px;
     border-radius: $borderRadius;
     @include transition(color, background-color);
 
     &:hover {
-        background-color: adjust-color($color: $primary, $saturation: 10%, $lightness: -7%)
+        background-color: var(--primaryBtnHover);
     }
 
     &.outline {
         background-color: transparent;
-        color: $primary;
+        color: var(--primary);
 
         &:hover {
-            background-color: $primary;
+            background-color: var(--primary);
             color: white;
         }
     }
@@ -78,17 +91,17 @@ a {
 
 .badge {
     padding: 2px 4px;
-    // border: 1px solid $secondary;
-    background-color: $badgeBg;
+    // border: 1px solid var(--secondary);
+    background-color: var(--badgeBg);
     color: white;
     border-radius: $borderRadius;
     font-size: 0.8rem;  
     // float:right;
 
     &.outline {
-        border: 1px solid $secondary;
+        border: 1px solid var(--secondary);
         background-color: transparent;
-        color: $secondary;
+        color: var(--secondary);
     }
 }
 

@@ -33,7 +33,7 @@ const props = defineProps<{
         display: flex;
         flex-direction: row;
         gap: 10px;
-        background-color: $cardBg;
+        background-color: var(--cardBg);
         padding: 10px;
         border-radius: $borderRadius;
 

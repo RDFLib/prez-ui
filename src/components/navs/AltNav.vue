@@ -120,14 +120,14 @@ p {
 
             a.mediatype {
                 padding: 6px;
-                background-color: $navColor;
+                background-color: var(--secondary);
                 color: white;
                 border-radius: $borderRadius;
                 font-size: 0.8rem;
                 @include transition(background-color);
 
                 &:hover {
-                    background-color: adjust-color($color: $navColor, $saturation: 5%, $lightness: -10%);
+                    background-color: var(--secondaryBtnHover);
                 }
             }
         }
