@@ -28,3 +28,5 @@ coverage
 *.sw?
 
 Dockerfile.node
+*.sh
+!docker_entrypoint.sh

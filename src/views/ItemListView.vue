@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, inject } from "vue";
 import { useRoute } from "vue-router";
-import { DataFactory } from "n3";
+import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
@@ -21,10 +21,8 @@ const { data, profiles, loading, error, doRequest } = useGetRequest();
 const props = defineProps<{
     title: string;
     parentType?: string;
-    itemPred: string; // soon replaced with default profile hasLabelPredicate?
+    class: string;
     childButton?: { name: string, url: string }; // undefined or link to children (/collections or /items)
-    // titlePred: string; // soon replaced with default profile hasLabelPredicate
-    // descPred: string; // soon replaced with default profile hasLabelPredicate
     enableSearch?: boolean;
     content?: string;
 }>();
@@ -110,9 +108,15 @@ onMounted(() => {
             }
         }
 
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("rdf:bag")), null)[0]; // need a consistent way to select the parent (previously was rdf:bag)
+        let nodeList: Quad_Subject[] | Quad_Object[] = [];
+        
+        if (props.class) {
+            nodeList = store.value.getSubjects(namedNode(qname("a")), namedNode(qname(props.class)), null);
+        } else {
+            nodeList = store.value.getObjects(null, namedNode(qname("rdfs:member")), null);
+        }
 
-        store.value.forObjects(member => {
+        nodeList.forEach(member => {
             let c: ListItem = {
                 iri: member.id
             };
@@ -126,7 +130,7 @@ onMounted(() => {
                 }
             }, member, null, null, null);
             items.value.push(c);
-        }, subject, namedNode(qname(props.itemPred)), null);
+        });
 
         if (isAltView.value) {
             ui.rightNavConfig = { enabled: false };
@@ -155,9 +159,10 @@ onMounted(() => {
         <h1 class="page-title">{{ props.title }}</h1>
         <p v-if="props.content" v-html="props.content"></p>
         <div>
-            <ItemList v-if="data" :items="items" :childName="props.childButton?.name" :childLink="props.childButton?.url" />
+            <template v-if="error">Network error: {{ error }}</template>
             <template v-else-if="loading">loading...</template>
-            <template v-else-if="error">Network error: {{ error }}</template>
+            <ItemList v-else-if="items.length > 0" :items="items" :childName="props.childButton?.name" :childLink="props.childButton?.url" />
+            <template v-else>No {{ props.title }} found.</template>
         </div>
         <Teleport v-if="props.enableSearch" to="#right-bar-content">
             <AdvancedSearch :flavour="flavour" :query="getSearchDefaults()" />
