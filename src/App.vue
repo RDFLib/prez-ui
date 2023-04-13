@@ -64,13 +64,11 @@ onMounted(() => {
 
             // get list of profiles
             let profileUris: string[] = [];
-            profStore.value.forObjects(object => {
-                profStore.value.forEach(q => {
-                    if (q.predicate.value === profQname("prez:link")) {
-                        profileUris.push(`${apiBaseUrl}${q.object.value}`);
-                    }
-                }, object, null, null, null);
-            }, namedNode(profQname("prez:ProfilesList")), namedNode(profQname("rdfs:member")), null);
+            profStore.value.forEach(quad => {
+                profStore.value.forObjects(objectValue => {
+                    profileUris.push(`${apiBaseUrl}${objectValue.value}`)
+                }, quad.subject, namedNode(profQname("prez:link")), null);
+            }, null, namedNode(profQname("rdf:type")), namedNode(profQname("prof:Profile")), null);
             
             // promise.all request for each profile in parallel
             Promise.all(profileUris.map(uri => fetch(uri).then(r => r.text()))).then(values => {
