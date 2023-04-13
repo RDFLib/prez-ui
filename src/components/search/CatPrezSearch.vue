@@ -38,20 +38,18 @@ onMounted(() => {
     doRequest(`${apiBaseUrl}/c/catalogs`, () => {
         parseIntoStore(data.value);
 
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("rdf:bag")), null)[0];
-
-        store.value.forObjects(member => {
+        store.value.forSubjects(member => {
             let option: CatalogOption = {
                 iri: member.value
             };
             
             store.value.forEach(q => { // get preds & objs for each subj
-                if (q.predicate.value === qname("dcterms:title")) {
+                if (q.predicate.value === qname("rdfs:label")) {
                     option.title = q.object.value;
                 }
             }, member, null, null, null);
             options.value.push(option);
-        }, subject, namedNode(qname("rdfs:member")), null);
+        }, namedNode(qname("a")), namedNode(qname("dcat:Catalog")), null);
     });
 });
 </script>

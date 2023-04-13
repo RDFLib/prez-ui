@@ -9,6 +9,7 @@ import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type PrezFlavour }
 import ItemList from "@/components/ItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
+import ErrorMessage from "@/components/ErrorMessage.vue";
 
 const { namedNode } = DataFactory;
 
@@ -159,8 +160,12 @@ onMounted(() => {
         <h1 class="page-title">{{ props.title }}</h1>
         <p v-if="props.content" v-html="props.content"></p>
         <div>
-            <template v-if="error">Network error: {{ error }}</template>
-            <template v-else-if="loading">loading...</template>
+            <template v-if="error">
+                <ErrorMessage :message="error" />
+            </template>
+            <template v-else-if="loading">
+                <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
+            </template>
             <ItemList v-else-if="items.length > 0" :items="items" :childName="props.childButton?.name" :childLink="props.childButton?.url" />
             <template v-else>No {{ props.title }} found.</template>
         </div>

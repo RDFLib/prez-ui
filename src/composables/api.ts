@@ -56,8 +56,15 @@ export function useGetRequest() {
 
         fetch(url)
         .then(r => {
+            // console.log("got response")
+            // console.log("response", r)
             if (!r.ok) {
-                throw new Error("Response was not OK");
+                // console.log("not ok", r)
+                // console.log(r.status)
+                // console.log(r.statusText)
+                // console.log(r.text())
+                // throw new Error(`Response was not OK: status ${r.status}`);
+                return Promise.reject(r); // returns a Response object to catch() to access status, etc.
             }
             profiles.value = r.headers.get("link") ? getProfilesFromHeaders(r.headers.get("link")!) : [];
             return r.text();
@@ -65,11 +72,22 @@ export function useGetRequest() {
         .then(text => {
             data.value = text;
             callback();
-            loading.value = false;
         })
         .catch(e => {
-            error.value = e;
+            // console.log("error", e)
+            if (e instanceof TypeError) { // generic JS network error
+                // console.log("generic error")
+                // console.log("message", e.message)
+                error.value = e.message;
+            } else if (e instanceof Response) {
+                // console.log("response error")
+                // console.log("status", e.status)
+                error.value = e.statusText;
+            }
+            
             errorCallback();
+        })
+        .finally(() => {
             loading.value = false;
         });
     }

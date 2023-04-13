@@ -10,6 +10,7 @@ import PropTableNew from "@/components/proptable/PropTableNew.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
+import ErrorMessage from "@/components/ErrorMessage.vue";
 
 const { namedNode } = DataFactory;
 
@@ -363,8 +364,12 @@ onMounted(() => {
                 </tr>
             </template>
         </PropTableNew>
-        <template v-else-if="loading">loading...</template>
-        <template v-else-if="error">Network error: {{ error }}</template>
+        <template v-else-if="loading">
+            <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
+        </template>
+        <template v-else-if="error">
+            <ErrorMessage :message="error" />
+        </template>
         <Teleport v-if="props.enableSearch" to="#right-bar-content">
             <AdvancedSearch :flavour="flavour" :query="getSearchDefaults()" />
         </Teleport>

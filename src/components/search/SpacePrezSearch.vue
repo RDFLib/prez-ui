@@ -64,14 +64,13 @@ onMounted(() => {
     doRequest(`${apiBaseUrl}/s/datasets`, () => {
         parseIntoStore(data.value);
 
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("rdf:bag")), null)[0];
-
-        store.value.forObjects(member => {
+        store.value.forSubjects(member => {
             let option: Option = {
                 iri: member.value
             };
 
             let datasetLink = "";
+            let datasetIRI = member.value;
             
             store.value.forEach(q => { // get preds & objs for each subj
                 if (q.predicate.value === qname("dcterms:title")) {
@@ -90,23 +89,21 @@ onMounted(() => {
                 collectionDoRequest(`${apiBaseUrl}${datasetLink}/collections`, () => {
                     collectionParseIntoStore(collectionData.value);
 
-                    const collectionSubject = collectionStore.value.getSubjects(namedNode(collectionQname("a")), namedNode(collectionQname("rdf:bag")), null)[0];
-
                     collectionStore.value.forObjects(member => {
                         let option: Option = {
                             iri: member.value
                         };
                         
                         collectionStore.value.forEach(q => { // get preds & objs for each subj
-                            if (q.predicate.value === collectionQname("dcterms:title")) {
+                            if (q.predicate.value === collectionQname("rdfs:label")) {
                                 option.title = q.object.value;
                             }
                         }, member, null, null, null);
                         collectionOptions.value.push(option);
-                    }, collectionSubject, namedNode(collectionQname("rdfs:member")), null);
+                    }, namedNode(datasetIRI), namedNode(collectionQname("rdfs:member")), null);
                 });
             }
-        }, subject, namedNode(qname("rdfs:member")), null);
+        }, namedNode(qname("a")), namedNode(qname("dcat:Dataset")), null);
     });
 });
 </script>

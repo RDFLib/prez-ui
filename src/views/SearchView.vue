@@ -6,6 +6,7 @@ import { useGetRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 import { apiBaseUrlConfigKey } from "@/types";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
+import ErrorMessage from "@/components/ErrorMessage.vue";
 
 interface SearchResult {
     label?: string;
@@ -61,12 +62,19 @@ onMounted(() => {
 <template>
     <h1 class="page-title">Advanced Search</h1>
     <AdvancedSearch :query="query" fullPage/>
-    <div v-if="results.length > 0">
+    <template v-if="error">
+        <ErrorMessage :message="error" />
+    </template>
+    <template v-else-if="loading">
+        <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
+    </template>
+    <template v-else-if="route.query && route.query.term">
         <h2>Results</h2>
-        <div class="results">
+        <div v-if="results.length > 0" class="results">
             <RouterLink v-for="result in results" class="result" :to="`/object?uri=${encodeURIComponent(result.uri)}`">{{ result.label || result.uri }}</RouterLink>
         </div>
-    </div>
+        <p v-else>No results found.</p>
+    </template>
 </template>
 
 <style lang="scss" scoped>

@@ -38,9 +38,7 @@ onMounted(() => {
     doRequest(`${apiBaseUrl}/v/vocab`, () => {
         parseIntoStore(data.value);
 
-        const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname("rdf:bag")), null)[0];
-
-        store.value.forObjects(member => {
+        store.value.forSubjects(member => {
             let option: VocabOption = {
                 iri: member.value
             };
@@ -51,7 +49,7 @@ onMounted(() => {
                 }
             }, member, null, null, null);
             options.value.push(option);
-        }, subject, namedNode(qname("rdfs:member")), null);
+        }, namedNode(qname("a")), namedNode(qname("skos:ConceptScheme")), null);
     });
 });
 </script>

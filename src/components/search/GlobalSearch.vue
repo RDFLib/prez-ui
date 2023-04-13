@@ -8,8 +8,8 @@ function submit() {
     router.push({
         name: "search",
         query: {
-            filter: searchTerm.value,
-            searchType: "all"
+            term: searchTerm.value,
+            method: "exactMatch"
         }
     });
 }
@@ -24,7 +24,7 @@ function clearSearch() {
         <div class="search-bar">
             <input
                 type="search"
-                name="filter"
+                name="term"
                 id=""
                 class="search-input"
                 v-model="searchTerm"
