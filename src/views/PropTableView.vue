@@ -66,7 +66,7 @@ const children = ref<ListItem[]>([]);
 const concepts = ref<Concept[]>([]); // only for vocab
 const properties = ref<AnnotatedQuad[]>([]);
 const blankNodes = ref<AnnotatedQuad[]>([]);
-const hideConcepts = ref(true); // only for vocab
+const hideConcepts = ref(false); // only for vocab
 const collapseAll = ref(true); // only for vocab
 
 const isAltView = ref(false);
