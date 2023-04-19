@@ -27,8 +27,8 @@ CONSTRUCT {?ds a <${config.spatial.datasetClass}> ;
     <${config.spatial.membershipRelationship}> ?fc .
   ?fc a geo:FeatureCollection ;
   <${config.props.fcLabel}> ?fc_title}
-WHERE {<https://prez.dev/DatasetList> <${config.spatial.membershipRelationship}> ?ds.
-  ?ds <${config.spatial.membershipRelationship}> ?fc ;
+WHERE { ?ds a <${config.spatial.datasetClass}> ;
+      <${config.spatial.membershipRelationship}> ?fc ;
       <${config.props.dsLabel}> ?ds_title .
   ?fc <${config.props.fcLabel}> ?fc_title
       }`
