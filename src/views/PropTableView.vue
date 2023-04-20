@@ -221,6 +221,12 @@ function getBreadcrumbs(): Breadcrumb[] {
     let breadcrumbs: Breadcrumb[] = [];
     if (flavour.value) {
         breadcrumbs.push({ name: flavour.value, url: `/${flavour.value[0].toLowerCase()}`});
+        if (["ConceptInCollection"].includes(props.type)) {
+            breadcrumbs.push({ name: "Collections", url: "/v/collection" });
+        }
+        if (["ConceptInCollection"].includes(props.type)) {
+            breadcrumbs.push({ name: "Collection", url: `/v/collection/${route.params.collectionId}` });
+        }
         if (["skos:ConceptScheme", "skos:Concept"].includes(props.type)) {
             breadcrumbs.push({ name: "Vocabs", url: "/v/vocab" });
         }

@@ -87,6 +87,14 @@ const router = createRouter({
             }
         },
         {
+            path: "/v/collection/:collectionId/:conceptId",
+            name: "concept-in-collection",
+            component: () => import("@/views/PropTableView.vue"),
+            props: {
+                type: "ConceptInCollection",
+            }
+        },
+        {
             path: "/s",
             name: "spaceprez home",
             component: () => import("@/views/spaceprez/SpacePrezHomeView.vue")
