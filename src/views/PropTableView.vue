@@ -25,12 +25,10 @@ const { data, profiles, loading, error, doRequest } = useGetRequest();
 const props = withDefaults(defineProps<{
     type: string;
     getChildren: boolean;
-    childPred: string; // soon replaced with default profile hasLabelPredicate?
-    childTitlePred: string; // soon replaced with default profile hasLabelPredicate?
+    childPred: string;
+    childTitlePred: string;
     childDisplayTitle: string; // for display in table th
     childButton?: { name: string, url: string }; // undefined or link to children (/collections or /items)
-    // titlePred: string; // soon replaced with default profile hasLabelPredicate ---> TODO: REMOVE
-    // descPred: string; // soon replaced with default profile hasLabelPredicate ---> TODO: REMOVE
     enableSearch?: boolean;
 }>(), {
     getChildren: false,
@@ -43,8 +41,6 @@ let hiddenPreds = [
     qname("a"),
     qname("dcterms:identifier"),
     qname("prez:count"),
-    // qname(props.titlePred),
-    // qname(props.descPred),
     ... props.type === "skos:ConceptScheme" ? [qname("skos:hasTopConcept")] : [],
     ... props.childPred ? [qname(props.childPred)] : []
 ];
@@ -112,8 +108,8 @@ function getProperties() {
     let labelPred = qname("rdfs:label");
     let descPred = qname("dcterms:description");
 
-    if (Object.keys(ui.profiles).includes(defaultProfile.token)) {
-        const currentProfile = ui.profiles[defaultProfile.token];
+    if (Object.keys(ui.profiles).includes(defaultProfile.uri)) {
+        const currentProfile = ui.profiles[defaultProfile.uri];
         
         // get profile-specific label & description predicates if available
         if (currentProfile.labelPredicate) {

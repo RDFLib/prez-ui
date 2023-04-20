@@ -118,7 +118,6 @@ const router = createRouter({
             props: {
                 title: "Datasets",
                 class: "dcat:Dataset",
-                itemPred: "rdfs:member",
                 childButton: { name: "Collections", url: "/collections" },
                 enableSearch: true,
                 content: `A list of <a href="http://www.w3.org/ns/dcat#Dataset" target="_blank" rel="noopener noreferrer">dcat:Datasets</a>.`
@@ -142,7 +141,6 @@ const router = createRouter({
             props: {
                 title: "Feature Collections",
                 parentType: "dcat:Dataset",
-                itemPred: "rdfs:member",
                 childButton: { name: "Features", url: "/items" },
                 enableSearch: true,
                 content: `A list of <a href="http://www.opengis.net/ont/geosparql#FeatureCollection" target="_blank" rel="noopener noreferrer">geo:FeatureCollections</a>.`
@@ -166,7 +164,7 @@ const router = createRouter({
             props: {
                 title: "Features",
                 parentType: "geo:FeatureCollection",
-                itemPred: "rdfs:member",
+                enableSearch: true,
                 content: `A list of <a href="http://www.opengis.net/ont/geosparql#Feature" target="_blank" rel="noopener noreferrer">geo:Features</a>.`
             }
         },

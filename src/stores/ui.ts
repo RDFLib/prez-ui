@@ -28,13 +28,13 @@ export const useUiStore = defineStore("ui", () => {
     // actions
 
     // get profiles from local storage
-    if (localStorage.getItem("profiles")) {
-        profiles.value = JSON.parse(localStorage.getItem("profiles") || "");
+    if (sessionStorage.getItem("profiles")) {
+        profiles.value = JSON.parse(sessionStorage.getItem("profiles") || "");
     }
 
     // watch & save profiles to local storage
     watch(profiles, (state) => {
-        localStorage.setItem("profiles", JSON.stringify(state));
+        sessionStorage.setItem("profiles", JSON.stringify(state));
     }, { deep: true });
 
     return {

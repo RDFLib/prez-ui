@@ -63,17 +63,21 @@ onMounted(() => {
             profParseIntoStore(profData.value);
 
             // get list of profiles
-            let profileUris: string[] = [];
+            let profileUris: {[uri: string]: {
+                token: string;
+                link: string;
+            }} = {};
             profStore.value.forSubjects(subject => {
                 profStore.value.forEach(q => {
-                    if (q.predicate.value === profQname("prez:link")) {
-                        profileUris.push(`${apiBaseUrl}${q.object.value}`);
+                    profileUris[q.subject.value] = {
+                        token: q.object.value.replace("/profiles/", ""),
+                        link: `${apiBaseUrl}${q.object.value}`
                     }
-                }, subject, null, null, null);
+                }, subject, namedNode(profQname("prez:link")), null, null);
             }, namedNode(profQname("a")), namedNode(profQname("prof:Profile")), null);
             
             // promise.all request for each profile in parallel
-            Promise.all(profileUris.map(uri => fetch(uri).then(r => r.text()))).then(values => {
+            Promise.all(Object.values(profileUris).map(p => fetch(p.link).then(r => r.text()))).then(values => {
                 // parse all results into store
                 values.forEach(value => {
                     combinedParseIntoStore(value)
@@ -84,7 +88,7 @@ onMounted(() => {
                 combinedStore.value.forSubjects(subject => {
                     let p: Profile = {
                         namespace: subject.id,
-                        token: "",
+                        token: profileUris[subject.id].token,
                         title: "",
                         description: "",
                         mediatypes: [],
@@ -95,8 +99,8 @@ onMounted(() => {
                             p.title = q.object.value;
                         } else if (q.predicate.value === combinedQname("dcterms:description")) {
                             p.description = q.object.value;
-                        } else if (q.predicate.value === combinedQname("dcterms:identifier")) {
-                            p.token = q.object.value;
+                        // } else if (q.predicate.value === combinedQname("dcterms:identifier")) {
+                        //     p.token = q.object.value;
                         } else if (q.predicate.value === combinedQname("altr-ext:hasResourceFormat")) {
                             p.mediatypes.push(q.object.value);
                         } else if (q.predicate.value === combinedQname("altr-ext:hasDefaultResourceFormat")) {
@@ -111,7 +115,7 @@ onMounted(() => {
                     profs.push(p);
                 }, namedNode(combinedQname("a")), namedNode(combinedQname("prof:Profile")), null);
 
-                ui.profiles = profs.reduce<{[token: string]: Profile}>((obj, prof) => (obj[prof.token] = prof, obj), {}); // {"dcat": {...}, "vocpub": {...}, ...}
+                ui.profiles = profs.reduce<{[namespace: string]: Profile}>((obj, prof) => (obj[prof.namespace] = prof, obj), {}); // {uri: {...}, ...}
             });
         });
     }

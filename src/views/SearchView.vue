@@ -11,6 +11,7 @@ import ErrorMessage from "@/components/ErrorMessage.vue";
 interface SearchResult {
     label?: string;
     uri: string;
+    source: string;
 };
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
@@ -28,15 +29,23 @@ function getResults() {
         doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
             parseIntoStore(data.value);
             store.value.forSubjects(subject => {
-                let result: SearchResult = {
-                    uri: subject.value
-                };
+                let resultUri = subject.value;
+                let resultLabel = undefined;
+                let resultSource = "";
+
                 store.value.forEach(q => {
                     if ([qname("skos:prefLabel"), qname("dcterms:title"), qname("rdfs:label")].includes(q.predicate.value)) {
-                        result.label = q.object.value;
+                        resultLabel = q.object.value;
+                    }
+                    if (q.predicate.value === qname("prez:searchResultSource") ) {
+                        resultSource = q.object.value.replace(qname("prez:"), "");
                     }
                 }, subject, null, null, null);
-                results.value.push(result);
+                results.value.push({
+                    uri: resultUri,
+                    label: resultLabel,
+                    source: resultSource
+                });
             }, null, null, null);
         });
     }
@@ -70,8 +79,15 @@ onMounted(() => {
     </template>
     <template v-else-if="route.query && route.query.term">
         <h2>Results</h2>
+        <div class="results-cols">
+            <span>Title</span>
+            <span>Source</span>
+        </div>
         <div v-if="results.length > 0" class="results">
-            <RouterLink v-for="result in results" class="result" :to="`/object?uri=${encodeURIComponent(result.uri)}`">{{ result.label || result.uri }}</RouterLink>
+            <RouterLink v-for="result in results" class="result" :to="`/object?uri=${encodeURIComponent(result.uri)}`">
+                <span>{{ result.label || result.uri }}</span>
+                <span :style="{ color: 'black' }">{{ result.source }}</span>
+            </RouterLink>
         </div>
         <p v-else>No results found.</p>
     </template>
@@ -79,6 +95,18 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 @import "@/assets/sass/_variables.scss";
+
+%resultsColumns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.results-cols {
+    @extend %resultsColumns;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
 
 .results {
     display: flex;
@@ -89,6 +117,7 @@ onMounted(() => {
         background-color: var(--cardBg);
         padding: 6px;
         border-radius: $borderRadius;
+        @extend %resultsColumns;
     }
 }
 </style>

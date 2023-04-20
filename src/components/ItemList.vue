@@ -28,6 +28,7 @@ const props = defineProps<{
     display: flex;
     flex-direction: column;
     gap: 12px;
+    margin-bottom: 12px;;
 
     a.list-item {
         display: flex;

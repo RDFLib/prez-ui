@@ -10,6 +10,7 @@ import ItemList from "@/components/ItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
+import PaginationComponent from "@/components/PaginationComponent.vue";
 
 const { namedNode } = DataFactory;
 
@@ -22,14 +23,14 @@ const { data, profiles, loading, error, doRequest } = useGetRequest();
 const props = defineProps<{
     title: string;
     parentType?: string;
-    class: string;
+    class?: string;
     childButton?: { name: string, url: string }; // undefined or link to children (/collections or /items)
     enableSearch?: boolean;
     content?: string;
 }>();
 
 const items = ref<ListItem[]>([]);
-
+const count = ref(0);
 const isAltView = ref(false);
 
 const flavour = computed<PrezFlavour | undefined>(() => {
@@ -41,6 +42,14 @@ const flavour = computed<PrezFlavour | undefined>(() => {
         return "VocPrez";
     } else {
         return undefined;
+    }
+});
+
+const currentPageNumber = computed(() => {
+    if (route.query && route.query.page) {
+        return parseInt(route.query.page as string);
+    } else {
+        return 1;
     }
 });
 
@@ -73,7 +82,25 @@ function getSearchDefaults(): {[key: string]: string} { // need IRI of parent to
 }
 
 onMounted(() => {
-    doRequest(`${apiBaseUrl}${route.path}`, () => {
+    let paginationParams = "";
+
+    if (route.query) {
+        if (route.query.page) {
+            paginationParams += `?page=${route.query.page}`;
+        }
+
+        if (route.query.per_page) {
+            if (route.query.page) {
+                paginationParams += "&";
+            } else {
+                paginationParams += "?";
+            }
+
+            paginationParams += `per_page=${route.query.per_page}`;
+        }
+    }
+
+    doRequest(`${apiBaseUrl}${route.path}${paginationParams}`, () => {
         const defaultProfile = profiles.value.find(p => p.default)!;
         
         // check profile, potentially show Alt profiles page or redirect to API endpoint
@@ -97,8 +124,8 @@ onMounted(() => {
         let labelPred = qname("rdfs:label");
         let descPred = qname("dcterms:description");
 
-        if (Object.keys(ui.profiles).includes(defaultProfile.token)) {
-            const currentProfile = ui.profiles[defaultProfile.token];
+        if (Object.keys(ui.profiles).includes(defaultProfile.uri)) {
+            const currentProfile = ui.profiles[defaultProfile.uri];
             
             // get profile-specific label & description predicates if available
             if (currentProfile.labelPredicate) {
@@ -112,9 +139,12 @@ onMounted(() => {
         let nodeList: Quad_Subject[] | Quad_Object[] = [];
         
         if (props.class) {
+            count.value = parseInt(store.value.getObjects(namedNode(qname(props.class)), namedNode(qname("prez:count")), null)[0].value);
             nodeList = store.value.getSubjects(namedNode(qname("a")), namedNode(qname(props.class)), null);
         } else {
-            nodeList = store.value.getObjects(null, namedNode(qname("rdfs:member")), null);
+            const quad = store.value.getQuads(null, namedNode(qname("prez:count")), null, null)[0];
+            count.value = parseInt(quad.object.value);
+            nodeList = store.value.getObjects(quad.subject, namedNode(qname("rdfs:member")), null);
         }
 
         nodeList.forEach(member => {
@@ -131,6 +161,18 @@ onMounted(() => {
                 }
             }, member, null, null, null);
             items.value.push(c);
+        });
+
+        items.value.sort((a, b) => {
+            if (a.title && b.title) {
+                return a.title.localeCompare(b.title);
+            } else if (a.title) {
+                return -1;
+            } else if (b.title) {
+                return 1;
+            } else {
+                return a.iri.localeCompare(b.iri);
+            }
         });
 
         if (isAltView.value) {
@@ -159,16 +201,18 @@ onMounted(() => {
     <template v-else>
         <h1 class="page-title">{{ props.title }}</h1>
         <p v-if="props.content" v-html="props.content"></p>
-        <div>
-            <template v-if="error">
-                <ErrorMessage :message="error" />
-            </template>
-            <template v-else-if="loading">
-                <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
-            </template>
-            <ItemList v-else-if="items.length > 0" :items="items" :childName="props.childButton?.name" :childLink="props.childButton?.url" />
-            <template v-else>No {{ props.title }} found.</template>
-        </div>
+        <p v-if="items.length > 0">Showing {{ items.length }} of {{ count }} items.</p>
+        <template v-if="error">
+            <ErrorMessage :message="error" />
+        </template>
+        <template v-else-if="loading">
+            <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
+        </template>
+        <template v-else-if="items.length > 0">
+            <ItemList :items="items" :childName="props.childButton?.name" :childLink="props.childButton?.url" />
+            <PaginationComponent :url="route.path" :totalCount="count" :currentPage="currentPageNumber" />
+        </template>
+        <template v-else>No {{ props.title }} found.</template>
         <Teleport v-if="props.enableSearch" to="#right-bar-content">
             <AdvancedSearch :flavour="flavour" :query="getSearchDefaults()" />
         </Teleport>
