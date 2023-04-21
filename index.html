@@ -6,8 +6,8 @@
     <link rel="icon" href="/theme/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prez</title>
-    <script src="https://kit.fontawesome.com/5660b8b2a9.js" crossorigin="anonymous"></script>
-    <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
+    <script class="external" src="https://kit.fontawesome.com/5660b8b2a9.js" crossorigin="anonymous"></script>
+    <link class="external" href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="/theme/theme.css">
 </head>
@@ -17,7 +17,38 @@
     <div id="app"></div>
     <footer id="footer"></footer>
     <script>
-        fetch("/theme/header.html")
+        var BASE_URL = "/";
+
+        const files = [
+            "/@vite/client",
+            "/theme/favicon.ico",
+            "/style.css",
+            "/theme/theme.css",
+            "/assets/*.js",
+            "/assets/*.css"
+        ];
+
+        const headScriptElements = document.querySelectorAll("head > script:not(.external)");
+        const headLinkElements = document.querySelectorAll("head > link:not(.external)");
+
+        function modifyPaths(elementArray, attr) {
+            elementArray.forEach(element => {
+                const url = new URL(element[attr]);
+                const file = files.find(f => new RegExp(`.*${f.replace("/", "\/").replace("*", ".*")}$`).test(url.pathname));
+                const baseUrl = url.pathname.replace(new RegExp(`${file.replace("/", "\/").replace("*", ".*")}`), "") + "/";
+                if (BASE_URL === "/" && baseUrl !== "/") { // vite dev server/build -> change BASE_URL
+                    BASE_URL = baseUrl;
+                } else if (BASE_URL !== "/" && baseUrl == "/") { // docker container -> change path prefix
+                    url.pathname = BASE_URL + url.pathname.slice(1);
+                    element[attr] = url.toString();
+                }
+            });
+        }
+
+        modifyPaths(headScriptElements, "src");
+        modifyPaths(headLinkElements, "href");
+        
+        fetch(`${BASE_URL}header.html`)
             .then(response => {
                 if (response.ok) {
                     return response.text();
@@ -26,8 +57,7 @@
             .then(text => {
                 document.querySelector("#header").innerHTML = text;
             });
-        
-        fetch("/theme/footer.html")
+        fetch(`${BASE_URL}footer.html`)
             .then(response => {
                 if (response.ok) {
                     return response.text();
