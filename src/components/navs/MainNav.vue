@@ -111,7 +111,7 @@ const props = defineProps<{
             <div class="nav-item"><RouterLink to="/sparql" class="nav-link">SPARQL</RouterLink></div>
             <div class="nav-item"><RouterLink to="/profiles" :class="`nav-link ${route.path.startsWith('/profiles') ? 'active' : ''}`">Profiles</RouterLink></div>
             <div class="nav-item"><RouterLink to="/about" class="nav-link">About</RouterLink></div>
-            <div class="nav-item"><RouterLink to="/docs" class="nav-link">API Docs</RouterLink></div>
+            <div class="nav-item"><RouterLink to="/docs" class="nav-link">API Documentation</RouterLink></div>
             <div class="bottom-nav-items">
                 <a href="https://github.com/RDFLib/prez-ui" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i> Prez UI v{{ props.version }}</a>
                 <a href="https://github.com/RDFLib/prez" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i> Prez API v{{ ui.apiVersion }}</a>
