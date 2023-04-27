@@ -3,6 +3,7 @@ import { inject, computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { useUiStore } from "@/stores/ui";
 import { enabledPrezsConfigKey, type PrezFlavour } from "@/types";
+import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 
 const routes: {[key: string]: any[]} = {
     "VocPrez": [
@@ -71,20 +72,6 @@ const activePrez = computed(() => {
 
 const collapse = ref(false);
 const dropdowns = ref(enabledPrezs.value.reduce<{[key: string]: boolean}>((obj, prez) => (obj[prez] = prez === activePrez.value, obj), {}));
-
-const getPrezSystemLabel = (key: string) => {
-    const prezKeyLabelMapping = {
-        "VocPrez": "Vocabularies",
-        "SpacePrez": "Spatial Data",
-        "CatPrez": "Catalog Data"
-    }
-
-    if (key in prezKeyLabelMapping) {
-        return prezKeyLabelMapping[key];
-    }
-
-    return key
-}
 
 watch(() => route.path, (newValue) => {
     Object.keys(dropdowns.value).forEach(prez => dropdowns.value[prez] = prez === activePrez.value);
