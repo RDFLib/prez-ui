@@ -4,6 +4,7 @@ import { RouterLink } from "vue-router";
 import { useUiStore } from "@/stores/ui";
 import type { PrezFlavour } from "@/types";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
+import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 
 const ui = useUiStore();
 
@@ -44,7 +45,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <h1 class="page-title">{{ props.flavour }}</h1>
+    <h1 class="page-title">{{ getPrezSystemLabel(props.flavour) }}</h1>
     <div class="home-page-links">
         <RouterLink v-for="link in homeLinks" :to="link.url" class="home-page-link">
             <h4 class="link-title">{{ link.label }}</h4>
