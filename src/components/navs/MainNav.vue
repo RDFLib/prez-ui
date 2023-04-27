@@ -7,7 +7,7 @@ import { enabledPrezsConfigKey, type PrezFlavour } from "@/types";
 const routes: {[key: string]: any[]} = {
     "VocPrez": [
         {
-            "label": "Vocabs",
+            "label": "Vocabularies",
             "to": "/v/vocab"
         },
         {
@@ -72,6 +72,20 @@ const activePrez = computed(() => {
 const collapse = ref(false);
 const dropdowns = ref(enabledPrezs.value.reduce<{[key: string]: boolean}>((obj, prez) => (obj[prez] = prez === activePrez.value, obj), {}));
 
+const getPrezSystemLabel = (key: string) => {
+    const prezKeyLabelMapping = {
+        "VocPrez": "Vocabularies",
+        "SpacePrez": "Spatial Data",
+        "CatPrez": "Catalog Data"
+    }
+
+    if (key in prezKeyLabelMapping) {
+        return prezKeyLabelMapping[key];
+    }
+
+    return key
+}
+
 watch(() => route.path, (newValue) => {
     Object.keys(dropdowns.value).forEach(prez => dropdowns.value[prez] = prez === activePrez.value);
 });
@@ -89,7 +103,7 @@ const props = defineProps<{
             <template v-for="prez in enabledPrezs">
                 <div class="nav-item">
                     <RouterLink :to="`/${prez.toLowerCase()[0]}`" class="nav-link">
-                        {{ prez }}
+                        {{ getPrezSystemLabel(prez) }}
                     </RouterLink>
                     <button class="dropdown-btn" @click="dropdowns[prez] = !dropdowns[prez]">
                         <i :class="`fa-regular fa-chevron-${dropdowns[prez] ? 'up' : 'down'}`"></i>
