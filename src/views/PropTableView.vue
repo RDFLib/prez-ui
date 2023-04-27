@@ -231,7 +231,7 @@ function getBreadcrumbs(): Breadcrumb[] {
             breadcrumbs.push({ name: "Vocabularies", url: "/v/vocab" });
         }
         if (["skos:Concept"].includes(props.type)) {
-            breadcrumbs.push({ name: "Vocab", url: `/v/vocab/${route.params.vocabId}` }); // need parent info in data (link, title & type)
+            breadcrumbs.push({ name: "Vocabulary", url: `/v/vocab/${route.params.vocabId}` }); // need parent info in data (link, title & type)
         }
         if (["skos:Collection"].includes(props.type)) {
             breadcrumbs.push({ name: "Collections", url: "/v/collection" });
