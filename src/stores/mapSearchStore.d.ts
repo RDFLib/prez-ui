@@ -7,5 +7,5 @@ export type WKTResult = {
     wkt: string
     fcLabel: string
     label: string
-    id: string
+    id?: string
 }
