@@ -11,6 +11,7 @@ import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
+import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 
 const { namedNode } = DataFactory;
 
@@ -220,7 +221,7 @@ function getChildren() {
 function getBreadcrumbs(): Breadcrumb[] {
     let breadcrumbs: Breadcrumb[] = [];
     if (flavour.value) {
-        breadcrumbs.push({ name: flavour.value, url: `/${flavour.value[0].toLowerCase()}`});
+        breadcrumbs.push({ name: getPrezSystemLabel(flavour.value) + " Home", url: `/${flavour.value[0].toLowerCase()}`});
         if (["ConceptInCollection"].includes(props.type)) {
             breadcrumbs.push({ name: "Collections", url: "/v/collection" });
         }

@@ -11,6 +11,7 @@ import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import PaginationComponent from "@/components/PaginationComponent.vue";
+import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 
 const { namedNode } = DataFactory;
 
@@ -56,7 +57,7 @@ const currentPageNumber = computed(() => {
 function getBreadcrumbs(): Breadcrumb[] {
     let breadcrumbs: Breadcrumb[] = [];
     if (flavour.value) {
-        breadcrumbs.push({ name: flavour.value, url: `/${flavour.value[0].toLowerCase()}`});
+        breadcrumbs.push({ name: getPrezSystemLabel(flavour.value) + " Home", url: `/${flavour.value[0].toLowerCase()}`});
         if (props.parentType) {
             if (["dcat:Dataset", "geo:FeatureCollection"].includes(props.parentType)) {
                 breadcrumbs.push({ name: "Datasets", url: "/s/datasets" });
