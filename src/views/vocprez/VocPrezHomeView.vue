@@ -18,35 +18,42 @@ const links = [
 
 <template>
     <FlavourHome flavour="VocPrez" :links="links">
-        <p>Welcome to VocPrez - a read-only web delivery system for Simple Knowledge Organization System (SKOS)-formulated
-            RDF vocabularies.</p>
-        <p>VocPrez presents different views of vocabularies from a list of RDF sources. This system currently implements
-            sources from local files, Research Vocabularies Australia and VocBench.</p>
-        <h2>Vocabularies</h2>
         <p>
-            Vocabularies (or ConceptSchemes) contain a hierarchical list of terms (or Concepts).
+            The vocabularies are provided as a read-only web delivery system, providing a standardised set of profiles 
+            in both human and machine-readable views. See the available profiles <RouterLink to="/v/profiles">here</RouterLink>.
         </p>
         <p>
-            See the <RouterLink to="/v/vocab">Vocabularies Register</RouterLink> for a list of vocabularies this
-            instance of VocPrez knows about.
+            More specifically, the vocabularies defined in this system conform to the VocPub profile,
+            which itself is an opinionated profile of the SKOS (Simple Knowledge Organisation System) data model.
+        </p>
+        <h2>Vocabularies</h2>
+        <p>
+            A vocabulary (concept scheme) is a hierarchical list of terms (concepts).
+        </p>
+        <p>
+            See the <RouterLink to="/v/vocab">Vocabularies Register</RouterLink> for a list of vocabularies.
         </p>
         <h2>Collections</h2>
         <p>
-            Collections are a grouping of terms (or Concepts), represented as a flat listing of Concepts.
+            A collectionis a flat grouping of terms (concepts).
         </p>
         <p>
-            See the <RouterLink to="/v/collection">Collections page</RouterLink> for a list of collections this
-            instance of VocPrez knows about.
+            See the <RouterLink to="/v/collection">Collections page</RouterLink> for a list of collections.
         </p>
         <h2>Concepts</h2>
         <p>
-            Vocabulary terms (or Concepts) are listed within a vocabulary's home page. Each vocabulary presents both a
+            Vocabulary terms (concepts) are listed within a vocabulary's home page. Each vocabulary presents both a
             concept hierarchy (tree) view and a link to a flat list of its concepts.
         </p>
         <h2>Search and Querying</h2>
         <p>
-            You can search for Concepts within one vocab or across all vocabularies by using the search bar below or the <RouterLink to="/search">Advanced Search page</RouterLink>, or perform SPARQL queries using the <RouterLink to="/sparql">SPARQL page</RouterLink>.
+            You can search for concepts within one vocabulary or across all vocabularies.
         </p>
+        <ul>
+            <li>To search across vocabularies, use the search bar above.</li>
+            <li>To search across the entire Prez system, use the <RouterLink to="/search">Advanced Search</RouterLink>.</li>
+            <li>To perform custom queries, use the SPARQL query language on the <RouterLink to="/sparql">SPARQL page</RouterLink></li>
+        </ul>
 </FlavourHome></template>
 
 <style lang="scss" scoped></style>
