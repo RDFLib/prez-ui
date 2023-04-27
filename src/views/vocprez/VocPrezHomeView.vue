@@ -4,7 +4,7 @@ import FlavourHome from "@/components/FlavourHome.vue";
 
 const links = [
     {
-        label: "Vocabs",
+        label: "Vocabularies",
         url: "/v/vocab",
         description: "A list of SKOS vocabularies"
     },
@@ -43,9 +43,9 @@ const links = [
             Vocabulary terms (or Concepts) are listed within a vocabulary's home page. Each vocabulary presents both a
             concept hierarchy (tree) view and a link to a flat list of its concepts.
         </p>
-        <h2>Search & Querying</h2>
+        <h2>Search and Querying</h2>
         <p>
-            You can search for Concepts within one vocab or across all vocabs by using the search bar below or the <RouterLink to="/search">Advanced Search page</RouterLink>, or perform SPARQL queries using the <RouterLink to="/sparql">SPARQL page</RouterLink>.
+            You can search for Concepts within one vocab or across all vocabularies by using the search bar below or the <RouterLink to="/search">Advanced Search page</RouterLink>, or perform SPARQL queries using the <RouterLink to="/sparql">SPARQL page</RouterLink>.
         </p>
 </FlavourHome></template>
 

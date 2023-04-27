@@ -228,7 +228,7 @@ function getBreadcrumbs(): Breadcrumb[] {
             breadcrumbs.push({ name: "Collection", url: `/v/collection/${route.params.collectionId}` });
         }
         if (["skos:ConceptScheme", "skos:Concept"].includes(props.type)) {
-            breadcrumbs.push({ name: "Vocabs", url: "/v/vocab" });
+            breadcrumbs.push({ name: "Vocabularies", url: "/v/vocab" });
         }
         if (["skos:Concept"].includes(props.type)) {
             breadcrumbs.push({ name: "Vocab", url: `/v/vocab/${route.params.vocabId}` }); // need parent info in data (link, title & type)
