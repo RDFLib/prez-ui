@@ -35,7 +35,7 @@ const links = [
         </p>
         <h2>Collections</h2>
         <p>
-            A collectionis a flat grouping of terms (concepts).
+            A collection is a flat grouping of terms (concepts).
         </p>
         <p>
             See the <RouterLink to="/v/collection">Collections page</RouterLink> for a list of collections.
