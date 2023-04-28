@@ -1,8 +1,8 @@
 const getPrezSystemLabel = (key: string) => {
   const prezKeyLabelMapping: { [key: string]: string } = {
     VocPrez: "Vocabularies",
-    SpacePrez: "Spatial Data",
-    CatPrez: "Catalog Data",
+    SpacePrez: "Spatial Data Catalog",
+    CatPrez: "Data Catalog",
   };
 
   if (key in prezKeyLabelMapping) {

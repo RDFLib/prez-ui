@@ -8,14 +8,14 @@ const ui = useUiStore();
 
 onMounted(() => {
     ui.rightNavConfig = { enabled: false };
-    document.title = "Spatial Data Home | Prez";
+    document.title = "Spatial Data Catalog Home | Prez";
     ui.pageHeading = { name: "SpacePrez", url: "/s"};
     ui.breadcrumbs = [{ name: getPrezSystemLabel("SpacePrez") + " Home", url: "/s" }];
 });
 </script>
 
 <template>
-    <h1>Spatial Data</h1>
+    <h1>Spatial Data Catalog</h1>
     <p>
         A spatial catalog of Feature Collections and Features conforming to <a href="https://www.w3.org/TR/vocab-dcat-2/">DCAT</a> and 
         <a href="https://www.ogc.org/standard/geosparql/">GeoSPARQL</a>, and delivered as a read-only web system in both human and machine-readable views.
