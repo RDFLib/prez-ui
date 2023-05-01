@@ -1,3 +1,12 @@
+## Change for 2023-04-27
+
+Updates to SpacePrez search
+- Area type defaults to Nearby for points and Contains for areas
+- Search button bug fixed
+- Search loading feedback
+- Updates to SPAQRL query to remove filters
+- Duplicate search request issue
+
 ## Changes for 2023-03-24
 
 Merge of map search changes for SpacePrez
