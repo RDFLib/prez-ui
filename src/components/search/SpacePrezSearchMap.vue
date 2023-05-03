@@ -304,6 +304,25 @@ table {
     grid-template-columns: 1fr 3fr; /* set the column widths to 1/4 and 3/4 of the container width */
 }
 
+.left-panel {
+    min-width: 320px;
+    padding-right: 1em;
+}
+.right-panel {
+}
+
+/* Media query for small screens */
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    .left-panel {
+        margin-bottom: 2em;
+        width: 100%;
+        padding-right: 0;
+    }
+}
+
 .space-right {
     margin-right:1em;    
 }
@@ -322,12 +341,6 @@ table {
     margin-top:10px;
 }
 
-.left-panel {
-    min-width: 320px;
-    padding-right: 1em;
-}
-.right-panel {
-}
 
 pre.debug {
     white-space: break-spaces;
