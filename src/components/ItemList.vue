@@ -46,69 +46,29 @@ const setSortState = (key: listingTableColumn) => {
     }
 }
 
-// props.items.sort((a, b) => a.status?.localeCompare(b.status))
-
-watch(sortState, (newSortState, oldSortState) => {
+watch(sortState, () => {
     const validKeys: listingTableColumn[] = ["label", "description", "status", "derivationMode"];
+    const keyToListItem = {
+        label: "title",
+        description: "description",
+        status: "status",
+        derivationMode: "derivationMode",
+    }
     
-
     for (const validKey of validKeys) {
-        if (validKey === "label" && sortState[validKey] === true) {
+        if (sortState[validKey] === true) {
             rows.value = props.items.sort((a: ListItem, b: ListItem) => {
-                if (a.hasOwnProperty("title")) {
-                    return a.title.localeCompare(b.title)
+                const listItemKey = keyToListItem[validKey];
+                if (a.hasOwnProperty(listItemKey)) {
+                    return a[listItemKey].localeCompare(b[listItemKey]);
                 }
             })
         }
-        else if (validKey === "label" && sortState[validKey] === false) {
+        else if (sortState[validKey] === false) {
             rows.value = props.items.sort((a: ListItem, b: ListItem) => {
-                if (b.hasOwnProperty("title")) {
-                    return b.title.localeCompare(a.title)
-                }
-            })
-        }
-
-        else if (validKey === "description" && sortState[validKey] === true) {
-            rows.value = props.items.sort((a: ListItem, b: ListItem) => {
-                if (a.hasOwnProperty("description")) {
-                    return a.description.localeCompare(b.description)
-                }
-            })
-        }
-        else if (validKey === "description" && sortState[validKey] === false) {
-            rows.value = props.items.sort((a: ListItem, b: ListItem) => {
-                if (b.hasOwnProperty("description")) {
-                    return b.description.localeCompare(a.description)
-                }
-            })
-        }
-
-        else if (validKey === "status" && sortState[validKey] === true) {
-            rows.value = props.items.sort((a: ListItem, b: ListItem) => {
-                if (a.hasOwnProperty("status")) {
-                    return a.status.localeCompare(b.status)
-                }
-            })
-        }
-        else if (validKey === "status" && sortState[validKey] === false) {
-            rows.value = props.items.sort((a: ListItem, b: ListItem) => {
-                if (b.hasOwnProperty("status")) {
-                    return b.status.localeCompare(a.status)
-                }
-            })
-        }
-
-        else if (validKey === "derivationMode" && sortState[validKey] === true) {
-            rows.value = props.items.sort((a: ListItem, b: ListItem) => {
-                if (a.hasOwnProperty("derivationMode")) {
-                    return a.derivationMode.localeCompare(b.derivationMode)
-                }
-            })
-        }
-        else if (validKey === "derivationMode" && sortState[validKey] === false) {
-            rows.value = props.items.sort((a: ListItem, b: ListItem) => {
-                if (b.hasOwnProperty("derivationMode")) {
-                    return b.derivationMode.localeCompare(a.derivationMode)
+                const listItemKey = keyToListItem[validKey];
+                if (b.hasOwnProperty(listItemKey)) {
+                    return b[listItemKey].localeCompare(a[listItemKey]);
                 }
             })
         }
