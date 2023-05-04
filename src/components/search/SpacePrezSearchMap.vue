@@ -164,7 +164,10 @@ const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) =
 
                 <div class="query-option">
                     <h4 class="query-option-title">Find features and datasets</h4>
-                    <div v-if="datasets.loading">Loading...</div>
+                    <div v-if="datasets.loading">
+                        <h4>Loading...</h4>
+                        <div class="loading-icon"></div>
+                    </div>
                     <div class="error" v-else-if="datasets.error">Unable to load datasets: {{ datasets.error }}</div>
                     <div v-for="datasetNode in datasetTreeRef">
                         <ul>
@@ -208,6 +211,7 @@ const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) =
             />
             <div v-if="mapSearch.loading">
                 <h3>Loading...</h3>
+                <div class="loading-icon"></div>
             </div>
             <div v-else>
                 <div v-if="mapSearch.data && mapSearch.data.length > 0">
@@ -378,5 +382,26 @@ pre.debug {
     background-color: lightcoral;
     display: inline-block;
 }
+
+.loading-icon {
+  position: relative;
+  width: 20px;
+  height: 20px; 
+  margin:0;
+  padding:0;
+  -webkit-animation: fa-spin 2s infinite linear;
+  animation: fa-spin 2s infinite linear;
+}
+
+.loading-icon:before {
+  content: "\f1ce";
+  font-family: FontAwesome;
+  font-size:20px;
+  line-height:21px;
+  position: absolute;
+  top: 0; 
+  bottom:0;
+}
+
 
 </style>
