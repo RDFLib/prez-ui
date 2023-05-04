@@ -158,6 +158,16 @@ onMounted(() => {
                     c.description = q.object.value;
                 } else if (q.predicate.value === qname("prez:link")) {
                     c.link = q.object.value;
+                } else if (q.predicate.value === qname("reg:status")) {
+                    store.value.forObjects(result => {
+                        c.status = result.value;
+                    }, q.object, qname("rdfs:label"), null);
+                } else if (q.predicate.value === qname("prov:qualifiedDerivation")) {
+                    store.value.forObjects(result => {
+                        store.value.forObjects(innerResult => {
+                            c.role = innerResult.value;
+                        }, result,qname("rdfs:label"), null);
+                    }, q.object, qname("prov:hadRole"), null);
                 }
             }, member, null, null, null);
             items.value.push(c);

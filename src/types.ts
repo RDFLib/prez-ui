@@ -89,6 +89,8 @@ export interface ListItem {
     description?: string;
     link?: string;
     type?: string;
+    status?: string;
+    role?: string;
 };
 
 export interface AnnotatedPredicate {

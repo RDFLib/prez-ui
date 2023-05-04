@@ -10,29 +10,62 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div class="list">
-        <RouterLink class="list-item" v-for="item in props.items" :to="!!item.link ? item.link : ''">
-            <div class="list-item-left">
-                <h4 class="list-item-title">{{ item.title || item.iri }}</h4>
-                <div v-if="!!item.description" class="list-item-desc">{{ item.description }}</div>
-            </div>
-            <RouterLink v-if="props.childLink" @click.stop :to="item.link + props.childLink" class="btn outline sm child-btn">{{ props.childName }}</RouterLink>
-        </RouterLink>
-    </div>
+    <table class="table" role="grid">
+        <thead>
+            <tr role="row">
+                <th>Label</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Derivation mode</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="row" role="row" v-for="item in props.items">
+                <td>
+                    <RouterLink :to="!!item.link ? item.link : ''">
+                        {{ item.title || item.iri }}
+                    </RouterLink>
+                </td>
+                <td>
+                    <div v-if="!!item.description">{{ item.description.substring(0, 80) + "..." }}</div>
+                </td>
+                <td>
+                    <div v-if="!!item.status">{{  item.status }}</div>
+                </td>
+                <td>
+                    <div v-if="!!item.role">{{  item.role }}</div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </template>
 
 <style lang="scss" scoped>
 @import "@/assets/sass/_variables.scss";
 
+.table {
+    border-collapse: separate;
+    border-spacing: 0 1em;
+}
+
+.row {
+    padding: 5px;
+    background-color: var(--cardBg);
+}
+
+td {
+    padding: 10px;
+}
+
 .list {
-    display: flex;
-    flex-direction: column;
+    // display: flex;
+    // flex-direction: column;
     gap: 12px;
-    margin-bottom: 12px;;
+    margin-bottom: 12px;
 
     a.list-item {
-        display: flex;
-        flex-direction: row;
+        // display: flex;
+        // flex-direction: row;
         gap: 10px;
         background-color: var(--cardBg);
         padding: 10px;
