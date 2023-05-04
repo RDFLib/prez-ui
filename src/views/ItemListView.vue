@@ -165,7 +165,7 @@ onMounted(() => {
                 } else if (q.predicate.value === qname("prov:qualifiedDerivation")) {
                     store.value.forObjects(result => {
                         store.value.forObjects(innerResult => {
-                            c.role = innerResult.value;
+                            c.derivationMode = innerResult.value;
                         }, result,qname("rdfs:label"), null);
                     }, q.object, qname("prov:hadRole"), null);
                 }
