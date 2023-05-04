@@ -11,6 +11,10 @@ const props = defineProps<{
     childLink?: string;
 }>();
 
+// Each key is a table header.
+// If key has the value "true", it is being sorted alphabetically A-Z.
+// If key has the value "false", it is being sorted alphabetically Z-A.
+// Only one key can have a value of true or false and other keys are null.
 const sortState = reactive<{label: boolean | null, description: boolean | null, status: boolean | null, derivationMode: boolean | null}>({
     label: true,
     description: null,
