@@ -125,6 +125,11 @@ watch(sortState, () => {
     background-color: var(--cardBg);
 }
 
+th {
+    text-align: left;
+    padding-left: 0.5rem;
+}
+
 td {
     padding: 10px;
 }
