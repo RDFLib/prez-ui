@@ -135,14 +135,10 @@ td {
 }
 
 .list {
-    // display: flex;
-    // flex-direction: column;
     gap: 12px;
     margin-bottom: 12px;
 
     a.list-item {
-        // display: flex;
-        // flex-direction: row;
         gap: 10px;
         background-color: var(--cardBg);
         padding: 10px;
