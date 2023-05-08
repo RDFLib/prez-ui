@@ -92,7 +92,9 @@ onMounted(() => {
                         title: "",
                         description: "",
                         mediatypes: [],
-                        defaultMediatype: ""
+                        defaultMediatype: "",
+                        labelPredicate: [],
+                        descPredicate: []
                     };
                     combinedStore.value.forEach(q => {
                         if (q.predicate.value === combinedQname("dcterms:title")) {
@@ -106,9 +108,9 @@ onMounted(() => {
                         } else if (q.predicate.value === combinedQname("altr-ext:hasDefaultResourceFormat")) {
                             p.defaultMediatype = q.object.value;
                         } else if (q.predicate.value === combinedQname("altr-ext:hasLabelPredicate")) {
-                            p.labelPredicate = q.object.value;
+                            p.labelPredicate.push(q.object.value);
                         } else if (q.predicate.value === combinedQname("altr-ext:hasDescriptionPredicate")) {
-                            p.descPredicate = q.object.value;
+                            p.descPredicate.push(q.object.value);
                         }
                     }, subject, null, null, null);
                     p.mediatypes.sort((a, b) => Number(b === p.defaultMediatype) - Number(a === p.defaultMediatype));

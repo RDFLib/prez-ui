@@ -121,19 +121,19 @@ onMounted(() => {
         parseIntoStore(data.value);
 
         // default label & description predicates
-        let labelPred = qname("rdfs:label");
-        let descPred = qname("dcterms:description");
+        let labelPred = [qname("rdfs:label")];
+        let descPred = [qname("dcterms:description")];
 
         if (Object.keys(ui.profiles).includes(defaultProfile.uri)) {
             const currentProfile = ui.profiles[defaultProfile.uri];
             
             // get profile-specific label & description predicates if available
-            if (currentProfile.labelPredicate) {
-                labelPred = currentProfile.labelPredicate;
-            }
-            if (currentProfile.descPredicate) {
-                descPred = currentProfile.descPredicate;
-            }
+            if (currentProfile.labelPredicate.length > 0) {
+            labelPred = currentProfile.labelPredicate;
+        }
+        if (currentProfile.descPredicate.length > 0) {
+            descPred = currentProfile.descPredicate;
+        }
         }
 
         let nodeList: Quad_Subject[] | Quad_Object[] = [];
@@ -152,9 +152,9 @@ onMounted(() => {
                 iri: member.id
             };
             store.value.forEach(q => { // get preds & objs for each subj
-                if (q.predicate.value === labelPred) {
+                if (labelPred.includes(q.predicate.value)) {
                     c.title = q.object.value;
-                } else if (q.predicate.value === descPred) {
+                } else if (descPred.includes(q.predicate.value)) {
                     c.description = q.object.value;
                 } else if (q.predicate.value === qname("prez:link")) {
                     c.link = q.object.value;

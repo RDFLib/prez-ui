@@ -108,29 +108,29 @@ function getProperties() {
     const defaultProfile = profiles.value.find(p => p.default)!;
 
     // default label & description predicates
-    let labelPred = qname("rdfs:label");
-    let descPred = qname("dcterms:description");
+    let labelPred = [qname("rdfs:label")];
+    let descPred = [qname("dcterms:description")];
     const geoPreds = [qname("geo:hasBoundingBox"), qname("geo:hasGeometry")];
 
     if (Object.keys(ui.profiles).includes(defaultProfile.uri)) {
         const currentProfile = ui.profiles[defaultProfile.uri];
         
         // get profile-specific label & description predicates if available
-        if (currentProfile.labelPredicate) {
+        if (currentProfile.labelPredicate.length > 0) {
             labelPred = currentProfile.labelPredicate;
         }
-        if (currentProfile.descPredicate) {
+        if (currentProfile.descPredicate.length > 0) {
             descPred = currentProfile.descPredicate;
         }
     }
 
     // add label & desc predicates to hidden list
-    hiddenPreds.push(...[labelPred, descPred]);
+    hiddenPreds.push(...[...labelPred, ...descPred]);
 
     store.value.forEach(q => {
-        if (q.predicate.value === labelPred) {
+        if (labelPred.includes(q.predicate.value)) {
             item.value.title = q.object.value;
-        } else if (q.predicate.value === descPred) {
+        } else if (descPred.includes(q.predicate.value)) {
             item.value.description = q.object.value;
         } else if (q.predicate.value === qname("a")) {
             item.value.type = q.object.value;
