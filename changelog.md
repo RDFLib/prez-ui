@@ -1,3 +1,10 @@
+## Change for 2023-05-03
+Add map client to search and item pages
+- SearchView updates to add map for any results with spatial data
+- PropTableView includes a map for any pages with spatial data
+- Temp fix for loading icon issue
+- Minor change to reduce white space for search forms
+
 ## Change for 2023-04-27
 
 Updates to SpacePrez search

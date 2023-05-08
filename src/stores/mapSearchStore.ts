@@ -9,7 +9,7 @@ import type { WKTResult } from '@/stores/mapSearchStore.d'
 
 import { apiBaseUrlConfigKey } from "@/types";
 
-const linkPrefix = '/s/object?uri='
+const linkPrefix = '/object?uri='
 
 /**
  * Main search store for processing the results of a search SPARQL query

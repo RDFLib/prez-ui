@@ -62,7 +62,8 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     gap: 16px;
-    margin: 20px auto;
+    margin: 20px 0;
+    max-width: 768px;
     flex-wrap: wrap;
     // justify-content: center;
 
