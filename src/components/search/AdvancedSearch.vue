@@ -121,10 +121,10 @@ function camelToTitleCase(s: string): string {
     flex-direction: column;
     width: 100%;
     gap: 8px;
-    margin: 0 auto;
+    margin: 0;
     
     &.lg {
-        width: 50%;
+        max-width: 768px;
 
         input.search-input, button.submit-btn {
             padding: 10px;
