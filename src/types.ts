@@ -91,6 +91,14 @@ export interface ListItem {
     description?: string;
     link?: string;
     type?: string;
+};
+
+export interface VocabListItem {
+    iri: string;
+    title?: string;
+    description?: string;
+    link?: string;
+    type?: string;
     status?: string;
     derivationMode?: string;
 };
