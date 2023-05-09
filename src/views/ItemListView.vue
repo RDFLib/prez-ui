@@ -5,8 +5,9 @@ import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type PrezFlavour } from "@/types";
+import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type VocabListItem, type PrezFlavour } from "@/types";
 import ItemList from "@/components/ItemList.vue";
+import VocabItemList from "@/components/VocabItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
@@ -149,19 +150,42 @@ onMounted(() => {
         }
 
         nodeList.forEach(member => {
-            let c: ListItem = {
-                iri: member.id
-            };
-            store.value.forEach(q => { // get preds & objs for each subj
-                if (q.predicate.value === labelPred) {
-                    c.title = q.object.value;
-                } else if (q.predicate.value === descPred) {
-                    c.description = q.object.value;
-                } else if (q.predicate.value === qname("prez:link")) {
-                    c.link = q.object.value;
-                }
-            }, member, null, null, null);
-            items.value.push(c);
+            let c: ListItem & VocabListItem = {iri: member.id};
+            
+            if (flavour.value === "VocPrez") {
+                store.value.forEach(q => { // get preds & objs for each subj
+                    if (q.predicate.value === labelPred) {
+                        c.title = q.object.value;
+                    } else if (q.predicate.value === descPred) {
+                        c.description = q.object.value;
+                    } else if (q.predicate.value === qname("prez:link")) {
+                        c.link = q.object.value;
+                    } else if (q.predicate.value === qname("reg:status")) {
+                        store.value.forObjects(result => {
+                            c.status = result.value;
+                        }, q.object, qname("rdfs:label"), null);
+                    } else if (q.predicate.value === qname("prov:qualifiedDerivation")) {
+                        store.value.forObjects(result => {
+                            store.value.forObjects(innerResult => {
+                                c.derivationMode = innerResult.value;
+                            }, result,qname("rdfs:label"), null);
+                        }, q.object, qname("prov:hadRole"), null);
+                    }
+                }, member, null, null, null);
+                items.value.push(c);
+            }
+            else {
+                store.value.forEach(q => { // get preds & objs for each subj
+                    if (q.predicate.value === labelPred) {
+                        c.title = q.object.value;
+                    } else if (q.predicate.value === descPred) {
+                        c.description = q.object.value;
+                    } else if (q.predicate.value === qname("prez:link")) {
+                        c.link = q.object.value;
+                    }
+                }, member, null, null, null);
+                items.value.push(c);
+            }
         });
 
         items.value.sort((a, b) => {
@@ -210,7 +234,12 @@ onMounted(() => {
             <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
         </template>
         <template v-else-if="items.length > 0">
-            <ItemList :items="items" :childName="props.childButton?.name" :childLink="props.childButton?.url" />
+            <template v-if="flavour === 'VocPrez'">
+                <VocabItemList :items="items" :childName="props.childButton?.name" :childLink="props.childButton?.url" />
+            </template>
+            <template v-else>
+                <ItemList :items="items" :childName="props.childButton?.name" :childLink="props.childButton?.url" />
+            </template>
             <PaginationComponent :url="route.path" :totalCount="count" :currentPage="currentPageNumber" />
         </template>
         <template v-else>No {{ props.title }} found.</template>
