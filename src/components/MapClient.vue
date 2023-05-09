@@ -230,7 +230,7 @@ watch(mapRef, googleMap => {
         :street-view-control="props.streetViewController || mapConfig.settings.options.streetViewController"
         :zoom="props.zoom || mapConfig.settings.options.zoom"
         map-type-id="terrain"
-        style="width: 100%; height: 500px" 
+        style="width: 100%; height: 500px; background-color: #eee;" 
     >
     </GMapMap>
 

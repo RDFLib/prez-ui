@@ -12,6 +12,8 @@ import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
+import MapClient from "@/components/MapClient.vue";
+import type { WKTResult } from "@/stores/mapSearchStore.d";
 
 const { namedNode } = DataFactory;
 
@@ -65,6 +67,7 @@ const properties = ref<AnnotatedQuad[]>([]);
 const blankNodes = ref<AnnotatedQuad[]>([]);
 const hideConcepts = ref(false); // only for vocab
 const collapseAll = ref(true); // only for vocab
+const geoResults = ref<WKTResult[]>([]); // for spatial results
 
 const isAltView = ref(false);
 
@@ -108,6 +111,7 @@ function getProperties() {
     // default label & description predicates
     let labelPred = qname("rdfs:label");
     let descPred = qname("dcterms:description");
+    const geoPreds = [qname("geo:hasBoundingBox"), qname("geo:hasGeometry")];
 
     if (Object.keys(ui.profiles).includes(defaultProfile.uri)) {
         const currentProfile = ui.profiles[defaultProfile.uri];
@@ -131,6 +135,16 @@ function getProperties() {
             item.value.description = q.object.value;
         } else if (q.predicate.value === qname("a")) {
             item.value.type = q.object.value;
+        } else if (geoPreds.indexOf(q.predicate.value) >= 0) {
+            store.value.forEach(geoQ=>{
+                geoResults.value.push({
+                    label: '',
+                    fcLabel: '',
+                    wkt: geoQ.object.value,
+                    uri: descPred,
+                    link: `/object?uri=${item.value.iri}`
+                })
+            }, q.object, namedNode(qname("geo:asWKT")), null, null)
         }
 
         if (!isAltView.value) {
@@ -141,6 +155,11 @@ function getProperties() {
             findBlankNodes(q, store.value, recursionCounter);
         }
     }, subject, null, null, null);
+
+    // set the item title after the item title has been set
+    geoResults.value.forEach(result=>{
+        result.label = item.value.title ? item.value.title : item.value.iri
+    });
 }
 
 function getConcepts() {
@@ -329,7 +348,12 @@ onMounted(() => {
     <ProfilesTable v-if="isAltView" :profiles="profiles" :path="route.path" />
     <template v-else>
         <PropTableNew v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPreds="hiddenPreds">
-            <!-- <template v-if="geometry" #map></template> -->
+            <template #map>
+                <MapClient v-if="geoResults.length"
+                        ref="searchMapRef" 
+                        :geo-w-k-t="geoResults"
+                    />
+            </template>
             <template v-if="props.type === 'skos:ConceptScheme'" #bottom>
                 <tr>
                     <th>Concepts</th>

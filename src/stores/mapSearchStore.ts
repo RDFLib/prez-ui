@@ -9,7 +9,7 @@ import type { WKTResult } from '@/stores/mapSearchStore.d'
 
 import { apiBaseUrlConfigKey } from "@/types";
 
-const linkPrefix = '/s/object?uri='
+const linkPrefix = '/object?uri='
 
 /**
  * Main search store for processing the results of a search SPARQL query
@@ -45,39 +45,34 @@ export const mapSearchStore = defineStore({
     async searchMap(query:string) {
         // make the API call to the SPARQL endpoint
         const url = `${this.apiBaseUrl}/s/sparql`
-        const response = await axios.get(url,  { headers: {"accept": "application/sparql-results+json"}, params: { query }})
-
-
         this.loading = true
         this.success = false
 
         try {
-
+          const response = await axios.get(url,  { headers: {"accept": "application/sparql-results+json"}, params: { query }})
           this.data = response.data.results.bindings.filter((item:any)=>item.fc_label?.value).map((item:any)=>{
             return {
               uri: item.f_uri.value,
               link: `${linkPrefix}${item.f_uri.value}`,
               wkt: item.wkt.value,
               fcLabel: item.fc_label?.value,
-              label: item.f_label.value,
-              id: item.o.value
+              label: item.f_label.value
             }
           })
+          // successfully processed
+          this.success = true
+          this.error = null
 
         } catch (error:any) {
-
           // set the error status
           this.error = error.message
+          this.data = []
           this.success = false
 
         } finally {
           // always set loading to complete
           this.loading = false
         }
-
-        // successfully processed
-        this.success = true
-        this.error = null
 
     }
 
