@@ -128,12 +128,12 @@ onMounted(() => {
             const currentProfile = ui.profiles[defaultProfile.uri];
             
             // get profile-specific label & description predicates if available
-            if (currentProfile.labelPredicate.length > 0) {
-            labelPred = currentProfile.labelPredicate;
-        }
-        if (currentProfile.descPredicate.length > 0) {
-            descPred = currentProfile.descPredicate;
-        }
+            if (currentProfile.labelPredicates.length > 0) {
+                labelPred = currentProfile.labelPredicates;
+            }
+            if (currentProfile.descriptionPredicates.length > 0) {
+                descPred = currentProfile.descriptionPredicates;
+            }
         }
 
         let nodeList: Quad_Subject[] | Quad_Object[] = [];
