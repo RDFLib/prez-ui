@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { onMounted } from "vue";
 import { useUiStore } from "@/stores/ui";
+import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 
 const ui = useUiStore();
 
@@ -8,7 +9,7 @@ onMounted(() => {
     ui.rightNavConfig = { enabled: false };
     document.title = "About CatPrez | Prez";
     ui.pageHeading = { name: "CatPrez", url: "/c" };
-    ui.breadcrumbs = [{ name: "CatPrez", url: "/c" }, { name: "About", url: "/c/about" }];
+    ui.breadcrumbs = [{ name: getPrezSystemLabel("CatPrez") + " Home", url: "/c" }, { name: "About", url: "/c/about" }];
 });
 </script>
 

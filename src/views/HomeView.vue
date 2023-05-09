@@ -18,20 +18,19 @@ onMounted(() => {
 
 <template>
     <h1 class="page-title">Welcome to Prez</h1>
-    <p>Prez is a Linked Data API that combines VocPrez, SpacePrez (OGC API) and CatPrez.</p>
-    <p>Each instance of Prez can either act as a collection of *Prezs or as a stand-alone instance of a single *Prez.</p>
+    <p>Prez is a Linked Data API with support for multiple data formats (JSON, CSV, JSON-LD, Turtle, RDF/XML).</p>
     <div class="prez-card-container">
         <RouterLink v-if="enabledPrezs.includes('CatPrez')" class="prez-card" to="/c">
-            <h3>CatPrez</h3>
-            <p>CatPrez presents Data Catalog Vocabulary (DCAT) catalogue information in RDF, in various formats.</p>
+            <h3>Data Catalog</h3>
+            <p>General data catalog structured using DCAT metadata format.</p>
         </RouterLink>
         <RouterLink v-if="enabledPrezs.includes('SpacePrez')" class="prez-card" to="/s">
-            <h3>SpacePrez</h3>
-            <p>SpacePrez presents GeoSPARQL spatial features in various formats. This API conforms to the Open Geospatial Consortium (OGC) API specification.</p>
+            <h3>Spatial Data Catalog</h3>
+            <p>Spatial data catalog of GeoSPARQL spatial features with an API conforming to the OGC API specification. Uses DCAT for catalog metadata.</p>
         </RouterLink>
         <RouterLink v-if="enabledPrezs.includes('VocPrez')" class="prez-card" to="/v">
-            <h3>VocPrez</h3>
-            <p>VocPrez presents Simple Knowledge Organization System (SKOS)-formulated RDF vocabularies in various formats.</p>
+            <h3>Vocabularies</h3>
+            <p>A well-structured set of SKOS vocabularies conforming to the VocPub profile.</p>
         </RouterLink>
     </div>
 </template>

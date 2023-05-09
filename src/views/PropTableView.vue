@@ -11,6 +11,7 @@ import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
+import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import MapClient from "@/components/MapClient.vue";
 import type { WKTResult } from "@/stores/mapSearchStore.d";
 
@@ -239,7 +240,7 @@ function getChildren() {
 function getBreadcrumbs(): Breadcrumb[] {
     let breadcrumbs: Breadcrumb[] = [];
     if (flavour.value) {
-        breadcrumbs.push({ name: flavour.value, url: `/${flavour.value[0].toLowerCase()}`});
+        breadcrumbs.push({ name: getPrezSystemLabel(flavour.value) + " Home", url: `/${flavour.value[0].toLowerCase()}`});
         if (["ConceptInCollection"].includes(props.type)) {
             breadcrumbs.push({ name: "Collections", url: "/v/collection" });
         }
@@ -247,10 +248,10 @@ function getBreadcrumbs(): Breadcrumb[] {
             breadcrumbs.push({ name: "Collection", url: `/v/collection/${route.params.collectionId}` });
         }
         if (["skos:ConceptScheme", "skos:Concept"].includes(props.type)) {
-            breadcrumbs.push({ name: "Vocabs", url: "/v/vocab" });
+            breadcrumbs.push({ name: "Vocabularies", url: "/v/vocab" });
         }
         if (["skos:Concept"].includes(props.type)) {
-            breadcrumbs.push({ name: "Vocab", url: `/v/vocab/${route.params.vocabId}` }); // need parent info in data (link, title & type)
+            breadcrumbs.push({ name: "Vocabulary", url: `/v/vocab/${route.params.vocabId}` }); // need parent info in data (link, title & type)
         }
         if (["skos:Collection"].includes(props.type)) {
             breadcrumbs.push({ name: "Collections", url: "/v/collection" });
