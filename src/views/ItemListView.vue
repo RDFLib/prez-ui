@@ -133,18 +133,18 @@ onMounted(() => {
         parseIntoStore(data.value);
 
         // default label & description predicates
-        let labelPred = qname("rdfs:label");
-        let descPred = qname("dcterms:description");
+        let labelPred = [qname("rdfs:label")];
+        let descPred = [qname("dcterms:description")];
 
         if (Object.keys(ui.profiles).includes(defaultProfile.uri)) {
             const currentProfile = ui.profiles[defaultProfile.uri];
             
             // get profile-specific label & description predicates if available
-            if (currentProfile.labelPredicate) {
-                labelPred = currentProfile.labelPredicate;
+            if (currentProfile.labelPredicates.length > 0) {
+                labelPred = currentProfile.labelPredicates;
             }
-            if (currentProfile.descPredicate) {
-                descPred = currentProfile.descPredicate;
+            if (currentProfile.descriptionPredicates.length > 0) {
+                descPred = currentProfile.descriptionPredicates;
             }
         }
 
@@ -164,9 +164,9 @@ onMounted(() => {
             
             if (flavour.value === "VocPrez") {
                 store.value.forEach(q => { // get preds & objs for each subj
-                    if (q.predicate.value === labelPred) {
+                    if (labelPred.includes(q.predicate.value)) {
                         c.title = q.object.value;
-                    } else if (q.predicate.value === descPred) {
+                    } else if (descPred.includes(q.predicate.value)) {
                         c.description = q.object.value;
                     } else if (q.predicate.value === qname("prez:link")) {
                         c.link = q.object.value;
@@ -188,9 +188,9 @@ onMounted(() => {
             }
             else {
                 store.value.forEach(q => { // get preds & objs for each subj
-                    if (q.predicate.value === labelPred) {
+                    if (labelPred.includes(q.predicate.value)) {
                         c.title = q.object.value;
-                    } else if (q.predicate.value === descPred) {
+                    } else if (descPred.includes(q.predicate.value)) {
                         c.description = q.object.value;
                     } else if (q.predicate.value === qname("prez:link")) {
                         c.link = q.object.value;

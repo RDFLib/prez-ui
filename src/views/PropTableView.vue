@@ -109,42 +109,43 @@ function getProperties() {
     const defaultProfile = profiles.value.find(p => p.default)!;
 
     // default label & description predicates
-    let labelPred = qname("rdfs:label");
-    let descPred = qname("dcterms:description");
+    let labelPred = [qname("rdfs:label")];
+    let descPred = [qname("dcterms:description")];
     const geoPreds = [qname("geo:hasBoundingBox"), qname("geo:hasGeometry")];
 
     if (Object.keys(ui.profiles).includes(defaultProfile.uri)) {
         const currentProfile = ui.profiles[defaultProfile.uri];
         
         // get profile-specific label & description predicates if available
-        if (currentProfile.labelPredicate) {
-            labelPred = currentProfile.labelPredicate;
+        if (currentProfile.labelPredicates.length > 0) {
+            labelPred = currentProfile.labelPredicates;
         }
-        if (currentProfile.descPredicate) {
-            descPred = currentProfile.descPredicate;
+        if (currentProfile.descriptionPredicates.length > 0) {
+            descPred = currentProfile.descriptionPredicates;
         }
     }
 
     // add label & desc predicates to hidden list
-    hiddenPreds.push(...[labelPred, descPred]);
+    hiddenPreds.push(...[...labelPred, ...descPred]);
 
     store.value.forEach(q => {
-        if (q.predicate.value === labelPred) {
+        if (labelPred.includes(q.predicate.value)) {
             item.value.title = q.object.value;
-        } else if (q.predicate.value === descPred) {
+        } else if (descPred.includes(q.predicate.value)) {
             item.value.description = q.object.value;
         } else if (q.predicate.value === qname("a")) {
             item.value.type = q.object.value;
         } else if (geoPreds.indexOf(q.predicate.value) >= 0) {
-            store.value.forEach(geoQ=>{
+            store.value.forEach(geoQ => {
                 geoResults.value.push({
                     label: '',
                     fcLabel: '',
                     wkt: geoQ.object.value,
-                    uri: descPred,
+                    uri: item.value.iri,
                     link: `/object?uri=${item.value.iri}`
                 })
             }, q.object, namedNode(qname("geo:asWKT")), null, null)
+            console.log(geoResults.value)
         }
 
         if (!isAltView.value) {
@@ -157,7 +158,7 @@ function getProperties() {
     }, subject, null, null, null);
 
     // set the item title after the item title has been set
-    geoResults.value.forEach(result=>{
+    geoResults.value.forEach(result => {
         result.label = item.value.title ? item.value.title : item.value.iri
     });
 }
