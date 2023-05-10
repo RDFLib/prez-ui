@@ -101,6 +101,7 @@ export interface VocabListItem {
     type?: string;
     status?: string;
     derivationMode?: string;
+    [key: string]: string | undefined;
 };
 
 export interface AnnotatedPredicate {

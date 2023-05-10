@@ -3,10 +3,10 @@ import { reactive, watch, ref } from "vue";
 import { RouterLink } from "vue-router";
 
 import ItemListSortButton from "@/components/ItemListSortButton.vue";
-import type { ListItem, listingTableColumn } from "@/types";
+import type { VocabListItem, listingTableColumn } from "@/types";
 
 const props = defineProps<{
-    items: ListItem[];
+    items: VocabListItem[];
     childName?: string;
     childLink?: string;
 }>();
@@ -61,19 +61,21 @@ watch(sortState, () => {
     
     for (const validKey of validKeys) {
         if (sortState[validKey] === true) {
-            rows.value = props.items.sort((a: ListItem, b: ListItem) => {
+            rows.value = props.items.sort((a: VocabListItem, b: VocabListItem) => {
                 const listItemKey = keyToListItem[validKey];
                 if (a.hasOwnProperty(listItemKey)) {
-                    return a[listItemKey].localeCompare(b[listItemKey]);
+                    return (a[listItemKey] as string).localeCompare(b[listItemKey] as string);
                 }
+                return 0;
             })
         }
         else if (sortState[validKey] === false) {
-            rows.value = props.items.sort((a: ListItem, b: ListItem) => {
+            rows.value = props.items.sort((a: VocabListItem, b: VocabListItem) => {
                 const listItemKey = keyToListItem[validKey];
                 if (b.hasOwnProperty(listItemKey)) {
-                    return b[listItemKey].localeCompare(a[listItemKey]);
+                    return (b[listItemKey] as string).localeCompare(a[listItemKey] as string);
                 }
+                return 0;
             })
         }
     }
