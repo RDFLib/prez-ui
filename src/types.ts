@@ -51,8 +51,9 @@ export interface Profile {
     description: string;
     mediatypes: string[];
     defaultMediatype: string;
-    labelPredicate?: string;
-    descPredicate?: string;
+    labelPredicates: string[];
+    descriptionPredicates: string[];
+    explanationPredicates: string[];
 };
 
 export interface Breadcrumb {
