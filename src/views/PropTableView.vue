@@ -136,15 +136,16 @@ function getProperties() {
         } else if (q.predicate.value === qname("a")) {
             item.value.type = q.object.value;
         } else if (geoPreds.indexOf(q.predicate.value) >= 0) {
-            store.value.forEach(geoQ=>{
+            store.value.forEach(geoQ => {
                 geoResults.value.push({
                     label: '',
                     fcLabel: '',
                     wkt: geoQ.object.value,
-                    uri: descPred,
+                    uri: item.value.iri,
                     link: `/object?uri=${item.value.iri}`
                 })
             }, q.object, namedNode(qname("geo:asWKT")), null, null)
+            console.log(geoResults.value)
         }
 
         if (!isAltView.value) {
@@ -157,7 +158,7 @@ function getProperties() {
     }, subject, null, null, null);
 
     // set the item title after the item title has been set
-    geoResults.value.forEach(result=>{
+    geoResults.value.forEach(result => {
         result.label = item.value.title ? item.value.title : item.value.iri
     });
 }
