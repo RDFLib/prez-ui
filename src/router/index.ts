@@ -37,7 +37,7 @@ const router = createRouter({
             name: "vocabs",
             component: () => import("@/views/ItemListView.vue"),
             props: {
-                title: "Vocabs",
+                title: "Vocabularies",
                 class: "skos:ConceptScheme",
                 enableSearch: true,
                 content: `A list of <a href="http://www.w3.org/2004/02/skos/core#ConceptScheme" target="_blank" rel="noopener noreferrer">skos:ConceptSchemes</a>.`

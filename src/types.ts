@@ -3,6 +3,8 @@ import type { Quad } from "n3";
 
 export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
 
+export type listingTableColumn = "label" | "description" | "status" | "derivationMode";
+
 export const mapConfigKey: InjectionKey<MapConfig> = Symbol();
 export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
 export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
@@ -90,6 +92,17 @@ export interface ListItem {
     description?: string;
     link?: string;
     type?: string;
+};
+
+export interface VocabListItem {
+    iri: string;
+    title?: string;
+    description?: string;
+    link?: string;
+    type?: string;
+    status?: string;
+    derivationMode?: string;
+    [key: string]: string | undefined;
 };
 
 export interface AnnotatedPredicate {

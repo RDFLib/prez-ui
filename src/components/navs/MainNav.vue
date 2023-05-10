@@ -3,11 +3,12 @@ import { inject, computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { useUiStore } from "@/stores/ui";
 import { enabledPrezsConfigKey, type PrezFlavour } from "@/types";
+import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 
 const routes: {[key: string]: any[]} = {
     "VocPrez": [
         {
-            "label": "Vocabs",
+            "label": "Vocabularies",
             "to": "/v/vocab"
         },
         {
@@ -89,7 +90,7 @@ const props = defineProps<{
             <template v-for="prez in enabledPrezs">
                 <div class="nav-item">
                     <RouterLink :to="`/${prez.toLowerCase()[0]}`" class="nav-link">
-                        {{ prez }}
+                        {{ getPrezSystemLabel(prez) }}
                     </RouterLink>
                     <button class="dropdown-btn" @click="dropdowns[prez] = !dropdowns[prez]">
                         <i :class="`fa-regular fa-chevron-${dropdowns[prez] ? 'up' : 'down'}`"></i>
@@ -110,7 +111,7 @@ const props = defineProps<{
             <div class="nav-item"><RouterLink to="/sparql" class="nav-link">SPARQL</RouterLink></div>
             <div class="nav-item"><RouterLink to="/profiles" :class="`nav-link ${route.path.startsWith('/profiles') ? 'active' : ''}`">Profiles</RouterLink></div>
             <div class="nav-item"><RouterLink to="/about" class="nav-link">About</RouterLink></div>
-            <div class="nav-item"><RouterLink to="/docs" class="nav-link">API Docs</RouterLink></div>
+            <div class="nav-item"><RouterLink to="/docs" class="nav-link">API Documentation</RouterLink></div>
             <div class="bottom-nav-items">
                 <a href="https://github.com/RDFLib/prez-ui" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i> Prez UI v{{ props.version }}</a>
                 <a href="https://github.com/RDFLib/prez" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i> Prez API v{{ ui.apiVersion }}</a>

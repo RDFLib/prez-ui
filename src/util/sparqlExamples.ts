@@ -24,7 +24,7 @@ WHERE {
 } LIMIT 10`
     },
     {
-        title: "VocPrez Counting Concepts",
+        title: "Vocabularies - Counting Concepts",
         shortTitle: "Concept Count",
         description: "Here is an example query for VocPrez you can copy 'n paste into the Query UI text area above to test with. It counts the number of vocabulary Concepts in the all vocabularies in this system and will return an integer: ",
         query: `PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -35,7 +35,7 @@ WHERE {
 }`
     },
     {
-        title: "SpacePrez Basic Feature Information",
+        title: "Spatial Data Catalog - Basic Feature Information",
         shortTitle: "Feature Info",
         description: "Here is an example query for SpacePrez for use in the Query UI above. It returns most two Features' URIs and their titles.",
         query: `PREFIX dcterms: <http://purl.org/dc/terms/>
