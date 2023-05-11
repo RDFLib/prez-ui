@@ -83,6 +83,16 @@ function getSearchDefaults(): {[key: string]: string} { // need IRI of parent to
     }
 }
 
+function getIRILocalName(iri: string) {
+    let result = iri.split("#");
+    if (result.length === 1) {
+        return result[0].split("/").slice(-1)[0]
+    }
+    else {
+        return result.slice(-1)[0];
+    }
+}
+
 onMounted(() => {
     let paginationParams = "";
 
@@ -161,11 +171,13 @@ onMounted(() => {
                     } else if (q.predicate.value === qname("prez:link")) {
                         c.link = q.object.value;
                     } else if (q.predicate.value === qname("reg:status")) {
+                        c.status = getIRILocalName(q.object.value);
                         store.value.forObjects(result => {
                             c.status = result.value;
                         }, q.object, qname("rdfs:label"), null);
                     } else if (q.predicate.value === qname("prov:qualifiedDerivation")) {
                         store.value.forObjects(result => {
+                            c.derivationMode = getIRILocalName(result.value);
                             store.value.forObjects(innerResult => {
                                 c.derivationMode = innerResult.value;
                             }, result,qname("rdfs:label"), null);
