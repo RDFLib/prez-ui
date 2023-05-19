@@ -6,7 +6,7 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
 import { apiBaseUrlConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour } from "@/types";
-import PropTableNew from "@/components/proptable/PropTableNew.vue";
+import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
@@ -145,7 +145,6 @@ function getProperties() {
                     link: `/object?uri=${item.value.iri}`
                 })
             }, q.object, namedNode(qname("geo:asWKT")), null, null)
-            console.log(geoResults.value)
         }
 
         if (!isAltView.value) {
@@ -306,7 +305,7 @@ onMounted(() => {
             const defaultProfile = profiles.value.find(p => p.default)!;
             if (route.query._profile === defaultProfile.token && !route.query._mediatype) {
                 isAltView.value = false;
-            } else if (route.query._profile === "alt" && !route.query._mediatype) {
+            } else if (route.query._profile === "lt-prfl:alt-profile" && !route.query._mediatype) {
                 // show alt profiles page
                 isAltView.value = true;
             } else {
@@ -348,7 +347,7 @@ onMounted(() => {
 <template>
     <ProfilesTable v-if="isAltView" :profiles="profiles" :path="route.path" />
     <template v-else>
-        <PropTableNew v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPreds="hiddenPreds">
+        <PropTable v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPreds="hiddenPreds">
             <template #map>
                 <MapClient v-if="geoResults.length"
                         ref="searchMapRef" 
@@ -391,7 +390,7 @@ onMounted(() => {
                     </td>
                 </tr>
             </template>
-        </PropTableNew>
+        </PropTable>
         <template v-else-if="loading">
             <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
         </template>
