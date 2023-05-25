@@ -2,6 +2,8 @@
 import { RouterLink } from "vue-router";
 import type { ListItem } from "@/types";
 
+const MAX_DESC_LENGTH = 200;
+
 const props = defineProps<{
     items: ListItem[];
     childName?: string;
@@ -14,7 +16,7 @@ const props = defineProps<{
         <RouterLink class="list-item" v-for="item in props.items" :to="!!item.link ? item.link : ''">
             <div class="list-item-left">
                 <h4 class="list-item-title">{{ item.title || item.iri }}</h4>
-                <div v-if="!!item.description" class="list-item-desc">{{ item.description }}</div>
+                <div v-if="!!item.description" class="list-item-desc">{{ item.description.length >= MAX_DESC_LENGTH ? item.description.slice(0, MAX_DESC_LENGTH) + "..." : item.description  }}</div>
             </div>
             <RouterLink v-if="props.childLink" @click.stop :to="item.link + props.childLink" class="btn outline sm child-btn">{{ props.childName }}</RouterLink>
         </RouterLink>
