@@ -105,8 +105,7 @@ watch(sortState, () => {
                 </td>
                 <td>
                     <div v-if="!!item.status">
-                        <a :href="item.status.iri" target="_blank">{{ item.status.label }}</a>
-                        <span :style="`color: ${item.status.color}`" class="fa-solid fa-circle fa-2xs"></span>
+                        <a :href="item.status.iri" target="_blank">{{ item.status.label }}</a> <span :style="`color: ${item.status.color}`" class="fa-solid fa-circle fa-2xs"></span>
                     </div>
                 </td>
                 <td>
