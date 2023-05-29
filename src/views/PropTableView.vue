@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import { ref, computed, onMounted, inject } from "vue";
+import { ref, computed, onMounted, inject, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
 import { BlankNode, DataFactory, Quad, Store } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour } from "@/types";
-import PropTableNew from "@/components/proptable/PropTableNew.vue";
+import { apiBaseUrlConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile } from "@/types";
+import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
@@ -17,135 +17,136 @@ import type { WKTResult } from "@/stores/mapSearchStore.d";
 
 const { namedNode } = DataFactory;
 
-const RECURSION_LIMIT = 5; // limit on recursive search of blank nodes
-
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qname } = useRdfStore();
 const { data, profiles, loading, error, doRequest } = useGetRequest();
 
-const props = withDefaults(defineProps<{
-    type: string;
-    getChildren: boolean;
-    childPred: string;
-    childTitlePred: string;
-    childDisplayTitle: string; // for display in table th
-    childButton?: { name: string, url: string }; // undefined or link to children (/collections or /items)
-    enableSearch?: boolean;
-}>(), {
-    getChildren: false,
-    childPred: "",
-    childTitlePred: "",
-    childDisplayTitle: "Members"
-});
-
-let hiddenPreds = [
-    qname("a"),
-    qname("dcterms:identifier"),
-    qname("prez:count"),
-    ... props.type === "skos:ConceptScheme" ? [qname("skos:hasTopConcept")] : [],
-    ... props.childPred ? [qname(props.childPred)] : []
-];
-
-const flavour = computed<PrezFlavour | undefined>(() => {
-    if (route.path.startsWith("/c/")) {
-        return "CatPrez";
-    } else if (route.path.startsWith("/s/")) {
-        return "SpacePrez";
-    } else if (route.path.startsWith("/v/")) {
-        return "VocPrez";
-    } else {
-        return undefined;
-    }
-});
+const DEFAULT_LABEL_PREDICATES = [qname("rdfs:label")];
+const DEFAULT_DESC_PREDICATES = [qname("dcterms:description")];
+const DEFAULT_GEO_PREDICATES = [qname("geo:hasBoundingBox"), qname("geo:hasGeometry")];
+const DEFAULT_CHILDREN_PREDICATES = [qname("rdfs:member"), qname("skos:member"), qname("dcterms:hasPart")];
+const RECURSION_LIMIT = 5; // limit on recursive search of blank nodes
+const ALT_PROFILES_TOKEN = "lt-prfl:alt-profile";
 
 const item = ref<ListItem>({} as ListItem);
 const children = ref<ListItem[]>([]);
 const concepts = ref<Concept[]>([]); // only for vocab
 const properties = ref<AnnotatedQuad[]>([]);
 const blankNodes = ref<AnnotatedQuad[]>([]);
-const hideConcepts = ref(false); // only for vocab
-const collapseAll = ref(true); // only for vocab
+const collapseConcepts = ref(true); // only for vocab
 const geoResults = ref<WKTResult[]>([]); // for spatial results
-
 const isAltView = ref(false);
+const isObjectView = ref(false);
+const flavour = ref<PrezFlavour | null>(null);
+const searchEnabled = ref(false);
+const searchDefaults = ref<{[key: string]: string}>({});
+const childrenPredicate = ref("");
+const hiddenPredicates = ref<string[]>([
+    qname("a"),
+    qname("dcterms:identifier"),
+    qname("prez:count")
+]);
+const defaultProfile = ref<Profile | null>(null);
+const childrenConfig = ref({
+    showChildren: false,
+    childrenTitle: "",
+    showButton: false,
+    buttonTitle: "",
+    buttonLink: ""
+});
 
-function createAnnoQuad(q: Quad, store: Store): AnnotatedQuad {
-    return {
-        subject: q.subject,
-        predicate: {
-            termType: q.predicate.termType,
-            value: q.predicate.value,
-            id: q.predicate.id,
-            annotations: store.getQuads(q.predicate, null, null, null)
-        },
-        object: q.object,
-        value: q.value,
-        graph: q.graph,
-        termType: q.termType,
-        equals: q.equals,
-        toJSON: q.toJSON
-    };
-}
-
-function findBlankNodes(q: Quad, store: Store, recursionCounter: number) {
-    if (q.object instanceof BlankNode) {
-        recursionCounter++;
-        store.forEach(q1 => {
-            const annoQuad1 = createAnnoQuad(q1, store);
-            blankNodes.value.push(annoQuad1);
-            if (recursionCounter < RECURSION_LIMIT) {
-                findBlankNodes(q1, store, recursionCounter);
-            }
-        }, q.object, null, null, null)
+function configByType(type: string) {
+    item.value.type = type;
+    switch (type) {
+        case qname("dcat:Catalog"):
+            searchEnabled.value = true;
+            searchDefaults.value = { catalog: item.value.iri };
+            childrenConfig.value = {
+                ...childrenConfig.value,
+                showChildren: true,
+                childrenTitle: "Resources"
+            };
+            break;
+        case qname("dcat:Resource"):
+            break;
+        case qname("dcat:Dataset"):
+            searchEnabled.value = true;
+            searchDefaults.value = { dataset: item.value.iri };
+            childrenConfig.value = {
+                showChildren: false,
+                showButton: true,
+                childrenTitle: "Members",
+                buttonTitle: "Collections",
+                buttonLink: "/collections"
+            };
+            break;
+        case qname("geo:FeatureCollection"):
+            searchEnabled.value = true;
+            searchDefaults.value = { collection: item.value.iri };
+            childrenConfig.value = {
+                showChildren: false,
+                showButton: true,
+                childrenTitle: "Members",
+                buttonTitle: "Features",
+                buttonLink: "/items"
+            };
+            break;
+        case qname("geo:Feature"):
+            break;
+        case qname("skos:ConceptScheme"):
+            searchEnabled.value = true;
+            searchDefaults.value = { vocab: item.value.iri };
+            hiddenPredicates.value.push(qname("skos:hasTopConcept"));
+            childrenConfig.value.showChildren = true;
+            break;
+        case qname("skos:Collection"):
+            childrenConfig.value = {
+                ...childrenConfig.value,
+                showChildren: true,
+                childrenTitle: "Concepts"
+            };
+            break;
+        case qname("skos:Concept"):
+            break;
+        case qname("prof:Profile"):
+            break;
+        default:
     }
 }
 
 function getProperties() {
-    const subject = store.value.getSubjects(namedNode(qname("a")), namedNode(qname(props.type)), null)[0];
+    // find subject
+    const subject = isObjectView.value ? namedNode(route.query.uri as string) : store.value.getSubjects(namedNode(qname("a")), namedNode(item.value.type!), null)[0];
     item.value.iri = subject.id;
 
-    const defaultProfile = profiles.value.find(p => p.default)!;
+    // get label & description predicates
+    const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+    const descPredicates = defaultProfile.value!.descriptionPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
+    hiddenPredicates.value.push(...[...labelPredicates, ...descPredicates]);
 
-    // default label & description predicates
-    let labelPred = [qname("rdfs:label")];
-    let descPred = [qname("dcterms:description")];
-    const geoPreds = [qname("geo:hasBoundingBox"), qname("geo:hasGeometry")];
-
-    if (Object.keys(ui.profiles).includes(defaultProfile.uri)) {
-        const currentProfile = ui.profiles[defaultProfile.uri];
-        
-        // get profile-specific label & description predicates if available
-        if (currentProfile.labelPredicates.length > 0) {
-            labelPred = currentProfile.labelPredicates;
-        }
-        if (currentProfile.descriptionPredicates.length > 0) {
-            descPred = currentProfile.descriptionPredicates;
-        }
-    }
-
-    // add label & desc predicates to hidden list
-    hiddenPreds.push(...[...labelPred, ...descPred]);
-
+    // get attributes for item object, fill out properties
     store.value.forEach(q => {
-        if (labelPred.includes(q.predicate.value)) {
+        if (labelPredicates.includes(q.predicate.value)) {
             item.value.title = q.object.value;
-        } else if (descPred.includes(q.predicate.value)) {
+        } else if (descPredicates.includes(q.predicate.value)) {
             item.value.description = q.object.value;
-        } else if (q.predicate.value === qname("a")) {
-            item.value.type = q.object.value;
-        } else if (geoPreds.indexOf(q.predicate.value) >= 0) {
+        } else if (DEFAULT_CHILDREN_PREDICATES.includes(q.predicate.value)) {
+            childrenPredicate.value = q.predicate.value;
+            hiddenPredicates.value.push(q.predicate.value);
+        } else if (q.predicate.value === qname("a") && isObjectView.value) {
+            configByType(q.object.value);
+        } else if (DEFAULT_GEO_PREDICATES.indexOf(q.predicate.value) >= 0) {
             store.value.forEach(geoQ => {
                 geoResults.value.push({
-                    label: '',
-                    fcLabel: '',
+                    label: "",
+                    fcLabel: "",
                     wkt: geoQ.object.value,
                     uri: item.value.iri,
                     link: `/object?uri=${item.value.iri}`
                 })
             }, q.object, namedNode(qname("geo:asWKT")), null, null)
-            console.log(geoResults.value)
         }
 
         if (!isAltView.value) {
@@ -163,6 +164,113 @@ function getProperties() {
     });
 }
 
+function getBreadcrumbs(): Breadcrumb[] {
+    // if /object, then use home/object/<object>
+    // else, build out the breadcrumbs using the URL path
+    let crumbs: Breadcrumb[] = [];
+    
+    if (isObjectView.value) {
+        crumbs.push({ name: "Get Object by URI", url: "/object" });
+    } else {
+        if (flavour.value) {
+            crumbs.push({ name: getPrezSystemLabel(flavour.value) + " Home", url: `/${flavour.value[0].toLowerCase()}`});
+        }
+        const pathSegments = route.path.split("/").slice(1, -1);
+        let skipSegment = false;
+        pathSegments.forEach((pathSegment, index) => {
+            if (skipSegment) { // skip segment when an ID appears
+                skipSegment = false;
+                return;
+            }
+            switch (pathSegment) {
+                case "catalogs":
+                    crumbs.push({ name: "Catalogs", url: "/c/catalogs" });
+                    break;
+                case "datasets":
+                    crumbs.push({ name: "Datasets", url: "/s/datasets" });
+                    if (index + 1 !== pathSegments.length) {
+                        crumbs.push({ name: "Dataset", url: `/s/datasets/${route.params.datasetId}` });
+                        skipSegment = true;
+                    }
+                    break;
+                case "collections":
+                    crumbs.push({ name: "Feature Collections", url: `/s/datasets/${route.params.datasetId}/collections` });
+                    if (index + 1 !== pathSegments.length) {
+                        crumbs.push({ name: "Feature Collection", url: `/s/datasets/${route.params.datasetId}/collections/${route.params.featureCollectionId}` });
+                        skipSegment = true;
+                    }
+                    break;
+                case "items":
+                    crumbs.push({ name: "Features", url: `/s/datasets/${route.params.datasetId}/collections/${route.params.featureCollectionId}/items` });
+                    break;
+                case "vocab":
+                    crumbs.push({ name: "Vocabularies", url: "/v/vocab" });
+                    if (index + 1 !== pathSegments.length) {
+                        crumbs.push({ name: "Vocabulary", url: `/v/vocab/${route.params.vocabId}` });
+                        skipSegment = true;
+                    }
+                    break;
+                case "collection":
+                    crumbs.push({ name: "Collections", url: "/v/collection" });
+                    if (index + 1 !== pathSegments.length) {
+                        crumbs.push({ name: "Collection", url: `/v/vocab/${route.params.collectionId}` });
+                        skipSegment = true;
+                    }
+                    break;
+                case "profiles":
+                    crumbs.push({ name: "Profiles", url: `${flavour.value ? flavour.value[0].toLowerCase() : ""}/profiles` });
+                    break;
+                default:
+            }
+        });
+    }
+
+    crumbs.push({ name: item.value.title || item.value.iri, url: route.path });
+    if (isAltView.value) {
+        crumbs.push({ name: "Alternate Profiles", url: `${route.path}?_profile=${ALT_PROFILES_TOKEN}` });
+    }
+    return crumbs;
+}
+
+function getChildren() {
+    if (item.value.type === qname("skos:ConceptScheme")) {
+        getConcepts();
+    } else {
+        const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+
+        store.value.forObjects((obj) => {
+            let child: ListItem = {
+                iri: obj.id
+            };
+
+            store.value.forEach(q => {
+                if (labelPredicates.includes(q.predicate.value)) {
+                    child.title = q.object.value;
+                } else if (q.predicate.value === qname("prez:link")) {
+                    child.link = q.object.value;
+                } else if (q.predicate.value === qname("a")) {
+                    child.type = q.object.value;
+                }
+            }, obj, null, null, null);
+
+            children.value.push(child);
+        }, namedNode(item.value.iri), namedNode(childrenPredicate.value), null);
+
+        // sort by title, then by IRI
+        children.value.sort((a, b) => {
+            if (a.title && b.title) {
+                return a.title.localeCompare(b.title);
+            } else if (a.title) {
+                return -1;
+            } else if (b.title) {
+                return 1;
+            } else {
+                return a.iri.localeCompare(b.iri);
+            }
+        });
+    }
+}
+
 function getConcepts() {
     let conceptArray: Concept[] = [];
     
@@ -175,7 +283,7 @@ function getConcepts() {
             link: ""
         };
         store.value.forEach(q => {
-            if (q.predicate.value === qname(props.childTitlePred)) {
+            if (q.predicate.value === qname("skos:prefLabel")) {
                 c.title = q.object.value;
             } else if (q.predicate.value === qname("prez:link")) {
                 c.link = q.object.value;
@@ -218,129 +326,111 @@ function getConcepts() {
     concepts.value = conceptsList;
 }
 
-function getChildren() {
-    if (props.type === "skos:ConceptScheme") {
-        getConcepts();
-    } else {
-        store.value.forObjects(part => {
-            let p: ListItem = {
-                iri: part.id
+function createAnnoQuad(q: Quad, store: Store): AnnotatedQuad {
+    return {
+        subject: q.subject,
+        predicate: {
+            termType: q.predicate.termType,
+            value: q.predicate.value,
+            id: q.predicate.id,
+            annotations: store.getQuads(q.predicate, null, null, null)
+        },
+        object: q.object,
+        value: q.value,
+        graph: q.graph,
+        termType: q.termType,
+        equals: q.equals,
+        toJSON: q.toJSON
+    };
+}
+
+function findBlankNodes(q: Quad, store: Store, recursionCounter: number) {
+    if (q.object instanceof BlankNode) {
+        recursionCounter++;
+        store.forEach(q1 => {
+            const annoQuad1 = createAnnoQuad(q1, store);
+            blankNodes.value.push(annoQuad1);
+            if (recursionCounter < RECURSION_LIMIT) {
+                findBlankNodes(q1, store, recursionCounter);
             }
-            store.value.forEach(q => {
-                if (q.predicate.value === qname(props.childTitlePred)) {
-                    p.title = q.object.value;
-                } else if (q.predicate.value === qname("prez:link")) {
-                    p.link = q.object.value;
-                }
-            }, part, null, null, null);
-            children.value.push(p);
-        }, namedNode(item.value.iri), namedNode(qname(props.childPred)), null);
+        }, q.object, null, null, null)
     }
 }
 
-function getBreadcrumbs(): Breadcrumb[] {
-    let breadcrumbs: Breadcrumb[] = [];
-    if (flavour.value) {
-        breadcrumbs.push({ name: getPrezSystemLabel(flavour.value) + " Home", url: `/${flavour.value[0].toLowerCase()}`});
-        if (["ConceptInCollection"].includes(props.type)) {
-            breadcrumbs.push({ name: "Collections", url: "/v/collection" });
+onBeforeMount(() => {
+    // inspect route to infer type & Prez flavour
+    if (route.path.startsWith("/c/")) {
+        flavour.value = "CatPrez";
+        if (route.path.match(/c\/profiles\/.+/)) {
+            configByType(qname("prof:Profile"));
+        } else if (route.path.match(/c\/catalogs\/.+\/.+/)) {
+            configByType(qname("dcat:Resource"));
+        } else if (route.path.match(/c\/catalogs\/.+/)) {
+            configByType(qname("dcat:Catalog"));
         }
-        if (["ConceptInCollection"].includes(props.type)) {
-            breadcrumbs.push({ name: "Collection", url: `/v/collection/${route.params.collectionId}` });
+    } else if (route.path.startsWith("/s/")) {
+        flavour.value = "SpacePrez";
+        if (route.path.match(/s\/profiles\/.+/)) {
+            configByType(qname("prof:Profile"));
+        } else if (route.path.match(/s\/datasets\/.+\/collections\/.+\/items\/.+/)) {
+            configByType(qname("geo:Feature"));
+        } else if (route.path.match(/s\/datasets\/.+\/collections\/.+/)) {
+            configByType(qname("geo:FeatureCollection"));
+        } else if (route.path.match(/s\/datasets\/.+/)) {
+            configByType(qname("dcat:Dataset"));
         }
-        if (["skos:ConceptScheme", "skos:Concept"].includes(props.type)) {
-            breadcrumbs.push({ name: "Vocabularies", url: "/v/vocab" });
+    } else if (route.path.startsWith("/v/")) {
+        flavour.value = "VocPrez";
+        if (route.path.match(/v\/profiles\/.+/)) {
+            configByType(qname("prof:Profile"));
+        } else if (route.path.match(/v\/vocab\/.+\/.+/)) {
+            configByType(qname("skos:Concept"));
+        } else if (route.path.match(/v\/collection\/.+\/.+/)) {
+            // concept in collection
+            configByType(qname("skos:Concept"));
+        } else if (route.path.match(/v\/vocab\/.+/)) {
+            configByType(qname("skos:ConceptScheme"));
+        } else if (route.path.match(/v\/collection\/.+/)) {
+            configByType(qname("skos:Collection"));
         }
-        if (["skos:Concept"].includes(props.type)) {
-            breadcrumbs.push({ name: "Vocabulary", url: `/v/vocab/${route.params.vocabId}` }); // need parent info in data (link, title & type)
-        }
-        if (["skos:Collection"].includes(props.type)) {
-            breadcrumbs.push({ name: "Collections", url: "/v/collection" });
-        }
-        if (["dcat:Catalog", "dcat:Resource"].includes(props.type)) {
-            breadcrumbs.push({ name: "Catalogs", url: "/c/catalogs" });
-        }
-        if (["dcat:Resource"].includes(props.type)) {
-            breadcrumbs.push({ name: "Catalog", url: `/c/catalogs/${route.params.catalogId}` }); // need parent info in data (link, title & type)
-        }
-        if (["dcat:Dataset", "geo:FeatureCollection", "geo:Feature"].includes(props.type)) {
-            breadcrumbs.push({ name: "Datasets", url: "/s/datasets" });
-        }
-        if (["geo:FeatureCollection", "geo:Feature"].includes(props.type)) {
-            breadcrumbs.push({ name: "Dataset", url: `/s/datasets/${route.params.datasetId}` }); // need parent info in data (link, title & type)
-            breadcrumbs.push({ name: "Feature Collections", url: `/s/datasets/${route.params.datasetId}/collections` }); // need parent info in data (link, title & type)
-        }
-        if (["geo:Feature"].includes(props.type)) {
-            breadcrumbs.push({ name: "Feature Collection", url: `/s/datasets/${route.params.datasetId}/collections/${route.params.featureCollectionId}` }); // need parent info in data (link, title & type)
-            breadcrumbs.push({ name: "Features", url: `/s/datasets/${route.params.datasetId}/collections/${route.params.featureCollectionId}/items` }); // need parent info in data (link, title & type)
-        }
-    } else if (props.type === "prof:Profile") {
-        breadcrumbs.push({ name: "Profiles", url: "/profiles"});
+    } else if (route.path.startsWith("/profiles/")) {
+        configByType(qname("prof:Profile"));
+    } else if (route.path.startsWith("/object")) {
+        isObjectView.value = true;
     }
-    return breadcrumbs;
-}
 
-function getSearchDefaults(): {[key: string]: string} {
-    if (props.enableSearch) {
-        switch (props.type) {
-            case "skos:ConceptScheme":
-                return { vocab: item.value.iri };
-            case "dcat:Catalog":
-                return { catalog: item.value.iri };
-            case "dcat:Dataset":
-                return { dataset: item.value.iri };
-            case "geo:FeatureCollection":
-                return { collection: item.value.iri };
-            default:
-                return {};
-        }
-    } else {
-        return {};
+    // check if alt profile & no mediatype, then show alt profiles page
+    if (route.query._profile === ALT_PROFILES_TOKEN && !route.query._mediatype) {
+        isAltView.value = true;
     }
-}
+});
 
 onMounted(() => {
-    doRequest(`${apiBaseUrl}${route.path}`, () => {
-        // check profile, potentially show Alt profiles page or redirect to API endpoint
-        if (route.query && route.query._profile) {
-            const defaultProfile = profiles.value.find(p => p.default)!;
-            if (route.query._profile === defaultProfile.token && !route.query._mediatype) {
-                isAltView.value = false;
-            } else if (route.query._profile === "alt" && !route.query._mediatype) {
-                // show alt profiles page
-                isAltView.value = true;
-            } else {
-                // redirect to API
-                window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`)
-            }
-        } else {
-            isAltView.value = false;
-        }
+    doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
+        // find the current/default profile
+        defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
         
-        parseIntoStore(data.value);
-        getProperties();
-        
-        if (!isAltView.value && props.getChildren) {
-            getChildren();
+        // if specify mediatype, or profile is not default or alt, redirect to API
+        if ((route.query && route.query._profile) &&
+            (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
+                window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
         }
 
+        // disable right nav if AltView
         if (isAltView.value) {
             ui.rightNavConfig = { enabled: false };
         } else {
             ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
         }
-        
-        document.title = `${item.value.title || props.type.split(":")[1]} | Prez`;
-        if (flavour.value) {
-            ui.pageHeading = { name: flavour.value, url: `/${flavour.value[0].toLowerCase()}`};
-        } else {
-            ui.pageHeading = { name: "Prez", url: "/"};
+
+        parseIntoStore(data.value);
+        getProperties();
+        if (!isAltView.value && childrenConfig.value.showChildren) {
+            getChildren();
         }
-        ui.breadcrumbs = [
-            ...getBreadcrumbs(),
-            { name: item.value.title || props.type.split(":")[1], url: route.path },
-            ... isAltView.value ? [{ name: "Alternate Profiles", url: `${route.path}?_profile=alt` }] : []
-        ];
+
+        document.title = item.value.title ? `${item.value.title} | Prez` : "Prez";
+        ui.breadcrumbs = getBreadcrumbs();
     });
 });
 </script>
@@ -348,34 +438,30 @@ onMounted(() => {
 <template>
     <ProfilesTable v-if="isAltView" :profiles="profiles" :path="route.path" />
     <template v-else>
-        <PropTableNew v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPreds="hiddenPreds">
+        <PropTable v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPreds="hiddenPredicates">
             <template #map>
                 <MapClient v-if="geoResults.length"
                         ref="searchMapRef" 
                         :geo-w-k-t="geoResults"
                     />
             </template>
-            <template v-if="props.type === 'skos:ConceptScheme'" #bottom>
+            <template v-if="item.type === qname('skos:ConceptScheme')" #bottom>
                 <tr>
                     <th>Concepts</th>
                     <td>
-                        <button id="concept-hide-btn" class="btn" @click="hideConcepts = !hideConcepts">
-                            <template v-if="hideConcepts">Show <i class="fa-regular fa-chevron-down"></i></template>
-                            <template v-else>Hide <i class="fa-regular fa-chevron-up"></i></template>
-                        </button>
-                        <div :class="`concepts ${hideConcepts ? 'collapse' : ''}`">
-                            <button id="collapse-all-btn" @click="collapseAll = !collapseAll" class="btn">
-                                <template v-if="collapseAll"><i class="fa-regular fa-plus"></i> Expand all</template>
+                        <div class="concepts">
+                            <button id="collapse-all-btn" @click="collapseConcepts = !collapseConcepts" class="btn">
+                                <template v-if="collapseConcepts"><i class="fa-regular fa-plus"></i> Expand all</template>
                                 <template v-else><i class="fa-regular fa-minus"></i> Collapse all</template>
                             </button>
-                            <ConceptComponent v-for="concept in concepts" v-bind="concept" :baseUrl="route.path" :collapseAll="collapseAll" />
+                            <ConceptComponent v-for="concept in concepts" v-bind="concept" :baseUrl="route.path" :collapseAll="collapseConcepts" />
                         </div>
                     </td>
                 </tr>
             </template>
-            <template v-else-if="props.getChildren" #bottom>
+            <template v-else-if="childrenConfig.showChildren" #bottom>
                 <tr>
-                    <th>{{ props.childDisplayTitle }}</th>
+                    <th>{{ childrenConfig.childrenTitle }}</th>
                     <td>
                         <div class="children-list">
                             <RouterLink v-for="child in children" :to="child.link || ''">{{ child.title || child.iri }}</RouterLink>
@@ -383,41 +469,34 @@ onMounted(() => {
                     </td>
                 </tr>
             </template>
-            <template v-else-if="props.childButton" #bottom>
+            <template v-else-if="childrenConfig.showButton && !isObjectView" #bottom>
                 <tr>
-                    <th>Members</th>
+                    <th>{{ childrenConfig.childrenTitle }}</th>
                     <td>
-                        <RouterLink :to="`${route.path}${props.childButton.url}`" class="btn">{{ props.childButton.name }}</RouterLink>
+                        <RouterLink :to="`${route.path}${childrenConfig.buttonLink}`" class="btn">{{ childrenConfig.buttonTitle }}</RouterLink>
                     </td>
                 </tr>
             </template>
-        </PropTableNew>
+        </PropTable>
         <template v-else-if="loading">
             <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
         </template>
         <template v-else-if="error">
             <ErrorMessage :message="error" />
         </template>
-        <Teleport v-if="props.enableSearch" to="#right-bar-content">
-            <AdvancedSearch :flavour="flavour" :query="getSearchDefaults()" />
+        <Teleport v-if="searchEnabled" to="#right-bar-content">
+            <AdvancedSearch v-if="flavour" :flavour="flavour" :query="searchDefaults" />
         </Teleport>
     </template>
 </template>
 
-<style lang="scss" scoped>
-button#concept-hide-btn {
-    margin-bottom: 12px;
-}
 
+<style lang="scss" scoped>
 .concepts {
     display: flex;
     flex-direction: column;
     gap: 8px;
     overflow: hidden;
-
-    &.collapse {
-        height: 0;
-    }
 
     button#collapse-all-btn {
         align-self: baseline;

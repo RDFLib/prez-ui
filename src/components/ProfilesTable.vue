@@ -38,6 +38,7 @@ const orderedProfiles = computed(() => {
 </script>
 
 <template>
+    <h1 class="page-title">Alternate Profiles</h1>
     <table>
         <tr>
             <th>Token</th>
