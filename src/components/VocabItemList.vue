@@ -109,7 +109,9 @@ watch(sortState, () => {
                     </div>
                 </td>
                 <td>
-                    <div v-if="!!item.derivationMode">{{  item.derivationMode }}</div>
+                    <div v-if="!!item.derivationMode">
+                        <a :href="item.derivationMode.iri">{{  item.derivationMode.label }}</a>
+                    </div>
                 </td>
             </tr>
         </tbody>

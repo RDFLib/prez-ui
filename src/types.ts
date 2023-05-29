@@ -100,6 +100,11 @@ export interface RegStatus {
     color?: string;
 };
 
+export interface DerivationMode {
+    iri: string;
+    label: string;
+};
+
 export interface VocabListItem {
     iri: string;
     title?: string;
@@ -107,7 +112,7 @@ export interface VocabListItem {
     link?: string;
     type?: string;
     status?: RegStatus;
-    derivationMode?: string;
+    derivationMode?: DerivationMode;
     [key: string]: string | RegStatus | undefined;
 };
 

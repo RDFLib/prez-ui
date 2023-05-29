@@ -5,7 +5,7 @@ import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type VocabListItem, type PrezFlavour, type Profile, type RegStatus } from "@/types";
+import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type VocabListItem, type PrezFlavour, type Profile, type RegStatus, type DerivationMode } from "@/types";
 import ItemList from "@/components/ItemList.vue";
 import VocabItemList from "@/components/VocabItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
@@ -207,10 +207,13 @@ function getProperties() {
                 c.status = status;
             } else if (flavour.value === "VocPrez" && q.predicate.value === qname("prov:qualifiedDerivation")) {
                 store.value.forObjects(result => {
-                    c.derivationMode = getIRILocalName(result.value);
+                    const mode: DerivationMode = {iri: result.value, label: getIRILocalName(result.value)};
+
                     store.value.forObjects(innerResult => {
-                        c.derivationMode = innerResult.value;
+                        mode.label = innerResult.value;
                     }, result,qname("rdfs:label"), null);
+
+                    c.derivationMode = mode;
                 }, q.object, qname("prov:hadRole"), null);
             }
         }, member, null, null, null);
