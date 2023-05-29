@@ -5,7 +5,7 @@ import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type VocabListItem, type PrezFlavour, type Profile } from "@/types";
+import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type VocabListItem, type PrezFlavour, type Profile, type RegStatus } from "@/types";
 import ItemList from "@/components/ItemList.vue";
 import VocabItemList from "@/components/VocabItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
@@ -195,10 +195,16 @@ function getProperties() {
             } else if (q.predicate.value === qname("prez:link")) {
                 c.link = q.object.value;
             } else if (flavour.value === "VocPrez" && q.predicate.value === qname("reg:status")) {
-                c.status = getIRILocalName(q.object.value);
+                const status: RegStatus = {iri: q.object.value, label: getIRILocalName(q.object.value)};
+
                 store.value.forObjects(result => {
-                    c.status = result.value;
+                    status.label = result.value;
                 }, q.object, qname("rdfs:label"), null);
+
+                store.value.forObjects(result => {
+                    status.color = result.value;
+                }, q.object, qname("sdo:color"), null);
+                c.status = status;
             } else if (flavour.value === "VocPrez" && q.predicate.value === qname("prov:qualifiedDerivation")) {
                 store.value.forObjects(result => {
                     c.derivationMode = getIRILocalName(result.value);

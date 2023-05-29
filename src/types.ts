@@ -94,15 +94,21 @@ export interface ListItem {
     type?: string;
 };
 
+export interface RegStatus {
+    iri: string;
+    label: string;
+    color?: string;
+};
+
 export interface VocabListItem {
     iri: string;
     title?: string;
     description?: string;
     link?: string;
     type?: string;
-    status?: string;
+    status?: RegStatus;
     derivationMode?: string;
-    [key: string]: string | undefined;
+    [key: string]: string | RegStatus | undefined;
 };
 
 export interface AnnotatedPredicate {

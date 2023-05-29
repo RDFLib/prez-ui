@@ -104,7 +104,10 @@ watch(sortState, () => {
                     <div v-if="!!item.description">{{ item.description.substring(0, 80) + "..." }}</div>
                 </td>
                 <td>
-                    <div v-if="!!item.status">{{  item.status }}</div>
+                    <div v-if="!!item.status">
+                        <a :href="item.status.iri" target="_blank">{{ item.status.label }}</a>
+                        <span :style="`color: ${item.status.color}`" class="fa-solid fa-circle fa-2xs"></span>
+                    </div>
                 </td>
                 <td>
                     <div v-if="!!item.derivationMode">{{  item.derivationMode }}</div>
