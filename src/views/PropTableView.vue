@@ -5,7 +5,7 @@ import { BlankNode, DataFactory, Quad, Store } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra } from "@/types";
+import { apiBaseUrlConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
@@ -32,7 +32,7 @@ const RECURSION_LIMIT = 5; // limit on recursive search of blank nodes
 const ALT_PROFILES_TOKEN = "lt-prfl:alt-profile";
 
 const item = ref<ListItem>({} as ListItem);
-const children = ref<ListItem[]>([]);
+const children = ref<ListItemExtra[]>([]);
 const concepts = ref<Concept[]>([]); // only for vocab
 const properties = ref<AnnotatedQuad[]>([]);
 const blankNodes = ref<AnnotatedQuad[]>([]);
@@ -244,8 +244,9 @@ function getChildren() {
         const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
         store.value.forObjects((obj) => {
-            let child: ListItem & ListItemExtra = {
-                iri: obj.id
+            let child: ListItemExtra = {
+                iri: obj.id,
+                extras: {}
             };
 
             store.value.forEach(q => {
@@ -256,11 +257,14 @@ function getChildren() {
                 } else if (q.predicate.value === qname("a")) {
                     child.type = q.object.value;
                 } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:publisher")) {
-                    child.publisher = q.object.value;
+                    const publisher: ListItemSortable = { label: q.object.value };
+                    child.extras.publisher = publisher;
                 } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:creator")) {
-                    child.creator = q.object.value;
+                    const creator: ListItemSortable = { label: q.object.value };
+                    child.extras.creator = creator;
                 } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:created")) {
-                    child.created = q.object.value;
+                    const publisher: ListItemSortable = { label: q.object.value };
+                    child.extras.publisher = publisher;
                 } 
             }, obj, null, null, null);
 
@@ -476,7 +480,7 @@ onMounted(() => {
                     <SortableTabularList
                         v-if="item.type === qname('dcat:Catalog')"
                         :items="children"
-                        :predicates="['title', 'publisher', 'creator', 'created']"
+                        :predicates="['publisher', 'creator', 'created']"
                     />
                     <td v-else>
                         <div class="children-list">

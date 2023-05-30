@@ -1,28 +1,46 @@
 <script lang="ts" setup>
 import { ref, computed } from "vue";
 import { RouterLink } from "vue-router";
-import type { ListItem, ListItemExtra } from "@/types";
+import type { ListItemExtra } from "@/types";
 import ItemListSortButton from "@/components/ItemListSortButton.vue";
 
 const props = defineProps<{
-    items: (ListItem & ListItemExtra)[];
+    items: ListItemExtra[];
     predicates: string[];
 }>();
 
 const sortKey = ref("title-asc"); // sort key <predicate>-asc or <predicate>-desc, default to title
 
+const extraPredicates = computed(() => {
+    return ["title", ...props.predicates];
+});
+
 const sortedList = computed(() => {
     const [sortPredicate, sortDirection]: string[] = sortKey.value.split("-");
     const isAscending = sortDirection === "asc";
     return props.items.sort((a, b) => {
-        if (a[sortPredicate]! && b[sortPredicate]!) {
-            return isAscending ? a[sortPredicate]!.localeCompare(b[sortPredicate]!) : b[sortPredicate]!.localeCompare(a[sortPredicate]!);
-        } else if (a[sortPredicate]!) {
-            return isAscending ? -1 : 1;
-        } else if (b[sortPredicate]!) {
-            return isAscending ? 1 : -1;
+        if (sortPredicate === "title" || sortPredicate === "description") {
+            if (a[sortPredicate] && b[sortPredicate]) {
+                return isAscending ? a[sortPredicate]!.localeCompare(b[sortPredicate]!) : b[sortPredicate]!.localeCompare(a[sortPredicate]!);
+            } else if (a[sortPredicate]) {
+                return isAscending ? -1 : 1;
+            } else if (b[sortPredicate]) {
+                return isAscending ? 1 : -1;
+            } else {
+                return 0;
+            }
         } else {
-            return 0;
+            if (a.extras[sortPredicate] && b.extras[sortPredicate]) {
+                const aLabel = a.extras[sortPredicate].label;
+                const bLabel = b.extras[sortPredicate].label;
+                return isAscending ? aLabel.localeCompare(bLabel) : bLabel.localeCompare(aLabel);
+            } else if (a.extras[sortPredicate]) {
+                return isAscending ? -1 : 1;
+            } else if (b.extras[sortPredicate]) {
+                return isAscending ? 1 : -1;
+            } else {
+                return 0;
+            }
         }
     })
 });
@@ -45,7 +63,7 @@ function camelToTitleCase(s: string): string {
     <table class="table" role="grid">
         <thead>
             <tr role="row">
-                <th v-for="predicate in props.predicates">
+                <th v-for="predicate in extraPredicates">
                     {{ camelToTitleCase(predicate) }}&nbsp;
                     <ItemListSortButton
                         :id="predicate"
@@ -56,16 +74,16 @@ function camelToTitleCase(s: string): string {
             </tr>
         </thead>
         <tbody>
-            <tr class="row" role="row" v-for="item in sortedList">
-                <td v-for="predicate in props.predicates">
+            <tr v-for="item in sortedList" class="row" role="row">
+                <td v-for="predicate in extraPredicates">
                     <RouterLink v-if="predicate === 'title'" :to="!!item.link ? item.link : ''">
                         {{ item.title || item.iri }}
                     </RouterLink>
-                    <div v-else-if="!!item[predicate]">
-                        <template v-if="predicate === 'description'">
-                            {{ item[predicate]!.substring(0, 80) + "..." }}
-                        </template>
-                        <template v-else>{{ item[predicate] }}</template>
+                    <div v-else-if="predicate === 'description' && !!item.description">{{ item.description.substring(0, 80) + "..." }}</div>
+                    <div v-else-if="!!item.extras[predicate]">
+                        <a v-if="!!item.extras[predicate].iri" :href="item.extras[predicate].iri" target="_blank" rel="noopener noreferrer">{{ item.extras[predicate].label }}</a>
+                        <template v-else>{{ item.extras[predicate].label }}</template>
+                        <span v-if="!!item.extras[predicate].color" :style="{color: item.extras[predicate].color, marginLeft: '6px'}" class="fa-solid fa-circle fa-2xs"></span>
                     </div>
                 </td>
             </tr>

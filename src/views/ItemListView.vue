@@ -5,7 +5,7 @@ import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type PrezFlavour, type Profile, type ListItemExtra } from "@/types";
+import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import ItemList from "@/components/ItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
@@ -37,7 +37,7 @@ const TOP_LEVEL_TYPES = [
 const ALT_PROFILES_TOKEN = "lt-prfl:alt-profile";
 
 // const parent = ref<ListItem>({} as ListItem); // might need to store parent info (dataset & feature collection)
-const items = ref<ListItem[]>([]);
+const items = ref<ListItemExtra[]>([]);
 const itemType = ref({
     uri: "",
     label: ""
@@ -185,7 +185,10 @@ function getProperties() {
 
     // fill out item list & handle vocprez items
     nodeList.forEach(member => {
-        let c: ListItem & ListItemExtra = { iri: member.id };
+        let c: ListItemExtra = {
+            iri: member.id,
+            extras: {}
+        };
 
         store.value.forEach(q => {
             if (labelPredicates.includes(q.predicate.value)) {
@@ -195,16 +198,25 @@ function getProperties() {
             } else if (q.predicate.value === qname("prez:link")) {
                 c.link = q.object.value;
             } else if (flavour.value === "VocPrez" && q.predicate.value === qname("reg:status")) {
-                c.status = getIRILocalName(q.object.value);
+                const status: ListItemSortable = {iri: q.object.value, label: getIRILocalName(q.object.value)};
+
                 store.value.forObjects(result => {
-                    c.status = result.value;
+                    status.label = result.value;
                 }, q.object, qname("rdfs:label"), null);
+
+                store.value.forObjects(result => {
+                    status.color = result.value;
+                }, q.object, qname("sdo:color"), null);
+                c.extras.status = status;
             } else if (flavour.value === "VocPrez" && q.predicate.value === qname("prov:qualifiedDerivation")) {
                 store.value.forObjects(result => {
-                    c.derivationMode = getIRILocalName(result.value);
+                    const mode: ListItemSortable = {iri: result.value, label: getIRILocalName(result.value)};
+
                     store.value.forObjects(innerResult => {
-                        c.derivationMode = innerResult.value;
+                        mode.label = innerResult.value;
                     }, result,qname("rdfs:label"), null);
+
+                    c.extras.derivationMode = mode;
                 }, q.object, qname("prov:hadRole"), null);
             }
         }, member, null, null, null);
@@ -313,7 +325,7 @@ onMounted(() => {
             <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
         </template>
         <template v-else-if="items.length > 0">
-            <SortableTabularList v-if="flavour === 'VocPrez'" :items="items" :predicates="['title', 'description', 'status', 'derivationMode']" />
+            <SortableTabularList v-if="flavour === 'VocPrez'" :items="items" :predicates="['description', 'status', 'derivationMode']" />
             <ItemList v-else :items="items" :childName="childrenConfig.buttonTitle" :childLink="childrenConfig.buttonLink" />
             <PaginationComponent :url="route.path" :totalCount="count" :currentPage="currentPageNumber" />
         </template>
