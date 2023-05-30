@@ -5,7 +5,7 @@ import { BlankNode, DataFactory, Quad, Store } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile } from "@/types";
+import { apiBaseUrlConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra } from "@/types";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
@@ -14,6 +14,7 @@ import ErrorMessage from "@/components/ErrorMessage.vue";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import MapClient from "@/components/MapClient.vue";
 import type { WKTResult } from "@/stores/mapSearchStore.d";
+import SortableTabularList from "@/components/SortableTabularList.vue";
 
 const { namedNode } = DataFactory;
 
@@ -185,6 +186,10 @@ function getBreadcrumbs(): Breadcrumb[] {
             switch (pathSegment) {
                 case "catalogs":
                     crumbs.push({ name: "Catalogs", url: "/c/catalogs" });
+                    if (index + 1 !== pathSegments.length) {
+                        crumbs.push({ name: "Catalog", url: `/c/catalogs/${route.params.catalogId}` });
+                        skipSegment = true;
+                    }
                     break;
                 case "datasets":
                     crumbs.push({ name: "Datasets", url: "/s/datasets" });
@@ -239,7 +244,7 @@ function getChildren() {
         const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
         store.value.forObjects((obj) => {
-            let child: ListItem = {
+            let child: ListItem & ListItemExtra = {
                 iri: obj.id
             };
 
@@ -250,7 +255,13 @@ function getChildren() {
                     child.link = q.object.value;
                 } else if (q.predicate.value === qname("a")) {
                     child.type = q.object.value;
-                }
+                } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:publisher")) {
+                    child.publisher = q.object.value;
+                } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:creator")) {
+                    child.creator = q.object.value;
+                } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:created")) {
+                    child.created = q.object.value;
+                } 
             }, obj, null, null, null);
 
             children.value.push(child);
@@ -462,7 +473,12 @@ onMounted(() => {
             <template v-else-if="childrenConfig.showChildren" #bottom>
                 <tr>
                     <th>{{ childrenConfig.childrenTitle }}</th>
-                    <td>
+                    <SortableTabularList
+                        v-if="item.type === qname('dcat:Catalog')"
+                        :items="children"
+                        :predicates="['title', 'publisher', 'creator', 'created']"
+                    />
+                    <td v-else>
                         <div class="children-list">
                             <RouterLink v-for="child in children" :to="child.link || ''">{{ child.title || child.iri }}</RouterLink>
                         </div>

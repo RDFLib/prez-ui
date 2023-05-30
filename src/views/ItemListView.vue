@@ -5,14 +5,14 @@ import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type VocabListItem, type PrezFlavour, type Profile } from "@/types";
+import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type PrezFlavour, type Profile, type ListItemExtra } from "@/types";
 import ItemList from "@/components/ItemList.vue";
-import VocabItemList from "@/components/VocabItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import PaginationComponent from "@/components/PaginationComponent.vue";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
+import SortableTabularList from "@/components/SortableTabularList.vue";
 
 const { namedNode } = DataFactory;
 
@@ -185,7 +185,7 @@ function getProperties() {
 
     // fill out item list & handle vocprez items
     nodeList.forEach(member => {
-        let c: VocabListItem = { iri: member.id }; // already contains all attributes we need
+        let c: ListItem & ListItemExtra = { iri: member.id };
 
         store.value.forEach(q => {
             if (labelPredicates.includes(q.predicate.value)) {
@@ -313,7 +313,7 @@ onMounted(() => {
             <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
         </template>
         <template v-else-if="items.length > 0">
-            <VocabItemList v-if="flavour === 'VocPrez'" :items="items" />
+            <SortableTabularList v-if="flavour === 'VocPrez'" :items="items" :predicates="['title', 'description', 'status', 'derivationMode']" />
             <ItemList v-else :items="items" :childName="childrenConfig.buttonTitle" :childLink="childrenConfig.buttonLink" />
             <PaginationComponent :url="route.path" :totalCount="count" :currentPage="currentPageNumber" />
         </template>

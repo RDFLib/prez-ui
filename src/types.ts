@@ -105,6 +105,10 @@ export interface VocabListItem {
     [key: string]: string | undefined;
 };
 
+export interface ListItemExtra {
+    [key: string]: string | undefined;
+}
+
 export interface AnnotatedPredicate {
     termType: "NamedNode" | "Variable";
     value: string;
