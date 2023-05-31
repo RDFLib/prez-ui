@@ -263,8 +263,8 @@ function getChildren() {
                     const creator: ListItemSortable = { label: q.object.value };
                     child.extras.creator = creator;
                 } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:issued")) {
-                    const publisher: ListItemSortable = { label: q.object.value };
-                    child.extras.publisher = publisher;
+                    const issued: ListItemSortable = { label: q.object.value };
+                    child.extras.issued = issued;
                 } 
             }, obj, null, null, null);
 
