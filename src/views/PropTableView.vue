@@ -262,7 +262,7 @@ function getChildren() {
                 } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:creator")) {
                     const creator: ListItemSortable = { label: q.object.value };
                     child.extras.creator = creator;
-                } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:created")) {
+                } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:issued")) {
                     const publisher: ListItemSortable = { label: q.object.value };
                     child.extras.publisher = publisher;
                 } 
@@ -480,7 +480,7 @@ onMounted(() => {
                     <SortableTabularList
                         v-if="item.type === qname('dcat:Catalog')"
                         :items="children"
-                        :predicates="['publisher', 'creator', 'created']"
+                        :predicates="['publisher', 'creator', 'issued']"
                     />
                     <td v-else>
                         <div class="children-list">
