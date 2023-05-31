@@ -237,6 +237,16 @@ function getBreadcrumbs(): Breadcrumb[] {
     return crumbs;
 }
 
+function getIRILocalName(iri: string) {
+    let result = iri.split("#");
+    if (result.length === 1) {
+        return result[0].split("/").slice(-1)[0]
+    }
+    else {
+        return result.slice(-1)[0];
+    }
+}
+
 function getChildren() {
     if (item.value.type === qname("skos:ConceptScheme")) {
         getConcepts();
@@ -257,10 +267,20 @@ function getChildren() {
                 } else if (q.predicate.value === qname("a")) {
                     child.type = q.object.value;
                 } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:publisher")) {
-                    const publisher: ListItemSortable = { label: q.object.value };
+                    const publisher: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
+
+                    store.value.forObjects(result => {
+                        publisher.label = result.value;
+                    }, q.object, qname("rdfs:label"), null);
+
                     child.extras.publisher = publisher;
                 } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:creator")) {
-                    const creator: ListItemSortable = { label: q.object.value };
+                    const creator: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
+
+                    store.value.forObjects(result => {
+                        creator.label = result.value;
+                    }, q.object, qname("rdfs:label"), null);
+                    
                     child.extras.creator = creator;
                 } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:issued")) {
                     const issued: ListItemSortable = { label: q.object.value };
