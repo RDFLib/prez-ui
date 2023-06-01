@@ -279,6 +279,7 @@ table {
         th {
             padding: 10px;
             background-color: #ccc;
+            text-align:left;
         }
     }
     tbody {
