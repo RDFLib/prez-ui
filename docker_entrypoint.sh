@@ -17,6 +17,7 @@ done
 if (declare -p "VITE_BASE_URL" &>/dev/null)
 then
     sed -i "s|BASE_URL = \"/\"|BASE_URL = \"$VITE_BASE_URL\"|g" /app/index.html
+    sed -i "s|/@BASE_URL@/|$VITE_BASE_URL|g" /app/index.html ${INDEX_FILE}
     cp /app/index.html /app/404.html
 fi
 

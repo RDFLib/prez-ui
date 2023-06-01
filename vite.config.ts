@@ -39,6 +39,6 @@ export default defineConfig(({ mode }) => {
                 }
             }
         },
-        base: process.env.GH_PAGES_DEMO ? "/prez-ui/" : (process.env.VITE_BASE_URL || "/"),
+        base: process.env.GH_PAGES_DEMO ? "/prez-ui/" : (process.env.VITE_DYNAMIC_BASE_URL ? '/@BASE_URL@/' : (process.env.VITE_BASE_URL || "/")),
     };
 });
