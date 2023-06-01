@@ -3,8 +3,6 @@ import type { Quad } from "n3";
 
 export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
 
-export type listingTableColumn = "label" | "description" | "status" | "derivationMode";
-
 export const mapConfigKey: InjectionKey<MapConfig> = Symbol();
 export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
 export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
@@ -94,26 +92,17 @@ export interface ListItem {
     type?: string;
 };
 
-export interface RegStatus {
-    iri: string;
+// extra properies for SortableTable display go in extras
+export interface ListItemExtra extends ListItem {
+    extras: {
+        [key: string]: ListItemSortable
+    };
+}
+
+export interface ListItemSortable {
     label: string;
+    iri?: string;
     color?: string;
-};
-
-export interface DerivationMode {
-    iri: string;
-    label: string;
-};
-
-export interface VocabListItem {
-    iri: string;
-    title?: string;
-    description?: string;
-    link?: string;
-    type?: string;
-    status?: RegStatus;
-    derivationMode?: DerivationMode;
-    [key: string]: string | RegStatus | undefined;
 };
 
 export interface AnnotatedPredicate {

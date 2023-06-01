@@ -5,14 +5,14 @@ import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type VocabListItem, type PrezFlavour, type Profile, type RegStatus, type DerivationMode } from "@/types";
+import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import ItemList from "@/components/ItemList.vue";
-import VocabItemList from "@/components/VocabItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import PaginationComponent from "@/components/PaginationComponent.vue";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
+import SortableTabularList from "@/components/SortableTabularList.vue";
 
 const { namedNode } = DataFactory;
 
@@ -37,7 +37,7 @@ const TOP_LEVEL_TYPES = [
 const ALT_PROFILES_TOKEN = "lt-prfl:alt-profile";
 
 // const parent = ref<ListItem>({} as ListItem); // might need to store parent info (dataset & feature collection)
-const items = ref<ListItem[]>([]);
+const items = ref<ListItemExtra[]>([]);
 const itemType = ref({
     uri: "",
     label: ""
@@ -185,7 +185,10 @@ function getProperties() {
 
     // fill out item list & handle vocprez items
     nodeList.forEach(member => {
-        let c: VocabListItem = { iri: member.id }; // already contains all attributes we need
+        let c: ListItemExtra = {
+            iri: member.id,
+            extras: {}
+        };
 
         store.value.forEach(q => {
             if (labelPredicates.includes(q.predicate.value)) {
@@ -195,7 +198,7 @@ function getProperties() {
             } else if (q.predicate.value === qname("prez:link")) {
                 c.link = q.object.value;
             } else if (flavour.value === "VocPrez" && q.predicate.value === qname("reg:status")) {
-                const status: RegStatus = {iri: q.object.value, label: getIRILocalName(q.object.value)};
+                const status: ListItemSortable = {iri: q.object.value, label: getIRILocalName(q.object.value)};
 
                 store.value.forObjects(result => {
                     status.label = result.value;
@@ -204,16 +207,16 @@ function getProperties() {
                 store.value.forObjects(result => {
                     status.color = result.value;
                 }, q.object, qname("sdo:color"), null);
-                c.status = status;
+                c.extras.status = status;
             } else if (flavour.value === "VocPrez" && q.predicate.value === qname("prov:qualifiedDerivation")) {
                 store.value.forObjects(result => {
-                    const mode: DerivationMode = {iri: result.value, label: getIRILocalName(result.value)};
+                    const mode: ListItemSortable = {iri: result.value, label: getIRILocalName(result.value)};
 
                     store.value.forObjects(innerResult => {
                         mode.label = innerResult.value;
                     }, result,qname("rdfs:label"), null);
 
-                    c.derivationMode = mode;
+                    c.extras.derivationMode = mode;
                 }, q.object, qname("prov:hadRole"), null);
             }
         }, member, null, null, null);
@@ -322,7 +325,7 @@ onMounted(() => {
             <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
         </template>
         <template v-else-if="items.length > 0">
-            <VocabItemList v-if="flavour === 'VocPrez'" :items="items" />
+            <SortableTabularList v-if="flavour === 'VocPrez'" :items="items" :predicates="['description', 'status', 'derivationMode']" />
             <ItemList v-else :items="items" :childName="childrenConfig.buttonTitle" :childLink="childrenConfig.buttonLink" />
             <PaginationComponent :url="route.path" :totalCount="count" :currentPage="currentPageNumber" />
         </template>
