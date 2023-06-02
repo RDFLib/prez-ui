@@ -279,6 +279,7 @@ table {
         th {
             padding: 10px;
             background-color: #ccc;
+            text-align:left;
         }
     }
     tbody {
@@ -376,6 +377,20 @@ pre.debug {
         }
 
     }
+}
+
+div > ul {
+    margin-left:0;
+    padding-left:0;
+}
+div ul > li {
+    list-style-type: none;
+}
+div > ul li ul {
+    padding-top: 10px;
+}
+div > ul li ul li {
+    padding-bottom: 4px;
 }
 
 .error {
