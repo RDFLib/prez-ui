@@ -11,7 +11,7 @@ WHERE {
 }
 ORDER BY ?t`
 
-export function QUERY_GET_THEMES(catalogs=[]) {
+export function QUERY_GET_THEMES(catalogs:string[]=[]) {
   return `
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -29,7 +29,7 @@ ORDER BY DESC(?count) ?pl
 LIMIT 10`
 }
 
-export function QUERY_SEARCH(catalogs=[], searchTerms='', themes=[], shape='', limit=0) {
+export function QUERY_SEARCH(catalogs:string[]=[], searchTerms:string='', themes:string[]=[], shape:string='', limit:number=0) {
   return `
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     PREFIX dcat: <http://www.w3.org/ns/dcat#>

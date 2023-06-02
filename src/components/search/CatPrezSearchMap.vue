@@ -15,8 +15,8 @@ const rdThemes = refDataStore('themes')()
 const rdSearch = refDataStore('search')()
 
 const searchTermRef = ref('')
-const selectedCatalogsRef = ref([])
-const selectedThemesRef = ref([])
+const selectedCatalogsRef = ref<string[]>([])
+const selectedThemesRef = ref<string[]>([])
 const shapeTypeRef = ref(ShapeTypes.None)
 const coordsRef = ref<Coords>([])
 const showQueryRef = ref(false)
@@ -54,7 +54,14 @@ const performSearch = async(event: Event|null=null) => {
 // start off by loading the main filter lists for catalogs and themes
 onMounted(async ()=>{
     await rdCatalogs.fetch<RDCatalog[]>('c', QUERY_GET_CATALOGS);
-    await fetchThemes()
+    (rdCatalogs.data as RDCatalog[]).forEach(cat=>{
+        selectedCatalogsRef.value.push(cat.c)
+    });
+    await fetchThemes();
+    (rdThemes.data as RDTheme[]).forEach(theme=>{
+        selectedThemesRef.value.push(theme.th);
+    })
+    await performSearch();
 })
 
 </script>
@@ -71,7 +78,7 @@ onMounted(async ()=>{
                                 <input type="checkbox" 
                                     :value="cat.c" 
                                     v-model="selectedCatalogsRef" 
-                                    @change="(event) => fetchThemes()"
+                                    @change="async (event) => { await fetchThemes(); await performSearch(); }"
                                 /> {{ cat.t }}
                             </label>
                         </li>
@@ -95,7 +102,7 @@ onMounted(async ()=>{
                                 <input type="checkbox" 
                                     :value="theme.th" 
                                     v-model="selectedThemesRef" 
-                                    @change="(event) => null"
+                                    @change="(event) => performSearch()"
                                 /> {{ theme.pl }}
                             </label>
                         </li>
@@ -138,9 +145,9 @@ onMounted(async ()=>{
                 <tbody>
                     <template v-for="(result, index) in <RDSearch[]>rdSearch.data">
                         <tr :key="index" v-if="limitRef === 0 || index < limitRef">                            
-                            <td><a target="_blank" v-bind:href="`${result.r}`">{{ result.t }}</a></td>
+                            <td><a target="_blank" v-bind:href="`/object?uri=${result.r}`">{{ result.t }}</a></td>
                             <td>{{ result.d }}</td>
-                            <td class="th-list"><a v-for="(th, tindex) in result.thlist.split('\t')" target="_blank" v-bind:href="`${th}`">{{ result.thpllist.split('\t')[tindex] }}</a></td>
+                            <td class="th-list"><a v-for="(th, tindex) in result.thlist.split('\t')" target="_blank" v-bind:href="`/object?uri=${th}`">{{ result.thpllist.split('\t')[tindex] }}</a></td>
                         </tr>
                     </template>
                 </tbody>
