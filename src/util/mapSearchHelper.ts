@@ -90,7 +90,7 @@ const queryTopoFilterPart = (shape:string, areaType: AreaTypes, radius:number) =
 }
 
 /** Constructs the shape query based on a set of coords */
-const shapeQueryPart = (coords: Coords) => {
+export const shapeQueryPart = (coords: Coords) => {
   if(coords.length == 0) {
     return '';
   } else if(coords.length == 1) {

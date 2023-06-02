@@ -29,7 +29,11 @@ const props = defineProps({
     zoom: Number,
     streetViewController: Boolean,
     geoWKT: Object as PropType<WKTResult[]>,
-    drawingModes: Object as PropType<DrawingModes[]>
+    drawingModes: Object as PropType<DrawingModes[]>,
+    style: {
+        type: String,
+        default: 'width: 100%; height: 500px; background-color: #eee;'
+    }    
 })
 
 // when the map object has loaded, it will call this function to set mapDrawFunc, so an external component can call it when needed
@@ -230,7 +234,7 @@ watch(mapRef, googleMap => {
         :street-view-control="props.streetViewController || mapConfig.settings.options.streetViewController"
         :zoom="props.zoom || mapConfig.settings.options.zoom"
         map-type-id="terrain"
-        style="width: 100%; height: 500px; background-color: #eee;" 
+        :style="props.style" 
     >
     </GMapMap>
 
