@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN npm install
 COPY . ./
 RUN rm .env
-RUN CI=false npm run build
+RUN CI=false VITE_DYNAMIC_BASE_URL=1 npm run build
 
 FROM nginx:alpine AS prod
 RUN apk add --no-cache bash
