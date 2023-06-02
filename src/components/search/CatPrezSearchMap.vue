@@ -28,6 +28,7 @@ const updateSelection = async (selectedCoords:Coords, shapeType:ShapeTypes) => {
     //shapeTypeRef.value = selectedCoords.length == 0 ? ShapeTypes.None : (selectedCoords.length == 1 ? ShapeTypes.Point : ShapeTypes.Polygon)
     shapeTypeRef.value = shapeType
     coordsRef.value = selectedCoords
+    await performSearch();
 }
 
 const links = [
