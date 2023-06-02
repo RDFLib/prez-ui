@@ -8,7 +8,7 @@ onMounted(() => {
     ui.rightNavConfig = { enabled: false };
     document.title = "About VocPrez | Prez";
     ui.pageHeading = { name: "VocPrez", url: "/v" };
-    ui.breadcrumbs = [{ name: "VocPrez", url: "/v" }, { name: "About", url: "/v/about" }];
+    ui.breadcrumbs = [{ name: "Vocabularies Home", url: "/v" }, { name: "About", url: "/v/about" }];
 });
 </script>
 

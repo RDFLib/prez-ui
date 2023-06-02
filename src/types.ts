@@ -49,8 +49,9 @@ export interface Profile {
     description: string;
     mediatypes: string[];
     defaultMediatype: string;
-    labelPredicate?: string;
-    descPredicate?: string;
+    labelPredicates: string[];
+    descriptionPredicates: string[];
+    explanationPredicates: string[];
 };
 
 export interface Breadcrumb {
@@ -89,6 +90,19 @@ export interface ListItem {
     description?: string;
     link?: string;
     type?: string;
+};
+
+// extra properies for SortableTable display go in extras
+export interface ListItemExtra extends ListItem {
+    extras: {
+        [key: string]: ListItemSortable
+    };
+}
+
+export interface ListItemSortable {
+    label: string;
+    iri?: string;
+    color?: string;
 };
 
 export interface AnnotatedPredicate {

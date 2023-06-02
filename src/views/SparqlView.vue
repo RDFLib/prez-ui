@@ -169,15 +169,15 @@ function copy(text: string) {
 
 <template>
     <h1 class="page-title">SPARQL Search</h1>
-    <p>Here you can perform more advanced querying using <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener noreferrer">SPARQL</a> (SPARQL Protocol and RDF Query Language). This page acts both as an interactive querying page as well as an endpoint for clients.</p>
+    <p>Perform advanced querying using <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener noreferrer">SPARQL</a>. This page acts both as an interactive querying page as well as an endpoint for clients.</p>
     <div id="query-options" ref="queryOptionsElement">
         <div class="query-option">
             <div class="query-option-title">Endpoint</div>
             <select name="endpoint" id="endpoint" @change="selectedEndpoint = ($event.target as HTMLInputElement).value">
                 <option value="all" :selected="selectedEndpoint === 'all'">All</option>
-                <option value="catprez" :selected="selectedEndpoint === 'catprez'">CatPrez</option>
-                <option value="spaceprez" :selected="selectedEndpoint === 'spaceprez'">SpacePrez</option>
-                <option value="vocprez" :selected="selectedEndpoint === 'vocprez'">VocPrez</option>
+                <option value="catprez" :selected="selectedEndpoint === 'catprez'">Data Catalog</option>
+                <option value="spaceprez" :selected="selectedEndpoint === 'spaceprez'">Spatial Data Catalog</option>
+                <option value="vocprez" :selected="selectedEndpoint === 'vocprez'">Vocabularies</option>
             </select>
         </div>
         <div v-if="queryType === 'SELECT' || queryType === 'ASK'" class="query-option">

@@ -45,6 +45,7 @@ const radiusRef = ref(5)
 const limitRef = ref(10)
 const showQueryRef = ref(false)
 const sparqlQueryRef = ref('')
+const initialAreaTypeRef = ref(AreaTypes.Nearby)
 
 // to hold the wkt shape response from the map search
 const responseRef = ref<WKTResult[]>()
@@ -95,7 +96,17 @@ const updateSelection = async (selectedCoords:Coords, shapeType:ShapeTypes) => {
     //shapeTypeRef.value = selectedCoords.length == 0 ? ShapeTypes.None : (selectedCoords.length == 1 ? ShapeTypes.Point : ShapeTypes.Polygon)
     shapeTypeRef.value = shapeType
     coordsRef.value = selectedCoords
-    await performMapSearch()
+    // only search when we have shape type provided
+    if(shapeType != ShapeTypes.None) {
+        if(shapeType == ShapeTypes.Point) {
+            initialAreaTypeRef.value = AreaTypes.Nearby
+            areaTypeRef.value = AreaTypes.Nearby
+        } else {
+            initialAreaTypeRef.value = AreaTypes.Contains
+            areaTypeRef.value = AreaTypes.Contains
+        }
+        await performMapSearch()
+    }
 }
 
 // convert out areatypes into a list of options format to show as buttons
@@ -103,6 +114,7 @@ const areaButtons = enumToOptions(AreaTypes)
 
 // triggered when a change of area type has been clicked
 const handleAreaButtonChange = async (values: AreaTypes[]) => {
+    initialAreaTypeRef.value = values[0]
     areaTypeRef.value = values[0]
     await performMapSearch()
 }
@@ -139,20 +151,23 @@ const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) =
             <form action="" class="query-options">
                 <div class="query-option">
                     <h4 class="query-option-title">Search map selection</h4>
-                    <div class="btn sm outline">{{ shapeTypeRef }}</div>
+                    <div class="msg"><i class="fa-solid fa-play"></i> {{ shapeTypeRef }}</div>
                     <p />
                     <div v-if="shapeTypeRef == ShapeTypes.None">Select a point or rectangle on the map to begin</div>
                     <p />
-                    <ButtonGroup v-if="shapeTypeRef != ShapeTypes.None" @change="handleAreaButtonChange" :buttons="areaButtons" :allowMultipleSelection="false" />
+                    <ButtonGroup :initial-value="initialAreaTypeRef" v-if="shapeTypeRef != ShapeTypes.None" @change="handleAreaButtonChange" :buttons="areaButtons" :allowMultipleSelection="false" />
                     <div v-if="shapeTypeRef != ShapeTypes.None && areaTypeRef == AreaTypes.Nearby" style="padding-top:10px;font-size:0.7em">
-                        within <input class="small-input" v-model="radiusRef" /> km
+                        within <input class="small-input" v-model="radiusRef" @change="performMapSearch()" /> km
                     </div>
                     <p />
                 </div>
 
                 <div class="query-option">
                     <h4 class="query-option-title">Find features and datasets</h4>
-                    <div v-if="datasets.loading">Loading...</div>
+                    <div v-if="datasets.loading">
+                        <h4>Loading...</h4>
+                        <div class="loading-icon"></div>
+                    </div>
                     <div class="error" v-else-if="datasets.error">Unable to load datasets: {{ datasets.error }}</div>
                     <div v-for="datasetNode in datasetTreeRef">
                         <ul>
@@ -183,7 +198,7 @@ const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) =
                 
                 <span class="nowrap">Results limit: <input id="input-limit" class="space-right" @change="performMapSearch()" v-model="limitRef" /></span>
                 <span class="nowrap"><label class="space-right"><input v-model="showQueryRef" type="checkbox">Show query</label></span>
-                <button @click="performMapSearch" v-bind:disabled="shapeTypeRef == ShapeTypes.None" class="btn" type="submit">Search</button>
+                <button @click="performMapSearch()" v-bind:disabled="shapeTypeRef == ShapeTypes.None" class="btn" type="button">Search</button>
             </form>    
 
         </div>
@@ -194,25 +209,37 @@ const toggleAllFeatures = async (datasetNode:DatasetTreeNode, checked:boolean) =
                 :drawing-modes="['MARKER', 'POLYGON', 'RECTANGLE']"
                 @selectionUpdated="updateSelection" 
             />
-            <div v-if="mapSearch.data && mapSearch.data.length > 0">
-                <h3>Result set</h3>
-                <table>
-                    <thead>
-                        <th>Feature collection</th>
-                        <th>Label</th>
-                        <th>URI</th>
-                    </thead>
-                    <tbody>
-                        <tr v-for="result in mapSearch.data">
-                            <td>{{ result.fcLabel }}</td>
-                            <td>{{ result.label }}</td>
-                            <td><a v-bind:href="`${result.link}`">{{ result.uri }}</a></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>    
+            <div v-if="mapSearch.loading">
+                <h3>Loading...</h3>
+                <div class="loading-icon"></div>
+            </div>
             <div v-else>
-                <h3>No results</h3>
+                <div v-if="mapSearch.data && mapSearch.data.length > 0">
+                    <h3>Result set</h3>
+                    <table>
+                        <thead>
+                            <th>Feature collection</th>
+                            <th>Label</th>
+                            <th>URI</th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="result in mapSearch.data">
+                                <td>{{ result.fcLabel }}</td>
+                                <td>{{ result.label }}</td>
+                                <td><a v-bind:href="`${result.link}`">{{ result.uri }}</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>    
+                <div v-else-if="mapSearch.error">
+                    <h3>Unable to search map</h3>
+                    <div class="error">
+                        {{ mapSearch.error }}
+                    </div>
+                </div>
+                <div v-else>
+                    <h3>No results</h3>
+                </div>
             </div>
         </div>
     </div>
@@ -281,6 +308,25 @@ table {
     grid-template-columns: 1fr 3fr; /* set the column widths to 1/4 and 3/4 of the container width */
 }
 
+.left-panel {
+    min-width: 320px;
+    padding-right: 1em;
+}
+.right-panel {
+}
+
+/* Media query for small screens */
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    .left-panel {
+        margin-bottom: 2em;
+        width: 100%;
+        padding-right: 0;
+    }
+}
+
 .space-right {
     margin-right:1em;    
 }
@@ -289,18 +335,16 @@ table {
     width:3em;
 }
 
+.msg {
+    color: var(--primary);    
+}
+
 .nowrap {
     display:inline-block;
     white-space: nowrap;
     margin-top:10px;
 }
 
-.left-panel {
-    min-width: 320px;
-    padding-right: 1em;
-}
-.right-panel {
-}
 
 pre.debug {
     white-space: break-spaces;
@@ -338,5 +382,26 @@ pre.debug {
     background-color: lightcoral;
     display: inline-block;
 }
+
+.loading-icon {
+  position: relative;
+  width: 20px;
+  height: 20px; 
+  margin:0;
+  padding:0;
+  -webkit-animation: fa-spin 2s infinite linear;
+  animation: fa-spin 2s infinite linear;
+}
+
+.loading-icon:before {
+  content: "\f1ce";
+  font-family: FontAwesome;
+  font-size:20px;
+  line-height:21px;
+  position: absolute;
+  top: 0; 
+  bottom:0;
+}
+
 
 </style>

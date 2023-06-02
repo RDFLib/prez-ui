@@ -4,6 +4,7 @@ import { RouterLink } from "vue-router";
 import { useUiStore } from "@/stores/ui";
 import type { PrezFlavour } from "@/types";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
+import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 
 const ui = useUiStore();
 
@@ -37,14 +38,14 @@ const homeLinks = computed(() => {
 
 onMounted(() => {
     ui.rightNavConfig = { enabled: false };
-    document.title = `${props.flavour} | Prez`;
+    document.title = `${getPrezSystemLabel(props.flavour) + " Home"} | Prez`;
     ui.pageHeading = { name: props.flavour, url: `/${letter.value}`};
-    ui.breadcrumbs = [{ name: props.flavour, url: `/${letter.value}` }];
+    ui.breadcrumbs = [{ name: getPrezSystemLabel(props.flavour) + " Home", url: `/${letter.value}` }];
 });
 </script>
 
 <template>
-    <h1 class="page-title">{{ props.flavour }}</h1>
+    <h1 class="page-title">{{ getPrezSystemLabel(props.flavour) }}</h1>
     <div class="home-page-links">
         <RouterLink v-for="link in homeLinks" :to="link.url" class="home-page-link">
             <h4 class="link-title">{{ link.label }}</h4>
@@ -62,7 +63,8 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     gap: 16px;
-    margin: 20px auto;
+    margin: 20px 0;
+    max-width: 768px;
     flex-wrap: wrap;
     // justify-content: center;
 
