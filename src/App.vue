@@ -17,8 +17,7 @@ const { namedNode } = DataFactory;
 
 const version = packageJson.version;
 
-// const sidenav = inject(sidenavConfigKey) as boolean;
-const sidenav = true;
+const sidenav = inject(sidenavConfigKey) as boolean;
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
