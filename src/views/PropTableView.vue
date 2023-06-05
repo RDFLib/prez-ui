@@ -355,9 +355,10 @@ function getConcepts() {
 
         if (!!c.broader) {
             const parent = conceptArray[indexMap[c.broader]];
-            parent.children = [...(parent.children || []), c];
+            parent.children = [...(parent.children || []), c].sort((a, b) => a.title.localeCompare(b.title));
         }
     });
+    conceptsList.sort((a, b) => a.title.localeCompare(b.title));
     concepts.value = conceptsList;
 }
 
