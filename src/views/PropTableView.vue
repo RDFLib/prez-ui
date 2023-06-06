@@ -15,6 +15,7 @@ import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import MapClient from "@/components/MapClient.vue";
 import type { WKTResult } from "@/stores/mapSearchStore.d";
 import SortableTabularList from "@/components/SortableTabularList.vue";
+import LoadingMessage from "@/components/LoadingMessage.vue";
 
 const { namedNode } = DataFactory;
 
@@ -441,32 +442,51 @@ onBeforeMount(() => {
     }
 });
 
+function ensureProfiles() {
+    return new Promise<void>((resolve, reject) => {
+        let expTimer = setTimeout(reject, 10 * 1000); // time out after 10s
+               
+        (function waitForProfiles() {
+            if (Object.keys(ui.profiles).length > 0) {
+                clearTimeout(expTimer)
+                return resolve()
+            };
+            setTimeout(waitForProfiles, 500);
+        })();
+    })
+}
+
 onMounted(() => {
-    doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
-        // find the current/default profile
-        defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
-        
-        // if specify mediatype, or profile is not default or alt, redirect to API
-        if ((route.query && route.query._profile) &&
-            (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
-                window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
-        }
+    loading.value = true;
+    // wait for profiles to be set in Pinia
+    ensureProfiles().then(() => {
+        console.log("profiles ready")
+        doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
+            // find the current/default profile
+            defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
+            
+            // if specify mediatype, or profile is not default or alt, redirect to API
+            if ((route.query && route.query._profile) &&
+                (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
+                    window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
+            }
 
-        // disable right nav if AltView
-        if (isAltView.value) {
-            ui.rightNavConfig = { enabled: false };
-        } else {
-            ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
-        }
+            // disable right nav if AltView
+            if (isAltView.value) {
+                ui.rightNavConfig = { enabled: false };
+            } else {
+                ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
+            }
 
-        parseIntoStore(data.value);
-        getProperties();
-        if (!isAltView.value && childrenConfig.value.showChildren) {
-            getChildren();
-        }
+            parseIntoStore(data.value);
+            getProperties();
+            if (!isAltView.value && childrenConfig.value.showChildren) {
+                getChildren();
+            }
 
-        document.title = item.value.title ? `${item.value.title} | Prez` : "Prez";
-        ui.breadcrumbs = getBreadcrumbs();
+            document.title = item.value.title ? `${item.value.title} | Prez` : "Prez";
+            ui.breadcrumbs = getBreadcrumbs();
+        });
     });
 });
 </script>
@@ -519,12 +539,8 @@ onMounted(() => {
                 </tr>
             </template>
         </PropTable>
-        <template v-else-if="loading">
-            <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
-        </template>
-        <template v-else-if="error">
-            <ErrorMessage :message="error" />
-        </template>
+        <LoadingMessage v-else-if="loading" />
+        <ErrorMessage v-else-if="error" :message="error" />
         <Teleport v-if="searchEnabled" to="#right-bar-content">
             <AdvancedSearch v-if="flavour" :flavour="flavour" :query="searchDefaults" />
         </Teleport>

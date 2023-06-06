@@ -122,7 +122,7 @@ onUnmounted(() => {
             <div class="nav-item"><RouterLink to="/" class="nav-link">Home</RouterLink></div>
             <template v-for="prez in enabledPrezs">
                 <div class="nav-item" :style="{ position: 'relative' }">
-                    <RouterLink :to="`/${prez.toLowerCase()[0]}`" :class="`nav-link ${!props.sidenav && route.path.startsWith(`/${prez.toLowerCase()[0]}`) ? 'active' : ''}`">
+                    <RouterLink :to="`/${prez.toLowerCase()[0]}`" :class="`nav-link ${!props.sidenav && route.path.startsWith(`/${prez.toLowerCase()[0]}/`) ? 'active' : ''}`">
                         {{ getPrezSystemLabel(prez) }}
                     </RouterLink>
                     <button class="dropdown-btn" @click="clickDropdown(prez)">

@@ -13,6 +13,7 @@ import ErrorMessage from "@/components/ErrorMessage.vue";
 import PaginationComponent from "@/components/PaginationComponent.vue";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import SortableTabularList from "@/components/SortableTabularList.vue";
+import LoadingMessage from "@/components/LoadingMessage.vue";
 
 const { namedNode } = DataFactory;
 
@@ -286,28 +287,45 @@ onBeforeMount(() => {
     }
 });
 
+function ensureProfiles() {
+    return new Promise<void>((resolve, reject) => {
+        let expTimer = setTimeout(reject, 10 * 1000); // time out after 10s
+               
+        (function waitForProfiles() {
+            if (Object.keys(ui.profiles).length > 0) {
+                clearTimeout(expTimer)
+                return resolve()
+            };
+            setTimeout(waitForProfiles, 500);
+        })();
+    })
+}
+
 onMounted(() => {
-    doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
-        defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
-        
-        // if specify mediatype, or profile is not default or alt, redirect to API
-        if ((route.query && route.query._profile) &&
-            (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
-                window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
-        }
+    loading.value = true;
+    ensureProfiles().then(() => {
+        doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
+            defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
+            
+            // if specify mediatype, or profile is not default or alt, redirect to API
+            if ((route.query && route.query._profile) &&
+                (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
+                    window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
+            }
 
-        // disable right nav if AltView
-        if (isAltView.value) {
-            ui.rightNavConfig = { enabled: false };
-        } else {
-            ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
-        }
+            // disable right nav if AltView
+            if (isAltView.value) {
+                ui.rightNavConfig = { enabled: false };
+            } else {
+                ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
+            }
 
-        parseIntoStore(data.value);
-        getProperties();
+            parseIntoStore(data.value);
+            getProperties();
 
-        document.title = `${itemType.value.label} | Prez`;
-        ui.breadcrumbs = getBreadcrumbs();
+            document.title = `${itemType.value.label} | Prez`;
+            ui.breadcrumbs = getBreadcrumbs();
+        });
     });
 });
 </script>
@@ -317,13 +335,9 @@ onMounted(() => {
     <template v-else>
         <h1 class="page-title">{{ itemType.label }}</h1>
         <p>A list of <a :href="itemType.uri" target="_blank" rel="noopener noreferrer">{{ itemType.label }}.</a></p>
-        <p v-if="items.length > 0">Showing {{ items.length }} of {{ count }} items.</p>
-        <template v-if="error">
-            <ErrorMessage :message="error" />
-        </template>
-        <template v-else-if="loading">
-            <i class="fa-regular fa-spinner-third fa-spin"></i> Loading...
-        </template>
+        <p v-if="!loading && items.length > 0">Showing {{ items.length }} of {{ count }} items.</p>
+        <ErrorMessage v-if="error" :message="error" />
+        <LoadingMessage v-else-if="loading" />
         <template v-else-if="items.length > 0">
             <SortableTabularList v-if="flavour === 'VocPrez'" :items="items" :predicates="['description', 'status', 'derivationMode']" />
             <ItemList v-else :items="items" :childName="childrenConfig.buttonTitle" :childLink="childrenConfig.buttonLink" />
