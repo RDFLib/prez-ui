@@ -14,6 +14,7 @@ import PaginationComponent from "@/components/PaginationComponent.vue";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
+import { ensureProfiles } from "@/util/helpers";
 
 const { namedNode } = DataFactory;
 
@@ -286,20 +287,6 @@ onBeforeMount(() => {
         isAltView.value = true;
     }
 });
-
-function ensureProfiles() {
-    return new Promise<void>((resolve, reject) => {
-        let expTimer = setTimeout(reject, 10 * 1000); // time out after 10s
-               
-        (function waitForProfiles() {
-            if (Object.keys(ui.profiles).length > 0) {
-                clearTimeout(expTimer)
-                return resolve()
-            };
-            setTimeout(waitForProfiles, 500);
-        })();
-    })
-}
 
 onMounted(() => {
     loading.value = true;
