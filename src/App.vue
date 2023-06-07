@@ -31,31 +31,6 @@ const { store: combinedStore, prefixes: combinedPrefixes, parseIntoStore: combin
 document.title = ui.pageTitle;
 
 onMounted(() => {
-    // get API details
-    doRequest(apiBaseUrl, () => {
-        parseIntoStore(data.value);
-
-        // get API version
-        const version = store.value.getObjects(null, qname("prez:version"), null)[0];
-        ui.apiVersion = version.value;
-
-        // get search methods per flavour
-        let searchMethods: {[key: string]: string[]} = {};
-        store.value.forObjects(object => {
-            let flavour = "";
-            let methods: string[] = [];
-            store.value.forEach(q => {
-                if (q.predicate.value === qname("a")) {
-                    flavour = q.object.value.split(`${qname('prez:')}`)[1];
-                } else if (q.predicate.value === qname("prez:availableSearchMethod")) {
-                    methods.push(q.object.value.split(`${qname('prez:')}`)[1]);
-                }
-            }, object, null, null, null);
-            searchMethods[flavour] = methods;
-        }, null, qname("prez:enabledPrezFlavour"), null);
-        ui.searchMethods = searchMethods;
-    });
-
     // if profiles don't exist in pinia
     if (Object.keys(ui.profiles).length === 0) {
         profDoRequest(`${apiBaseUrl}/profiles`, () => {
@@ -123,6 +98,31 @@ onMounted(() => {
             });
         });
     }
+
+    // get API details
+    doRequest(apiBaseUrl, () => {
+        parseIntoStore(data.value);
+
+        // get API version
+        const version = store.value.getObjects(null, qname("prez:version"), null)[0];
+        ui.apiVersion = version.value;
+
+        // get search methods per flavour
+        let searchMethods: {[key: string]: string[]} = {};
+        store.value.forObjects(object => {
+            let flavour = "";
+            let methods: string[] = [];
+            store.value.forEach(q => {
+                if (q.predicate.value === qname("a")) {
+                    flavour = q.object.value.split(`${qname('prez:')}`)[1];
+                } else if (q.predicate.value === qname("prez:availableSearchMethod")) {
+                    methods.push(q.object.value.split(`${qname('prez:')}`)[1]);
+                }
+            }, object, null, null, null);
+            searchMethods[flavour] = methods;
+        }, null, qname("prez:enabledPrezFlavour"), null);
+        ui.searchMethods = searchMethods;
+    });
 });
 </script>
 
