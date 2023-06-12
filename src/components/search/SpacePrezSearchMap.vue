@@ -231,7 +231,7 @@ const toggleAllFeatures = async (datasetNode: DatasetTreeNode, checked: boolean)
                         <ErrorMessage v-else-if="datasets.error" :message="`Unable to load datasets: ${datasets.error}`" />
                         <ul v-else class="dataset-options">
                             <li v-for="(dataset, dIndex) in datasetTreeRef" class="dataset-option">
-                                <input type="checkbox" :id="`dataset-${dIndex}`" :value="dataset.item.subject" v-model="selectedDatasetsRef" @change="(event: InputEvent) => toggleAllFeatures(dataset, (event.target as HTMLInputElement)?.checked)" />
+                                <input type="checkbox" :id="`dataset-${dIndex}`" :value="dataset.item.subject" v-model="selectedDatasetsRef" @change="toggleAllFeatures(dataset, ($event.target as HTMLInputElement)?.checked)" />
                                 <label :for="`dataset-${dIndex}`">{{ dataset.item.object }}</label>
                                 <button
                                     class="btn outline sm dataset-collapse-btn"
