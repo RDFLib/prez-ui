@@ -62,7 +62,7 @@ const featureCollectionQueryPart = (featureCollection:string, config: MapSearchC
 
 /** Constructs a SPARQL query for the SpacePrez map search */
 const mapSearchQuery = (featureCollectionsQueryPart:string, topoQueryPart:string, limit:number, config: MapSearchConfig) => `${mapSearchPrefixPart}
-SELECT ?f_uri ?wkt ?fc ?fc_label ?f_label
+SELECT ?f_uri ?wkt ?fc_label ?f_label
 WHERE {
     { ?f_uri geo:hasGeometry/geo:asWKT ?wkt;
     }
