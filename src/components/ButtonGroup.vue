@@ -1,8 +1,8 @@
 <template>
   <div class="button-container">
-    <div v-for="(button, index) in buttons" :key="index" @click="selectButton(index)" class="btn sm" :class="{ outline: !selectedButtons.includes(index) }">
+    <button v-for="(button, index) in buttons" :key="index" @click="selectButton(index)" class="btn sm" :class="{ outline: !selectedButtons.includes(index) }" :disabled="props.disabled">
       {{ button.text }}
-    </div>
+    </button>
   </div>
 </template>
 
@@ -26,7 +26,11 @@ const props = defineProps({
   initialValue: {
     type: String,
     default: null
-  }
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
 })
 
 const selectedButtons = ref<number[]>([])

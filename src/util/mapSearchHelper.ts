@@ -55,13 +55,14 @@ PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX prez: <https://prez.dev/>
 `
 
-const featureCollectionQueryPart = (featureCollection:string, config: MapSearchConfig) => ` <${featureCollection}> <${config.spatial.membershipRelationship}> ?f_uri . 
+// need to also select the feature collection URI to generate a link for it in the results
+const featureCollectionQueryPart = (featureCollection:string, config: MapSearchConfig) => `<${featureCollection}> <${config.spatial.membershipRelationship}> ?f_uri . 
 <${featureCollection}> <${config.props.fcLabel}> ?fc_label
 `
 
 /** Constructs a SPARQL query for the SpacePrez map search */
 const mapSearchQuery = (featureCollectionsQueryPart:string, topoQueryPart:string, limit:number, config: MapSearchConfig) => `${mapSearchPrefixPart}
-SELECT ?f_uri ?wkt ?fc_label ?f_label
+SELECT ?f_uri ?wkt ?fc ?fc_label ?f_label
 WHERE {
     { ?f_uri geo:hasGeometry/geo:asWKT ?wkt;
     }

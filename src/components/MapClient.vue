@@ -1,9 +1,8 @@
 <script lang="ts" setup>
-
 /// <reference path="../../node_modules/@types/google.maps/index.d.ts" /> 
 
-import { wktToGeoJSON } from "@terraformer/wkt"
 import { inject, reactive, ref, watch, type PropType } from 'vue'
+import { wktToGeoJSON } from "@terraformer/wkt"
 import { mapConfigKey, type MapConfig } from "@/types";
 import { convertConfigTypes } from '@/util/mapSearchHelper'
 import type { MapOptionsCenter } from '@/types'
@@ -33,7 +32,7 @@ const props = defineProps({
     style: {
         type: String,
         default: 'width: 100%; height: 500px; background-color: #eee;'
-    }    
+    }
 })
 
 // when the map object has loaded, it will call this function to set mapDrawFunc, so an external component can call it when needed
@@ -237,5 +236,4 @@ watch(mapRef, googleMap => {
         :style="props.style" 
     >
     </GMapMap>
-
 </template>
