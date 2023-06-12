@@ -29,7 +29,7 @@ export const mapSearchStore = defineStore({
       data: <WKTResult[]>[],
       success: false,
       loading: false,
-      error: null,
+      error: null as null | string,
       apiBaseUrl: apiBaseUrl
     }
   },
@@ -65,7 +65,7 @@ export const mapSearchStore = defineStore({
 
         } catch (error:any) {
           // set the error status
-          this.error = error.message
+          this.error = error.message as string
           this.data = []
           this.success = false
 

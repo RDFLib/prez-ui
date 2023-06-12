@@ -55,7 +55,8 @@ PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX prez: <https://prez.dev/>
 `
 
-const featureCollectionQueryPart = (featureCollection:string, config: MapSearchConfig) => ` <${featureCollection}> <${config.spatial.membershipRelationship}> ?f_uri . 
+// need to also select the feature collection URI to generate a link for it in the results
+const featureCollectionQueryPart = (featureCollection:string, config: MapSearchConfig) => `<${featureCollection}> <${config.spatial.membershipRelationship}> ?f_uri . 
 <${featureCollection}> <${config.props.fcLabel}> ?fc_label
 `
 
