@@ -447,7 +447,6 @@ onMounted(() => {
     loading.value = true;
     // wait for profiles to be set in Pinia
     ensureProfiles().then(() => {
-        console.log("profiles ready")
         doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
             // find the current/default profile
             defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];

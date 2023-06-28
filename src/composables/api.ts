@@ -51,37 +51,41 @@ export function useGetRequest() {
         return Object.values(profileObj);
     }
 
+    /**
+     * Do an API GET request to the Prez API
+     * 
+     * Automatically parses the Link headers to determine the available profiles as part of the request. Expects a `text/anot+turtle` response.
+     * 
+     * @param url The URL to fetch data from
+     * @param callback A callback function that will run if the request succeeds
+     * @param errorCallback A callback function that will run if the request errors
+     */
     function doRequest(url: string, callback = () => {}, errorCallback = () => {}) {
         loading.value = true;
 
-        fetch(url)
+        fetch(url, {
+            method: "GET",
+            headers: {
+                "Accept": "text/anot+turtle"
+            }
+        })
         .then(r => {
-            // console.log("got response")
-            // console.log("response", r)
             if (!r.ok) {
-                // console.log("not ok", r)
-                // console.log(r.status)
-                // console.log(r.statusText)
-                // console.log(r.text())
-                // throw new Error(`Response was not OK: status ${r.status}`);
                 return Promise.reject(r); // returns a Response object to catch() to access status, etc.
             }
+
+            // link headers are parsed & profiles are set
             profiles.value = r.headers.get("link") ? getProfilesFromHeaders(r.headers.get("link")!) : [];
-            return r.text();
+            return r.text(); // turtle string
         })
         .then(text => {
             data.value = text;
             callback();
         })
         .catch(e => {
-            // console.log("error", e)
             if (e instanceof TypeError) { // generic JS network error
-                // console.log("generic error")
-                // console.log("message", e.message)
                 error.value = e.message;
             } else if (e instanceof Response) {
-                // console.log("response error")
-                // console.log("status", e.status)
                 error.value = e.statusText;
             }
             
