@@ -44,7 +44,7 @@ export const mapSearchStore = defineStore({
      */
     async searchMap(query:string) {
         // make the API call to the SPARQL endpoint
-        const url = `${this.apiBaseUrl}/s/sparql`
+        const url = `${this.apiBaseUrl}/sparql`
         this.loading = true
         this.success = false
 
