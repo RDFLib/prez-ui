@@ -158,7 +158,7 @@ export const datasetsStore = defineStore({
      * Calls the spacePrez search endpoint using the query for spacePrez
      */
     async fetchSpacePrezData() {
-        return await this.fetchData(`${this.apiBaseUrl}/s/sparql`, getDatasetFeatureQuery(this.mapConfig.search));
+        return await this.fetchData(`${this.apiBaseUrl}/sparql`, getDatasetFeatureQuery(this.mapConfig.search));
     },
 
     /**

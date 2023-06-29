@@ -42,9 +42,9 @@ export function refDataStore(id:string) {
       /**
        * Calls the SPARQL endpoint with the predefined query, returns a generalised object array from the json response
        */
-      async fetch<T>(subsystem:"s"|"c"|"v", query:string):Promise<void> {
+      async fetch<T>(query:string):Promise<void> {
           // make the API call to the SPARQL endpoint
-          const url = `${this.apiBaseUrl}/${subsystem}/sparql`
+          const url = `${this.apiBaseUrl}/sparql`
           this.loading = true
           this.success = false
 
