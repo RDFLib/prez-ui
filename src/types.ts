@@ -1,5 +1,5 @@
 import type { InjectionKey } from "vue";
-import type { Quad } from "n3";
+import type { Quad, NamedNode } from "n3";
 
 export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
 
@@ -89,7 +89,13 @@ export interface ListItem {
     title?: string;
     description?: string;
     link?: string;
-    type?: string;
+    baseClass?: string;
+    types?: {
+        value: string;
+        qname?: string;
+        label?: string;
+        description?: string;
+    }[];
 };
 
 // extra properies for SortableTable display go in extras
@@ -112,8 +118,18 @@ export interface AnnotatedPredicate {
     annotations: Quad[];
 };
 
-export interface AnnotatedQuad extends Omit<Quad, "predicate"> {
+export interface AnnotatedObject {
+    termType: "NamedNode" | "Variable" | "Literal" | "BlankNode";
+    value: string;
+    id: string;
+    language?: string;
+    datatype?: NamedNode;
+    annotations: Quad[];
+};
+
+export interface AnnotatedQuad extends Omit<Quad, "predicate" | "object"> {
     predicate: AnnotatedPredicate;
+    object: AnnotatedObject;
 };
 
 export interface RowObj {
@@ -125,6 +141,7 @@ export interface RowObj {
     };
     language?: string;
     description?: string;
+    explanation?: string;
     termType: string;
     label?: string;
     rows: RowPred[];
