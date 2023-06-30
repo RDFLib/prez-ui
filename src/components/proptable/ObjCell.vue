@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { RowObj } from "@/types";
+import { copyToClipboard } from "@/util/helpers";
 import PropRow from "@/components/proptable/PropRow.vue";
 
 const props = defineProps<RowObj>();
@@ -10,10 +11,6 @@ const geometryPreds = [
 ];
 
 const MAX_GEOM_LENGTH = 100; // max character length for geometry strings
-
-function copyString(s: string) {
-    navigator.clipboard.writeText(s.trim());
-}
 </script>
 
 <template>
@@ -41,7 +38,7 @@ function copyString(s: string) {
                 </template>
                 <div v-else-if="props.datatype && geometryPreds.includes(props.datatype.value)" class="geom-cell">
                     <pre>{{ props.value.length > MAX_GEOM_LENGTH ? `${props.value.slice(0, MAX_GEOM_LENGTH)}...` : props.value }}</pre>
-                    <button class="btn outline sm" title="Copy geometry" @click="copyString(props.value)"><i class="fa-regular fa-clipboard"></i></button>
+                    <button class="btn outline sm" title="Copy geometry" @click="copyToClipboard(props.value)"><i class="fa-regular fa-clipboard"></i></button>
                 </div>
                 <template v-else>{{ props.value }}</template>
             </template>

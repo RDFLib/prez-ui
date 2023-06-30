@@ -23,13 +23,13 @@ const { namedNode } = DataFactory;
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
-const { store, prefixes, parseIntoStore, qname } = useRdfStore();
+const { store, prefixes, parseIntoStore, qnameToIri } = useRdfStore();
 const { data, profiles, loading, error, doRequest } = useGetRequest();
 
-const DEFAULT_LABEL_PREDICATES = [qname("rdfs:label")];
-const DEFAULT_DESC_PREDICATES = [qname("dcterms:description")];
-const DEFAULT_GEO_PREDICATES = [qname("geo:hasBoundingBox"), qname("geo:hasGeometry")];
-const DEFAULT_CHILDREN_PREDICATES = [qname("rdfs:member"), qname("skos:member"), qname("dcterms:hasPart")];
+const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
+const DEFAULT_DESC_PREDICATES = [qnameToIri("dcterms:description")];
+const DEFAULT_GEO_PREDICATES = [qnameToIri("geo:hasBoundingBox"), qnameToIri("geo:hasGeometry")];
+const DEFAULT_CHILDREN_PREDICATES = [qnameToIri("rdfs:member"), qnameToIri("skos:member"), qnameToIri("dcterms:hasPart")];
 const RECURSION_LIMIT = 5; // limit on recursive search of blank nodes
 const ALT_PROFILES_TOKEN = "lt-prfl:alt-profile";
 
@@ -47,9 +47,9 @@ const searchEnabled = ref(false);
 const searchDefaults = ref<{[key: string]: string}>({});
 const childrenPredicate = ref("");
 const hiddenPredicates = ref<string[]>([
-    qname("a"),
-    qname("dcterms:identifier"),
-    qname("prez:count")
+    qnameToIri("a"),
+    qnameToIri("dcterms:identifier"),
+    qnameToIri("prez:count")
 ]);
 const defaultProfile = ref<Profile | null>(null);
 const childrenConfig = ref({
@@ -63,7 +63,7 @@ const childrenConfig = ref({
 function configByType(type: string) {
     item.value.type = type;
     switch (type) {
-        case qname("dcat:Catalog"):
+        case qnameToIri("dcat:Catalog"):
             searchEnabled.value = true;
             searchDefaults.value = { catalog: item.value.iri };
             childrenConfig.value = {
@@ -72,9 +72,9 @@ function configByType(type: string) {
                 childrenTitle: "Resources"
             };
             break;
-        case qname("dcat:Resource"):
+        case qnameToIri("dcat:Resource"):
             break;
-        case qname("dcat:Dataset"):
+        case qnameToIri("dcat:Dataset"):
             searchEnabled.value = true;
             searchDefaults.value = { dataset: item.value.iri };
             childrenConfig.value = {
@@ -85,7 +85,7 @@ function configByType(type: string) {
                 buttonLink: "/collections"
             };
             break;
-        case qname("geo:FeatureCollection"):
+        case qnameToIri("geo:FeatureCollection"):
             searchEnabled.value = true;
             searchDefaults.value = { collection: item.value.iri };
             childrenConfig.value = {
@@ -96,24 +96,24 @@ function configByType(type: string) {
                 buttonLink: "/items"
             };
             break;
-        case qname("geo:Feature"):
+        case qnameToIri("geo:Feature"):
             break;
-        case qname("skos:ConceptScheme"):
+        case qnameToIri("skos:ConceptScheme"):
             searchEnabled.value = true;
             searchDefaults.value = { vocab: item.value.iri };
-            hiddenPredicates.value.push(qname("skos:hasTopConcept"));
+            hiddenPredicates.value.push(qnameToIri("skos:hasTopConcept"));
             childrenConfig.value.showChildren = true;
             break;
-        case qname("skos:Collection"):
+        case qnameToIri("skos:Collection"):
             childrenConfig.value = {
                 ...childrenConfig.value,
                 showChildren: true,
                 childrenTitle: "Concepts"
             };
             break;
-        case qname("skos:Concept"):
+        case qnameToIri("skos:Concept"):
             break;
-        case qname("prof:Profile"):
+        case qnameToIri("prof:Profile"):
             break;
         default:
     }
@@ -121,7 +121,7 @@ function configByType(type: string) {
 
 function getProperties() {
     // find subject
-    const subject = isObjectView.value ? namedNode(route.query.uri as string) : store.value.getSubjects(namedNode(qname("a")), namedNode(item.value.type!), null)[0];
+    const subject = isObjectView.value ? namedNode(route.query.uri as string) : store.value.getSubjects(namedNode(qnameToIri("a")), namedNode(item.value.type!), null)[0];
     item.value.iri = subject.id;
 
     // get label & description predicates
@@ -138,7 +138,7 @@ function getProperties() {
         } else if (DEFAULT_CHILDREN_PREDICATES.includes(q.predicate.value)) {
             childrenPredicate.value = q.predicate.value;
             hiddenPredicates.value.push(q.predicate.value);
-        } else if (q.predicate.value === qname("a") && isObjectView.value) {
+        } else if (q.predicate.value === qnameToIri("a") && isObjectView.value) {
             configByType(q.object.value);
         } else if (DEFAULT_GEO_PREDICATES.indexOf(q.predicate.value) >= 0) {
             store.value.forEach(geoQ => {
@@ -149,7 +149,7 @@ function getProperties() {
                     uri: item.value.iri,
                     link: `/object?uri=${item.value.iri}`
                 })
-            }, q.object, namedNode(qname("geo:asWKT")), null, null)
+            }, q.object, namedNode(qnameToIri("geo:asWKT")), null, null)
         }
 
         if (!isAltView.value) {
@@ -250,7 +250,7 @@ function getIRILocalName(iri: string) {
 }
 
 function getChildren() {
-    if (item.value.type === qname("skos:ConceptScheme")) {
+    if (item.value.type === qnameToIri("skos:ConceptScheme")) {
         getConcepts();
     } else {
         const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
@@ -264,27 +264,27 @@ function getChildren() {
             store.value.forEach(q => {
                 if (labelPredicates.includes(q.predicate.value)) {
                     child.title = q.object.value;
-                } else if (q.predicate.value === qname("prez:link")) {
+                } else if (q.predicate.value === qnameToIri("prez:link")) {
                     child.link = q.object.value;
-                } else if (q.predicate.value === qname("a")) {
+                } else if (q.predicate.value === qnameToIri("a")) {
                     child.type = q.object.value;
-                } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:publisher")) {
+                } else if (item.value.type === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:publisher")) {
                     const publisher: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
 
                     store.value.forObjects(result => {
                         publisher.label = result.value;
-                    }, q.object, qname("rdfs:label"), null);
+                    }, q.object, qnameToIri("rdfs:label"), null);
 
                     child.extras.publisher = publisher;
-                } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:creator")) {
+                } else if (item.value.type === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:creator")) {
                     const creator: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
 
                     store.value.forObjects(result => {
                         creator.label = result.value;
-                    }, q.object, qname("rdfs:label"), null);
+                    }, q.object, qnameToIri("rdfs:label"), null);
                     
                     child.extras.creator = creator;
-                } else if (item.value.type === qname("dcat:Catalog") && q.predicate.value === qname("dcterms:issued")) {
+                } else if (item.value.type === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:issued")) {
                     const issued: ListItemSortable = { label: q.object.value };
                     child.extras.issued = issued;
                 } 
@@ -320,22 +320,22 @@ function getConcepts() {
             link: ""
         };
         store.value.forEach(q => {
-            if (q.predicate.value === qname("skos:prefLabel")) {
+            if (q.predicate.value === qnameToIri("skos:prefLabel")) {
                 c.title = q.object.value;
-            } else if (q.predicate.value === qname("prez:link")) {
+            } else if (q.predicate.value === qnameToIri("prez:link")) {
                 c.link = q.object.value;
-            } else if (q.predicate.value === qname("skos:narrower")) {
+            } else if (q.predicate.value === qnameToIri("skos:narrower")) {
                 c.narrower.push(q.object.value);
-            } else if (q.predicate.value === qname("skos:broader")) {
+            } else if (q.predicate.value === qnameToIri("skos:broader")) {
                 c.broader = q.object.value;
             }
         }, subject, null, null, null);
         conceptArray.push(c);
-    }, namedNode(qname("skos:inScheme")), namedNode(item.value.iri), null);
+    }, namedNode(qnameToIri("skos:inScheme")), namedNode(item.value.iri), null);
 
     // get top concepts
-    const hasTopConcepts = store.value.getObjects(namedNode(item.value.iri), namedNode(qname("skos:hasTopConcept")), null).map(o => o.id);
-    const topConceptsOf = store.value.getSubjects(namedNode(qname("skos:topConceptOf")), namedNode(item.value.iri), null).map(s => s.id);
+    const hasTopConcepts = store.value.getObjects(namedNode(item.value.iri), namedNode(qnameToIri("skos:hasTopConcept")), null).map(o => o.id);
+    const topConceptsOf = store.value.getSubjects(namedNode(qnameToIri("skos:topConceptOf")), namedNode(item.value.iri), null).map(s => s.id);
     const topConcepts = [...new Set([...hasTopConcepts, ...topConceptsOf])]; // merge & remove duplicates
 
     // build concept hierarchy tree
@@ -400,39 +400,39 @@ onBeforeMount(() => {
     if (route.path.startsWith("/c/")) {
         flavour.value = "CatPrez";
         if (route.path.match(/c\/profiles\/.+/)) {
-            configByType(qname("prof:Profile"));
+            configByType(qnameToIri("prof:Profile"));
         } else if (route.path.match(/c\/catalogs\/.+\/.+/)) {
-            configByType(qname("dcat:Resource"));
+            configByType(qnameToIri("dcat:Resource"));
         } else if (route.path.match(/c\/catalogs\/.+/)) {
-            configByType(qname("dcat:Catalog"));
+            configByType(qnameToIri("dcat:Catalog"));
         }
     } else if (route.path.startsWith("/s/")) {
         flavour.value = "SpacePrez";
         if (route.path.match(/s\/profiles\/.+/)) {
-            configByType(qname("prof:Profile"));
+            configByType(qnameToIri("prof:Profile"));
         } else if (route.path.match(/s\/datasets\/.+\/collections\/.+\/items\/.+/)) {
-            configByType(qname("geo:Feature"));
+            configByType(qnameToIri("geo:Feature"));
         } else if (route.path.match(/s\/datasets\/.+\/collections\/.+/)) {
-            configByType(qname("geo:FeatureCollection"));
+            configByType(qnameToIri("geo:FeatureCollection"));
         } else if (route.path.match(/s\/datasets\/.+/)) {
-            configByType(qname("dcat:Dataset"));
+            configByType(qnameToIri("dcat:Dataset"));
         }
     } else if (route.path.startsWith("/v/")) {
         flavour.value = "VocPrez";
         if (route.path.match(/v\/profiles\/.+/)) {
-            configByType(qname("prof:Profile"));
+            configByType(qnameToIri("prof:Profile"));
         } else if (route.path.match(/v\/vocab\/.+\/.+/)) {
-            configByType(qname("skos:Concept"));
+            configByType(qnameToIri("skos:Concept"));
         } else if (route.path.match(/v\/collection\/.+\/.+/)) {
             // concept in collection
-            configByType(qname("skos:Concept"));
+            configByType(qnameToIri("skos:Concept"));
         } else if (route.path.match(/v\/vocab\/.+/)) {
-            configByType(qname("skos:ConceptScheme"));
+            configByType(qnameToIri("skos:ConceptScheme"));
         } else if (route.path.match(/v\/collection\/.+/)) {
-            configByType(qname("skos:Collection"));
+            configByType(qnameToIri("skos:Collection"));
         }
     } else if (route.path.startsWith("/profiles/")) {
-        configByType(qname("prof:Profile"));
+        configByType(qnameToIri("prof:Profile"));
     } else if (route.path.startsWith("/object")) {
         isObjectView.value = true;
     }
@@ -488,7 +488,7 @@ onMounted(() => {
                         :geo-w-k-t="geoResults"
                     />
             </template>
-            <template v-if="item.type === qname('skos:ConceptScheme')" #bottom>
+            <template v-if="item.type === qnameToIri('skos:ConceptScheme')" #bottom>
                 <tr>
                     <th>Concepts</th>
                     <td>
@@ -506,7 +506,7 @@ onMounted(() => {
                 <tr>
                     <th>{{ childrenConfig.childrenTitle }}</th>
                     <SortableTabularList
-                        v-if="item.type === qname('dcat:Catalog')"
+                        v-if="item.type === qnameToIri('dcat:Catalog')"
                         :items="children"
                         :predicates="['publisher', 'creator', 'issued']"
                     />

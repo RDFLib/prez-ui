@@ -9,7 +9,7 @@ const { namedNode } = DataFactory;
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const { data, loading, error, doRequest } = useGetRequest();
-const { store, parseIntoStore, qname } = useRdfStore();
+const { store, parseIntoStore, qnameToIri } = useRdfStore();
 
 const props = defineProps<{
     defaultSelected?: string;
@@ -44,12 +44,12 @@ onMounted(() => {
             };
             
             store.value.forEach(q => { // get preds & objs for each subj
-                if (q.predicate.value === qname("rdfs:label")) {
+                if (q.predicate.value === qnameToIri("rdfs:label")) {
                     option.title = q.object.value;
                 }
             }, member, null, null, null);
             options.value.push(option);
-        }, namedNode(qname("a")), namedNode(qname("dcat:Catalog")), null);
+        }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Catalog")), null);
     });
 });
 </script>

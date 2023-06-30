@@ -9,7 +9,7 @@ const { namedNode } = DataFactory;
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const { data, loading, error, doRequest } = useGetRequest();
-const { store, parseIntoStore, qname } = useRdfStore();
+const { store, parseIntoStore, qnameToIri } = useRdfStore();
 
 const props = defineProps<{
     defaultSelected?: {
@@ -73,9 +73,9 @@ onMounted(() => {
             let datasetIRI = member.value;
             
             store.value.forEach(q => { // get preds & objs for each subj
-                if (q.predicate.value === qname("dcterms:title")) {
+                if (q.predicate.value === qnameToIri("dcterms:title")) {
                     option.title = q.object.value;
-                } else if (q.predicate.value === qname("prez:link")) {
+                } else if (q.predicate.value === qnameToIri("prez:link")) {
                     datasetLink = q.object.value;
                 }
             }, member, null, null, null);
@@ -84,7 +84,7 @@ onMounted(() => {
             // get feature collection list
             if (datasetLink !== "") {
                 const { data: collectionData, loading: collectionLoading, error: collectionError, doRequest: collectionDoRequest } = useGetRequest();
-                const { store: collectionStore, parseIntoStore: collectionParseIntoStore, qname: collectionQname } = useRdfStore();
+                const { store: collectionStore, parseIntoStore: collectionParseIntoStore, qnameToIri: collectionQnameToIri } = useRdfStore();
                 
                 collectionDoRequest(`${apiBaseUrl}${datasetLink}/collections`, () => {
                     collectionParseIntoStore(collectionData.value);
@@ -95,15 +95,15 @@ onMounted(() => {
                         };
                         
                         collectionStore.value.forEach(q => { // get preds & objs for each subj
-                            if (q.predicate.value === collectionQname("rdfs:label")) {
+                            if (q.predicate.value === collectionQnameToIri("rdfs:label")) {
                                 option.title = q.object.value;
                             }
                         }, member, null, null, null);
                         collectionOptions.value.push(option);
-                    }, namedNode(datasetIRI), namedNode(collectionQname("rdfs:member")), null);
+                    }, namedNode(datasetIRI), namedNode(collectionQnameToIri("rdfs:member")), null);
                 });
             }
-        }, namedNode(qname("a")), namedNode(qname("dcat:Dataset")), null);
+        }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Dataset")), null);
     });
 });
 </script>
