@@ -52,13 +52,31 @@ export function useRdfStore() {
      * @param {String} s qname string
      * @returns Predicate IRI string
      */
-    function qname(s: string) {
+    function qnameToIri(s: string): string {
         if (s === "a") { // special handling for "a" as rdf:type
             return prefixes.value.rdf + "type";
         } else {
             const [prefix, pred] = s.split(":");
             return prefixes.value[prefix] + pred;
         }
+    }
+
+    /**
+     * Generates a qname from an IRI
+     * 
+     * Note: must be called after `parseIntoStore()`
+     * 
+     * @param iri the IRI string
+     * @returns Generated qname
+     */
+    function iriToQname(iri: string): string {
+        let qname = "";
+        Object.entries(prefixes.value).forEach(([prefix, prefixIri]) => {
+            if (iri.startsWith(prefixIri)) {
+                qname = prefix + ":" + iri.split(prefixIri)[1];
+            }
+        });
+        return qname;
     }
 
     function clearStore() {
@@ -79,5 +97,5 @@ export function useRdfStore() {
     //     return s;
     // }
 
-    return { store, prefixes, parseIntoStore, qname, clearStore };
+    return { store, prefixes, parseIntoStore, qnameToIri, iriToQname, clearStore };
 }

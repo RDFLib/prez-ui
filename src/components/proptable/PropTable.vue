@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import type { NamedNode } from "n3";
 import type { AnnotatedObject, AnnotatedPredicate, AnnotatedQuad, ListItem, RowPred } from "@/types";
+import { copyToClipboard } from "@/util/helpers";
 import PropRow from "@/components/proptable/PropRow.vue";
 import ToolTip from "@/components/ToolTip.vue";
 
@@ -15,17 +15,17 @@ const props = defineProps<{
 
 const rows = ref<RowPred[]>([]);
 
-function getNamedNodeQname(n: AnnotatedPredicate | AnnotatedObject | NamedNode): string {
+function iriToQname(iri: string): string { // doesn't require a store, uses prefixes from props
     let qname = "";
     Object.entries(props.prefixes).forEach(([prefix, prefixIri]) => {
-        if (n.value.startsWith(prefixIri)) {
-            qname = prefix + ":" + n.value.split(prefixIri)[1];
+        if (iri.startsWith(prefixIri)) {
+            qname = prefix + ":" + iri.split(prefixIri)[1];
         }
     });
     return qname;
 }
 
-function qname(s: string): string {
+function qnameToIri(s: string): string { // doesn't require a store, uses prefixes from props
     if (s === "a") { // special handling for "a" as rdf:type
         return props.prefixes.rdf + "type";
     } else {
@@ -35,7 +35,7 @@ function qname(s: string): string {
 }
 
 function getAnnotation(annoNode: AnnotatedPredicate | AnnotatedObject, annotationPred: string): string | undefined {
-    return annoNode.annotations.find(annotation => annotation.predicate.value === qname(annotationPred))?.object.value;
+    return annoNode.annotations.find(annotation => annotation.predicate.value === qnameToIri(annotationPred))?.object.value;
 }
 
 function copyIri() {
@@ -48,7 +48,7 @@ function buildRows(properties: AnnotatedQuad[]): RowPred[] {
         propRows[p.predicate.value] ??= {
             iri: p.predicate.value,
             objs: [],
-            qname: getNamedNodeQname(p.predicate),
+            qname: iriToQname(p.predicate.value),
             label: getAnnotation(p.predicate, "rdfs:label"),
             description: getAnnotation(p.predicate, "dcterms:description"),
             explanation: getAnnotation(p.predicate, "dcterms:provenance"),
@@ -57,8 +57,8 @@ function buildRows(properties: AnnotatedQuad[]): RowPred[] {
 
         propRows[p.predicate.value].objs.push({
             value: p.object.value,
-            qname: p.object.termType === "NamedNode" ? getNamedNodeQname(p.object) : undefined,
-            datatype: p.object.termType === "Literal" ? { value: p.object.datatype!.value, qname: getNamedNodeQname(p.object.datatype!) } : undefined,
+            qname: p.object.termType === "NamedNode" ? iriToQname(p.object.value) : undefined,
+            datatype: p.object.termType === "Literal" ? { value: p.object.datatype!.value, qname: iriToQname(p.object.datatype!.value) } : undefined,
             language: p.object.termType === "Literal" ? p.object.language : undefined,
             termType: p.object.termType,
             label: getAnnotation(p.object, "rdfs:label"),
@@ -82,7 +82,7 @@ onMounted(() => {
         <small class="iri">
             <span class="badge">IRI</span>
             <a :href="props.item.iri" target="_blank" rel="noopener noreferrer">{{ props.item.iri }}</a>
-            <button class="btn outline sm" title="Copy IRI" @click="copyIri()"><i class="fa-regular fa-clipboard"></i></button>
+            <button class="btn outline sm" title="Copy IRI" @click="copyToClipboard(props.item.iri)"><i class="fa-regular fa-clipboard"></i></button>
         </small>
         <small class="type">
             <span class="badge">Type</span>

@@ -11,6 +11,8 @@ import { QUERY_GET_CATALOGS, QUERY_GET_THEMES, QUERY_SEARCH } from "@/stores/cat
 import type { RDCatalog, RDSearch, RDTheme } from "@/stores/catalogQueries.d"
 import { shapeQueryPart } from "@/util/mapSearchHelper"
 
+import { copyToClipboard } from "@/util/helpers";
+
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import BaseModal from "@/components/BaseModal.vue";
@@ -105,10 +107,6 @@ const performSearch = async(event: Event|null=null) => {
     sparqlQueryRef.value = QUERY_SEARCH(selectedCatalogsRef.value, searchTermRef.value, selectedThemesRef.value, shapeQueryPart(coordsRef.value), //limitRef.value);
         (limitRef.value > 0 ? parseInt(limitRef.value.toString()) + 1 : 0));
     await rdSearch.fetch<RDSearch[]>(sparqlQueryRef.value)
-}
-
-function copySPARQL() {
-    navigator.clipboard.writeText(sparqlQueryRef.value);
 }
 
 // start off by loading the main filter lists for catalogs and themes
@@ -242,7 +240,7 @@ onMounted(async ()=>{
             <pre>{{ sparqlQueryRef.trim() }}</pre>
         </div>
         <template #footer>
-            <button class="btn outline sparql-copy-btn" @click="copySPARQL" title="Copy SPARQL query">Copy <i class="fa-regular fa-copy"></i></button>
+            <button class="btn outline sparql-copy-btn" @click="copyToClipboard(sparqlQueryRef)" title="Copy SPARQL query">Copy <i class="fa-regular fa-copy"></i></button>
         </template>
     </BaseModal>
 </template>

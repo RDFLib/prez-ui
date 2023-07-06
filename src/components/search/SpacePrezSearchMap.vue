@@ -21,6 +21,7 @@ import ButtonGroup from "@/components/ButtonGroup.vue";
 import { enumToOptions } from "@/util/mapSearchHelper"
 import { mapSearchStore } from "@/stores/mapSearchStore";
 import type { WKTResult } from "@/stores/mapSearchStore.d"
+import { copyToClipboard } from "@/util/helpers";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import BaseModal from "@/components/BaseModal.vue";
@@ -80,10 +81,6 @@ function toggleCollapseDatasets() {
     let collapsed: {[key: string]: boolean} = {};
     Object.keys(datasetCollapse.value).forEach(dataset => collapsed[dataset] = !allDatasetsCollapsed.value);
     datasetCollapse.value = collapsed;
-}
-
-function copySPARQL() {
-    navigator.clipboard.writeText(sparqlQueryRef.value);
 }
 
 /** Selects/unselects all datasets & feature collections */
@@ -301,7 +298,7 @@ const toggleAllFeatures = async (datasetNode: DatasetTreeNode, checked: boolean)
             <pre>{{ sparqlQueryRef.trim() }}</pre>
         </div>
         <template #footer>
-            <button class="btn outline sparql-copy-btn" @click="copySPARQL" title="Copy SPARQL query">Copy <i class="fa-regular fa-copy"></i></button>
+            <button class="btn outline sparql-copy-btn" @click="copyToClipboard(sparqlQueryRef)" title="Copy SPARQL query">Copy <i class="fa-regular fa-copy"></i></button>
         </template>
     </BaseModal>
 </template>

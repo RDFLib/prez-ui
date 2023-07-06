@@ -9,7 +9,7 @@ const { namedNode } = DataFactory;
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const { data, loading, error, doRequest } = useGetRequest();
-const { store, parseIntoStore, qname } = useRdfStore();
+const { store, parseIntoStore, qnameToIri } = useRdfStore();
 
 const props = defineProps<{
     defaultSelected?: string;
@@ -44,12 +44,12 @@ onMounted(() => {
             };
             
             store.value.forEach(q => { // get preds & objs for each subj
-                if (q.predicate.value === qname("skos:prefLabel")) {
+                if (q.predicate.value === qnameToIri("skos:prefLabel")) {
                     option.title = q.object.value;
                 }
             }, member, null, null, null);
             options.value.push(option);
-        }, namedNode(qname("a")), namedNode(qname("skos:ConceptScheme")), null);
+        }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:ConceptScheme")), null);
     });
 });
 </script>

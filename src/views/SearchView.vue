@@ -12,6 +12,7 @@ import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import type { WKTResult } from "@/stores/mapSearchStore.d";
 import { DataFactory } from "n3";
+
 const { namedNode } = DataFactory;
 
 interface SearchResult {
@@ -24,7 +25,7 @@ const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
 const { data, loading, error, doRequest } = useGetRequest();
-const { store, prefixes, parseIntoStore, qname } = useRdfStore();
+const { store, prefixes, parseIntoStore, qnameToIri } = useRdfStore();
 
 const query = ref(route.query as {[key: string]: string});
 const results = ref<SearchResult[]>([]);
@@ -44,16 +45,16 @@ function getResults() {
                 let resultCoordinates = undefined;
 
                 store.value.forEach(q => {
-                    if ([qname("skos:prefLabel"), qname("dcterms:title"), qname("rdfs:label")].includes(q.predicate.value)) {
+                    if ([qnameToIri("skos:prefLabel"), qnameToIri("dcterms:title"), qnameToIri("rdfs:label")].includes(q.predicate.value)) {
                         resultLabel = q.object.value;
                     }
-                    if (q.predicate.value === qname("prez:searchResultSource") ) {
-                        resultSource = q.object.value.replace(qname("prez:"), "");
+                    if (q.predicate.value === qnameToIri("prez:searchResultSource") ) {
+                        resultSource = q.object.value.replace(qnameToIri("prez:"), "");
                     }
-                    if (q.predicate.value === qname("geo:hasGeometry")) {
+                    if (q.predicate.value === qnameToIri("geo:hasGeometry")) {
                         store.value.forEach(geometryTriple => {
                             resultCoordinates = geometryTriple.object.value;
-                        }, q.object, namedNode(qname("geo:asWKT")),  null, null);
+                        }, q.object, namedNode(qnameToIri("geo:asWKT")),  null, null);
                     }                    
                 }, subject, null, null, null);
                 results.value.push({
