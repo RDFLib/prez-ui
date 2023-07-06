@@ -4,6 +4,7 @@ import Yasqe from "@triply/yasqe";
 import Yasr from "@triply/yasr";
 import { useUiStore } from "@/stores/ui";
 import sparqlExamples from "@/util/sparqlExamples";
+import { copyToClipboard } from "@/util/helpers";
 import { apiBaseUrlConfigKey } from "@/types";
 
 const graphFormats = [
@@ -133,10 +134,6 @@ function loadExample(query: string) {
     toRaw(yasqe.value!).setValue(query); // fixes errors when loading example then clicking in editor - proxy issues with setValue() in Vue
     yasqe.value!.saveQuery();
 }
-
-function copy(text: string) {
-    navigator.clipboard.writeText(text.trim());
-}
 </script>
 
 <template>
@@ -181,7 +178,7 @@ function copy(text: string) {
                 <button
                     class="code-btn"
                     title="Copy"
-                    @click="copy(example.query)"
+                    @click="copyToClipboard(example.query)"
                 >
                     <i class="fa-regular fa-copy"></i>
                 </button>

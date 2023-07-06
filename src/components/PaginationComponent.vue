@@ -3,7 +3,7 @@ import { ref, computed, watch } from "vue";
 import { RouterLink } from "vue-router";
 import router from "@/router";
 
-const PER_PAGE = 10;
+const PER_PAGE = 20;
 
 const props = defineProps<{
     totalCount: number;
