@@ -95,7 +95,7 @@ const links = [
 ];
 
 const fetchThemes = async () => {
-    await rdThemes.fetch<RDTheme[]>("c", QUERY_GET_THEMES(selectedCatalogsRef.value));
+    await rdThemes.fetch<RDTheme[]>(QUERY_GET_THEMES(selectedCatalogsRef.value));
 }
 
 const performSearch = async(event: Event|null=null) => {
@@ -104,7 +104,7 @@ const performSearch = async(event: Event|null=null) => {
     }
     sparqlQueryRef.value = QUERY_SEARCH(selectedCatalogsRef.value, searchTermRef.value, selectedThemesRef.value, shapeQueryPart(coordsRef.value), //limitRef.value);
         (limitRef.value > 0 ? parseInt(limitRef.value.toString()) + 1 : 0));
-    await rdSearch.fetch<RDSearch[]>("c", sparqlQueryRef.value)
+    await rdSearch.fetch<RDSearch[]>(sparqlQueryRef.value)
 }
 
 function copySPARQL() {
@@ -113,7 +113,7 @@ function copySPARQL() {
 
 // start off by loading the main filter lists for catalogs and themes
 onMounted(async ()=>{
-    await rdCatalogs.fetch<RDCatalog[]>("c", QUERY_GET_CATALOGS);
+    await rdCatalogs.fetch<RDCatalog[]>(QUERY_GET_CATALOGS);
     (rdCatalogs.data as RDCatalog[]).forEach(cat=>{
         selectedCatalogsRef.value.push(cat.c)
     });
