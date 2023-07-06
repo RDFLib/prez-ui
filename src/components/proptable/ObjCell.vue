@@ -2,6 +2,7 @@
 import type { RowObj } from "@/types";
 import { copyToClipboard } from "@/util/helpers";
 import PropRow from "@/components/proptable/PropRow.vue";
+import ToolTip from "@/components/ToolTip.vue";
 
 const props = defineProps<RowObj>();
 
@@ -16,22 +17,21 @@ const MAX_GEOM_LENGTH = 100; // max character length for geometry strings
 <template>
     <div class="prop-obj">
         <div class="obj-value">
-            <template v-if="props.termType === 'BlankNode'">
-                <table>
-                    <PropRow v-for="row in props.rows" v-bind="row" />
-                </table>
-            </template>
-            <template v-else-if="props.termType === 'NamedNode'">
-                <template v-if="!!props.label">
-                    <a :href="props.value" target="_blank" rel="noopener noreferrer">{{ props.label }}</a>
-                </template>
-                <template v-else-if="!!props.qname">
-                    <a :href="props.value" target="_blank" rel="noopener noreferrer">{{ props.qname }}</a>
-                </template>
-                <template v-else>
-                    <a :href="props.value" target="_blank" rel="noopener noreferrer">{{ props.value }}</a>
-                </template>
-            </template>
+            <table v-if="props.termType === 'BlankNode'">
+                <PropRow v-for="row in props.rows" v-bind="row" />
+            </table>
+            <component v-else-if="props.termType === 'NamedNode'" :is="!!props.description ? ToolTip : 'slot'">
+                <a
+                    :href="props.value"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <template v-if="!!props.label">{{ props.label }}</template>
+                    <template v-else-if="!!props.qname">{{ props.qname }}</template>
+                    <template v-else>{{ props.value }}</template>
+                </a>
+                <template #text>{{ props.description }}</template>
+            </component>
             <template v-else>
                 <template v-if="props.value.startsWith('http')">
                     <a :href="props.value" target="_blank" rel="noopener noreferrer">{{ props.value }}</a>

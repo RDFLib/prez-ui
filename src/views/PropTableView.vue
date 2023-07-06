@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, inject, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
-import { BlankNode, DataFactory, Quad, Store } from "n3";
+import { BlankNode, DataFactory, Quad, Store, Literal } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
@@ -23,7 +23,7 @@ const { namedNode } = DataFactory;
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
-const { store, prefixes, parseIntoStore, qnameToIri } = useRdfStore();
+const { store, prefixes, parseIntoStore, qnameToIri, iriToQname } = useRdfStore();
 const { data, profiles, loading, error, doRequest } = useGetRequest();
 
 const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
@@ -60,9 +60,9 @@ const childrenConfig = ref({
     buttonLink: ""
 });
 
-function configByType(type: string) {
-    item.value.type = type;
-    switch (type) {
+function configByBaseClass(baseClass: string) {
+    item.value.baseClass = baseClass;
+    switch (baseClass) {
         case qnameToIri("dcat:Catalog"):
             searchEnabled.value = true;
             searchDefaults.value = { catalog: item.value.iri };
@@ -121,8 +121,11 @@ function configByType(type: string) {
 
 function getProperties() {
     // find subject
-    const subject = isObjectView.value ? namedNode(route.query.uri as string) : store.value.getSubjects(namedNode(qnameToIri("a")), namedNode(item.value.type!), null)[0];
-    item.value.iri = subject.id;
+    const subject = isObjectView.value ? namedNode(route.query.uri as string) : store.value.getSubjects(namedNode(qnameToIri("a")), namedNode(item.value.baseClass!), null)[0];
+    item.value = {
+        iri: subject.id,
+        types: []
+    };
 
     // get label & description predicates
     const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
@@ -138,8 +141,18 @@ function getProperties() {
         } else if (DEFAULT_CHILDREN_PREDICATES.includes(q.predicate.value)) {
             childrenPredicate.value = q.predicate.value;
             hiddenPredicates.value.push(q.predicate.value);
-        } else if (q.predicate.value === qnameToIri("a") && isObjectView.value) {
-            configByType(q.object.value);
+        } else if (q.predicate.value === qnameToIri("a")) {
+            configByBaseClass(q.object.value); // might not be needed anymore with the /object changes
+            const typeLabel = store.value.getObjects(q.object, namedNode(qnameToIri("rdfs:label")), null);
+            const typeDesc = store.value.getObjects(q.object, namedNode(qnameToIri("dcterms:description")), null);
+            const typeQname = iriToQname(q.object.value);
+
+            item.value.types!.push({
+                value: q.object.value,
+                qname: typeQname !== "" ? typeQname : undefined,
+                label: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+                description: typeDesc.length > 0 ? typeDesc[0].value : undefined,
+            });
         } else if (DEFAULT_GEO_PREDICATES.indexOf(q.predicate.value) >= 0) {
             store.value.forEach(geoQ => {
                 geoResults.value.push({
@@ -250,7 +263,7 @@ function getIRILocalName(iri: string) {
 }
 
 function getChildren() {
-    if (item.value.type === qnameToIri("skos:ConceptScheme")) {
+    if (item.value.baseClass === qnameToIri("skos:ConceptScheme")) {
         getConcepts();
     } else {
         const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
@@ -267,8 +280,8 @@ function getChildren() {
                 } else if (q.predicate.value === qnameToIri("prez:link")) {
                     child.link = q.object.value;
                 } else if (q.predicate.value === qnameToIri("a")) {
-                    child.type = q.object.value;
-                } else if (item.value.type === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:publisher")) {
+                    child.baseClass = q.object.value;
+                } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:publisher")) {
                     const publisher: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
 
                     store.value.forObjects(result => {
@@ -276,7 +289,7 @@ function getChildren() {
                     }, q.object, qnameToIri("rdfs:label"), null);
 
                     child.extras.publisher = publisher;
-                } else if (item.value.type === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:creator")) {
+                } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:creator")) {
                     const creator: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
 
                     store.value.forObjects(result => {
@@ -284,7 +297,7 @@ function getChildren() {
                     }, q.object, qnameToIri("rdfs:label"), null);
                     
                     child.extras.creator = creator;
-                } else if (item.value.type === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:issued")) {
+                } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:issued")) {
                     const issued: ListItemSortable = { label: q.object.value };
                     child.extras.issued = issued;
                 } 
@@ -373,7 +386,14 @@ function createAnnoQuad(q: Quad, store: Store): AnnotatedQuad {
             id: q.predicate.id,
             annotations: store.getQuads(q.predicate, null, null, null)
         },
-        object: q.object,
+        object: {
+            termType: q.object.termType,
+            value: q.object.value,
+            id: q.object.id,
+            datatype: q.object instanceof Literal ? q.object.datatype : undefined,
+            language: q.object instanceof Literal ? q.object.language : undefined,
+            annotations: store.getQuads(q.object, null, null, null)
+        },
         value: q.value,
         graph: q.graph,
         termType: q.termType,
@@ -395,44 +415,54 @@ function findBlankNodes(q: Quad, store: Store, recursionCounter: number) {
     }
 }
 
+function getQname(iri: string): string {
+    let qname = "";
+    Object.entries(prefixes).forEach(([prefix, prefixIri]) => {
+        if (iri.startsWith(prefixIri)) {
+            qname = prefix + ":" + iri.split(prefixIri)[1];
+        }
+    });
+    return qname;
+}
+
 onBeforeMount(() => {
     // inspect route to infer type & Prez flavour
     if (route.path.startsWith("/c/")) {
         flavour.value = "CatPrez";
         if (route.path.match(/c\/profiles\/.+/)) {
-            configByType(qnameToIri("prof:Profile"));
+            configByBaseClass(qnameToIri("prof:Profile"));
         } else if (route.path.match(/c\/catalogs\/.+\/.+/)) {
-            configByType(qnameToIri("dcat:Resource"));
+            configByBaseClass(qnameToIri("dcat:Resource"));
         } else if (route.path.match(/c\/catalogs\/.+/)) {
-            configByType(qnameToIri("dcat:Catalog"));
+            configByBaseClass(qnameToIri("dcat:Catalog"));
         }
     } else if (route.path.startsWith("/s/")) {
         flavour.value = "SpacePrez";
         if (route.path.match(/s\/profiles\/.+/)) {
-            configByType(qnameToIri("prof:Profile"));
+            configByBaseClass(qnameToIri("prof:Profile"));
         } else if (route.path.match(/s\/datasets\/.+\/collections\/.+\/items\/.+/)) {
-            configByType(qnameToIri("geo:Feature"));
+            configByBaseClass(qnameToIri("geo:Feature"));
         } else if (route.path.match(/s\/datasets\/.+\/collections\/.+/)) {
-            configByType(qnameToIri("geo:FeatureCollection"));
+            configByBaseClass(qnameToIri("geo:FeatureCollection"));
         } else if (route.path.match(/s\/datasets\/.+/)) {
-            configByType(qnameToIri("dcat:Dataset"));
+            configByBaseClass(qnameToIri("dcat:Dataset"));
         }
     } else if (route.path.startsWith("/v/")) {
         flavour.value = "VocPrez";
         if (route.path.match(/v\/profiles\/.+/)) {
-            configByType(qnameToIri("prof:Profile"));
+            configByBaseClass(qnameToIri("prof:Profile"));
         } else if (route.path.match(/v\/vocab\/.+\/.+/)) {
-            configByType(qnameToIri("skos:Concept"));
+            configByBaseClass(qnameToIri("skos:Concept"));
         } else if (route.path.match(/v\/collection\/.+\/.+/)) {
             // concept in collection
-            configByType(qnameToIri("skos:Concept"));
+            configByBaseClass(qnameToIri("skos:Concept"));
         } else if (route.path.match(/v\/vocab\/.+/)) {
-            configByType(qnameToIri("skos:ConceptScheme"));
+            configByBaseClass(qnameToIri("skos:ConceptScheme"));
         } else if (route.path.match(/v\/collection\/.+/)) {
-            configByType(qnameToIri("skos:Collection"));
+            configByBaseClass(qnameToIri("skos:Collection"));
         }
     } else if (route.path.startsWith("/profiles/")) {
-        configByType(qnameToIri("prof:Profile"));
+        configByBaseClass(qnameToIri("prof:Profile"));
     } else if (route.path.startsWith("/object")) {
         isObjectView.value = true;
     }
@@ -488,7 +518,7 @@ onMounted(() => {
                         :geo-w-k-t="geoResults"
                     />
             </template>
-            <template v-if="item.type === qnameToIri('skos:ConceptScheme')" #bottom>
+            <template v-if="item.baseClass === qnameToIri('skos:ConceptScheme')" #bottom>
                 <tr>
                     <th>Concepts</th>
                     <td>
@@ -506,7 +536,7 @@ onMounted(() => {
                 <tr>
                     <th>{{ childrenConfig.childrenTitle }}</th>
                     <SortableTabularList
-                        v-if="item.type === qnameToIri('dcat:Catalog')"
+                        v-if="item.baseClass === qnameToIri('dcat:Catalog')"
                         :items="children"
                         :predicates="['publisher', 'creator', 'issued']"
                     />
