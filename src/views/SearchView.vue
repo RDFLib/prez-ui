@@ -31,9 +31,9 @@ const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
 const { data, loading, error, doRequest } = useGetRequest();
-const { store, parseIntoStore, qname } = useRdfStore();
+const { store, parseIntoStore, qnameToIri } = useRdfStore();
 
-const query = ref(route.query as {[key: string]: string});
+const query = ref(route.query as { [key: string]: string });
 const results = ref<SearchResult[]>([]);
 const searchMapRef = ref()
 const geoResults = ref<WKTResult[]>([]);
@@ -45,7 +45,7 @@ function getResults() {
 
         doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
             parseIntoStore(data.value);
-            const labelPredicateIris = LABEL_PREDICATES.map(p => qname(p));
+            const labelPredicateIris = LABEL_PREDICATES.map(p => qnameToIri(p));
 
             store.value.forSubjects(subject => {
                 let resultUri = subject.value;
@@ -56,15 +56,15 @@ function getResults() {
                 store.value.forEach(q => {
                     if (labelPredicateIris.includes(q.predicate.value)) {
                         resultLabel = q.object.value;
-                    } else if (q.predicate.value === qname("prez:searchResultSource") ) {
-                        resultSource = q.object.value.replace(qname("prez:"), "");
-                    } else if (q.predicate.value === qname("geo:hasGeometry")) {
+                    } else if (q.predicate.value === qnameToIri("prez:searchResultSource")) {
+                        resultSource = q.object.value.replace(qnameToIri("prez:"), "");
+                    } else if (q.predicate.value === qnameToIri("geo:hasGeometry")) {
                         store.value.forEach(geometryTriple => {
                             resultCoordinates = geometryTriple.object.value;
-                        }, q.object, namedNode(qname("geo:asWKT")),  null, null);
-                    }                    
+                        }, q.object, namedNode(qnameToIri("geo:asWKT")), null, null);
+                    }
                 }, subject, null, null, null);
-                
+
                 results.value.push({
                     uri: resultUri,
                     label: resultLabel,
@@ -80,7 +80,7 @@ function getResults() {
                         wkt: resultCoordinates
                     });
                 }
-            }, namedNode(qname("a")), namedNode(qname("prez:SearchResult")), null);
+            }, namedNode(qnameToIri("a")), namedNode(qnameToIri("prez:SearchResult")), null);
         });
     }
 }
@@ -104,7 +104,7 @@ onMounted(() => {
 
 <template>
     <h1 class="page-title">Advanced Search</h1>
-    <AdvancedSearch :query="query" fullPage/>
+    <AdvancedSearch :query="query" fullPage />
     <ErrorMessage v-if="error" :message="error" />
     <template v-else-if="loading">
         <h3>Loading...</h3>
@@ -119,7 +119,8 @@ onMounted(() => {
                     <span>Source</span>
                 </div>
                 <div v-if="results.length > 0" class="results">
-                    <RouterLink v-for="result in results" class="result" :to="`/object?uri=${encodeURIComponent(result.uri)}`">
+                    <RouterLink v-for="result in results" class="result"
+                        :to="`/object?uri=${encodeURIComponent(result.uri)}`">
                         <span>{{ result.label || result.uri }}</span>
                         <span :style="{ color: 'black' }">{{ result.source }}</span>
                     </RouterLink>
@@ -128,10 +129,7 @@ onMounted(() => {
             </div>
             <div v-if="geoResults.length" class="right-panel">
                 <div class="results-title">Spatial Results</div>
-                <MapClient v-if="geoResults.length"
-                    ref="searchMapRef" 
-                    :geo-w-k-t="geoResults"
-                />
+                <MapClient v-if="geoResults.length" ref="searchMapRef" :geo-w-k-t="geoResults" />
             </div>
         </div>
     </template>
@@ -153,8 +151,8 @@ onMounted(() => {
 }
 
 .results-title {
-    font-weight:bold;
-    margin-bottom:6px;
+    font-weight: bold;
+    margin-bottom: 6px;
 }
 
 /* Media query for small screens */
@@ -162,13 +160,15 @@ onMounted(() => {
     .container {
         grid-template-columns: 1fr;
     }
+
     .left-panel {
         margin-bottom: 2em;
     }
+
     .right-panel {
         width: 100%;
-        margin:0;
-        padding:0;
+        margin: 0;
+        padding: 0;
     }
 }
 
@@ -199,22 +199,22 @@ onMounted(() => {
 }
 
 .loading-icon {
-  position: relative;
-  width: 20px;
-  height: 20px; 
-  margin:0;
-  padding:0;
-  -webkit-animation: fa-spin 2s infinite linear;
-  animation: fa-spin 2s infinite linear;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    -webkit-animation: fa-spin 2s infinite linear;
+    animation: fa-spin 2s infinite linear;
 }
 
 .loading-icon:before {
-  content: "\f1ce";
-  font-family: FontAwesome;
-  font-size:20px;
-  line-height:21px;
-  position: absolute;
-  top: 0; 
-  bottom:0;
+    content: "\f1ce";
+    font-family: FontAwesome;
+    font-size: 20px;
+    line-height: 21px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
 }
 </style>
