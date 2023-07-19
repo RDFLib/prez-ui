@@ -51,7 +51,8 @@ onMounted(() => {
 
 <template>
     <h1 class="page-title">Get Object by URI</h1>
-    <template v-if="links.length > 1">
+    <p v-if="!route.query || !route.query.uri">This page can be used to find objects by their URI (Uniform Resource Identifier) by adding <code>?uri=https://some.uri.here</code> (for example) to the end of this page's URL.</p>
+    <template v-else-if="links.length > 1">
         <p>Please select from the links below</p>
         <ul>
             <li v-for="link in links"><RouterLink :to="link">{{ link }}</RouterLink></li>
@@ -59,7 +60,7 @@ onMounted(() => {
     </template>
     <LoadingMessage v-else-if="loading" />
     <ErrorMessage v-else-if="error" :message="error" />
-    <p v-else>This page can be used to find objects by their URI (Uniform Resource Identifier) by adding <code>?uri=https://some.uri.here</code> (for example) to the end of this page's URL.</p>
+    <ErrorMessage v-else-if="route.query && route.query.uri && links.length === 0" message="Not Found: This resource contains no links within Prez" />
 </template>
 
 <style lang="scss" scoped>
