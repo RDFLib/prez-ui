@@ -96,6 +96,7 @@ export interface ListItem {
         label?: string;
         description?: string;
     }[];
+    childrenCount?: number;
 };
 
 // extra properies for SortableTable display go in extras
@@ -161,15 +162,17 @@ export interface Concept {
     iri: string;
     title: string;
     link: string;
-    children?: Concept[];
-    narrower: string[]; // not used here
-    broader: string; // not used here
+    childrenCount: number;
+    children: Concept[];
+    // narrower: string[]; // not used here
+    // broader: string; // not used here
 };
 
 // extending an interface for defineProps in-file causes errors, defined here instead
 export interface ConceptProps extends Concept {
     baseUrl: string;
     collapseAll: boolean;
+    parentPath: string; // used to find where in hierarchy tree to insert narrowers - parentIRI1|parentIRI2|parentIRI3...
 };
 
 // export interface PredCellProps extends Omit<RowPred, "order" | "objs"> {};

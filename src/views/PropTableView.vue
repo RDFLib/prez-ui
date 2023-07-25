@@ -24,7 +24,9 @@ const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qnameToIri, iriToQname } = useRdfStore();
+const { store: conceptStore, parseIntoStore: conceptParseIntoStore, qnameToIri: conceptQnameToIri, clearStore: conceptClearStore } = useRdfStore();
 const { data, profiles, loading, error, doRequest } = useGetRequest();
+const { data: conceptData, loading: conceptLoading, error: conceptError, doRequest: conceptDoRequest } = useGetRequest();
 
 const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
 const DEFAULT_DESC_PREDICATES = [qnameToIri("dcterms:description")];
@@ -32,6 +34,7 @@ const DEFAULT_GEO_PREDICATES = [qnameToIri("geo:hasBoundingBox"), qnameToIri("ge
 const DEFAULT_CHILDREN_PREDICATES = [qnameToIri("rdfs:member"), qnameToIri("skos:member"), qnameToIri("dcterms:hasPart")];
 const RECURSION_LIMIT = 5; // limit on recursive search of blank nodes
 const ALT_PROFILES_TOKEN = "lt-prfl:alt-profile";
+const PER_PAGE = 20;
 
 const item = ref<ListItem>({} as ListItem);
 const children = ref<ListItemExtra[]>([]);
@@ -49,7 +52,9 @@ const childrenPredicate = ref("");
 const hiddenPredicates = ref<string[]>([
     qnameToIri("a"),
     qnameToIri("dcterms:identifier"),
-    qnameToIri("prez:count")
+    qnameToIri("prez:count"),
+    qnameToIri("prez:childrenCount"),
+    qnameToIri("prez:link")
 ]);
 const defaultProfile = ref<Profile | null>(null);
 const childrenConfig = ref({
@@ -163,6 +168,8 @@ function getProperties() {
                     link: `/object?uri=${item.value.iri}`
                 })
             }, q.object, namedNode(qnameToIri("geo:asWKT")), null, null)
+        } else if (q.predicate.value === qnameToIri("prez:childrenCount")) {
+            item.value.childrenCount = Number(q.object.value);
         }
 
         if (!isAltView.value) {
@@ -264,7 +271,7 @@ function getIRILocalName(iri: string) {
 
 function getChildren() {
     if (item.value.baseClass === qnameToIri("skos:ConceptScheme")) {
-        getConcepts();
+        getTopConcepts();
     } else {
         const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
@@ -321,60 +328,78 @@ function getChildren() {
     }
 }
 
-function getConcepts() {
-    let conceptArray: Concept[] = [];
-    
-    store.value.forSubjects(subject => {
-        let c: Concept = {
-            iri: subject.id,
-            narrower: [],
-            broader: "",
-            title: "",
-            link: ""
-        };
-        store.value.forEach(q => {
-            if (q.predicate.value === qnameToIri("skos:prefLabel")) {
-                c.title = q.object.value;
-            } else if (q.predicate.value === qnameToIri("prez:link")) {
-                c.link = q.object.value;
-            } else if (q.predicate.value === qnameToIri("skos:narrower")) {
-                c.narrower.push(q.object.value);
-            } else if (q.predicate.value === qnameToIri("skos:broader")) {
-                c.broader = q.object.value;
-            }
-        }, subject, null, null, null);
-        conceptArray.push(c);
-    }, namedNode(qnameToIri("skos:inScheme")), namedNode(item.value.iri), null);
+function getTopConcepts(page: number = 1) {
+    conceptClearStore();
 
-    // get top concepts
-    const hasTopConcepts = store.value.getObjects(namedNode(item.value.iri), namedNode(qnameToIri("skos:hasTopConcept")), null).map(o => o.id);
-    const topConceptsOf = store.value.getSubjects(namedNode(qnameToIri("skos:topConceptOf")), namedNode(item.value.iri), null).map(s => s.id);
-    const topConcepts = [...new Set([...hasTopConcepts, ...topConceptsOf])]; // merge & remove duplicates
+    conceptDoRequest(`${apiBaseUrl}${route.path}/top-concepts?page=${page}&per_page=${PER_PAGE}`, () => {
+        conceptParseIntoStore(conceptData.value);
 
-    // build concept hierarchy tree
-    const indexMap = conceptArray.reduce<{[iri: string]: number}>((obj, c, i) => {
-        obj[c.iri] = i;
-        return obj;
-    }, {});
+        conceptStore.value.forObjects(object => {
+            let c: Concept = {
+                iri: object.id,
+                title: "",
+                link: "",
+                childrenCount: 0,
+                children: []
+            };
+            conceptStore.value.forEach(q => {
+                if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
+                    c.title = q.object.value;
+                } else if (q.predicate.value === conceptQnameToIri("prez:link")) {
+                    c.link = q.object.value;
+                } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
+                    c.childrenCount = Number(q.object.value);
+                }
+            }, object, null, null, null);
+            concepts.value.push(c);
+        }, namedNode(item.value.iri), namedNode(conceptQnameToIri("skos:hasTopConcept")), null);
 
-    let conceptsList: Concept[] = [];
-    conceptArray.forEach(c => {
-        if (c.narrower.length > 0) {
-            c.narrower.forEach(n => conceptArray[indexMap[n]].broader = c.iri);
-        }
-
-        if (topConcepts.includes(c.iri)) {
-            conceptsList.push(c);
-            return;
-        }
-
-        if (!!c.broader) {
-            const parent = conceptArray[indexMap[c.broader]];
-            parent.children = [...(parent.children || []), c].sort((a, b) => a.title.localeCompare(b.title));
-        }
+        concepts.value.sort((a, b) => a.title.localeCompare(b.title));
     });
-    conceptsList.sort((a, b) => a.title.localeCompare(b.title));
-    concepts.value = conceptsList;
+}
+
+function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link: string, page: number }) {
+    conceptClearStore();
+
+    conceptDoRequest(`${apiBaseUrl}${link}/narrowers?page=${page}&per_page=${PER_PAGE}`, () => {
+        // find parent to add narrowers to in hierarchy
+        let parent: Concept | undefined;
+        iriPath.split("|").forEach((iri, index) => {
+            if (index === 0) {
+                parent = concepts.value.find(c => c.iri === iri);
+            } else {
+                parent = parent!.children.find(c => c.iri === iri);
+            }
+
+            if (!parent) {
+                // error
+            }
+        });
+
+        conceptParseIntoStore(conceptData.value);
+
+        conceptStore.value.forObjects(object => {
+            let c: Concept = {
+                iri: object.id,
+                title: "",
+                link: "",
+                childrenCount: 0,
+                children: []
+            };
+            conceptStore.value.forEach(q => {
+                if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
+                    c.title = q.object.value;
+                } else if (q.predicate.value === conceptQnameToIri("prez:link")) {
+                    c.link = q.object.value;
+                } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
+                    c.childrenCount = Number(q.object.value);
+                }
+            }, object, null, null, null);
+            parent!.children.push(c);
+        }, namedNode(parent!.iri), namedNode(conceptQnameToIri("skos:narrower")), null);
+
+        parent!.children.sort((a, b) => a.title.localeCompare(b.title));
+    });
 }
 
 function createAnnoQuad(q: Quad, store: Store): AnnotatedQuad {
@@ -413,16 +438,6 @@ function findBlankNodes(q: Quad, store: Store, recursionCounter: number) {
             }
         }, q.object, null, null, null)
     }
-}
-
-function getQname(iri: string): string {
-    let qname = "";
-    Object.entries(prefixes).forEach(([prefix, prefixIri]) => {
-        if (iri.startsWith(prefixIri)) {
-            qname = prefix + ":" + iri.split(prefixIri)[1];
-        }
-    });
-    return qname;
 }
 
 onBeforeMount(() => {
@@ -514,21 +529,36 @@ onMounted(() => {
         <PropTable v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPreds="hiddenPredicates">
             <template #map>
                 <MapClient v-if="geoResults.length"
-                        ref="searchMapRef" 
-                        :geo-w-k-t="geoResults"
-                    />
+                    ref="searchMapRef" 
+                    :geo-w-k-t="geoResults"
+                />
             </template>
             <template v-if="item.baseClass === qnameToIri('skos:ConceptScheme')" #bottom>
                 <tr>
                     <th>Concepts</th>
                     <td>
                         <div class="concepts">
-                            <button id="collapse-all-btn" @click="collapseConcepts = !collapseConcepts" class="btn">
+                            <!-- <button id="collapse-all-btn" @click="collapseConcepts = !collapseConcepts" class="btn">
                                 <template v-if="collapseConcepts"><i class="fa-regular fa-plus"></i> Expand all</template>
                                 <template v-else><i class="fa-regular fa-minus"></i> Collapse all</template>
-                            </button>
-                            <ConceptComponent v-for="concept in concepts" v-bind="concept" :baseUrl="route.path" :collapseAll="collapseConcepts" />
+                            </button> -->
+                            <ConceptComponent
+                                v-for="concept in concepts"
+                                v-bind="concept"
+                                :baseUrl="route.path"
+                                :collapseAll="collapseConcepts"
+                                parentPath=""
+                                @getNarrowers="getNarrowers($event)"
+                            />
                         </div>
+                        <button
+                            v-if="concepts.length > 0 && item.childrenCount! > concepts.length"
+                            class="btn outline sm"
+                            @click="getTopConcepts(Math.round(concepts.length / PER_PAGE) + 1)"
+                            :style="{marginLeft: '26px'}"
+                        >
+                            Load more
+                        </button>
                     </td>
                 </tr>
             </template>
