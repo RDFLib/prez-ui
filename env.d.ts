@@ -2,6 +2,7 @@
 interface ImportMetaEnv {
     readonly VITE_SIDENAV: string; // true | false
     readonly VITE_ENABLED_PREZS: string; // CatPrez | SpacePrez | VocPrez comma separated
+    readonly VITE_ENABLE_SCORES: string; // true | false
     readonly VITE_API_BASE_URL: string;
     readonly VITE_MAP_SETTINGS_API_KEY: string;
     readonly VITE_MAP_SETTINGS_OPTIONS_CENTER_LAT: number;

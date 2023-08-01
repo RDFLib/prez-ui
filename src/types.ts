@@ -6,6 +6,7 @@ export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
 export const mapConfigKey: InjectionKey<MapConfig> = Symbol();
 export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
 export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
+export const enableScoresKey: InjectionKey<boolean> = Symbol();
 export const apiBaseUrlConfigKey: InjectionKey<string> = Symbol();
 
 export interface MapConfig {

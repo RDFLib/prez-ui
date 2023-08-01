@@ -1,6 +1,7 @@
 export default {
     sidenav: import.meta.env.VITE_SIDENAV,
     enabledPrezs: import.meta.env.VITE_ENABLED_PREZS,
+    enableScores: import.meta.env.VITE_ENABLE_SCORES,
     apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
     map: {
         settings: {
