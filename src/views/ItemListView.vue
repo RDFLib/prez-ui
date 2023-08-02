@@ -5,7 +5,7 @@ import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type Breadcrumb, type ListItem, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
+import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type ListItem, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import ItemList from "@/components/ItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
@@ -19,6 +19,7 @@ import { ensureProfiles } from "@/util/helpers";
 const { namedNode } = DataFactory;
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
+const defaultPerPage = inject(perPageConfigKey) as number;
 const route = useRoute();
 const ui = useUiStore();
 const { store, parseIntoStore, qnameToIri } = useRdfStore();
@@ -55,6 +56,7 @@ const childrenConfig = ref({
     buttonTitle: "",
     buttonLink: ""
 });
+const perPage = ref(Number(defaultPerPage));
 
 const currentPageNumber = computed(() => {
     if (route.query && route.query.page) {
@@ -286,12 +288,19 @@ onBeforeMount(() => {
     if (route.query._profile === ALT_PROFILES_TOKEN && !route.query._mediatype) {
         isAltView.value = true;
     }
+
+    if (route.query.per_page) {
+        perPage.value = Number(route.query.per_page);
+    }
 });
 
 onMounted(() => {
     loading.value = true;
+
+    let fullPath = Object.keys(route.query).length > 0 ? (route.query.per_page ? route.fullPath : route.fullPath + `&per_page=${perPage.value}`) : route.path + `?per_page=${perPage.value}`;
+
     ensureProfiles().then(() => {
-        doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
+        doRequest(`${apiBaseUrl}${fullPath}`, () => {
             defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
             
             // if specify mediatype, or profile is not default or alt, redirect to API
@@ -328,7 +337,7 @@ onMounted(() => {
         <template v-else-if="items.length > 0">
             <SortableTabularList v-if="flavour === 'VocPrez'" :items="items" :predicates="['description', 'status', 'derivationMode']" />
             <ItemList v-else :items="items" :childName="childrenConfig.buttonTitle" :childLink="childrenConfig.buttonLink" />
-            <PaginationComponent :url="route.path" :totalCount="count" :currentPage="currentPageNumber" />
+            <PaginationComponent :url="route.path" :totalCount="count" :currentPage="currentPageNumber" :perPage="perPage" />
         </template>
         <template v-else>No {{ itemType.label }} found.</template>
         <Teleport v-if="searchEnabled && flavour" to="#right-bar-content">

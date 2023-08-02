@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, inject } from "vue";
 import { RouterLink } from "vue-router";
-import type { ConceptProps } from "@/types";
+import { type ConceptProps, conceptPerPageConfigKey } from "@/types";
 
-const PER_PAGE = 20;
+const conceptPerPage = inject(conceptPerPageConfigKey) as number;
 
 const props = defineProps<ConceptProps>();
 
@@ -40,7 +40,7 @@ function loadMoreNarrowers() {
     emit("getNarrowers", {
         iriPath: iriPath.value,
         link: props.link,
-        page: Math.round(props.children.length / PER_PAGE) + 1
+        page: Math.round(props.children.length / conceptPerPage) + 1
     });
 }
 </script>

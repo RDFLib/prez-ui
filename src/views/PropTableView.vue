@@ -5,7 +5,7 @@ import { BlankNode, DataFactory, Quad, Store, Literal } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
+import { apiBaseUrlConfigKey, conceptPerPageConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
@@ -21,6 +21,7 @@ import { ensureProfiles } from "@/util/helpers";
 const { namedNode } = DataFactory;
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
+const conceptPerPage = inject(conceptPerPageConfigKey) as number;
 const route = useRoute();
 const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qnameToIri, iriToQname } = useRdfStore();
@@ -35,7 +36,6 @@ const DEFAULT_GEO_PREDICATES = [qnameToIri("geo:hasBoundingBox"), qnameToIri("ge
 const DEFAULT_CHILDREN_PREDICATES = [qnameToIri("rdfs:member"), qnameToIri("skos:member"), qnameToIri("dcterms:hasPart")];
 const RECURSION_LIMIT = 5; // limit on recursive search of blank nodes
 const ALT_PROFILES_TOKEN = "lt-prfl:alt-profile";
-const PER_PAGE = 20;
 
 const item = ref<ListItem>({} as ListItem);
 const children = ref<ListItemExtra[]>([]);
@@ -399,7 +399,7 @@ function getAllConcepts() {
 function getTopConcepts(page: number = 1) {
     conceptClearStore();
 
-    conceptDoRequest(`${apiBaseUrl}${route.path}/top-concepts?page=${page}&per_page=${PER_PAGE}`, () => {
+    conceptDoRequest(`${apiBaseUrl}${route.path}/top-concepts?page=${page}&per_page=${conceptPerPage}`, () => {
         conceptParseIntoStore(conceptData.value);
 
         conceptStore.value.forObjects(object => {
@@ -429,7 +429,7 @@ function getTopConcepts(page: number = 1) {
 function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link: string, page: number }) {
     conceptClearStore();
 
-    conceptDoRequest(`${apiBaseUrl}${link}/narrowers?page=${page}&per_page=${PER_PAGE}`, () => {
+    conceptDoRequest(`${apiBaseUrl}${link}/narrowers?page=${page}&per_page=${conceptPerPage}`, () => {
         // find parent to add narrowers to in hierarchy
         let parent: Concept | undefined;
         iriPath.split("|").forEach((iri, index) => {
@@ -593,7 +593,7 @@ onMounted(() => {
 
         if (item.value.baseClass === qnameToIri("skos:ConceptScheme")) {
             countDoRequest(`${apiBaseUrl}/count?curie=${route.path.split("/").slice(-1)[0]}&inbound=${encodeURIComponent(qnameToIri("skos:inScheme"))}`, () => {
-                if (parseInt(countData.value.replace('"', "")) <= 100) {
+                if (parseInt(countData.value.replace('"', "")) <= conceptPerPage) {
                     hasFewChildren.value = true;
                 }
                 getData();
@@ -637,7 +637,7 @@ onMounted(() => {
                         <button
                             v-if="!hasFewChildren && concepts.length > 0 && item.childrenCount! > concepts.length"
                             class="btn outline sm"
-                            @click="getTopConcepts(Math.round(concepts.length / PER_PAGE) + 1)"
+                            @click="getTopConcepts(Math.round(concepts.length / conceptPerPage) + 1)"
                             :style="{marginLeft: '26px'}"
                         >
                             Load more
