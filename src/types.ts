@@ -164,8 +164,8 @@ export interface Concept {
     link: string;
     childrenCount: number;
     children: Concept[];
-    // narrower: string[]; // not used here
-    // broader: string; // not used here
+    narrower?: string[];
+    broader?: string;
 };
 
 // extending an interface for defineProps in-file causes errors, defined here instead
@@ -173,6 +173,7 @@ export interface ConceptProps extends Concept {
     baseUrl: string;
     collapseAll: boolean;
     parentPath: string; // used to find where in hierarchy tree to insert narrowers - parentIRI1|parentIRI2|parentIRI3...
+    doNarrowerEmits: boolean;
 };
 
 // export interface PredCellProps extends Omit<RowPred, "order" | "objs"> {};

@@ -26,6 +26,7 @@ const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qnameToIri, iriToQname } = useRdfStore();
 const { store: conceptStore, parseIntoStore: conceptParseIntoStore, qnameToIri: conceptQnameToIri, clearStore: conceptClearStore } = useRdfStore();
 const { data, profiles, loading, error, doRequest } = useGetRequest();
+const { data: countData, loading: countLoading, error: countError, doRequest: countDoRequest } = useGetRequest();
 const { data: conceptData, loading: conceptLoading, error: conceptError, doRequest: conceptDoRequest } = useGetRequest();
 
 const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
@@ -64,6 +65,7 @@ const childrenConfig = ref({
     buttonTitle: "",
     buttonLink: ""
 });
+const hasFewChildren = ref(false); // only for vocab
 
 function configByBaseClass(baseClass: string) {
     item.value.baseClass = baseClass;
@@ -271,7 +273,11 @@ function getIRILocalName(iri: string) {
 
 function getChildren() {
     if (item.value.baseClass === qnameToIri("skos:ConceptScheme")) {
-        getTopConcepts();
+        if (hasFewChildren.value) {
+            getAllConcepts();
+        } else {
+            getTopConcepts();
+        }
     } else {
         const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
@@ -326,6 +332,68 @@ function getChildren() {
             }
         });
     }
+}
+
+function getAllConcepts() {
+    let conceptArray: Concept[] = [];
+    
+    store.value.forSubjects(subject => {
+        let c: Concept = {
+            iri: subject.id,
+            narrower: [],
+            broader: "",
+            title: "",
+            link: "",
+            childrenCount: 0,
+            children: []
+        };
+        store.value.forEach(q => {
+            if (q.predicate.value === qnameToIri("skos:prefLabel")) {
+                c.title = q.object.value;
+            } else if (q.predicate.value === qnameToIri("prez:link")) {
+                c.link = q.object.value;
+            } else if (q.predicate.value === qnameToIri("skos:narrower")) {
+                c.narrower!.push(q.object.value);
+            } else if (q.predicate.value === qnameToIri("skos:broader")) {
+                c.broader = q.object.value;
+            }
+        }, subject, null, null, null);
+        c.childrenCount = c.narrower!.length;
+        conceptArray.push(c);
+    }, namedNode(qnameToIri("skos:inScheme")), namedNode(item.value.iri), null);
+
+    // get top concepts
+    const hasTopConcepts = store.value.getObjects(namedNode(item.value.iri), namedNode(qnameToIri("skos:hasTopConcept")), null).map(o => o.id);
+    const topConceptsOf = store.value.getSubjects(namedNode(qnameToIri("skos:topConceptOf")), namedNode(item.value.iri), null).map(s => s.id);
+    const topConcepts = [...new Set([...hasTopConcepts, ...topConceptsOf])]; // merge & remove duplicates
+
+    // build concept hierarchy tree
+    const indexMap = conceptArray.reduce<{[iri: string]: number}>((obj, c, i) => {
+        obj[c.iri] = i;
+        return obj;
+    }, {});
+
+    let conceptsList: Concept[] = [];
+    conceptArray.forEach(c => {
+        if (c.narrower!.length > 0) {
+            c.narrower!.forEach(n => {
+                conceptArray[indexMap[n]].broader = c.iri;
+            });
+        }
+
+        if (topConcepts.includes(c.iri)) {
+            conceptsList.push(c);
+            return;
+        }
+
+        if (!!c.broader && c.broader !== "") {
+            const parent = conceptArray[indexMap[c.broader]];
+            parent.children = [...(parent.children || []), c].sort((a, b) => a.title.localeCompare(b.title));
+            parent.childrenCount = parent.children.length;
+        }
+    });
+    conceptsList.sort((a, b) => a.title.localeCompare(b.title));
+    concepts.value = conceptsList;
 }
 
 function getTopConcepts(page: number = 1) {
@@ -488,37 +556,51 @@ onBeforeMount(() => {
     }
 });
 
+function getData() {
+    doRequest(`${apiBaseUrl}${hasFewChildren.value ? route.path + "/all" + window.location.search : route.fullPath}`, () => {
+        // find the current/default profile
+        defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
+        
+        // if specify mediatype, or profile is not default or alt, redirect to API
+        if ((route.query && route.query._profile) &&
+            (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
+                window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
+        }
+
+        // disable right nav if AltView
+        if (isAltView.value) {
+            ui.rightNavConfig = { enabled: false };
+        } else {
+            ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
+        }
+
+        parseIntoStore(data.value);
+        getProperties();
+        if (!isAltView.value && childrenConfig.value.showChildren) {
+            getChildren();
+        }
+
+        document.title = item.value.title ? `${item.value.title} | Prez` : "Prez";
+        ui.breadcrumbs = getBreadcrumbs();
+    });
+}
+
 onMounted(() => {
     loading.value = true;
     // wait for profiles to be set in Pinia
     ensureProfiles().then(() => {
         console.log("profiles ready")
-        doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
-            // find the current/default profile
-            defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
-            
-            // if specify mediatype, or profile is not default or alt, redirect to API
-            if ((route.query && route.query._profile) &&
-                (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
-                    window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
-            }
 
-            // disable right nav if AltView
-            if (isAltView.value) {
-                ui.rightNavConfig = { enabled: false };
-            } else {
-                ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
-            }
-
-            parseIntoStore(data.value);
-            getProperties();
-            if (!isAltView.value && childrenConfig.value.showChildren) {
-                getChildren();
-            }
-
-            document.title = item.value.title ? `${item.value.title} | Prez` : "Prez";
-            ui.breadcrumbs = getBreadcrumbs();
-        });
+        if (item.value.baseClass === qnameToIri("skos:ConceptScheme")) {
+            countDoRequest(`${apiBaseUrl}/count?curie=${route.path.split("/").slice(-1)[0]}&inbound=${encodeURIComponent(qnameToIri("skos:inScheme"))}`, () => {
+                if (parseInt(countData.value.replace('"', "")) <= 100) {
+                    hasFewChildren.value = true;
+                }
+                getData();
+            });
+        } else {
+            getData();
+        }
     });
 });
 </script>
@@ -538,21 +620,22 @@ onMounted(() => {
                     <th>Concepts</th>
                     <td>
                         <div class="concepts">
-                            <!-- <button id="collapse-all-btn" @click="collapseConcepts = !collapseConcepts" class="btn">
+                            <button v-if="hasFewChildren" id="collapse-all-btn" @click="collapseConcepts = !collapseConcepts" class="btn">
                                 <template v-if="collapseConcepts"><i class="fa-regular fa-plus"></i> Expand all</template>
                                 <template v-else><i class="fa-regular fa-minus"></i> Collapse all</template>
-                            </button> -->
+                            </button>
                             <ConceptComponent
                                 v-for="concept in concepts"
                                 v-bind="concept"
                                 :baseUrl="route.path"
                                 :collapseAll="collapseConcepts"
                                 parentPath=""
+                                :doNarrowerEmits="!hasFewChildren"
                                 @getNarrowers="getNarrowers($event)"
                             />
                         </div>
                         <button
-                            v-if="concepts.length > 0 && item.childrenCount! > concepts.length"
+                            v-if="!hasFewChildren && concepts.length > 0 && item.childrenCount! > concepts.length"
                             class="btn outline sm"
                             @click="getTopConcepts(Math.round(concepts.length / PER_PAGE) + 1)"
                             :style="{marginLeft: '26px'}"

@@ -21,12 +21,12 @@ const iriPath = computed(() => {
     return props.parentPath === "" ? props.iri : `${props.parentPath}|${props.iri}`;
 });
 
-// watch(() => props.collapseAll, (newValue, oldValue) => {
-//     collapse.value = newValue;
-// });
+watch(() => props.collapseAll, (newValue, oldValue) => {
+    collapse.value = newValue;
+});
 
 function toggleCollapse() {
-    if (collapse.value && props.children.length === 0 && props.childrenCount > 0) {
+    if (collapse.value && props.children.length === 0 && props.childrenCount > 0 && props.doNarrowerEmits) {
         emit("getNarrowers", {
             iriPath: iriPath.value,
             link: props.link,
@@ -65,9 +65,10 @@ function loadMoreNarrowers() {
             :collapseAll="props.collapseAll"
             :parentPath="iriPath"
             @getNarrowers="emit('getNarrowers', $event)"
+            :doNarrowerEmits="props.doNarrowerEmits"
         />
         <button
-            v-if="props.children.length > 0 && props.childrenCount > props.children.length"
+            v-if="props.children.length > 0 && props.childrenCount > props.children.length && props.doNarrowerEmits"
             class="btn outline sm"
             @click="loadMoreNarrowers"
             :style="{marginLeft: '26px'}"
