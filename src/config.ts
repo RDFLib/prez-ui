@@ -1,6 +1,8 @@
 export default {
     sidenav: import.meta.env.VITE_SIDENAV,
     enabledPrezs: import.meta.env.VITE_ENABLED_PREZS,
+    perPage: import.meta.env.VITE_PER_PAGE,
+    conceptPerPage: import.meta.env.VITE_CONCEPT_PER_PAGE,
     apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
     map: {
         settings: {
