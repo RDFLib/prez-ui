@@ -5,6 +5,8 @@ export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
 
 export const mapConfigKey: InjectionKey<MapConfig> = Symbol();
 export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
+export const perPageConfigKey: InjectionKey<number> = Symbol();
+export const conceptPerPageConfigKey: InjectionKey<number> = Symbol();
 export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
 export const enableScoresKey: InjectionKey<boolean> = Symbol();
 export const apiBaseUrlConfigKey: InjectionKey<string> = Symbol();
@@ -97,6 +99,7 @@ export interface ListItem {
         label?: string;
         description?: string;
     }[];
+    childrenCount?: number;
 };
 
 // extra properies for SortableTable display go in extras
@@ -162,15 +165,18 @@ export interface Concept {
     iri: string;
     title: string;
     link: string;
-    children?: Concept[];
-    narrower: string[]; // not used here
-    broader: string; // not used here
+    childrenCount: number;
+    children: Concept[];
+    narrower?: string[];
+    broader?: string;
 };
 
 // extending an interface for defineProps in-file causes errors, defined here instead
 export interface ConceptProps extends Concept {
     baseUrl: string;
     collapseAll: boolean;
+    parentPath: string; // used to find where in hierarchy tree to insert narrowers - parentIRI1|parentIRI2|parentIRI3...
+    doNarrowerEmits: boolean;
 };
 
 // export interface PredCellProps extends Omit<RowPred, "order" | "objs"> {};

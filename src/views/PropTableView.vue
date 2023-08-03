@@ -5,7 +5,7 @@ import { BlankNode, DataFactory, Quad, Store, Literal } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, enableScoresKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
+import { apiBaseUrlConfigKey, conceptPerPageConfigKey, enableScoresKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
@@ -23,10 +23,14 @@ const { namedNode } = DataFactory;
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const enableScores = inject(enableScoresKey) as boolean;
+const conceptPerPage = inject(conceptPerPageConfigKey) as number;
 const route = useRoute();
 const ui = useUiStore();
 const { store, prefixes, parseIntoStore, qnameToIri, iriToQname } = useRdfStore();
+const { store: conceptStore, parseIntoStore: conceptParseIntoStore, qnameToIri: conceptQnameToIri, clearStore: conceptClearStore } = useRdfStore();
 const { data, profiles, loading, error, doRequest } = useGetRequest();
+const { data: countData, loading: countLoading, error: countError, doRequest: countDoRequest } = useGetRequest();
+const { data: conceptData, loading: conceptLoading, error: conceptError, doRequest: conceptDoRequest } = useGetRequest();
 
 const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
 const DEFAULT_DESC_PREDICATES = [qnameToIri("dcterms:description")];
@@ -52,6 +56,8 @@ const hiddenPredicates = ref<string[]>([
     qnameToIri("a"),
     qnameToIri("dcterms:identifier"),
     qnameToIri("prez:count"),
+    qnameToIri("prez:childrenCount"),
+    qnameToIri("prez:link"),
     "https://linked.data.gov.au/def/scores/hasScore"
 ]);
 const defaultProfile = ref<Profile | null>(null);
@@ -64,6 +70,7 @@ const childrenConfig = ref({
 });
 const hasScores = ref(false);
 const scores = ref<{[key: string]: {[key: string]: number}}>({}); // {fair: {f: 0, a: 0, i: 0, r: 0}, ...}
+const hasFewChildren = ref(false); // only for vocab
 
 function configByBaseClass(baseClass: string) {
     item.value.baseClass = baseClass;
@@ -170,6 +177,8 @@ function getProperties() {
             }, q.object, namedNode(qnameToIri("geo:asWKT")), null, null)
         } else if (q.predicate.value === "https://linked.data.gov.au/def/scores/hasScore" && enableScores && !hasScores.value) {
             hasScores.value = true;
+        } else if (q.predicate.value === qnameToIri("prez:childrenCount")) {
+            item.value.childrenCount = Number(q.object.value);
         }
 
         if (!isAltView.value) {
@@ -301,7 +310,11 @@ function getIRILocalName(iri: string) {
 
 function getChildren() {
     if (item.value.baseClass === qnameToIri("skos:ConceptScheme")) {
-        getConcepts();
+        if (hasFewChildren.value) {
+            getAllConcepts();
+        } else {
+            getTopConcepts();
+        }
     } else {
         const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
@@ -358,7 +371,7 @@ function getChildren() {
     }
 }
 
-function getConcepts() {
+function getAllConcepts() {
     let conceptArray: Concept[] = [];
     
     store.value.forSubjects(subject => {
@@ -367,7 +380,9 @@ function getConcepts() {
             narrower: [],
             broader: "",
             title: "",
-            link: ""
+            link: "",
+            childrenCount: 0,
+            children: []
         };
         store.value.forEach(q => {
             if (q.predicate.value === qnameToIri("skos:prefLabel")) {
@@ -375,11 +390,12 @@ function getConcepts() {
             } else if (q.predicate.value === qnameToIri("prez:link")) {
                 c.link = q.object.value;
             } else if (q.predicate.value === qnameToIri("skos:narrower")) {
-                c.narrower.push(q.object.value);
+                c.narrower!.push(q.object.value);
             } else if (q.predicate.value === qnameToIri("skos:broader")) {
                 c.broader = q.object.value;
             }
         }, subject, null, null, null);
+        c.childrenCount = c.narrower!.length;
         conceptArray.push(c);
     }, namedNode(qnameToIri("skos:inScheme")), namedNode(item.value.iri), null);
 
@@ -396,8 +412,10 @@ function getConcepts() {
 
     let conceptsList: Concept[] = [];
     conceptArray.forEach(c => {
-        if (c.narrower.length > 0) {
-            c.narrower.forEach(n => conceptArray[indexMap[n]].broader = c.iri);
+        if (c.narrower!.length > 0) {
+            c.narrower!.forEach(n => {
+                conceptArray[indexMap[n]].broader = c.iri;
+            });
         }
 
         if (topConcepts.includes(c.iri)) {
@@ -405,13 +423,88 @@ function getConcepts() {
             return;
         }
 
-        if (!!c.broader) {
+        if (!!c.broader && c.broader !== "") {
             const parent = conceptArray[indexMap[c.broader]];
             parent.children = [...(parent.children || []), c].sort((a, b) => a.title.localeCompare(b.title));
+            parent.childrenCount = parent.children.length;
         }
     });
     conceptsList.sort((a, b) => a.title.localeCompare(b.title));
     concepts.value = conceptsList;
+}
+
+function getTopConcepts(page: number = 1) {
+    conceptClearStore();
+
+    conceptDoRequest(`${apiBaseUrl}${route.path}/top-concepts?page=${page}&per_page=${conceptPerPage}`, () => {
+        conceptParseIntoStore(conceptData.value);
+
+        conceptStore.value.forObjects(object => {
+            let c: Concept = {
+                iri: object.id,
+                title: "",
+                link: "",
+                childrenCount: 0,
+                children: []
+            };
+            conceptStore.value.forEach(q => {
+                if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
+                    c.title = q.object.value;
+                } else if (q.predicate.value === conceptQnameToIri("prez:link")) {
+                    c.link = q.object.value;
+                } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
+                    c.childrenCount = Number(q.object.value);
+                }
+            }, object, null, null, null);
+            concepts.value.push(c);
+        }, namedNode(item.value.iri), namedNode(conceptQnameToIri("skos:hasTopConcept")), null);
+
+        concepts.value.sort((a, b) => a.title.localeCompare(b.title));
+    });
+}
+
+function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link: string, page: number }) {
+    conceptClearStore();
+
+    conceptDoRequest(`${apiBaseUrl}${link}/narrowers?page=${page}&per_page=${conceptPerPage}`, () => {
+        // find parent to add narrowers to in hierarchy
+        let parent: Concept | undefined;
+        iriPath.split("|").forEach((iri, index) => {
+            if (index === 0) {
+                parent = concepts.value.find(c => c.iri === iri);
+            } else {
+                parent = parent!.children.find(c => c.iri === iri);
+            }
+
+            if (!parent) {
+                // error
+            }
+        });
+
+        conceptParseIntoStore(conceptData.value);
+
+        conceptStore.value.forObjects(object => {
+            let c: Concept = {
+                iri: object.id,
+                title: "",
+                link: "",
+                childrenCount: 0,
+                children: []
+            };
+            conceptStore.value.forEach(q => {
+                if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
+                    c.title = q.object.value;
+                } else if (q.predicate.value === conceptQnameToIri("prez:link")) {
+                    c.link = q.object.value;
+                } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
+                    c.childrenCount = Number(q.object.value);
+                }
+            }, object, null, null, null);
+            parent!.children.push(c);
+        }, namedNode(parent!.iri), namedNode(conceptQnameToIri("skos:narrower")), null);
+
+        parent!.children.sort((a, b) => a.title.localeCompare(b.title));
+    });
 }
 
 function createAnnoQuad(q: Quad, store: Store): AnnotatedQuad {
@@ -450,16 +543,6 @@ function findBlankNodes(q: Quad, store: Store, recursionCounter: number) {
             }
         }, q.object, null, null, null)
     }
-}
-
-function getQname(iri: string): string {
-    let qname = "";
-    Object.entries(prefixes).forEach(([prefix, prefixIri]) => {
-        if (iri.startsWith(prefixIri)) {
-            qname = prefix + ":" + iri.split(prefixIri)[1];
-        }
-    });
-    return qname;
 }
 
 onBeforeMount(() => {
@@ -510,37 +593,51 @@ onBeforeMount(() => {
     }
 });
 
+function getData() {
+    doRequest(`${apiBaseUrl}${hasFewChildren.value ? route.path + "/all" + window.location.search : route.fullPath}`, () => {
+        // find the current/default profile
+        defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
+        
+        // if specify mediatype, or profile is not default or alt, redirect to API
+        if ((route.query && route.query._profile) &&
+            (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
+                window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
+        }
+
+        // disable right nav if AltView
+        if (isAltView.value) {
+            ui.rightNavConfig = { enabled: false };
+        } else {
+            ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
+        }
+
+        parseIntoStore(data.value);
+        getProperties();
+        if (!isAltView.value && childrenConfig.value.showChildren) {
+            getChildren();
+        }
+
+        document.title = item.value.title ? `${item.value.title} | Prez` : "Prez";
+        ui.breadcrumbs = getBreadcrumbs();
+    });
+}
+
 onMounted(() => {
     loading.value = true;
     // wait for profiles to be set in Pinia
     ensureProfiles().then(() => {
         console.log("profiles ready")
-        doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
-            // find the current/default profile
-            defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
-            
-            // if specify mediatype, or profile is not default or alt, redirect to API
-            if ((route.query && route.query._profile) &&
-                (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
-                    window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
-            }
 
-            // disable right nav if AltView
-            if (isAltView.value) {
-                ui.rightNavConfig = { enabled: false };
-            } else {
-                ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
-            }
-
-            parseIntoStore(data.value);
-            getProperties();
-            if (!isAltView.value && childrenConfig.value.showChildren) {
-                getChildren();
-            }
-
-            document.title = item.value.title ? `${item.value.title} | Prez` : "Prez";
-            ui.breadcrumbs = getBreadcrumbs();
-        });
+        if (item.value.baseClass === qnameToIri("skos:ConceptScheme")) {
+            countDoRequest(`${apiBaseUrl}/count?curie=${route.path.split("/").slice(-1)[0]}&inbound=${encodeURIComponent(qnameToIri("skos:inScheme"))}`, () => {
+                if (parseInt(countData.value.replace('"', "")) <= conceptPerPage) {
+                    hasFewChildren.value = true;
+                }
+                getData();
+            });
+        } else {
+            getData();
+        }
     });
 });
 </script>
@@ -551,21 +648,37 @@ onMounted(() => {
         <PropTable v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPreds="hiddenPredicates">
             <template #map>
                 <MapClient v-if="geoResults.length"
-                        ref="searchMapRef" 
-                        :geo-w-k-t="geoResults"
-                    />
+                    ref="searchMapRef" 
+                    :geo-w-k-t="geoResults"
+                />
             </template>
             <template v-if="item.baseClass === qnameToIri('skos:ConceptScheme')" #bottom>
                 <tr>
                     <th>Concepts</th>
                     <td>
                         <div class="concepts">
-                            <button id="collapse-all-btn" @click="collapseConcepts = !collapseConcepts" class="btn">
+                            <button v-if="hasFewChildren" id="collapse-all-btn" @click="collapseConcepts = !collapseConcepts" class="btn">
                                 <template v-if="collapseConcepts"><i class="fa-regular fa-plus"></i> Expand all</template>
                                 <template v-else><i class="fa-regular fa-minus"></i> Collapse all</template>
                             </button>
-                            <ConceptComponent v-for="concept in concepts" v-bind="concept" :baseUrl="route.path" :collapseAll="collapseConcepts" />
+                            <ConceptComponent
+                                v-for="concept in concepts"
+                                v-bind="concept"
+                                :baseUrl="route.path"
+                                :collapseAll="collapseConcepts"
+                                parentPath=""
+                                :doNarrowerEmits="!hasFewChildren"
+                                @getNarrowers="getNarrowers($event)"
+                            />
                         </div>
+                        <button
+                            v-if="!hasFewChildren && concepts.length > 0 && item.childrenCount! > concepts.length"
+                            class="btn outline sm"
+                            @click="getTopConcepts(Math.round(concepts.length / conceptPerPage) + 1)"
+                            :style="{marginLeft: '26px'}"
+                        >
+                            Load more
+                        </button>
                     </td>
                 </tr>
             </template>
