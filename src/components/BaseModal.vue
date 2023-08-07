@@ -107,7 +107,7 @@ onUnmounted(() => {
             $borderColor: #c9c9c9;
             display: flex;
             flex-direction: column;
-            padding: 8px;
+            padding: 16px;
             gap: 8px;
             overflow-y: auto;
             border-top: 1px solid $borderColor;

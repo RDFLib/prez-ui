@@ -9,7 +9,6 @@ const props = defineProps<{
 }>();
 
 const collapse = ref(false); // collapse to a badge
-// click info to open modal
 </script>
 
 <template>
