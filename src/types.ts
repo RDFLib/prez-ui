@@ -168,6 +168,7 @@ export interface Concept {
     children: Concept[];
     narrower?: string[];
     broader?: string;
+    color?: string;
 };
 
 // extending an interface for defineProps in-file causes errors, defined here instead
