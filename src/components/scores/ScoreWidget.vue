@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { ref } from "vue";
 import FairScore from "@/components/scores/FairScore.vue";
 import CareScore from "@/components/scores/CareScore.vue";
 
@@ -7,8 +6,6 @@ const props = defineProps<{
     score: {[key: string]: number};
     name: string;
 }>();
-
-const collapse = ref(false); // collapse to a badge
 </script>
 
 <template>
