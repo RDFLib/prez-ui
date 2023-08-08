@@ -136,6 +136,7 @@ export interface AnnotatedQuad extends Omit<Quad, "predicate" | "object"> {
 };
 
 export interface RowObj {
+    predIri: string;
     value: string;
     qname?: string;
     datatype?: {
@@ -168,6 +169,7 @@ export interface Concept {
     children: Concept[];
     narrower?: string[];
     broader?: string;
+    color?: string;
 };
 
 // extending an interface for defineProps in-file causes errors, defined here instead

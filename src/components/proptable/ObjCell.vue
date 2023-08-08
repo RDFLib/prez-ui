@@ -33,7 +33,8 @@ const MAX_GEOM_LENGTH = 100; // max character length for geometry strings
                 <template #text>{{ props.description }}</template>
             </component>
             <template v-else>
-                <template v-if="props.value.startsWith('http')">
+                <template v-if="props.predIri === 'https://schema.org/color'">{{ props.value }}<span v-if="!!props.value" :style="{color: props.value, marginLeft: '4px'}" class="fa-solid fa-circle fa-2xs"></span></template>
+                <template v-else-if="props.value.startsWith('http')">
                     <a :href="props.value" target="_blank" rel="noopener noreferrer">{{ props.value }}</a>
                 </template>
                 <div v-else-if="props.datatype && geometryPreds.includes(props.datatype.value)" class="geom-cell">

@@ -55,7 +55,7 @@ function loadMoreNarrowers() {
             <i :class="`fa-regular fa-${collapse ? 'plus' : 'minus'}`"></i>
         </button>
         <div v-else class="concept-left"></div>
-        <RouterLink class="concept" :to="props.link">{{ props.title || props.iri }}</RouterLink>
+        <RouterLink class="concept" :to="props.link">{{ props.title || props.iri }}</RouterLink> <span v-if="!!props.color" :style="{color: props.color}" class="fa-solid fa-circle fa-2xs"></span>
     </div>
     <div v-if="props.childrenCount > 0" :class="`concept-children ${collapse ? 'collapse' : ''}`">
         <ConceptComponent

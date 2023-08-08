@@ -408,7 +408,8 @@ function getTopConcepts(page: number = 1) {
                 title: "",
                 link: "",
                 childrenCount: 0,
-                children: []
+                children: [],
+                color: "",
             };
             conceptStore.value.forEach(q => {
                 if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
@@ -417,6 +418,8 @@ function getTopConcepts(page: number = 1) {
                     c.link = q.object.value;
                 } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
                     c.childrenCount = Number(q.object.value);
+                } else if (q.predicate.value === conceptQnameToIri("sdo:color")) {
+                    c.color = q.object.value;
                 }
             }, object, null, null, null);
             concepts.value.push(c);
@@ -452,7 +455,8 @@ function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link: stri
                 title: "",
                 link: "",
                 childrenCount: 0,
-                children: []
+                children: [],
+                color: "",
             };
             conceptStore.value.forEach(q => {
                 if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
@@ -461,6 +465,8 @@ function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link: stri
                     c.link = q.object.value;
                 } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
                     c.childrenCount = Number(q.object.value);
+                } else if (q.predicate.value === conceptQnameToIri("sdo:color")) {
+                    c.color = q.object.value;
                 }
             }, object, null, null, null);
             parent!.children.push(c);

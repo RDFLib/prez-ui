@@ -16,7 +16,7 @@ const props = defineProps<RowPred>();
             :explanation="props.explanation"
         />
         <td class="prop-objs">
-            <ObjCell v-for="obj in props.objs" v-bind="obj" />
+            <ObjCell v-for="obj in props.objs" v-bind="obj" :predIri="props.iri" />
         </td>
     </tr>
 </template>
