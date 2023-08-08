@@ -3,7 +3,7 @@ import pinia from "@/stores/pinia";
 import App from "@/App.vue";
 import router from "@/router";
 import config from "@/config";
-import { sidenavConfigKey, enabledPrezsConfigKey, apiBaseUrlConfigKey, mapConfigKey, perPageConfigKey, conceptPerPageConfigKey } from "@/types";
+import { sidenavConfigKey, enabledPrezsConfigKey, apiBaseUrlConfigKey, mapConfigKey, perPageConfigKey, conceptPerPageConfigKey, enableScoresKey } from "@/types";
 
 import VueGoogleMaps from '@fawmi/vue-google-maps'
 
@@ -15,6 +15,7 @@ app.provide(sidenavConfigKey, config.sidenav === "true");
 app.provide(enabledPrezsConfigKey, config.enabledPrezs.split(","));
 app.provide(perPageConfigKey, config.perPage);
 app.provide(conceptPerPageConfigKey, config.conceptPerPage);
+app.provide(enableScoresKey, config.enableScores === "true");
 app.provide(apiBaseUrlConfigKey, config.apiBaseUrl.replace(/\/$/, ""));
 app.provide(mapConfigKey, config.map);
 

@@ -20,11 +20,13 @@ const teleportChildren = computed(() => {
 
 <template>
     <div id="right-nav">
+        <div id="search-teleport"></div>
         <div id="right-bar-content" ref="teleportRef"></div>
         <hr v-if="(props.profiles && props.profiles.length > 0) && teleportChildren > 0"/>
         <Transition name="fade">
             <AltNav v-show="!!props.profiles && props.profiles.length > 0" :profiles="props.profiles" :currentUrl="props.currentUrl" />
         </Transition>
+        <div id="score-teleport"></div>
     </div>
 </template>
 
@@ -37,6 +39,12 @@ const teleportChildren = computed(() => {
     display: flex;
     flex-direction: column;
     gap: 12px;
+
+    #score-teleport {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
 }
 
 hr {

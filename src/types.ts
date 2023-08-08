@@ -8,6 +8,7 @@ export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
 export const perPageConfigKey: InjectionKey<number> = Symbol();
 export const conceptPerPageConfigKey: InjectionKey<number> = Symbol();
 export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
+export const enableScoresKey: InjectionKey<boolean> = Symbol();
 export const apiBaseUrlConfigKey: InjectionKey<string> = Symbol();
 
 export interface MapConfig {

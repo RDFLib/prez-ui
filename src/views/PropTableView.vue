@@ -5,7 +5,7 @@ import { BlankNode, DataFactory, Quad, Store, Literal } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, conceptPerPageConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
+import { apiBaseUrlConfigKey, conceptPerPageConfigKey, enableScoresKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
@@ -16,11 +16,13 @@ import MapClient from "@/components/MapClient.vue";
 import type { WKTResult } from "@/stores/mapSearchStore.d";
 import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
-import { ensureProfiles } from "@/util/helpers";
+import { ensureProfiles, titleCase } from "@/util/helpers";
+import ScoreWidget from "@/components/scores/ScoreWidget.vue";
 
 const { namedNode } = DataFactory;
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
+const enableScores = inject(enableScoresKey) as boolean;
 const conceptPerPage = inject(conceptPerPageConfigKey) as number;
 const route = useRoute();
 const ui = useUiStore();
@@ -55,7 +57,8 @@ const hiddenPredicates = ref<string[]>([
     qnameToIri("dcterms:identifier"),
     qnameToIri("prez:count"),
     qnameToIri("prez:childrenCount"),
-    qnameToIri("prez:link")
+    qnameToIri("prez:link"),
+    "https://linked.data.gov.au/def/scores/hasScore"
 ]);
 const defaultProfile = ref<Profile | null>(null);
 const childrenConfig = ref({
@@ -65,6 +68,8 @@ const childrenConfig = ref({
     buttonTitle: "",
     buttonLink: ""
 });
+const hasScores = ref(false);
+const scores = ref<{[key: string]: {[key: string]: number}}>({}); // {fair: {f: 0, a: 0, i: 0, r: 0}, ...}
 const hasFewChildren = ref(false); // only for vocab
 
 function configByBaseClass(baseClass: string) {
@@ -170,6 +175,8 @@ function getProperties() {
                     link: `/object?uri=${item.value.iri}`
                 })
             }, q.object, namedNode(qnameToIri("geo:asWKT")), null, null)
+        } else if (q.predicate.value === "https://linked.data.gov.au/def/scores/hasScore" && enableScores && !hasScores.value) {
+            hasScores.value = true;
         } else if (q.predicate.value === qnameToIri("prez:childrenCount")) {
             item.value.childrenCount = Number(q.object.value);
         }
@@ -183,10 +190,40 @@ function getProperties() {
         }
     }, subject, null, null, null);
 
+    if (hasScores.value) {
+        getScores();
+    }
+
     // set the item title after the item title has been set
     geoResults.value.forEach(result => {
         result.label = item.value.title ? item.value.title : item.value.iri
     });
+}
+
+function getScore(scoreName: string, normalised: boolean = false): {[key: string]: number} {
+    const scores: {[key: string]: number} = {};
+
+    store.value.forObjects(o => {
+        store.value.forEach(q => {
+            store.value.forObjects(o2 => {
+                store.value.forEach(q2 => {
+                    const match = q2.predicate.value.match(`https:\/\/linked.data.gov.au\/def\/scores\/${scoreName}([A-Z]){1}Score${normalised ? "Normalised" : ""}`);
+                    if (match) {
+                        scores[match[1].toLowerCase()] = Number(q2.object.value);
+                    }
+                }, o2, null, null, null);
+            }, q.subject, namedNode("http://purl.org/linked-data/cube#observation"), null);
+        }, o, namedNode(qnameToIri("a")), namedNode(`https://linked.data.gov.au/def/scores/${titleCase(scoreName)}Score${normalised ? "Normalised" : ""}`), null);
+    }, namedNode(item.value.iri), namedNode("https://linked.data.gov.au/def/scores/hasScore"), null);
+
+    return scores;
+}
+
+function getScores() {
+    scores.value = {
+        fair: getScore("fair"),
+        care: getScore("care"),
+    };
 }
 
 function getBreadcrumbs(): Breadcrumb[] {
@@ -677,8 +714,11 @@ onMounted(() => {
         </PropTable>
         <LoadingMessage v-else-if="loading" />
         <ErrorMessage v-else-if="error" :message="error" />
-        <Teleport v-if="searchEnabled" to="#right-bar-content">
+        <Teleport v-if="searchEnabled" to="#search-teleport">
             <AdvancedSearch v-if="flavour" :flavour="flavour" :query="searchDefaults" />
+        </Teleport>
+        <Teleport v-if="enableScores && hasScores" to="#score-teleport">
+            <ScoreWidget v-for="([name, score]) in Object.entries(scores)" :name="name" :score="score" />
         </Teleport>
     </template>
 </template>
