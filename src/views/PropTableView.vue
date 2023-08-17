@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { ref, computed, onMounted, inject, onBeforeMount } from "vue";
+import { ref, onMounted, inject, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
 import { BlankNode, DataFactory, Quad, Store, Literal } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
-import { useGetRequest } from "@/composables/api";
+import { useApiRequest } from "@/composables/api";
 import { apiBaseUrlConfigKey, conceptPerPageConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
@@ -24,11 +24,11 @@ const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const conceptPerPage = inject(conceptPerPageConfigKey) as number;
 const route = useRoute();
 const ui = useUiStore();
-const { store, prefixes, parseIntoStore, qnameToIri, iriToQname } = useRdfStore();
-const { store: conceptStore, parseIntoStore: conceptParseIntoStore, qnameToIri: conceptQnameToIri, clearStore: conceptClearStore } = useRdfStore();
-const { data, profiles, loading, error, doRequest } = useGetRequest();
-const { data: countData, loading: countLoading, error: countError, doRequest: countDoRequest } = useGetRequest();
-const { data: conceptData, loading: conceptLoading, error: conceptError, doRequest: conceptDoRequest } = useGetRequest();
+const { store, prefixes, parseIntoStore, qnameToIri, iriToQname } = useRdfStore(); // main store
+const { store: conceptStore, parseIntoStore: conceptParseIntoStore, qnameToIri: conceptQnameToIri, clearStore: conceptClearStore } = useRdfStore(); // store for concepts
+const { loading, error, apiGetRequest } = useApiRequest(); // main request
+const { loading: countLoading, error: countError, apiGetRequest: countApiGetRequest } = useApiRequest(); // count concepts for vocab request
+const { loading: conceptLoading, error: conceptError, apiGetRequest: conceptApiGetRequest } = useApiRequest(); // concept related requests
 
 const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
 const DEFAULT_DESC_PREDICATES = [qnameToIri("dcterms:description")];
@@ -128,7 +128,7 @@ function configByBaseClass(baseClass: string) {
 
 function getProperties() {
     // find subject
-    const subject = isObjectView.value ? namedNode(route.query.uri as string) : store.value.getSubjects(namedNode(qnameToIri("a")), namedNode(item.value.baseClass!), null)[0];
+    const subject = isObjectView.value ? namedNode(route.query.uri as string) : store.value.getSubjects(namedNode(qnameToIri("a")), namedNode(item.value.baseClass!), null)[0]; // isAltView breaks here - subject doesn't exist
     item.value = {
         iri: subject.id,
         types: []
@@ -396,11 +396,11 @@ function getAllConcepts() {
     concepts.value = conceptsList;
 }
 
-function getTopConcepts(page: number = 1) {
+async function getTopConcepts(page: number = 1) {
     conceptClearStore();
-
-    conceptDoRequest(`${apiBaseUrl}${route.path}/top-concepts?page=${page}&per_page=${conceptPerPage}`, () => {
-        conceptParseIntoStore(conceptData.value);
+    const { data: conceptData } = await conceptApiGetRequest(`${route.path}/top-concepts?page=${page}&per_page=${conceptPerPage}`);
+    if (conceptData && !conceptError.value) {
+        conceptParseIntoStore(conceptData);
 
         conceptStore.value.forObjects(object => {
             let c: Concept = {
@@ -423,28 +423,28 @@ function getTopConcepts(page: number = 1) {
         }, namedNode(item.value.iri), namedNode(conceptQnameToIri("skos:hasTopConcept")), null);
 
         concepts.value.sort((a, b) => a.title.localeCompare(b.title));
-    });
+    }
 }
 
-function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link: string, page: number }) {
+async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link: string, page: number }) {
+    // find parent to add narrowers to in hierarchy
+    let parent: Concept | undefined;
+    iriPath.split("|").forEach((iri, index) => {
+        if (index === 0) {
+            parent = concepts.value.find(c => c.iri === iri);
+        } else {
+            parent = parent!.children.find(c => c.iri === iri);
+        }
+
+        if (!parent) {
+            // error
+        }
+    });
+    
     conceptClearStore();
-
-    conceptDoRequest(`${apiBaseUrl}${link}/narrowers?page=${page}&per_page=${conceptPerPage}`, () => {
-        // find parent to add narrowers to in hierarchy
-        let parent: Concept | undefined;
-        iriPath.split("|").forEach((iri, index) => {
-            if (index === 0) {
-                parent = concepts.value.find(c => c.iri === iri);
-            } else {
-                parent = parent!.children.find(c => c.iri === iri);
-            }
-
-            if (!parent) {
-                // error
-            }
-        });
-
-        conceptParseIntoStore(conceptData.value);
+    const { data: conceptData } = await conceptApiGetRequest(`${link}/narrowers?page=${page}&per_page=${conceptPerPage}`);
+    if (conceptData && !conceptError.value) {
+        conceptParseIntoStore(conceptData);
 
         conceptStore.value.forObjects(object => {
             let c: Concept = {
@@ -467,7 +467,7 @@ function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link: stri
         }, namedNode(parent!.iri), namedNode(conceptQnameToIri("skos:narrower")), null);
 
         parent!.children.sort((a, b) => a.title.localeCompare(b.title));
-    });
+    }
 }
 
 function createAnnoQuad(q: Quad, store: Store): AnnotatedQuad {
@@ -556,10 +556,24 @@ onBeforeMount(() => {
     }
 });
 
-function getData() {
-    doRequest(`${apiBaseUrl}${hasFewChildren.value ? route.path + "/all" + window.location.search : route.fullPath}`, () => {
+onMounted(async () => {
+    loading.value = true;
+    await ensureProfiles(); // wait for profiles to be set in Pinia
+
+    if (item.value.baseClass === qnameToIri("skos:ConceptScheme")) {
+        const { data: countData } = await countApiGetRequest(`/count?curie=${route.path.split("/").slice(-1)[0]}&inbound=${encodeURIComponent(qnameToIri("skos:inScheme"))}`);
+        if (countData && !countError.value) {
+            if (parseInt(countData.replace('"', "")) <= conceptPerPage) {
+                hasFewChildren.value = true;
+            }
+        }
+    }
+
+    const { data, profiles } = await apiGetRequest(hasFewChildren.value ? `${route.path}/all${window.location.search}` : route.fullPath);
+
+    if (data && profiles.length > 0 && !error.value) {
         // find the current/default profile
-        defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
+        defaultProfile.value = ui.profiles[profiles.find(p => p.default)!.uri];
         
         // if specify mediatype, or profile is not default or alt, redirect to API
         if ((route.query && route.query._profile) &&
@@ -567,46 +581,26 @@ function getData() {
                 window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
         }
 
-        // disable right nav if AltView
-        if (isAltView.value) {
-            ui.rightNavConfig = { enabled: false };
-        } else {
-            ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
-        }
-
-        parseIntoStore(data.value);
+        ui.rightNavConfig = {
+            enabled: !isAltView.value,
+            profiles: profiles,
+            currentUrl: route.path
+        };
+    
+        parseIntoStore(data);
         getProperties();
         if (!isAltView.value && childrenConfig.value.showChildren) {
             getChildren();
         }
-
+    
         document.title = item.value.title ? `${item.value.title} | Prez` : "Prez";
         ui.breadcrumbs = getBreadcrumbs();
-    });
-}
-
-onMounted(() => {
-    loading.value = true;
-    // wait for profiles to be set in Pinia
-    ensureProfiles().then(() => {
-        console.log("profiles ready")
-
-        if (item.value.baseClass === qnameToIri("skos:ConceptScheme")) {
-            countDoRequest(`${apiBaseUrl}/count?curie=${route.path.split("/").slice(-1)[0]}&inbound=${encodeURIComponent(qnameToIri("skos:inScheme"))}`, () => {
-                if (parseInt(countData.value.replace('"', "")) <= conceptPerPage) {
-                    hasFewChildren.value = true;
-                }
-                getData();
-            });
-        } else {
-            getData();
-        }
-    });
+    }
 });
 </script>
 
 <template>
-    <ProfilesTable v-if="isAltView" :profiles="profiles" :path="route.path" />
+    <ProfilesTable v-if="isAltView" />
     <template v-else>
         <PropTable v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPreds="hiddenPredicates">
             <template #map>

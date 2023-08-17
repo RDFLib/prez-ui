@@ -1,14 +1,12 @@
 <script lang="ts" setup>
-import { ref, onMounted, inject, watch } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { DataFactory } from "n3";
-import { apiBaseUrlConfigKey } from "@/types";
-import { useGetRequest } from "@/composables/api";
+import { useApiRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 
 const { namedNode } = DataFactory;
 
-const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
-const { data, loading, error, doRequest } = useGetRequest();
+const { loading, error, apiGetRequest } = useApiRequest();
 const { store, parseIntoStore, qnameToIri } = useRdfStore();
 
 const props = defineProps<{
@@ -34,9 +32,10 @@ watch(() => props.defaultSelected, (newValue, oldValue) => {
     }
 });
 
-onMounted(() => {
-    doRequest(`${apiBaseUrl}/v/vocab`, () => {
-        parseIntoStore(data.value);
+onMounted(async () => {
+    const { data } = await apiGetRequest("/v/vocab");
+    if (data && !error.value) {
+        parseIntoStore(data);
 
         store.value.forSubjects(member => {
             let option: VocabOption = {
@@ -50,7 +49,7 @@ onMounted(() => {
             }, member, null, null, null);
             options.value.push(option);
         }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:ConceptScheme")), null);
-    });
+    }
 });
 </script>
 

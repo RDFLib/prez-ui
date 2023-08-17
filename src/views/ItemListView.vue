@@ -4,8 +4,8 @@ import { useRoute } from "vue-router";
 import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
-import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type ListItem, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
+import { useApiRequest } from "@/composables/api";
+import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import ItemList from "@/components/ItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
@@ -22,8 +22,8 @@ const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const defaultPerPage = inject(perPageConfigKey) as number;
 const route = useRoute();
 const ui = useUiStore();
+const { loading, error, apiGetRequest } = useApiRequest();
 const { store, parseIntoStore, qnameToIri } = useRdfStore();
-const { data, profiles, loading, error, doRequest } = useGetRequest();
 
 const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
 const DEFAULT_DESC_PREDICATES = [qnameToIri("dcterms:description")];
@@ -173,7 +173,7 @@ function getBreadcrumbs(): Breadcrumb[] {
 function getProperties() {
     // find subject & handle top-level vs feature collections & features
     let nodeList: (Quad_Subject | Quad_Object)[] = [];
-    const countQuad = store.value.getQuads(null, namedNode(qnameToIri("prez:count")), null, null)[0];
+    const countQuad = store.value.getQuads(null, namedNode(qnameToIri("prez:count")), null, null)[0]; // isAltView breaks here - prez:count doesn't exist
     count.value = parseInt(countQuad.object.value);
     if (TOP_LEVEL_TYPES.includes(countQuad.subject.value)) {
         nodeList = store.value.getSubjects(namedNode(qnameToIri("a")), countQuad.subject, null);
@@ -294,40 +294,41 @@ onBeforeMount(() => {
     }
 });
 
-onMounted(() => {
+onMounted(async () => {
     loading.value = true;
 
     let fullPath = Object.keys(route.query).length > 0 ? (route.query.per_page ? route.fullPath : route.fullPath + `&per_page=${perPage.value}`) : route.path + `?per_page=${perPage.value}`;
 
-    ensureProfiles().then(() => {
-        doRequest(`${apiBaseUrl}${fullPath}`, () => {
-            defaultProfile.value = ui.profiles[profiles.value.find(p => p.default)!.uri];
+    await ensureProfiles(); // wait for profiles to be set in Pinia
+
+    const { data, profiles } = await apiGetRequest(fullPath);
+    if (data && profiles.length > 0 && !error.value) {
+        defaultProfile.value = ui.profiles[profiles.find(p => p.default)!.uri];
             
-            // if specify mediatype, or profile is not default or alt, redirect to API
-            if ((route.query && route.query._profile) &&
-                (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
-                    window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
-            }
+        // if specify mediatype, or profile is not default or alt, redirect to API
+        if ((route.query && route.query._profile) &&
+            (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
+                window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
+        }
 
-            // disable right nav if AltView
-            if (isAltView.value) {
-                ui.rightNavConfig = { enabled: false };
-            } else {
-                ui.rightNavConfig = { enabled: true, profiles: profiles.value, currentUrl: route.path };
-            }
+        // disable right nav if AltView
+        ui.rightNavConfig = {
+            enabled: !isAltView.value,
+            profiles: profiles,
+            currentUrl: route.path
+        };
 
-            parseIntoStore(data.value);
-            getProperties();
+        parseIntoStore(data);
+        getProperties();
 
-            document.title = `${itemType.value.label} | Prez`;
-            ui.breadcrumbs = getBreadcrumbs();
-        });
-    });
+        document.title = `${itemType.value.label} | Prez`;
+        ui.breadcrumbs = getBreadcrumbs();
+    }
 });
 </script>
 
 <template>
-    <ProfilesTable v-if="isAltView" :profiles="profiles" :path="route.path" />
+    <ProfilesTable v-if="isAltView" />
     <template v-else>
         <h1 class="page-title">{{ itemType.label }}</h1>
         <p>A list of <a :href="itemType.uri" target="_blank" rel="noopener noreferrer">{{ itemType.label }}.</a></p>
