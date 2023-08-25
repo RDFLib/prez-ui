@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, inject, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
-import { BlankNode, DataFactory, Quad, Store, Literal } from "n3";
+import { BlankNode, DataFactory, Quad, Store, Literal, type Quad_Object } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useGetRequest } from "@/composables/api";
@@ -182,7 +182,7 @@ function getProperties() {
         }
 
         if (!isAltView.value) {
-            const annoQuad = createAnnoQuad(q, store.value);
+            const annoQuad = createAnnoQuad(q, store.value, labelPredicates);
             properties.value.push(annoQuad);
 
             let recursionCounter = 0;
@@ -513,8 +513,8 @@ function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link: stri
     });
 }
 
-function createAnnoQuad(q: Quad, store: Store): AnnotatedQuad {
-    return {
+function createAnnoQuad(q: Quad, store: Store, labelPredicates: string[]): AnnotatedQuad {
+    const annoQuad = {
         subject: q.subject,
         predicate: {
             termType: q.predicate.termType,
@@ -536,13 +536,24 @@ function createAnnoQuad(q: Quad, store: Store): AnnotatedQuad {
         equals: q.equals,
         toJSON: q.toJSON
     };
+
+    for (const labelPred of labelPredicates) {
+        const quads = store.getQuads(q.object, namedNode(labelPred), null, null)
+        if (quads.length > 0) {
+            for (const quad of quads) {
+                annoQuad.object.annotations.push(new Quad(quad.subject, namedNode(qnameToIri("rdfs:label")), quad.object))
+            }
+        }
+    }
+
+    return annoQuad
 }
 
 function findBlankNodes(q: Quad, store: Store, recursionCounter: number) {
     if (q.object instanceof BlankNode) {
         recursionCounter++;
         store.forEach(q1 => {
-            const annoQuad1 = createAnnoQuad(q1, store);
+            const annoQuad1 = createAnnoQuad(q1, store, []);
             blankNodes.value.push(annoQuad1);
             if (recursionCounter < RECURSION_LIMIT) {
                 findBlankNodes(q1, store, recursionCounter);
