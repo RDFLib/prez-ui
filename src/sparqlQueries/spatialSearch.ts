@@ -19,41 +19,45 @@ export function spatialSearchQuery(
         shape = `POLYGON ((${coords.map(coord => `${coord[0]} ${coord[1]}`).join(', ')}))`;
     }
 
+    let spatialFilter = "";
+    
+    switch(areaType) {
+        case AreaTypes.Contains:
+            spatialFilter = `FILTER (geof:sfContains("${shape}"^^geo:wktLiteral, ?wkt))`;
+            break;
+        case AreaTypes.Within:
+            spatialFilter = `FILTER (geof:sfWithin("${shape}"^^geo:wktLiteral, ?wkt))`;
+            break;
+        case AreaTypes.Nearby:
+            spatialFilter = `FILTER (spatialF:nearby("${shape}"^^geo:wktLiteral, ?wkt, ${radius}, unit:kilometre))`;
+            break;
+        case AreaTypes.Overlaps:
+            spatialFilter = `FILTER (geof:sfOverlaps("${shape}"^^geo:wktLiteral, ?wkt))`;
+            break;
+        default:
+            spatialFilter = '';
+    }
+
     return `PREFIX geo: <http://www.opengis.net/ont/geosparql#>
     PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX spatialF: <http://jena.apache.org/function/spatial#>
     PREFIX unit: <http://www.opengis.net/def/uom/OGC/1.0/>
-    SELECT ?f ?wkt ?fc ?fc_label ?label ?desc ?type ?type_label
+    SELECT ?f_uri ?wkt ?fc ?fc_label ?f_label
     WHERE {
         VALUES ?fc {${featureCollections.map(fc => `<${fc}>`).join(' ')}}
-        ?fc rdfs:member ?f .
-        ?f a ?type ;
-            geo:hasGeometry/geo:asWKT ?wkt .
+        ?fc rdfs:member ?f_uri .
+        ?f_uri geo:hasGeometry/geo:asWKT ?wkt .
 
         OPTIONAL {
-            ?f <${config.props.fLabel}> ?label .
+            ?f_uri <${config.props.fLabel}> ?f_label .
         }
 
         OPTIONAL {
             ?fc <${config.props.fcLabel}> ?fc_label .
         }
-    
-        OPTIONAL {
-            ?f sdo:description ?desc . # config for desc predicate?
-        }
 
-        OPTIONAL {
-            ?type rdfs:label ?type_label .
-        }
-
-        ${() => {switch(areaType) {
-            case AreaTypes.Contains: return `FILTER (geof:sfContains("${shape}"^^geo:wktLiteral, ?wkt))`;
-            case AreaTypes.Within: return `FILTER (geof:sfWithin("${shape}"^^geo:wktLiteral, ?wkt))`;
-            case AreaTypes.Nearby: return `FILTER (spatialF:nearby("${shape}"^^geo:wktLiteral, ?wkt, ${radius}, unit:kilometre))`;
-            case AreaTypes.Overlaps: return `FILTER (geof:sfOverlaps("${shape}"^^geo:wktLiteral, ?wkt))`;
-            default:
-                return '';
-        }}}
+        ${spatialFilter}
     }
     LIMIT ${limit}`;
 };

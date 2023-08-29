@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed, inject, onMounted, watch } from "vue";
 import { DataFactory } from "n3";
-import { mapConfigKey, type MapConfig, type ProfileHeader } from "@/types";
+import { apiBaseUrlConfigKey, mapConfigKey, type MapConfig, type ProfileHeader } from "@/types";
 import { useUiStore } from "@/stores/ui";
 import { useApiRequest, useConcurrentApiRequests, useSparqlRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
@@ -22,6 +22,16 @@ type Option = {
     iri: string;
 };
 
+type SparqlBinding = {
+    [key: string]: {
+        type: string;
+        datatype?: string;
+        value: string;
+        "xml:lang"?: string;
+    }
+};
+
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const mapConfig = inject(mapConfigKey) as MapConfig;
 
 const ui = useUiStore();
@@ -48,8 +58,15 @@ const spatialSelectionType = ref<AreaTypes>(AreaTypes.Nearby);
 const showQuery = ref(false);
 const limit = ref(10);
 const radius = ref(5);
-const results = ref([]);
+const results = ref<{
+    uri: string;
+    link: string;
+    wkt: string;
+    fcLabel: string;
+    label: string;
+}[]>([]);
 const datasetCollapse = ref<{[key: string]: boolean}>({});
+const searchMap = ref<typeof MapClient | null>(null);
 
 const allDatasetsCollapsed = computed(() => {
     return Object.values(datasetCollapse.value).every(isCollapsed => isCollapsed);
@@ -227,8 +244,57 @@ async function getDatasets() {
 }
 
 async function doSearch() {
-    
+    if (shape.value.coords.length > 0) {
+        const searchData = await searchSparqlGetRequest(`${apiBaseUrl}/sparql`, query.value);
+        if (searchData && !searchError.value) {
+            results.value = (searchData.results.bindings as SparqlBinding[]).map(result => {
+                return {
+                    uri: result.f_uri.value,
+                    link: `/object?uri=${encodeURIComponent(result.f_uri.value)}`,
+                    wkt: result.wkt.value,
+                    fcLabel: result.fc_label ? result.fc_label.value : "",
+                    label: result.f_label ? result.f_label.value : ""
+                }
+            });
+        }
+    }
 }
+
+watch(selectedDatasets, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+}, { deep: true });
+
+watch(selectedFeatureCollections, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+}, { deep: true });
+
+watch(limit, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+});
+
+watch(radius, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+});
+
+watch(shape, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+}, { deep: true });
+
+watch(spatialSelectionType, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+});
 
 onMounted(async () => {
     await getDatasets();
@@ -310,7 +376,7 @@ onMounted(async () => {
             </div>
             <div class="search-map">
                 <MapClient
-                    ref="searchMapRef"
+                    ref="searchMap"
                     :geo-w-k-t="results"
                     :drawing-modes="['MARKER', 'POLYGON', 'RECTANGLE']"
                     @selectionUpdated="handleMapSelectionChange"
@@ -331,7 +397,7 @@ onMounted(async () => {
                 <tbody>
                     <template v-for="result in results">
                         <tr>
-                            <td><a :href="result.link">{{ result.label }}</a></td>
+                            <td><a :href="result.link">{{ result.label || result.uri }}</a></td>
                             <td>{{ result.fcLabel }}</td>
                         </tr>
                     </template>
