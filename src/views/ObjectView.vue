@@ -15,7 +15,7 @@ const { namedNode } = DataFactory;
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
-const { store, parseIntoStore, qname } = useRdfStore();
+const { store, parseIntoStore, qnameToIri } = useRdfStore();
 const { data, loading, error, doRequest } = useGetRequest();
 
 const links = ref<string[]>([]);
@@ -29,7 +29,7 @@ onMounted(() => {
             const subject = namedNode(route.query.uri as string);
 
             store.value.forEach(q => {
-                if (q.predicate.value === qname("prez:link")) {
+                if (q.predicate.value === qnameToIri("prez:link")) {
                     links.value.push(q.object.value);
                 }
             }, subject, null, null, null);

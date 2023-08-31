@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { nextTick, onMounted, ref, inject, computed, watch, toRaw } from "vue";
+import { nextTick, onMounted, ref, inject, watch, toRaw } from "vue";
 import Yasqe from "@triply/yasqe";
 import Yasr from "@triply/yasr";
 import { useUiStore } from "@/stores/ui";
 import sparqlExamples from "@/util/sparqlExamples";
+import { copyToClipboard } from "@/util/helpers";
 import { apiBaseUrlConfigKey } from "@/types";
 
 const graphFormats = [
@@ -53,41 +54,16 @@ const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 
 const yasqe = ref<Yasqe | null>(null);
 const yasr = ref<Yasr | null>(null);
-const selectedEndpoint = ref("all");
 const queryType = ref<string | null>(null);
 const graphFormat = ref("text/turtle");
 const selectFormat = ref("application/sparql-results+json");
 const queryOptionsElement = ref<HTMLElement | null>(null);
 
-const sparqlEndpoint = computed(() => {
-    if (selectedEndpoint.value === "catprez") {
-        return apiBaseUrl + "/c/sparql";
-    } else if (selectedEndpoint.value === "spaceprez") {
-        return apiBaseUrl + "/s/sparql";
-    } else if (selectedEndpoint.value === "vocprez") {
-        return apiBaseUrl + "/v/sparql";
-    } else {
-        return apiBaseUrl + "/sparql";
-    }
-});
-
-watch(sparqlEndpoint, (newValue) => {
-    if (yasqe.value) {
-        yasqe.value.options.requestConfig.endpoint =  newValue;
-    }
-    localStorage.setItem("prez_sparql_options", JSON.stringify({
-        "selectedEndpoint": selectedEndpoint.value,
-        "graphFormat": graphFormat.value,
-        "selectFormat": selectFormat.value,
-    }));
-});
-
 watch(graphFormat, (newValue) => {
     if (yasqe.value) {
         yasqe.value.options.requestConfig.acceptHeaderGraph =  newValue;
     }
-    localStorage.setItem("prez_sparql_options", JSON.stringify({
-        "selectedEndpoint": selectedEndpoint.value,
+    sessionStorage.setItem("prez_sparql_options", JSON.stringify({
         "graphFormat": graphFormat.value,
         "selectFormat": selectFormat.value,
     }));
@@ -97,8 +73,7 @@ watch(selectFormat, (newValue) => {
     if (yasqe.value) {
         yasqe.value.options.requestConfig.acceptHeaderSelect =  newValue;
     }
-    localStorage.setItem("prez_sparql_options", JSON.stringify({
-        "selectedEndpoint": selectedEndpoint.value,
+    sessionStorage.setItem("prez_sparql_options", JSON.stringify({
         "graphFormat": graphFormat.value,
         "selectFormat": selectFormat.value,
     }));
@@ -110,16 +85,14 @@ onMounted(() => {
     ui.pageHeading = { name: "Prez", url: "/" };
     ui.breadcrumbs = [{ name: "SPARQL", url: "/sparql" }];
 
-    // persist options in localStorage
-    const sparqlOptions = localStorage.getItem("prez_sparql_options");
+    // persist options in sessionStorage
+    const sparqlOptions = sessionStorage.getItem("prez_sparql_options");
     if (sparqlOptions) {
         const sparqlOptionsParsed = JSON.parse(sparqlOptions);
-        selectedEndpoint.value = sparqlOptionsParsed.selectedEndpoint;
         graphFormat.value = sparqlOptionsParsed.graphFormat;
         selectFormat.value = sparqlOptionsParsed.selectFormat;
     } else {
-        localStorage.setItem("prez_sparql_options", JSON.stringify({
-            "selectedEndpoint": selectedEndpoint.value,
+        sessionStorage.setItem("prez_sparql_options", JSON.stringify({
             "graphFormat": graphFormat.value,
             "selectFormat": selectFormat.value,
         }));
@@ -130,7 +103,7 @@ onMounted(() => {
             showQueryButton: true,
             resizeable: false,
             requestConfig: {
-                endpoint: sparqlEndpoint.value,
+                endpoint: `${apiBaseUrl}/sparql`,
                 method: "GET",
                 adjustQueryBeforeRequest: (y) => { // add comment in query for Accept header to address caching issue
                     return `# ${(queryType.value === "SELECT" || queryType.value === "ASK") ? selectFormat.value : graphFormat.value}\n${y.getValue()}`;
@@ -161,25 +134,12 @@ function loadExample(query: string) {
     toRaw(yasqe.value!).setValue(query); // fixes errors when loading example then clicking in editor - proxy issues with setValue() in Vue
     yasqe.value!.saveQuery();
 }
-
-function copy(text: string) {
-    navigator.clipboard.writeText(text.trim());
-}
 </script>
 
 <template>
     <h1 class="page-title">SPARQL Search</h1>
     <p>Perform advanced querying using <a href="https://www.w3.org/TR/sparql11-query/" target="_blank" rel="noopener noreferrer">SPARQL</a>. This page acts both as an interactive querying page as well as an endpoint for clients.</p>
     <div id="query-options" ref="queryOptionsElement">
-        <div class="query-option">
-            <div class="query-option-title">Endpoint</div>
-            <select name="endpoint" id="endpoint" @change="selectedEndpoint = ($event.target as HTMLInputElement).value">
-                <option value="all" :selected="selectedEndpoint === 'all'">All</option>
-                <option value="catprez" :selected="selectedEndpoint === 'catprez'">Data Catalog</option>
-                <option value="spaceprez" :selected="selectedEndpoint === 'spaceprez'">Spatial Data Catalog</option>
-                <option value="vocprez" :selected="selectedEndpoint === 'vocprez'">Vocabularies</option>
-            </select>
-        </div>
         <div v-if="queryType === 'SELECT' || queryType === 'ASK'" class="query-option">
             <div class="query-option-title">Results Format</div>
             <select name="select-format" id="select-format" @change="selectFormat = ($event.target as HTMLInputElement).value">
@@ -218,7 +178,7 @@ function copy(text: string) {
                 <button
                     class="code-btn"
                     title="Copy"
-                    @click="copy(example.query)"
+                    @click="copyToClipboard(example.query)"
                 >
                     <i class="fa-regular fa-copy"></i>
                 </button>

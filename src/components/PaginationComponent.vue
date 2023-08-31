@@ -3,34 +3,34 @@ import { ref, computed, watch } from "vue";
 import { RouterLink } from "vue-router";
 import router from "@/router";
 
-const PER_PAGE = 10;
-
 const props = defineProps<{
     totalCount: number;
-    perPage?: number;
+    perPage: number;
     currentPage: number;
     url: string;
 }>();
 
 const pageDropdown = ref(props.currentPage);
+const perPage = ref(Number(props.perPage));
 
 const totalPages = computed(() => {
-    const pageCount = props.perPage || PER_PAGE;
-    return Math.ceil(props.totalCount / pageCount);
+    return Math.ceil(props.totalCount / perPage.value);
 });
 
 watch(pageDropdown, (newValue, oldValue) => {
     if (newValue !== oldValue) {
-        router.push(`${props.url}?page=${newValue}${props.perPage ? `&per_page=${props.perPage}` : ''}`);
+        router.push(`${props.url}?page=${newValue}&per_page=${perPage.value}`);
     }
 });
+
+// watcher for reloading when selecting per_page when dropdown is added
 </script>
 
 <template>
     <div class="pagination">
         <RouterLink
             v-if="props.currentPage > 2"
-            :to="`${props.url}?page=1${props.perPage ? `&per_page=${props.perPage}` : ''}`"
+            :to="`${props.url}?page=1&per_page=${perPage}`"
             class="btn outline pagination-btn"
         >
             1
@@ -38,7 +38,7 @@ watch(pageDropdown, (newValue, oldValue) => {
         <div v-if="props.currentPage > 3"><i class="fa-regular fa-ellipsis"></i></div>
         <RouterLink
             v-if="props.currentPage > 1"
-            :to="`${props.url}?page=${props.currentPage - 1}${props.perPage ? `&per_page=${props.perPage}` : ''}`"
+            :to="`${props.url}?page=${props.currentPage - 1}&per_page=${perPage}`"
             class="btn outline pagination-btn"
         >
             {{ props.currentPage - 1 }}
@@ -48,7 +48,7 @@ watch(pageDropdown, (newValue, oldValue) => {
         </select>
         <RouterLink
             v-if="props.currentPage < totalPages"
-            :to="`${props.url}?page=${props.currentPage + 1}${props.perPage ? `&per_page=${props.perPage}` : ''}`"
+            :to="`${props.url}?page=${props.currentPage + 1}&per_page=${perPage}`"
             class="btn outline pagination-btn"
         >
             {{ props.currentPage + 1 }}
@@ -56,7 +56,7 @@ watch(pageDropdown, (newValue, oldValue) => {
         <div v-if="props.currentPage < totalPages - 2"><i class="fa-regular fa-ellipsis"></i></div>
         <RouterLink
             v-if="props.currentPage < totalPages - 1"
-            :to="`${props.url}?page=${totalPages}${props.perPage ? `&per_page=${props.perPage}` : ''}`"
+            :to="`${props.url}?page=${totalPages}&per_page=${perPage}`"
             class="btn outline pagination-btn"
         >
             {{ totalPages }}

@@ -24,9 +24,9 @@ const ui = useUiStore();
 
 const { data, profiles, loading, error, doRequest } = useGetRequest();
 const { data: profData, profiles: profProfiles, loading: profLoading, error: profError, doRequest: profDoRequest } = useGetRequest();
-const { store, prefixes, parseIntoStore, qname } = useRdfStore();
-const { store: profStore, prefixes: profPrefixes, parseIntoStore: profParseIntoStore, qname: profQname } = useRdfStore();
-const { store: combinedStore, prefixes: combinedPrefixes, parseIntoStore: combinedParseIntoStore, qname: combinedQname } = useRdfStore();
+const { store, prefixes, parseIntoStore, qnameToIri } = useRdfStore();
+const { store: profStore, prefixes: profPrefixes, parseIntoStore: profParseIntoStore, qnameToIri: profQnameToIri } = useRdfStore();
+const { store: combinedStore, prefixes: combinedPrefixes, parseIntoStore: combinedParseIntoStore, qnameToIri: combinedQnameToIri } = useRdfStore();
 
 document.title = ui.pageTitle;
 
@@ -47,8 +47,8 @@ onMounted(() => {
                         token: q.object.value.replace("/profiles/", ""),
                         link: `${apiBaseUrl}${q.object.value}`
                     }
-                }, subject, namedNode(profQname("prez:link")), null, null);
-            }, namedNode(profQname("a")), namedNode(profQname("prof:Profile")), null);
+                }, subject, namedNode(profQnameToIri("prez:link")), null, null);
+            }, namedNode(profQnameToIri("a")), namedNode(profQnameToIri("prof:Profile")), null);
             
             // promise.all request for each profile in parallel
             Promise.all(Object.values(profileUris).map(p => fetch(p.link).then(r => r.text()))).then(values => {
@@ -72,27 +72,27 @@ onMounted(() => {
                         explanationPredicates: []
                     };
                     combinedStore.value.forEach(q => {
-                        if (q.predicate.value === combinedQname("dcterms:title")) {
+                        if (q.predicate.value === combinedQnameToIri("dcterms:title")) {
                             p.title = q.object.value;
-                        } else if (q.predicate.value === combinedQname("dcterms:description")) {
+                        } else if (q.predicate.value === combinedQnameToIri("dcterms:description")) {
                             p.description = q.object.value;
-                        // } else if (q.predicate.value === combinedQname("dcterms:identifier")) {
+                        // } else if (q.predicate.value === combinedQnameToIri("dcterms:identifier")) {
                         //     p.token = q.object.value;
-                        } else if (q.predicate.value === combinedQname("altr-ext:hasResourceFormat")) {
+                        } else if (q.predicate.value === combinedQnameToIri("altr-ext:hasResourceFormat")) {
                             p.mediatypes.push(q.object.value);
-                        } else if (q.predicate.value === combinedQname("altr-ext:hasDefaultResourceFormat")) {
+                        } else if (q.predicate.value === combinedQnameToIri("altr-ext:hasDefaultResourceFormat")) {
                             p.defaultMediatype = q.object.value;
-                        } else if (q.predicate.value === combinedQname("altr-ext:hasLabelPredicate")) {
+                        } else if (q.predicate.value === combinedQnameToIri("altr-ext:hasLabelPredicate")) {
                             p.labelPredicates.push(q.object.value);
-                        } else if (q.predicate.value === combinedQname("altr-ext:hasDescriptionPredicate")) {
+                        } else if (q.predicate.value === combinedQnameToIri("altr-ext:hasDescriptionPredicate")) {
                             p.descriptionPredicates.push(q.object.value);
-                        } else if (q.predicate.value === combinedQname("altr-ext:hasExplanationPredicate")) {
+                        } else if (q.predicate.value === combinedQnameToIri("altr-ext:hasExplanationPredicate")) {
                             p.explanationPredicates.push(q.object.value);
                         }
                     }, subject, null, null, null);
                     p.mediatypes.sort((a, b) => Number(b === p.defaultMediatype) - Number(a === p.defaultMediatype));
                     profs.push(p);
-                }, namedNode(combinedQname("a")), namedNode(combinedQname("prof:Profile")), null);
+                }, namedNode(combinedQnameToIri("a")), namedNode(combinedQnameToIri("prof:Profile")), null);
 
                 ui.profiles = profs.reduce<{[namespace: string]: Profile}>((obj, prof) => (obj[prof.namespace] = prof, obj), {}); // {uri: {...}, ...}
             });
@@ -104,7 +104,7 @@ onMounted(() => {
         parseIntoStore(data.value);
 
         // get API version
-        const version = store.value.getObjects(null, qname("prez:version"), null)[0];
+        const version = store.value.getObjects(null, qnameToIri("prez:version"), null)[0];
         ui.apiVersion = version.value;
 
         // get search methods per flavour
@@ -113,14 +113,14 @@ onMounted(() => {
             let flavour = "";
             let methods: string[] = [];
             store.value.forEach(q => {
-                if (q.predicate.value === qname("a")) {
-                    flavour = q.object.value.split(`${qname('prez:')}`)[1];
-                } else if (q.predicate.value === qname("prez:availableSearchMethod")) {
-                    methods.push(q.object.value.split(`${qname('prez:')}`)[1]);
+                if (q.predicate.value === qnameToIri("a")) {
+                    flavour = q.object.value.split(`${qnameToIri('prez:')}`)[1];
+                } else if (q.predicate.value === qnameToIri("prez:availableSearchMethod")) {
+                    methods.push(q.object.value.split(`${qnameToIri('prez:')}`)[1]);
                 }
             }, object, null, null, null);
             searchMethods[flavour] = methods;
-        }, null, qname("prez:enabledPrezFlavour"), null);
+        }, null, qnameToIri("prez:enabledPrezFlavour"), null);
         ui.searchMethods = searchMethods;
     });
 });

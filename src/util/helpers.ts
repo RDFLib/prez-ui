@@ -20,3 +20,16 @@ export function ensureProfiles() {
         })();
     });
 };
+
+/**
+ * Copies text to the clipboard
+ * 
+ * @param text The text to copy to the clipboard
+ */
+export function copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text.trim());
+}
+
+export function titleCase(s: string): string {
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}

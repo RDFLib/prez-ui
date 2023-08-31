@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import { BlankNode, Literal, NamedNode } from "n3";
-import type { AnnotatedPredicate, AnnotatedQuad, ListItem, RowPred } from "@/types";
+import type { AnnotatedObject, AnnotatedPredicate, AnnotatedQuad, ListItem, RowPred } from "@/types";
+import { copyToClipboard } from "@/util/helpers";
 import PropRow from "@/components/proptable/PropRow.vue";
+import ToolTip from "@/components/ToolTip.vue";
 
 const props = defineProps<{
     item: ListItem;
@@ -14,17 +15,17 @@ const props = defineProps<{
 
 const rows = ref<RowPred[]>([]);
 
-function getNamedNodeQname(n: NamedNode | AnnotatedPredicate): string {
+function iriToQname(iri: string): string { // doesn't require a store, uses prefixes from props
     let qname = "";
     Object.entries(props.prefixes).forEach(([prefix, prefixIri]) => {
-        if (n.value.startsWith(prefixIri)) {
-            qname = prefix + ":" + n.value.split(prefixIri)[1];
+        if (iri.startsWith(prefixIri)) {
+            qname = prefix + ":" + iri.split(prefixIri)[1];
         }
     });
     return qname;
 }
 
-function qname(s: string): string {
+function qnameToIri(s: string): string { // doesn't require a store, uses prefixes from props
     if (s === "a") { // special handling for "a" as rdf:type
         return props.prefixes.rdf + "type";
     } else {
@@ -33,8 +34,8 @@ function qname(s: string): string {
     }
 }
 
-function getAnnotation(predicate: AnnotatedPredicate, annotationPred: string): string | undefined {
-    return predicate.annotations.find(annotation => annotation.predicate.value === qname(annotationPred))?.object.value;
+function getAnnotation(annoNode: AnnotatedPredicate | AnnotatedObject, annotationPred: string): string | undefined {
+    return annoNode.annotations.find(annotation => annotation.predicate.value === qnameToIri(annotationPred))?.object.value;
 }
 
 function copyIri() {
@@ -47,7 +48,7 @@ function buildRows(properties: AnnotatedQuad[]): RowPred[] {
         propRows[p.predicate.value] ??= {
             iri: p.predicate.value,
             objs: [],
-            qname: getNamedNodeQname(p.predicate),
+            qname: iriToQname(p.predicate.value),
             label: getAnnotation(p.predicate, "rdfs:label"),
             description: getAnnotation(p.predicate, "dcterms:description"),
             explanation: getAnnotation(p.predicate, "dcterms:provenance"),
@@ -55,14 +56,16 @@ function buildRows(properties: AnnotatedQuad[]): RowPred[] {
         };
 
         propRows[p.predicate.value].objs.push({
+            predIri: p.predicate.value,
             value: p.object.value,
-            qname: p.object instanceof NamedNode ? getNamedNodeQname(p.object) : undefined,
-            datatype: p.object instanceof Literal ? { value: p.object.datatype.value, qname: getNamedNodeQname(p.object.datatype) } : undefined,
-            language: p.object instanceof Literal ? p.object.language : undefined,
-            description: undefined,
+            qname: p.object.termType === "NamedNode" ? iriToQname(p.object.value) : undefined,
+            datatype: p.object.termType === "Literal" ? { value: p.object.datatype!.value, qname: iriToQname(p.object.datatype!.value) } : undefined,
+            language: p.object.termType === "Literal" ? p.object.language : undefined,
             termType: p.object.termType,
-            label: undefined,
-            rows: p.object instanceof BlankNode ? buildRows(props.blankNodes.filter(p1 => p1.subject.id === p.object.id)) : []
+            label: getAnnotation(p.object, "rdfs:label"),
+            description: getAnnotation(p.object, "dcterms:description"),
+            explanation: getAnnotation(p.object, "dcterms:provenance"),
+            rows: p.object.termType === "BlankNode" ? buildRows(props.blankNodes.filter(p1 => p1.subject.id === p.object.id)) : []
         });
     });
     return Object.values(propRows).sort((a, b) => a.order - b.order);
@@ -80,11 +83,23 @@ onMounted(() => {
         <small class="iri">
             <span class="badge">IRI</span>
             <a :href="props.item.iri" target="_blank" rel="noopener noreferrer">{{ props.item.iri }}</a>
-            <button class="btn outline sm" title="Copy IRI" @click="copyIri()"><i class="fa-regular fa-clipboard"></i></button>
+            <button class="btn outline sm" title="Copy IRI" @click="copyToClipboard(props.item.iri)"><i class="fa-regular fa-clipboard"></i></button>
         </small>
         <small class="type">
             <span class="badge">Type</span>
-            <a :href="props.item.type" target="_blank" rel="noopener noreferrer">{{ props.item.type }}</a>
+            <div class="types">
+                <template v-for="(typeObj, index) in props.item.types">
+                    <component  :is="!!typeObj.description ? ToolTip : 'slot'">
+                        <a :href="typeObj.value" target="_blank" rel="noopener noreferrer">
+                            <template v-if="!!typeObj.label">{{ typeObj.label }}</template>
+                            <template v-else-if="!!typeObj.qname">{{ typeObj.qname }}</template>
+                            <template v-else>{{ typeObj.value }}</template>
+                        </a>
+                        <template #text>{{ typeObj.description }}</template>
+                    </component>
+                    <span v-if="index < props.item.types!.length - 1">, </span>
+                </template>
+            </div>
         </small>
     </h1>
     <slot name="map"></slot>
