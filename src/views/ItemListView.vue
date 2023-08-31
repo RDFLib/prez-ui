@@ -16,7 +16,7 @@ import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import { ensureProfiles } from "@/util/helpers";
 
-const { namedNode } = DataFactory;
+const { namedNode, literal } = DataFactory;
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
@@ -115,13 +115,43 @@ function configByType(type: string) {
 }
 
 function getBreadcrumbs(): Breadcrumb[] {
+    // get parents info
+    let parents: {
+        id: string;
+        title?: string;
+        uri: string;
+    }[] = [];
+
+    const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+    const pathSegments = route.path.split("/").slice(1);
+
+    pathSegments.forEach((id, index) => {
+        const quads = store.value.getQuads(null, namedNode(qname("dcterms:identifier")), literal(id, namedNode(qname("prez:identifier"))), null);
+        if (quads.length > 0) {
+            let parent: {
+                id: string;
+                title?: string;
+                uri: string;
+            } = {
+                id: id,
+                uri: quads[0].subject.value
+            };
+            store.value.forEach(q => {
+                if (labelPredicates.includes(q.predicate.value)) {
+                    parent.title = q.object.value;
+                }
+            }, quads[0].subject, null, null, null);
+            parents.push(parent);
+        }
+    });
+
     // build out the breadcrumbs using the URL path
     let crumbs: Breadcrumb[] = [];
     
     if (flavour.value) {
         crumbs.push({ name: getPrezSystemLabel(flavour.value) + " Home", url: `/${flavour.value[0].toLowerCase()}`});
     }
-    const pathSegments = route.path.split("/").slice(1);
+    
     let skipSegment = false;
     pathSegments.forEach((pathSegment, index) => {
         if (skipSegment) { // skip segment when an ID appears
@@ -135,14 +165,14 @@ function getBreadcrumbs(): Breadcrumb[] {
             case "datasets":
                 crumbs.push({ name: "Datasets", url: "/s/datasets" });
                 if (index + 1 !== pathSegments.length) {
-                    crumbs.push({ name: "Dataset", url: `/s/datasets/${route.params.datasetId}` });
+                    crumbs.push({ name: parents[0].title || parents[0].uri, url: `/s/datasets/${route.params.datasetId}` });
                     skipSegment = true;
                 }
                 break;
             case "collections":
                 crumbs.push({ name: "Feature Collections", url: `/s/datasets/${route.params.datasetId}/collections` });
                 if (index + 1 !== pathSegments.length) {
-                    crumbs.push({ name: "Feature Collection", url: `/s/datasets/${route.params.datasetId}/collections/${route.params.featureCollectionId}` });
+                    crumbs.push({ name: parents[1].title || parents[1].uri, url: `/s/datasets/${route.params.datasetId}/collections/${route.params.featureCollectionId}` });
                     skipSegment = true;
                 }
                 break;
