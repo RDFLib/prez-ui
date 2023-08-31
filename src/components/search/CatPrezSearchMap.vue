@@ -172,7 +172,6 @@ async function getThemes() {
  * Performs search via a SPARQL query
  */
 async function doSearch() {
-    console.log("performing search...")
     const searchData = await searchSparqlGetRequest(`${apiBaseUrl}/sparql`, query.value);
     if (searchData && !searchError.value) {
         results.value = (searchData.results.bindings as SparqlBinding[]).map(result => {
@@ -317,7 +316,6 @@ onMounted(async () => {
             </div>
             <div class="search-map">
                 <MapClient
-                    ref="searchMapRef"
                     :drawing-modes="['RECTANGLE']"
                     @selectionUpdated="handleMapSelectionChange"
                 />

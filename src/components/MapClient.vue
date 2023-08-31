@@ -6,7 +6,7 @@ import { wktToGeoJSON } from "@terraformer/wkt"
 import { mapConfigKey, type MapConfig } from "@/types";
 import { convertConfigTypes } from '@/util/mapSearchHelper'
 import type { MapOptionsCenter } from '@/types'
-import type { WKTResult } from '@/stores/mapSearchStore.d';
+import type { WKTResult } from "@/components/MapClient.d";
 import { ShapeTypes, type DrawingModes } from "@/components/MapClient.d";
 
 

@@ -5,7 +5,7 @@ import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useApiRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
-import type { WKTResult } from "@/stores/mapSearchStore.d";
+import type { WKTResult } from "@/components/MapClient.d";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";

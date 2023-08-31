@@ -256,6 +256,9 @@ async function doSearch() {
                     label: result.f_label ? result.f_label.value : ""
                 }
             });
+            if (searchMap.value) {
+                searchMap.value.drawShape(results.value);
+            }
         }
     }
 }
