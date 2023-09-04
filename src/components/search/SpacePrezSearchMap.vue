@@ -5,7 +5,7 @@ import { apiBaseUrlConfigKey, mapConfigKey, type MapConfig, type ProfileHeader }
 import { useUiStore } from "@/stores/ui";
 import { useApiRequest, useConcurrentApiRequests, useSparqlRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
-import { copyToClipboard } from "@/util/helpers";
+import { copyToClipboard, sortByTitle } from "@/util/helpers";
 import { AreaTypes, ShapeTypes, type Coords } from "@/components/MapClient.d";
 import { enumToOptions } from "@/util/mapSearchHelper";
 import MapClient from "@/components/MapClient.vue";
@@ -215,31 +215,11 @@ async function getDatasets() {
             }, subject, namedNode(qnameToIri("rdfs:member")), null);
 
             // sort by title first, then by IRI if no title
-            datasetOptions[subject.value].featureCollections.sort((a, b) => {
-                if (a.title && b.title) {
-                    return a.title.localeCompare(b.title);
-                } else if (a.title) {
-                    return -1;
-                } else if (b.title) {
-                    return 1;
-                } else {
-                    return a.iri.localeCompare(b.iri);
-                }
-            });
+            datasetOptions[subject.value].featureCollections.sort(sortByTitle);
         }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Dataset")), null);
 
         // sort by title first, then by IRI if no title
-        datasets.value = Object.values(datasetOptions).sort((a, b) => {
-            if (a.title && b.title) {
-                return a.title.localeCompare(b.title);
-            } else if (a.title) {
-                return -1;
-            } else if (b.title) {
-                return 1;
-            } else {
-                return a.iri.localeCompare(b.iri);
-            }
-        });
+        datasets.value = Object.values(datasetOptions).sort(sortByTitle);
     }
 }
 
@@ -343,7 +323,7 @@ onMounted(async () => {
                                 <template v-else>Collapse all <i class="fa-regular fa-chevron-up"></i></template>
                             </button>
                         </div>
-                        <LoadingMessage v-if="datasetLoading" />
+                        <LoadingMessage v-if="datasetLoading || fcLoading" />
                         <ErrorMessage v-else-if="datasetError" :message="`Unable to load datasets: ${datasetError}`" />
                         <ul v-else class="dataset-options">
                             <li v-for="(dataset, dIndex) in datasets" class="dataset-option">

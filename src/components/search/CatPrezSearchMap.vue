@@ -8,7 +8,7 @@ import { useApiRequest, useSparqlRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 import { catalogSpatialSearch, getThemesQuery } from "@/sparqlQueries/catalogSearch";
 import { shapeQueryPart } from "@/util/mapSearchHelper"
-import { copyToClipboard } from "@/util/helpers";
+import { copyToClipboard, sortByTitle } from "@/util/helpers";
 import MapClient from "@/components/MapClient.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
@@ -137,19 +137,7 @@ async function getCatalogs() {
             }
         }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Catalog")), null);
 
-        // sort by title first, then by IRI if no title
-        catalogOptions.sort((a, b) => {
-            if (a.title && b.title) {
-                return a.title.localeCompare(b.title);
-            } else if (a.title) {
-                return -1;
-            } else if (b.title) {
-                return 1;
-            } else {
-                return a.iri.localeCompare(b.iri);
-            }
-        });
-        catalogs.value = catalogOptions;
+        catalogs.value = catalogOptions.sort(sortByTitle);
     }
 }
 
