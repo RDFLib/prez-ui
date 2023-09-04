@@ -45,16 +45,18 @@ export function spatialSearchQuery(
     PREFIX unit: <http://www.opengis.net/def/uom/OGC/1.0/>
     SELECT ?f_uri ?wkt ?fc ?fc_label ?f_label
     WHERE {
-        VALUES ?fc {${featureCollections.map(fc => `<${fc}>`).join(' ')}}
-        ?fc rdfs:member ?f_uri .
         ?f_uri geo:hasGeometry/geo:asWKT ?wkt .
+        
+        ${featureCollections.map(fc => {
+            return `{
+                <${fc}> rdfs:member ?f_uri ;
+                    <${config.props.fcLabel}> ?fc_label .
+                BIND (<${fc}> AS ?fc)
+            }`;
+        }).join(' UNION ')}
 
         OPTIONAL {
             ?f_uri <${config.props.fLabel}> ?f_label .
-        }
-
-        OPTIONAL {
-            ?fc <${config.props.fcLabel}> ?fc_label .
         }
 
         ${spatialFilter}
