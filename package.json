@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "dev": "vite",
-        "build": "run-p type-check build-only; shx cp dist/index.html dist/404.html",
+        "build": "run-p type-check build-only && shx cp dist/index.html dist/404.html",
         "preview": "vite preview",
         "test:unit": "vitest --environment jsdom --root src/",
         "build-only": "vite build",

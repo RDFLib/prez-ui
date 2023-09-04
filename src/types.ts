@@ -8,6 +8,7 @@ export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
 export const perPageConfigKey: InjectionKey<number> = Symbol();
 export const conceptPerPageConfigKey: InjectionKey<number> = Symbol();
 export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
+export const enableScoresKey: InjectionKey<boolean> = Symbol();
 export const apiBaseUrlConfigKey: InjectionKey<string> = Symbol();
 
 export interface MapConfig {
@@ -136,6 +137,7 @@ export interface AnnotatedQuad extends Omit<Quad, "predicate" | "object"> {
 };
 
 export interface RowObj {
+    predIri: string;
     value: string;
     qname?: string;
     datatype?: {
@@ -168,6 +170,7 @@ export interface Concept {
     children: Concept[];
     narrower?: string[];
     broader?: string;
+    color?: string;
 };
 
 // extending an interface for defineProps in-file causes errors, defined here instead

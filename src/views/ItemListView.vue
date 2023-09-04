@@ -330,7 +330,7 @@ onMounted(async () => {
             <PaginationComponent :url="route.path" :totalCount="count" :currentPage="currentPageNumber" :perPage="perPage" />
         </template>
         <template v-else>No {{ itemType.label }} found.</template>
-        <Teleport v-if="searchEnabled && flavour" to="#right-bar-content">
+        <Teleport v-if="searchEnabled && flavour" to="#search-teleport">
             <AdvancedSearch :flavour="flavour" :query="searchDefaults" />
         </Teleport>
     </template>

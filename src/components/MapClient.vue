@@ -93,7 +93,12 @@ watch(mapRef, googleMap => {
                 features = []
                 results.forEach(result=>{
                     try {
-                        const geoJson = wktToGeoJSON(result.wkt)
+                        // The terraformer wkt parser does not handle CRS values as IRIs.
+                        // The following regex strips out any IRIs in the WKT.
+                        // Note that the regex does not conform to IRIs but simply strips
+                        // out anything that is surrounded by angled brackets.
+                        let wkt = result.wkt.replace(/(<([^>]+)>)/gi, "")
+                        const geoJson = wktToGeoJSON(wkt)
                         const featureGeoJson = {
                             type: 'Feature',
                             geometry: geoJson,
@@ -111,7 +116,7 @@ watch(mapRef, googleMap => {
                                 bounds.extend(latlng);
                             });
                         });
-                        setShape(result.wkt)
+                        setShape(wkt)
                         map.fitBounds(bounds);                
                     } catch (ex) {
                         // can happen if we're unable to parse the result, just consoled out for now

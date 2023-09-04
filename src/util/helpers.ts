@@ -30,6 +30,10 @@ export function copyToClipboard(text: string) {
     navigator.clipboard.writeText(text.trim());
 }
 
+export function titleCase(s: string): string {
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
 /**
  * Sorts an array of objects alphabetically first, and then by IRI if some elements lack a title
  * 

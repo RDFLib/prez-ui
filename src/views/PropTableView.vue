@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import { ref, onMounted, inject, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
-import { BlankNode, DataFactory, Quad, Store, Literal } from "n3";
+import { BlankNode, DataFactory, Quad, Store, Literal, type Quad_Object } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, conceptPerPageConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import type { WKTResult } from "@/components/MapClient.d";
+import { apiBaseUrlConfigKey, conceptPerPageConfigKey, enableScoresKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
@@ -16,11 +16,13 @@ import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import MapClient from "@/components/MapClient.vue";
 import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
-import { ensureProfiles, sortByTitle } from "@/util/helpers";
+import { ensureProfiles, titleCase, sortByTitle } from "@/util/helpers";
+import ScoreWidget from "@/components/scores/ScoreWidget.vue";
 
 const { namedNode } = DataFactory;
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
+const enableScores = inject(enableScoresKey) as boolean;
 const conceptPerPage = inject(conceptPerPageConfigKey) as number;
 const route = useRoute();
 const ui = useUiStore();
@@ -55,7 +57,8 @@ const hiddenPredicates = ref<string[]>([
     qnameToIri("dcterms:identifier"),
     qnameToIri("prez:count"),
     qnameToIri("prez:childrenCount"),
-    qnameToIri("prez:link")
+    qnameToIri("prez:link"),
+    "https://linked.data.gov.au/def/scores/hasScore"
 ]);
 const defaultProfile = ref<Profile | null>(null);
 const childrenConfig = ref({
@@ -65,6 +68,8 @@ const childrenConfig = ref({
     buttonTitle: "",
     buttonLink: ""
 });
+const hasScores = ref(false);
+const scores = ref<{[key: string]: {[key: string]: number}}>({}); // {fair: {f: 0, a: 0, i: 0, r: 0}, ...}
 const hasFewChildren = ref(false); // only for vocab
 
 function configByBaseClass(baseClass: string) {
@@ -170,12 +175,14 @@ function getProperties() {
                     link: `/object?uri=${item.value.iri}`
                 })
             }, q.object, namedNode(qnameToIri("geo:asWKT")), null, null)
+        } else if (q.predicate.value === "https://linked.data.gov.au/def/scores/hasScore" && enableScores && !hasScores.value) {
+            hasScores.value = true;
         } else if (q.predicate.value === qnameToIri("prez:childrenCount")) {
             item.value.childrenCount = Number(q.object.value);
         }
 
         if (!isAltView.value) {
-            const annoQuad = createAnnoQuad(q, store.value);
+            const annoQuad = createAnnoQuad(q, store.value, labelPredicates);
             properties.value.push(annoQuad);
 
             let recursionCounter = 0;
@@ -183,10 +190,40 @@ function getProperties() {
         }
     }, subject, null, null, null);
 
+    if (hasScores.value) {
+        getScores();
+    }
+
     // set the item title after the item title has been set
     geoResults.value.forEach(result => {
         result.label = item.value.title ? item.value.title : item.value.iri
     });
+}
+
+function getScore(scoreName: string, normalised: boolean = false): {[key: string]: number} {
+    const scores: {[key: string]: number} = {};
+
+    store.value.forObjects(o => {
+        store.value.forEach(q => {
+            store.value.forObjects(o2 => {
+                store.value.forEach(q2 => {
+                    const match = q2.predicate.value.match(`https:\/\/linked.data.gov.au\/def\/scores\/${scoreName}([A-Z]){1}Score${normalised ? "Normalised" : ""}`);
+                    if (match) {
+                        scores[match[1].toLowerCase()] = Number(q2.object.value);
+                    }
+                }, o2, null, null, null);
+            }, q.subject, namedNode("http://purl.org/linked-data/cube#observation"), null);
+        }, o, namedNode(qnameToIri("a")), namedNode(`https://linked.data.gov.au/def/scores/${titleCase(scoreName)}Score${normalised ? "Normalised" : ""}`), null);
+    }, namedNode(item.value.iri), namedNode("https://linked.data.gov.au/def/scores/hasScore"), null);
+
+    return scores;
+}
+
+function getScores() {
+    scores.value = {
+        fair: getScore("fair"),
+        care: getScore("care"),
+    };
 }
 
 function getBreadcrumbs(): Breadcrumb[] {
@@ -398,7 +435,8 @@ async function getTopConcepts(page: number = 1) {
                 title: "",
                 link: "",
                 childrenCount: 0,
-                children: []
+                children: [],
+                color: "",
             };
             conceptStore.value.forEach(q => {
                 if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
@@ -407,6 +445,8 @@ async function getTopConcepts(page: number = 1) {
                     c.link = q.object.value;
                 } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
                     c.childrenCount = Number(q.object.value);
+                } else if (q.predicate.value === conceptQnameToIri("sdo:color")) {
+                    c.color = q.object.value;
                 }
             }, object, null, null, null);
             concepts.value.push(c);
@@ -442,7 +482,8 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
                 title: "",
                 link: "",
                 childrenCount: 0,
-                children: []
+                children: [],
+                color: "",
             };
             conceptStore.value.forEach(q => {
                 if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
@@ -451,6 +492,8 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
                     c.link = q.object.value;
                 } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
                     c.childrenCount = Number(q.object.value);
+                } else if (q.predicate.value === conceptQnameToIri("sdo:color")) {
+                    c.color = q.object.value;
                 }
             }, object, null, null, null);
             parent!.children.push(c);
@@ -460,8 +503,8 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
     }
 }
 
-function createAnnoQuad(q: Quad, store: Store): AnnotatedQuad {
-    return {
+function createAnnoQuad(q: Quad, store: Store, labelPredicates: string[]): AnnotatedQuad {
+    const annoQuad = {
         subject: q.subject,
         predicate: {
             termType: q.predicate.termType,
@@ -483,13 +526,24 @@ function createAnnoQuad(q: Quad, store: Store): AnnotatedQuad {
         equals: q.equals,
         toJSON: q.toJSON
     };
+
+    for (const labelPred of labelPredicates) {
+        const quads = store.getQuads(q.object, namedNode(labelPred), null, null)
+        if (quads.length > 0) {
+            for (const quad of quads) {
+                annoQuad.object.annotations.push(new Quad(quad.subject, namedNode(qnameToIri("rdfs:label")), quad.object))
+            }
+        }
+    }
+
+    return annoQuad
 }
 
 function findBlankNodes(q: Quad, store: Store, recursionCounter: number) {
     if (q.object instanceof BlankNode) {
         recursionCounter++;
         store.forEach(q1 => {
-            const annoQuad1 = createAnnoQuad(q1, store);
+            const annoQuad1 = createAnnoQuad(q1, store, []);
             blankNodes.value.push(annoQuad1);
             if (recursionCounter < RECURSION_LIMIT) {
                 findBlankNodes(q1, store, recursionCounter);
@@ -655,8 +709,11 @@ onMounted(async () => {
         </PropTable>
         <LoadingMessage v-else-if="loading" />
         <ErrorMessage v-else-if="error" :message="error" />
-        <Teleport v-if="searchEnabled" to="#right-bar-content">
+        <Teleport v-if="searchEnabled" to="#search-teleport">
             <AdvancedSearch v-if="flavour" :flavour="flavour" :query="searchDefaults" />
+        </Teleport>
+        <Teleport v-if="enableScores && hasScores" to="#score-teleport">
+            <ScoreWidget v-for="([name, score]) in Object.entries(scores)" :name="name" :score="score" />
         </Teleport>
     </template>
 </template>

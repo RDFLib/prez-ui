@@ -56,6 +56,7 @@ function buildRows(properties: AnnotatedQuad[]): RowPred[] {
         };
 
         propRows[p.predicate.value].objs.push({
+            predIri: p.predicate.value,
             value: p.object.value,
             qname: p.object.termType === "NamedNode" ? iriToQname(p.object.value) : undefined,
             datatype: p.object.termType === "Literal" ? { value: p.object.datatype!.value, qname: iriToQname(p.object.datatype!.value) } : undefined,
