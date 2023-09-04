@@ -252,7 +252,7 @@ export function useSparqlRequest() {
         let isGraphQuery = ["CONSTRUCT", "DESCRIBE"].some(e => query.includes(e));
 
         try {
-            const r = await fetch(url, {
+            const r = await fetch(`${url}?query=${encodeURIComponent(query)}`, {
                 method: "GET",
                 headers: {
                     "Accept": isGraphQuery ? "text/turtle" : "application/sparql-results+json"

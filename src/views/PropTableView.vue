@@ -6,6 +6,7 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import { apiBaseUrlConfigKey, conceptPerPageConfigKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
+import type { WKTResult } from "@/components/MapClient.d";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
@@ -13,10 +14,9 @@ import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import MapClient from "@/components/MapClient.vue";
-import type { WKTResult } from "@/stores/mapSearchStore.d";
 import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
-import { ensureProfiles } from "@/util/helpers";
+import { ensureProfiles, sortByTitle } from "@/util/helpers";
 
 const { namedNode } = DataFactory;
 
@@ -320,17 +320,7 @@ function getChildren() {
         }, namedNode(item.value.iri), namedNode(childrenPredicate.value), null);
 
         // sort by title, then by IRI
-        children.value.sort((a, b) => {
-            if (a.title && b.title) {
-                return a.title.localeCompare(b.title);
-            } else if (a.title) {
-                return -1;
-            } else if (b.title) {
-                return 1;
-            } else {
-                return a.iri.localeCompare(b.iri);
-            }
-        });
+        children.value.sort(sortByTitle);
     }
 }
 
@@ -388,11 +378,11 @@ function getAllConcepts() {
 
         if (!!c.broader && c.broader !== "") {
             const parent = conceptArray[indexMap[c.broader]];
-            parent.children = [...(parent.children || []), c].sort((a, b) => a.title.localeCompare(b.title));
+            parent.children = [...(parent.children || []), c].sort(sortByTitle);
             parent.childrenCount = parent.children.length;
         }
     });
-    conceptsList.sort((a, b) => a.title.localeCompare(b.title));
+    conceptsList.sort(sortByTitle);
     concepts.value = conceptsList;
 }
 
@@ -422,7 +412,7 @@ async function getTopConcepts(page: number = 1) {
             concepts.value.push(c);
         }, namedNode(item.value.iri), namedNode(conceptQnameToIri("skos:hasTopConcept")), null);
 
-        concepts.value.sort((a, b) => a.title.localeCompare(b.title));
+        concepts.value.sort(sortByTitle);
     }
 }
 
@@ -466,7 +456,7 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
             parent!.children.push(c);
         }, namedNode(parent!.iri), namedNode(conceptQnameToIri("skos:narrower")), null);
 
-        parent!.children.sort((a, b) => a.title.localeCompare(b.title));
+        parent!.children.sort(sortByTitle);
     }
 }
 

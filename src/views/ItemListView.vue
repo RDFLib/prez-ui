@@ -14,7 +14,7 @@ import PaginationComponent from "@/components/PaginationComponent.vue";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
-import { ensureProfiles } from "@/util/helpers";
+import { ensureProfiles, sortByTitle } from "@/util/helpers";
 
 const { namedNode } = DataFactory;
 
@@ -227,18 +227,7 @@ function getProperties() {
         items.value.push(c);
     });
 
-    // sort by title first, then by IRI if no title
-    items.value.sort((a, b) => {
-        if (a.title && b.title) {
-            return a.title.localeCompare(b.title);
-        } else if (a.title) {
-            return -1;
-        } else if (b.title) {
-            return 1;
-        } else {
-            return a.iri.localeCompare(b.iri);
-        }
-    });
+    items.value.sort(sortByTitle);
 }
 
 function getIRILocalName(iri: string) {

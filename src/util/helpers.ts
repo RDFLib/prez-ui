@@ -29,3 +29,22 @@ export function ensureProfiles() {
 export function copyToClipboard(text: string) {
     navigator.clipboard.writeText(text.trim());
 }
+
+/**
+ * Sorts an array of objects alphabetically first, and then by IRI if some elements lack a title
+ * 
+ * @param a 
+ * @param b 
+ * @returns 
+ */
+export const sortByTitle = <T extends {title?: string; iri: string;}>(a: T, b: T): number => {
+    if (a.title && b.title) {
+        return a.title.localeCompare(b.title);
+    } else if (a.title) {
+        return -1;
+    } else if (b.title) {
+        return 1;
+    } else {
+        return a.iri.localeCompare(b.iri);
+    }
+};
