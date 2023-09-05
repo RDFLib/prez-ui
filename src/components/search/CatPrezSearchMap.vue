@@ -1,127 +1,221 @@
 <script lang="ts" setup>
-import { onMounted, ref, computed } from "vue";
-
-// the searchable map component and related map type definitions
-import MapClient from "@/components/MapClient.vue";
-import { AreaTypes, ShapeTypes, type Coords } from "@/components/MapClient.d";
-
-// the pinia search store and related type definitions to manage the returned catalog tree
-import { refDataStore } from "@/stores/refDataStore";
-import { QUERY_GET_CATALOGS, QUERY_GET_THEMES, QUERY_SEARCH } from "@/stores/catalogQueries"
-import type { RDCatalog, RDSearch, RDTheme } from "@/stores/catalogQueries.d"
+import { onMounted, ref, computed, inject, watch } from "vue";
+import { DataFactory } from "n3";
+import { apiBaseUrlConfigKey } from "@/types";
+import { ShapeTypes, type Coords } from "@/components/MapClient.d";
+import { useUiStore } from "@/stores/ui";
+import { useApiRequest, useSparqlRequest } from "@/composables/api";
+import { useRdfStore } from "@/composables/rdfStore";
+import { catalogSpatialSearch, getThemesQuery } from "@/sparqlQueries/catalogSearch";
 import { shapeQueryPart } from "@/util/mapSearchHelper"
-
-import { copyToClipboard } from "@/util/helpers";
-
+import { copyToClipboard, sortByTitle } from "@/util/helpers";
+import MapClient from "@/components/MapClient.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import BaseModal from "@/components/BaseModal.vue";
 
+const { namedNode } = DataFactory;
+
+type Option = {
+    title?: string;
+    iri: string;
+};
+
+type SparqlBinding = {
+    [key: string]: {
+        type: string;
+        datatype?: string;
+        value: string;
+        "xml:lang"?: string;
+    }
+};
+
+// type SparqlSelectResponse = {
+//     head: {
+//         vars: string[];
+//     };
+//     results: {
+//         bindings: SparqlBinding[];
+//     };
+// };
+
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
+
+const ui = useUiStore();
+const { loading: catalogLoading, error: catalogError, apiGetRequest: catalogApiGetRequest } = useApiRequest();
+const { loading: themesLoading, error: themesError, sparqlGetRequest: themesSparqlGetRequest } = useSparqlRequest();
+const { loading: searchLoading, error: searchError, sparqlGetRequest: searchSparqlGetRequest } = useSparqlRequest();
+const { store, parseIntoStore, qnameToIri } = useRdfStore();
+
+const LIVE_SEARCH = true;
+const DEFAULT_LABEL_PREDICATES = [qnameToIri("dcterms:title")];
 const MAX_DESC_LENGTH = 200;
 
-const rdCatalogs = refDataStore("catalogs")()
-const rdThemes = refDataStore("themes")()
-const rdSearch = refDataStore("search")()
+const catalogs = ref<Option[]>([]);
+const themes = ref<Option[]>([]);
+const selectedCatalogs = ref<string[]>([]);
+const selectedThemes = ref<string[]>([]);
+const searchTerm = ref("");
+const limit = ref(10);
+const shape = ref<{
+    type: ShapeTypes;
+    coords: Coords;
+}>({
+    type: ShapeTypes.None,
+    coords: []
+});
+const showQuery = ref(false);
+const results = ref<{
+    iri: string;
+    title: string;
+    description: string;
+    themes: {
+        iri: string;
+        title: string;
+    }[];
+}[]>([]);
 
-const searchTermRef = ref("")
-const selectedCatalogsRef = ref<string[]>([])
-const selectedThemesRef = ref<string[]>([])
-const shapeTypeRef = ref(ShapeTypes.None)
-const coordsRef = ref<Coords>([])
-const showQueryRef = ref(false)
-const sparqlQueryRef = ref("")
-const limitRef = ref(10)
-
-const modal = ref<string | null>(null);
+const query = computed(() => {
+    return catalogSpatialSearch(
+        selectedCatalogs.value,
+        searchTerm.value,
+        selectedThemes.value,
+        shapeQueryPart(shape.value.coords),
+        limit.value > 0 ? parseInt(limit.value.toString()) : 0
+    );
+});
 
 const allCatalogsSelected = computed(() => {
-    let allSelected = true;
-    (rdCatalogs.data as RDCatalog[]).forEach(catalog => {
-        if (!selectedCatalogsRef.value.includes(catalog.c)) {
-            allSelected = false;
-            return false;
-        }
-    });
-    return allSelected;
+    return catalogs.value.every(catalog => selectedCatalogs.value.includes(catalog.iri));
 });
 
 const allThemesSelected = computed(() => {
-    let allSelected = true;
-    (rdThemes.data as RDTheme[]).forEach(theme => {
-        if (!selectedThemesRef.value.includes(theme.th)) {
-            allSelected = false;
-            return false;
-        }
-    });
-    return allSelected;
+    return themes.value.every(theme => selectedThemes.value.includes(theme.iri));
 });
 
-async function toggleSelectAllCatalogs() {
-    let selectedCatalogs: string[] = [];
-    if (!allCatalogsSelected.value) {
-        (rdCatalogs.data as RDCatalog[]).forEach(catalog => {
-            selectedCatalogs.push(catalog.c);
+function toggleSelectAllCatalogs() {
+    selectedCatalogs.value = !allCatalogsSelected.value ? catalogs.value.map(catalog => catalog.iri) : [];
+}
+
+function toggleSelectAllThemes() {
+    selectedThemes.value = !allThemesSelected.value ? themes.value.map(theme => theme.iri) : [];
+}
+
+function handleMapSelectionChange(selectedCoords: Coords, shapeType: ShapeTypes) {
+    shape.value = {
+        type: shapeType,
+        coords: selectedCoords
+    };
+}
+
+/**
+ * Gets the list of Catalogs from the API endpoint `/c/catalogs` & creates the list of catalog options
+ */
+async function getCatalogs() {
+    const { data: catalogData, profiles: catalogProfiles } = await catalogApiGetRequest("/c/catalogs");
+    if (catalogData && catalogProfiles.length > 0 && !catalogError.value) {
+        const defaultProfile = ui.profiles[catalogProfiles.find(p => p.default)!.uri];
+        const labelPredicates = defaultProfile.labelPredicates.length > 0 ? defaultProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
+
+        parseIntoStore(catalogData);
+
+        const catalogOptions: Option[] = [];
+
+        store.value.forSubjects(subject => {
+            if (!subject.value.endsWith("/system/catprez")) { // hide system catalog
+                const catalog: Option = {
+                    iri: subject.value
+                };
+
+                store.value.forEach(q => {
+                    if (labelPredicates.includes(q.predicate.value)) {
+                        catalog.title = q.object.value;
+                    }
+                }, subject, null, null, null);
+
+                catalogOptions.push(catalog);
+            }
+        }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Catalog")), null);
+
+        catalogs.value = catalogOptions.sort(sortByTitle);
+    }
+}
+
+/**
+ * Gets a list of themes from a SPARQL query from the API & creates the list of theme options
+ */
+async function getThemes() {
+    const themesData = await themesSparqlGetRequest(`${apiBaseUrl}/sparql`, getThemesQuery(selectedCatalogs.value));
+    if (themesData && !themesError.value) {
+        themes.value = (themesData.results.bindings as SparqlBinding[]).map(result => {
+            return {
+                title: result.title.value,
+                iri: result.theme.value
+            };
         });
     }
-    selectedCatalogsRef.value = selectedCatalogs;
-
-    await performSearch();
 }
 
-async function toggleSelectAllThemes() {
-    let selectedThemes: string[] = [];
-    if (!allThemesSelected.value) {
-        (rdThemes.data as RDTheme[]).forEach(theme => {
-            selectedThemes.push(theme.th);
+/**
+ * Performs search via a SPARQL query
+ */
+async function doSearch() {
+    const searchData = await searchSparqlGetRequest(`${apiBaseUrl}/sparql`, query.value);
+    if (searchData && !searchError.value) {
+        results.value = (searchData.results.bindings as SparqlBinding[]).map(result => {
+            return {
+                iri: result.resource.value,
+                title: result.title.value,
+                description: result.desc.value,
+                themes: result.themeList.value.split("\t").map((theme, index) => {
+                    return {
+                        iri: theme,
+                        title: result.themeListLabels.value.split("\t")[index]
+                    };
+                })
+            }
         });
     }
-    selectedThemesRef.value = selectedThemes;
-
-    await performSearch();
 }
 
-// called when a selection has changed
-const updateSelection = async (selectedCoords:Coords, shapeType:ShapeTypes) => {
-    //shapeTypeRef.value = selectedCoords.length == 0 ? ShapeTypes.None : (selectedCoords.length == 1 ? ShapeTypes.Point : ShapeTypes.Polygon)
-    shapeTypeRef.value = shapeType
-    coordsRef.value = selectedCoords
-    await performSearch();
-}
-
-const links = [
-    {
-        label: "Catalogs",
-        url: "/c/catalogs",
-        description: "A list of DCAT Catalogs"
+watch(selectedCatalogs, async (newValue, oldValue) => {
+    await getThemes();
+    if (LIVE_SEARCH) {
+        await doSearch();
     }
-];
+}, { deep: true });
 
-const fetchThemes = async () => {
-    await rdThemes.fetch<RDTheme[]>(QUERY_GET_THEMES(selectedCatalogsRef.value));
-}
-
-const performSearch = async(event: Event|null=null) => {
-    if(event) {
-        event.preventDefault();
+watch(selectedThemes, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
     }
-    sparqlQueryRef.value = QUERY_SEARCH(selectedCatalogsRef.value, searchTermRef.value, selectedThemesRef.value, shapeQueryPart(coordsRef.value), //limitRef.value);
-        (limitRef.value > 0 ? parseInt(limitRef.value.toString()) + 1 : 0));
-    await rdSearch.fetch<RDSearch[]>(sparqlQueryRef.value)
-}
+}, { deep: true });
 
-// start off by loading the main filter lists for catalogs and themes
-onMounted(async ()=>{
-    await rdCatalogs.fetch<RDCatalog[]>(QUERY_GET_CATALOGS);
-    (rdCatalogs.data as RDCatalog[]).forEach(cat=>{
-        selectedCatalogsRef.value.push(cat.c)
-    });
-    await fetchThemes();
-    (rdThemes.data as RDTheme[]).forEach(theme=>{
-        selectedThemesRef.value.push(theme.th);
-    })
-    await performSearch();
-})
+watch(limit, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+});
 
+watch(searchTerm, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+});
+
+watch(shape, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+}, { deep: true });
+
+onMounted(async () => {
+    await getCatalogs();
+    selectedCatalogs.value = catalogs.value.map(catalog => catalog.iri); // select all by default
+    await getThemes();
+    selectedThemes.value = themes.value.map(theme => theme.iri); // select all by default
+    // await doSearch();
+});
 </script>
 
 <template>
@@ -135,25 +229,36 @@ onMounted(async ()=>{
                             type="search"
                             name="term"
                             class="search-input"
-                            v-model="searchTermRef"
+                            v-model="searchTerm"
                             placeholder="Search..."
-                            @keyup.enter="performSearch()"
+                            @keyup.enter="doSearch()"
                         >
                     </div>
                     <div class="form-section">
                         <h4>Catalogues</h4>
                         <div class="catalog-buttons">
                             <div class="select-all-input">
-                                <input type="checkbox" name="select-all-catalogs" id="select-all-catalogs" @change="toggleSelectAllCatalogs" v-model="allCatalogsSelected">
+                                <input
+                                    type="checkbox"
+                                    name="select-all-catalogs"
+                                    id="select-all-catalogs"
+                                    @change="toggleSelectAllCatalogs"
+                                    :checked="allCatalogsSelected"
+                                >
                                 <label for="select-all-catalogs">Select all</label>
                             </div>
                         </div>
-                        <LoadingMessage v-if="rdCatalogs.loading" />
-                        <ErrorMessage v-else-if="rdCatalogs.error" :message="`Unable to load catalogs: ${rdCatalogs.error}`" />
-                        <ul v-else-if="rdCatalogs.data.length > 0" class="catalog-options">
-                            <li v-for="(catalog, index) in <RDCatalog[]>rdCatalogs.data" class="catalog-option" :style="catalog.c.endsWith('/system/catprez') ? 'display: none;' : ''">
-                                <input type="checkbox" :id="`catalog-${index}`" :value="catalog.c" v-model="selectedCatalogsRef" @change="async (event) => { await fetchThemes(); await performSearch(); }" />
-                                <label :for="`catalog-${index}`">{{ catalog.t }}</label>
+                        <LoadingMessage v-if="catalogLoading" />
+                        <ErrorMessage v-else-if="catalogError" :message="`Unable to load catalogs: ${catalogError}`" />
+                        <ul v-else-if="catalogs.length > 0" class="catalog-options">
+                            <li v-for="(catalog, index) in catalogs" class="catalog-option">
+                                <input
+                                    type="checkbox"
+                                    :id="`catalog-${index}`"
+                                    :value="catalog.iri"
+                                    v-model="selectedCatalogs"
+                                />
+                                <label :for="`catalog-${index}`">{{ catalog.title }}</label>
                             </li>
                         </ul>
                     </div>
@@ -161,49 +266,54 @@ onMounted(async ()=>{
                         <h4>Themes</h4>
                         <div class="theme-buttons">
                             <div class="select-all-input">
-                                <input type="checkbox" name="select-all-themes" id="select-all-themes" @change="toggleSelectAllThemes" v-model="allThemesSelected">
+                                <input
+                                    type="checkbox"
+                                    name="select-all-themes"
+                                    id="select-all-themes"
+                                    @change="toggleSelectAllThemes"
+                                    :checked="allThemesSelected"
+                                >
                                 <label for="select-all-themes">Select all</label>
                             </div>
                         </div>
-                        <LoadingMessage v-if="rdThemes.loading" />
-                        <ErrorMessage v-else-if="rdThemes.error" :message="`Unable to load catalogs: ${rdThemes.error}`" />
-                        <ul v-else-if="rdThemes.data.length > 0" class="theme-options">
-                            <li v-for="(theme, index) in <RDTheme[]>rdThemes.data" class="theme-option" :key="theme.th">
-                                <input type="checkbox" 
-                                    :value="theme.th" 
-                                    v-model="selectedThemesRef"
+                        <LoadingMessage v-if="themesLoading" />
+                        <ErrorMessage v-else-if="themesError" :message="`Unable to load catalogs: ${themesError}`" />
+                        <ul v-else-if="themes.length > 0" class="theme-options">
+                            <li v-for="(theme, index) in themes" class="theme-option">
+                                <input
+                                    type="checkbox" 
+                                    :value="theme.iri" 
+                                    v-model="selectedThemes"
                                     :id="`theme-${index}`"
-                                    @change="(event) => performSearch()"
                                 />
-                                <label :for="`theme-${index}`">{{ theme.pl }}</label>
+                                <label :for="`theme-${index}`">{{ theme.title }}</label>
                             </li>
                         </ul>
                     </div>
                 </div>
                 <div class="bottom-buttons">
-                    <button class="btn outline" @click="modal = 'sparqlQuery'">Show Query <i class="fa-regular fa-code"></i></button>
+                    <button class="btn outline" @click="showQuery = true">Show Query <i class="fa-regular fa-code"></i></button>
                     <div class="right-buttons">
                         <div class="result-limit-input">
                             <label for="result-limit">Result limit</label>
-                            <input id="result-limit" type="number" @change="performSearch()" v-model="limitRef" min="1" max="100">
+                            <input id="result-limit" type="number" v-model="limit" min="1" max="100">
                         </div>
-                        <button class="btn" @click="performSearch()">Search <i class="fa-regular fa-magnifying-glass"></i></button>
+                        <button class="btn" @click="doSearch()">Search <i class="fa-regular fa-magnifying-glass"></i></button>
                     </div>
                 </div>
             </div>
             <div class="search-map">
                 <MapClient
-                    ref="searchMapRef"
                     :drawing-modes="['RECTANGLE']"
-                    @selectionUpdated="updateSelection"
+                    @selectionUpdated="handleMapSelectionChange"
                 />
             </div>
         </div>
         <div class="results">
             <h3>Results</h3>
-            <LoadingMessage v-if="rdSearch.loading" />
-            <ErrorMessage v-else-if="rdSearch.error" :message="rdSearch.error" />
-            <table v-else-if="rdSearch.data && rdSearch.data.length > 0">
+            <LoadingMessage v-if="searchLoading" />
+            <ErrorMessage v-else-if="searchError" :message="searchError" />
+            <table v-else-if="results.length > 0">
                 <thead>
                     <tr>
                         <th>Title</th>
@@ -211,20 +321,20 @@ onMounted(async ()=>{
                     </tr>
                 </thead>
                 <tbody>
-                    <template v-for="(result, index) in <RDSearch[]>rdSearch.data">
+                    <template v-for="(result, index) in results">
                         <tr :class="`${index % 2 === 1 ? 'grey' : '' }`">
-                            <td><a :href="`/object?uri=${encodeURIComponent(result.r)}`">{{ result.t }}</a></td>
+                            <td><a :href="`/object?uri=${encodeURIComponent(result.iri)}`">{{ result.title }}</a></td>
                             <td>
-                                <template v-for="(th, tindex) in result.thlist.split('\t')">
-                                    <a :href="`/object?uri=${th}`">
-                                        {{ result.thpllist.split('\t')[tindex] }}
+                                <template v-for="theme in result.themes">
+                                    <a :href="`/object?uri=${theme.iri}`">
+                                        {{ theme.title }}
                                     </a>
                                     <br/>
                                 </template>
                             </td>
                         </tr>
-                        <tr v-if="result.d" :class="`${index % 2 === 1 ? 'grey' : '' }`">
-                            <td colspan="2" class="desc">{{ result.d.length > MAX_DESC_LENGTH ? result.d.slice(0, MAX_DESC_LENGTH) + '...' : result.d }}</td>
+                        <tr v-if="result.description" :class="`${index % 2 === 1 ? 'grey' : '' }`">
+                            <td colspan="2" class="desc">{{ result.description.length > MAX_DESC_LENGTH ? result.description.slice(0, MAX_DESC_LENGTH) + '...' : result.description }}</td>
                         </tr>
                     </template>
                 </tbody>
@@ -234,13 +344,13 @@ onMounted(async ()=>{
             </div>
         </div>
     </div>
-    <BaseModal v-if="modal === 'sparqlQuery'" @modalClosed="modal = null">
+    <BaseModal v-if="showQuery" @modalClosed="showQuery = false">
         <template #headerMiddle>Spatial Search SPARQL Query</template>
         <div class="sparql-query-content">
-            <pre>{{ sparqlQueryRef.trim() }}</pre>
+            <pre>{{ query.trim() }}</pre>
         </div>
         <template #footer>
-            <button class="btn outline sparql-copy-btn" @click="copyToClipboard(sparqlQueryRef)" title="Copy SPARQL query">Copy <i class="fa-regular fa-copy"></i></button>
+            <button class="btn outline sparql-copy-btn" @click="copyToClipboard(query)" title="Copy SPARQL query">Copy <i class="fa-regular fa-copy"></i></button>
         </template>
     </BaseModal>
 </template>

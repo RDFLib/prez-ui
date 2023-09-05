@@ -3,10 +3,9 @@ import { onMounted, ref, watch, inject } from "vue";
 import { useRoute } from "vue-router";
 import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
-import { useGetRequest } from "@/composables/api";
+import { useApiRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
-import { apiBaseUrlConfigKey } from "@/types";
-import type { WKTResult } from "@/stores/mapSearchStore.d";
+import type { WKTResult } from "@/components/MapClient.d";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
@@ -27,10 +26,9 @@ interface SearchResult {
     source: string;
 };
 
-const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
-const { data, loading, error, doRequest } = useGetRequest();
+const { loading, error, apiGetRequest } = useApiRequest(); // main request
 const { store, parseIntoStore, qnameToIri } = useRdfStore();
 
 const query = ref(route.query as { [key: string]: string });
@@ -38,13 +36,15 @@ const results = ref<SearchResult[]>([]);
 const searchMapRef = ref()
 const geoResults = ref<WKTResult[]>([]);
 
-function getResults() {
+async function getResults() {
     if (route.query && route.query.term) {
         results.value = [];
         geoResults.value = [];
 
-        doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
-            parseIntoStore(data.value);
+        const { data } = await apiGetRequest(route.fullPath);
+        
+        if (data && !error.value) {
+            parseIntoStore(data);
             const labelPredicateIris = LABEL_PREDICATES.map(p => qnameToIri(p));
 
             store.value.forSubjects(subject => {
@@ -81,23 +81,23 @@ function getResults() {
                     });
                 }
             }, namedNode(qnameToIri("a")), namedNode(qnameToIri("prez:SearchResult")), null);
-        });
+        }
     }
 }
 
-watch(() => route.query, (newValue, oldValue) => {
+watch(() => route.query, async (newValue, oldValue) => {
     if (Object.keys(newValue).length > 0 && newValue !== oldValue) {
-        getResults();
+        await getResults();
     }
 }, { deep: true });
 
-onMounted(() => {
+onMounted(async () => {
     ui.rightNavConfig = { enabled: false };
     document.title = "Advanced Search | Prez";
     ui.pageHeading = { name: "Prez", url: "/" };
     ui.breadcrumbs = [{ name: "Advanced Search", url: "/search" }];
     if (Object.keys(route.query).length > 0) {
-        getResults();
+        await getResults();
     }
 });
 </script>

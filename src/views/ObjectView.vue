@@ -1,30 +1,28 @@
 <script lang="ts" setup>
-import { ref, onMounted, inject } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute, RouterLink } from "vue-router";
 import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
-import { useGetRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey } from "@/types";
+import { useApiRequest } from "@/composables/api";
 import router from "@/router";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 
 const { namedNode } = DataFactory;
 
-const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
 const { store, parseIntoStore, qnameToIri } = useRdfStore();
-const { data, loading, error, doRequest } = useGetRequest();
+const { loading, error, apiGetRequest } = useApiRequest();
 
 const links = ref<string[]>([]);
 
-onMounted(() => {
+onMounted(async () => {
     if (route.query && route.query.uri) {
-        doRequest(`${apiBaseUrl}${route.fullPath}`, () => {
-            // parse turtle
-            parseIntoStore(data.value);
+        const { data } = await apiGetRequest(route.fullPath);
+        if (data && !error.value) {
+            parseIntoStore(data);
 
             const subject = namedNode(route.query.uri as string);
 
@@ -39,7 +37,7 @@ onMounted(() => {
                 router.push(links.value[0]);
             }
             // else if multiple links, list on page
-        });
+        }
     }
 
     ui.rightNavConfig = { enabled: false };
@@ -53,10 +51,12 @@ onMounted(() => {
     <h1 class="page-title">Get Object by URI</h1>
     <p v-if="!route.query || !route.query.uri">This page can be used to find objects by their URI (Uniform Resource Identifier) by adding <code>?uri=https://some.uri.here</code> (for example) to the end of this page's URL.</p>
     <template v-else-if="links.length > 1">
-        <p>Please select from the links below</p>
-        <ul>
-            <li v-for="link in links"><RouterLink :to="link">{{ link }}</RouterLink></li>
-        </ul>
+        <p>Please select from the links below:</p>
+        <div class="links">
+            <RouterLink class="link" v-for="link in links" :to="link">
+                <h4 class="link-title">{{ link }}</h4>
+            </RouterLink>
+        </div>
     </template>
     <LoadingMessage v-else-if="loading" />
     <ErrorMessage v-else-if="error" :message="error" />
@@ -64,5 +64,22 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+@import "@/assets/sass/_variables.scss";
 
+.links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;;
+
+    a.link {
+        background-color: var(--cardBg);
+        padding: 10px;
+        border-radius: $borderRadius;
+
+        .link-title {
+            margin: 0;
+        }
+    }
+}
 </style>
