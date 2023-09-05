@@ -4,8 +4,8 @@ import { RouterView, useRoute } from "vue-router";
 import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
-import { useGetRequest } from "@/composables/api";
-import { sidenavConfigKey, apiBaseUrlConfigKey, type Profile } from "@/types";
+import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
+import { sidenavConfigKey, type Profile } from "@/types";
 import MainNav from "@/components/navs/MainNav.vue";
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
 import RightSideBar from "@/components/navs/RightSideBar.vue";
@@ -18,111 +18,121 @@ const { namedNode } = DataFactory;
 const version = packageJson.version;
 
 const sidenav = inject(sidenavConfigKey) as boolean;
-const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const route = useRoute();
 const ui = useUiStore();
-
-const { data, profiles, loading, error, doRequest } = useGetRequest();
-const { data: profData, profiles: profProfiles, loading: profLoading, error: profError, doRequest: profDoRequest } = useGetRequest();
-const { store, prefixes, parseIntoStore, qnameToIri } = useRdfStore();
-const { store: profStore, prefixes: profPrefixes, parseIntoStore: profParseIntoStore, qnameToIri: profQnameToIri } = useRdfStore();
-const { store: combinedStore, prefixes: combinedPrefixes, parseIntoStore: combinedParseIntoStore, qnameToIri: combinedQnameToIri } = useRdfStore();
+const { loading: rootLoading, error: rootError, apiGetRequest: rootApiGetRequest } = useApiRequest(); // main request to API root
+const { loading: profLoading, error: profError, apiGetRequest: profApiGetRequest } = useApiRequest(); // profiles request
+const { loading: concurrentLoading, hasError: concurrentHasError, concurrentApiRequests } = useConcurrentApiRequests(); // concurrent profile requests
+const { store: rootStore, parseIntoStore: rootParseIntoStore, qnameToIri: rootQnameToIri } = useRdfStore(); // store for API root data
+const { store: profStore, parseIntoStore: profParseIntoStore, qnameToIri: profQnameToIri } = useRdfStore(); // profiles store
 
 document.title = ui.pageTitle;
 
-onMounted(() => {
+async function getRootApiMetadata() {
+    // get API details
+    const { data: rootData } = await rootApiGetRequest("/");
+    if (rootData && !rootError.value) {
+        rootParseIntoStore(rootData);
+
+        // get API version
+        const version = rootStore.value.getObjects(null, rootQnameToIri("prez:version"), null)[0];
+        ui.apiVersion = version.value;
+
+        // get search methods per flavour
+        let searchMethods: {[key: string]: string[]} = {};
+        rootStore.value.forObjects(object => {
+            let flavour = "";
+            let methods: string[] = [];
+            rootStore.value.forEach(q => {
+                if (q.predicate.value === rootQnameToIri("a")) {
+                    flavour = q.object.value.split(`${rootQnameToIri("prez:")}`)[1];
+                } else if (q.predicate.value === rootQnameToIri("prez:availableSearchMethod")) {
+                    methods.push(q.object.value.split(`${rootQnameToIri("prez:")}`)[1]);
+                }
+            }, object, null, null, null);
+            searchMethods[flavour] = methods;
+        }, null, rootQnameToIri("prez:enabledPrezFlavour"), null);
+        ui.searchMethods = searchMethods;
+    }
+}
+
+async function getProfiles() {
     // if profiles don't exist in pinia
     if (Object.keys(ui.profiles).length === 0) {
-        profDoRequest(`${apiBaseUrl}/profiles`, () => {
-            profParseIntoStore(profData.value);
+        const { data: profData } = await profApiGetRequest("/profiles");
+        if (profData && !profError.value) {
+            profParseIntoStore(profData);
 
             // get list of profiles
             let profileUris: {[uri: string]: {
                 token: string;
                 link: string;
             }} = {};
+
             profStore.value.forSubjects(subject => {
                 profStore.value.forEach(q => {
                     profileUris[q.subject.value] = {
                         token: q.object.value.replace("/profiles/", ""),
-                        link: `${apiBaseUrl}${q.object.value}`
+                        link: q.object.value
                     }
                 }, subject, namedNode(profQnameToIri("prez:link")), null, null);
             }, namedNode(profQnameToIri("a")), namedNode(profQnameToIri("prof:Profile")), null);
-            
-            // promise.all request for each profile in parallel
-            Promise.all(Object.values(profileUris).map(p => fetch(p.link).then(r => r.text()))).then(values => {
-                // parse all results into store
-                values.forEach(value => {
-                    combinedParseIntoStore(value)
-                });
 
-                let profs: Profile[] = [];
 
-                combinedStore.value.forSubjects(subject => {
-                    let p: Profile = {
-                        namespace: subject.id,
-                        token: profileUris[subject.id].token,
-                        title: "",
-                        description: "",
-                        mediatypes: [],
-                        defaultMediatype: "",
-                        labelPredicates: [],
-                        descriptionPredicates: [],
-                        explanationPredicates: []
-                    };
-                    combinedStore.value.forEach(q => {
-                        if (q.predicate.value === combinedQnameToIri("dcterms:title")) {
-                            p.title = q.object.value;
-                        } else if (q.predicate.value === combinedQnameToIri("dcterms:description")) {
-                            p.description = q.object.value;
-                        // } else if (q.predicate.value === combinedQnameToIri("dcterms:identifier")) {
-                        //     p.token = q.object.value;
-                        } else if (q.predicate.value === combinedQnameToIri("altr-ext:hasResourceFormat")) {
-                            p.mediatypes.push(q.object.value);
-                        } else if (q.predicate.value === combinedQnameToIri("altr-ext:hasDefaultResourceFormat")) {
-                            p.defaultMediatype = q.object.value;
-                        } else if (q.predicate.value === combinedQnameToIri("altr-ext:hasLabelPredicate")) {
-                            p.labelPredicates.push(q.object.value);
-                        } else if (q.predicate.value === combinedQnameToIri("altr-ext:hasDescriptionPredicate")) {
-                            p.descriptionPredicates.push(q.object.value);
-                        } else if (q.predicate.value === combinedQnameToIri("altr-ext:hasExplanationPredicate")) {
-                            p.explanationPredicates.push(q.object.value);
-                        }
-                    }, subject, null, null, null);
-                    p.mediatypes.sort((a, b) => Number(b === p.defaultMediatype) - Number(a === p.defaultMediatype));
-                    profs.push(p);
-                }, namedNode(combinedQnameToIri("a")), namedNode(combinedQnameToIri("prof:Profile")), null);
+            // request each profile in parallel
+            const profilesData = await concurrentApiRequests(Object.values(profileUris).map(p => p.link));
 
-                ui.profiles = profs.reduce<{[namespace: string]: Profile}>((obj, prof) => (obj[prof.namespace] = prof, obj), {}); // {uri: {...}, ...}
-            });
-        });
-    }
-
-    // get API details
-    doRequest(apiBaseUrl, () => {
-        parseIntoStore(data.value);
-
-        // get API version
-        const version = store.value.getObjects(null, qnameToIri("prez:version"), null)[0];
-        ui.apiVersion = version.value;
-
-        // get search methods per flavour
-        let searchMethods: {[key: string]: string[]} = {};
-        store.value.forObjects(object => {
-            let flavour = "";
-            let methods: string[] = [];
-            store.value.forEach(q => {
-                if (q.predicate.value === qnameToIri("a")) {
-                    flavour = q.object.value.split(`${qnameToIri('prez:')}`)[1];
-                } else if (q.predicate.value === qnameToIri("prez:availableSearchMethod")) {
-                    methods.push(q.object.value.split(`${qnameToIri('prez:')}`)[1]);
+            profilesData.forEach(r => {
+                if (r.value) {
+                    profParseIntoStore(r.value);
                 }
-            }, object, null, null, null);
-            searchMethods[flavour] = methods;
-        }, null, qnameToIri("prez:enabledPrezFlavour"), null);
-        ui.searchMethods = searchMethods;
-    });
+            });
+
+            let profs: Profile[] = [];
+
+            profStore.value.forSubjects(subject => {
+                let p: Profile = {
+                    namespace: subject.id,
+                    token: profileUris[subject.id].token,
+                    title: "",
+                    description: "",
+                    mediatypes: [],
+                    defaultMediatype: "",
+                    labelPredicates: [],
+                    descriptionPredicates: [],
+                    explanationPredicates: []
+                };
+                
+                profStore.value.forEach(q => {
+                    if (q.predicate.value === profQnameToIri("dcterms:title")) { // need to use label predicate from profile
+                        p.title = q.object.value;
+                    } else if (q.predicate.value === profQnameToIri("dcterms:description")) { // need to use description predicate from profile
+                        p.description = q.object.value;
+                    // } else if (q.predicate.value === profQnameToIri("dcterms:identifier")) {
+                    //     p.token = q.object.value;
+                    } else if (q.predicate.value === profQnameToIri("altr-ext:hasResourceFormat")) {
+                        p.mediatypes.push(q.object.value);
+                    } else if (q.predicate.value === profQnameToIri("altr-ext:hasDefaultResourceFormat")) {
+                        p.defaultMediatype = q.object.value;
+                    } else if (q.predicate.value === profQnameToIri("altr-ext:hasLabelPredicate")) {
+                        p.labelPredicates.push(q.object.value);
+                    } else if (q.predicate.value === profQnameToIri("altr-ext:hasDescriptionPredicate")) {
+                        p.descriptionPredicates.push(q.object.value);
+                    } else if (q.predicate.value === profQnameToIri("altr-ext:hasExplanationPredicate")) {
+                        p.explanationPredicates.push(q.object.value);
+                    }
+                }, subject, null, null, null);
+                p.mediatypes.sort((a, b) => Number(b === p.defaultMediatype) - Number(a === p.defaultMediatype));
+                profs.push(p);
+            }, namedNode(profQnameToIri("a")), namedNode(profQnameToIri("prof:Profile")), null);
+
+            ui.profiles = profs.reduce<{[namespace: string]: Profile}>((obj, prof) => (obj[prof.namespace] = prof, obj), {}); // {uri: {...}, ...}
+        }
+    }
+}
+
+onMounted(async () => {
+    await Promise.all([getRootApiMetadata(), getProfiles()]);
 });
 </script>
 

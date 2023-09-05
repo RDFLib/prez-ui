@@ -1,15 +1,18 @@
 <script lang="ts" setup>
-import { ref, onMounted, inject, watch } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { DataFactory } from "n3";
-import { apiBaseUrlConfigKey } from "@/types";
-import { useGetRequest } from "@/composables/api";
+import { useUiStore } from "@/stores/ui";
+import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 
 const { namedNode } = DataFactory;
 
-const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
-const { data, loading, error, doRequest } = useGetRequest();
+const ui = useUiStore();
+const { loading: datasetLoading, error: datasetError, apiGetRequest: datasetApiGetRequest } = useApiRequest(); // main request
+const { loading: collectionLoading, hasError: collectionHasError, concurrentApiRequests: collectionConcurrentApiRequests } = useConcurrentApiRequests(); // feature collections requests
 const { store, parseIntoStore, qnameToIri } = useRdfStore();
+
+const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
 
 const props = defineProps<{
     defaultSelected?: {
@@ -28,6 +31,7 @@ const emit = defineEmits<{
 interface Option {
     iri: string;
     title?: string;
+    link: string;
 };
 
 const datasetOptions = ref<Option[]>([]);
@@ -57,54 +61,67 @@ watch(() => props.defaultSelected, (newValue, oldValue) => {
         collectionSelected.value = newValue.collection?.split(",") || [];
         emitOptions();
     }
-}, {deep: true});
+}, { deep: true });
 
-onMounted(() => {
-    // get dataset list
-    doRequest(`${apiBaseUrl}/s/datasets`, () => {
-        parseIntoStore(data.value);
+onMounted(async () => {
+    // get list of datasets
+    const { data: datasetData, profiles: datasetProfiles } = await datasetApiGetRequest("/s/datasets");
 
-        store.value.forSubjects(member => {
-            let option: Option = {
-                iri: member.value
-            };
+    if (datasetData && datasetProfiles.length > 0 && !datasetError.value) {
+        const defaultProfile = ui.profiles[datasetProfiles.find(p => p.default)!.uri];
+        const labelPredicates = defaultProfile.labelPredicates.length > 0 ? defaultProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
-            let datasetLink = "";
-            let datasetIRI = member.value;
+        parseIntoStore(datasetData);
+
+        store.value.forSubjects(async (member) => {
+            let title = "";
+            let link = "";
             
             store.value.forEach(q => { // get preds & objs for each subj
-                if (q.predicate.value === qnameToIri("dcterms:title")) {
-                    option.title = q.object.value;
+                if (labelPredicates.includes(q.predicate.value)) {
+                    title = q.object.value;
                 } else if (q.predicate.value === qnameToIri("prez:link")) {
-                    datasetLink = q.object.value;
+                    link = q.object.value;
                 }
             }, member, null, null, null);
-            datasetOptions.value.push(option);
-
-            // get feature collection list
-            if (datasetLink !== "") {
-                const { data: collectionData, loading: collectionLoading, error: collectionError, doRequest: collectionDoRequest } = useGetRequest();
-                const { store: collectionStore, parseIntoStore: collectionParseIntoStore, qnameToIri: collectionQnameToIri } = useRdfStore();
-                
-                collectionDoRequest(`${apiBaseUrl}${datasetLink}/collections`, () => {
-                    collectionParseIntoStore(collectionData.value);
-
-                    collectionStore.value.forObjects(member => {
-                        let option: Option = {
-                            iri: member.value
-                        };
-                        
-                        collectionStore.value.forEach(q => { // get preds & objs for each subj
-                            if (q.predicate.value === collectionQnameToIri("rdfs:label")) {
-                                option.title = q.object.value;
-                            }
-                        }, member, null, null, null);
-                        collectionOptions.value.push(option);
-                    }, namedNode(datasetIRI), namedNode(collectionQnameToIri("rdfs:member")), null);
-                });
-            }
+            
+            datasetOptions.value.push({
+                iri: member.value,
+                title: title || undefined,
+                link: link
+            });
         }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Dataset")), null);
-    });
+        
+        // get list of feature collections
+        const collectionData = await collectionConcurrentApiRequests(datasetOptions.value.map(d => `${d.link}/collections`));
+
+        collectionData.forEach(r => {
+            if (r.value) {
+                parseIntoStore(r.value);
+            }
+        });
+
+        datasetOptions.value.forEach(d => {
+            store.value.forObjects(member => {
+                let title = "";
+                let link = "";
+            
+                store.value.forEach(q => { // get preds & objs for each subj
+                    if (q.predicate.value === qnameToIri("rdfs:label")) { // need label predicates from profile
+                        title = q.object.value;
+                    } else if (q.predicate.value === qnameToIri("prez:link")) {
+                        link = q.object.value;
+                    }
+                }, member, null, null, null);
+
+                collectionOptions.value.push({
+                    iri: member.value,
+                    title: title || undefined,
+                    link: link
+                });
+            }, namedNode(d.iri), namedNode(qnameToIri("rdfs:member")), null);
+        });
+    }
 });
 </script>
 
