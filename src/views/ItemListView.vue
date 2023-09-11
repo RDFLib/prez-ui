@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { onMounted, onBeforeMount, ref, computed, inject } from "vue";
 import { useRoute } from "vue-router";
-import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
+import { DataFactory, type Quad_Object, type Quad_Subject, type Literal } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
+import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable, type languageLabel } from "@/types";
 import ItemList from "@/components/ItemList.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
@@ -14,9 +14,9 @@ import PaginationComponent from "@/components/PaginationComponent.vue";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
-import { ensureProfiles, sortByTitle } from "@/util/helpers";
+import { ensureProfiles, sortByTitle, getLanguagePriority } from "@/util/helpers";
 
-const { namedNode } = DataFactory;
+const { namedNode, literal } = DataFactory;
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const defaultPerPage = inject(perPageConfigKey) as number;
@@ -117,13 +117,43 @@ function configByType(type: string) {
 }
 
 function getBreadcrumbs(): Breadcrumb[] {
+    // get parents info
+    let parents: {
+        id: string;
+        title?: string;
+        uri: string;
+    }[] = [];
+
+    const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+    const pathSegments = route.path.split("/").slice(1);
+
+    pathSegments.forEach((id, index) => {
+        const quads = store.value.getQuads(null, namedNode(qnameToIri("dcterms:identifier")), literal(id, namedNode(qnameToIri("prez:identifier"))), null);
+        if (quads.length > 0) {
+            let parent: {
+                id: string;
+                title?: string;
+                uri: string;
+            } = {
+                id: id,
+                uri: quads[0].subject.value
+            };
+            store.value.forEach(q => {
+                if (labelPredicates.includes(q.predicate.value)) {
+                    parent.title = q.object.value;
+                }
+            }, quads[0].subject, null, null, null);
+            parents.push(parent);
+        }
+    });
+
     // build out the breadcrumbs using the URL path
     let crumbs: Breadcrumb[] = [];
     
     if (flavour.value) {
         crumbs.push({ name: getPrezSystemLabel(flavour.value) + " Home", url: `/${flavour.value[0].toLowerCase()}`});
     }
-    const pathSegments = route.path.split("/").slice(1);
+    
     let skipSegment = false;
     pathSegments.forEach((pathSegment, index) => {
         if (skipSegment) { // skip segment when an ID appears
@@ -137,14 +167,14 @@ function getBreadcrumbs(): Breadcrumb[] {
             case "datasets":
                 crumbs.push({ name: "Datasets", url: "/s/datasets" });
                 if (index + 1 !== pathSegments.length) {
-                    crumbs.push({ name: "Dataset", url: `/s/datasets/${route.params.datasetId}` });
+                    crumbs.push({ name: parents[0].title || parents[0].uri, url: `/s/datasets/${route.params.datasetId}` });
                     skipSegment = true;
                 }
                 break;
             case "collections":
                 crumbs.push({ name: "Feature Collections", url: `/s/datasets/${route.params.datasetId}/collections` });
                 if (index + 1 !== pathSegments.length) {
-                    crumbs.push({ name: "Feature Collection", url: `/s/datasets/${route.params.datasetId}/collections/${route.params.featureCollectionId}` });
+                    crumbs.push({ name: parents[1].title || parents[1].uri, url: `/s/datasets/${route.params.datasetId}/collections/${route.params.featureCollectionId}` });
                     skipSegment = true;
                 }
                 break;
@@ -194,9 +224,16 @@ function getProperties() {
             extras: {}
         };
 
+        const labels: languageLabel[] = [];
+
         store.value.forEach(q => {
             if (labelPredicates.includes(q.predicate.value)) {
-                c.title = q.object.value;
+                let language = (q.object as Literal).language;
+                labels.push({
+                    value: q.object.value,
+                    language: language || undefined,
+                    priority: getLanguagePriority(language)
+                });
             } else if (descPredicates.includes(q.predicate.value)) {
                 c.description = q.object.value;
             } else if (q.predicate.value === qnameToIri("prez:link")) {
@@ -224,6 +261,11 @@ function getProperties() {
                 }, q.object, qnameToIri("prov:hadRole"), null);
             }
         }, member, null, null, null);
+        // sort labels by language priority
+        labels.sort((a, b) => a.priority - b.priority);
+
+        // set title to highest priority language tag
+        c.title = labels.length > 0 ? labels[0].value : undefined;
         items.value.push(c);
     });
 

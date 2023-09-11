@@ -6,7 +6,7 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import type { WKTResult } from "@/components/MapClient.d";
-import { apiBaseUrlConfigKey, conceptPerPageConfigKey, enableScoresKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
+import { apiBaseUrlConfigKey, conceptPerPageConfigKey, enableScoresKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable, type languageLabel } from "@/types";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
 import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
@@ -16,10 +16,10 @@ import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import MapClient from "@/components/MapClient.vue";
 import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
-import { ensureProfiles, titleCase, sortByTitle } from "@/util/helpers";
+import { ensureProfiles, titleCase, sortByTitle, getLanguagePriority } from "@/util/helpers";
 import ScoreWidget from "@/components/scores/ScoreWidget.vue";
 
-const { namedNode } = DataFactory;
+const { namedNode, literal } = DataFactory;
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const enableScores = inject(enableScoresKey) as boolean;
@@ -142,12 +142,19 @@ function getProperties() {
     // get label & description predicates
     const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
     const descPredicates = defaultProfile.value!.descriptionPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
-    hiddenPredicates.value.push(...[...labelPredicates, ...descPredicates]);
+    hiddenPredicates.value.push(...descPredicates);
+
+    const labels: languageLabel[] = [];
 
     // get attributes for item object, fill out properties
     store.value.forEach(q => {
         if (labelPredicates.includes(q.predicate.value)) {
-            item.value.title = q.object.value;
+            let language = (q.object as Literal).language;
+            labels.push({
+                value: q.object.value,
+                language: language || undefined,
+                priority: getLanguagePriority(language)
+            });
         } else if (descPredicates.includes(q.predicate.value)) {
             item.value.description = q.object.value;
         } else if (DEFAULT_CHILDREN_PREDICATES.includes(q.predicate.value)) {
@@ -190,6 +197,16 @@ function getProperties() {
         }
     }, subject, null, null, null);
 
+    // sort labels by language priority
+    labels.sort((a, b) => a.priority - b.priority);
+
+    // set title to highest priority language tag
+    item.value.title = labels.length > 0 ? labels[0].value : undefined;
+
+    if (labels.length === 1) { // hide label property in table if there is only one label
+        hiddenPredicates.value.push(...labelPredicates);
+    }
+
     if (hasScores.value) {
         getScores();
     }
@@ -227,6 +244,36 @@ function getScores() {
 }
 
 function getBreadcrumbs(): Breadcrumb[] {
+    // get parents info
+    let parents: {
+        id: string;
+        title?: string;
+        uri: string;
+    }[] = [];
+
+    const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+    const pathSegments = route.path.split("/").slice(1, -1);
+
+    pathSegments.forEach((id, index) => {
+        const quads = store.value.getQuads(null, namedNode(qnameToIri("dcterms:identifier")), literal(id, namedNode(qnameToIri("prez:identifier"))), null);
+        if (quads.length > 0) {
+            let parent: {
+                id: string;
+                title?: string;
+                uri: string;
+            } = {
+                id: id,
+                uri: quads[0].subject.value
+            };
+            store.value.forEach(q => {
+                if (labelPredicates.includes(q.predicate.value)) {
+                    parent.title = q.object.value;
+                }
+            }, quads[0].subject, null, null, null);
+            parents.push(parent);
+        }
+    });
+
     // if /object, then use home/object/<object>
     // else, build out the breadcrumbs using the URL path
     let crumbs: Breadcrumb[] = [];
@@ -237,7 +284,6 @@ function getBreadcrumbs(): Breadcrumb[] {
         if (flavour.value) {
             crumbs.push({ name: getPrezSystemLabel(flavour.value) + " Home", url: `/${flavour.value[0].toLowerCase()}`});
         }
-        const pathSegments = route.path.split("/").slice(1, -1);
         let skipSegment = false;
         pathSegments.forEach((pathSegment, index) => {
             if (skipSegment) { // skip segment when an ID appears
@@ -248,21 +294,21 @@ function getBreadcrumbs(): Breadcrumb[] {
                 case "catalogs":
                     crumbs.push({ name: "Catalogs", url: "/c/catalogs" });
                     if (index + 1 !== pathSegments.length) {
-                        crumbs.push({ name: "Catalog", url: `/c/catalogs/${route.params.catalogId}` });
+                        crumbs.push({ name: parents[0].title || parents[0].uri, url: `/c/catalogs/${route.params.catalogId}` });
                         skipSegment = true;
                     }
                     break;
                 case "datasets":
                     crumbs.push({ name: "Datasets", url: "/s/datasets" });
                     if (index + 1 !== pathSegments.length) {
-                        crumbs.push({ name: "Dataset", url: `/s/datasets/${route.params.datasetId}` });
+                        crumbs.push({ name: parents[0].title || parents[0].uri, url: `/s/datasets/${route.params.datasetId}` });
                         skipSegment = true;
                     }
                     break;
                 case "collections":
                     crumbs.push({ name: "Feature Collections", url: `/s/datasets/${route.params.datasetId}/collections` });
                     if (index + 1 !== pathSegments.length) {
-                        crumbs.push({ name: "Feature Collection", url: `/s/datasets/${route.params.datasetId}/collections/${route.params.featureCollectionId}` });
+                        crumbs.push({ name: parents[1].title || parents[1].uri, url: `/s/datasets/${route.params.datasetId}/collections/${route.params.featureCollectionId}` });
                         skipSegment = true;
                     }
                     break;
@@ -272,14 +318,14 @@ function getBreadcrumbs(): Breadcrumb[] {
                 case "vocab":
                     crumbs.push({ name: "Vocabularies", url: "/v/vocab" });
                     if (index + 1 !== pathSegments.length) {
-                        crumbs.push({ name: "Vocabulary", url: `/v/vocab/${route.params.vocabId}` });
+                        crumbs.push({ name: parents[0].title || parents[0].uri, url: `/v/vocab/${route.params.vocabId}` });
                         skipSegment = true;
                     }
                     break;
                 case "collection":
                     crumbs.push({ name: "Collections", url: "/v/collection" });
                     if (index + 1 !== pathSegments.length) {
-                        crumbs.push({ name: "Collection", url: `/v/vocab/${route.params.collectionId}` });
+                        crumbs.push({ name: parents[0].title || parents[0].uri, url: `/v/collection/${route.params.collectionId}` });
                         skipSegment = true;
                     }
                     break;
@@ -324,11 +370,20 @@ function getChildren() {
                 extras: {}
             };
 
+            const labels: languageLabel[] = [];
+
+            let links: string[] = [];
+
             store.value.forEach(q => {
                 if (labelPredicates.includes(q.predicate.value)) {
-                    child.title = q.object.value;
+                    let language = (q.object as Literal).language;
+                    labels.push({
+                        value: q.object.value,
+                        language: language || undefined,
+                        priority: getLanguagePriority(language)
+                    });
                 } else if (q.predicate.value === qnameToIri("prez:link")) {
-                    child.link = q.object.value;
+                    links.push(q.object.value);
                 } else if (q.predicate.value === qnameToIri("a")) {
                     child.baseClass = q.object.value;
                 } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:publisher")) {
@@ -353,6 +408,24 @@ function getChildren() {
                 } 
             }, obj, null, null, null);
 
+            // sort labels by language priority
+            labels.sort((a, b) => a.priority - b.priority);
+
+            // set title to highest priority language tag
+            child.title = labels.length > 0 ? labels[0].value : undefined;
+
+            // ensure the correct link is set
+            if (links.length > 1) {
+                let start = links.filter(link => link.startsWith(route.path));
+                if (start.length > 0) {
+                    child.link = start[0];
+                } else {
+                    child.link = links[0]; 
+                }
+            } else if (links.length === 1) {
+                child.link = links[0];
+            }
+
             children.value.push(child);
         }, namedNode(item.value.iri), namedNode(childrenPredicate.value), null);
 
@@ -374,10 +447,18 @@ function getAllConcepts() {
             childrenCount: 0,
             children: []
         };
+
+        const labels: languageLabel[] = [];
+        
         store.value.forEach(q => {
             if (q.predicate.value === qnameToIri("skos:prefLabel")) {
-                c.title = q.object.value;
-            } else if (q.predicate.value === qnameToIri("prez:link")) {
+                let language = (q.object as Literal).language;
+                labels.push({
+                    value: q.object.value,
+                    language: language || undefined,
+                    priority: getLanguagePriority(language)
+                });
+            } else if (q.predicate.value === qnameToIri("prez:link") && q.object.value.startsWith(route.path)) { // enforce links within current vocab
                 c.link = q.object.value;
             } else if (q.predicate.value === qnameToIri("skos:narrower")) {
                 c.narrower!.push(q.object.value);
@@ -385,6 +466,11 @@ function getAllConcepts() {
                 c.broader = q.object.value;
             }
         }, subject, null, null, null);
+        // sort labels by language priority
+        labels.sort((a, b) => a.priority - b.priority);
+
+        // set title to highest priority language tag
+        c.title = labels.length > 0 ? labels[0].value : "";
         c.childrenCount = c.narrower!.length;
         conceptArray.push(c);
     }, namedNode(qnameToIri("skos:inScheme")), namedNode(item.value.iri), null);
@@ -438,9 +524,15 @@ async function getTopConcepts(page: number = 1) {
                 children: [],
                 color: "",
             };
+            const labels: languageLabel[] = [];
             conceptStore.value.forEach(q => {
                 if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
-                    c.title = q.object.value;
+                    let language = (q.object as Literal).language;
+                    labels.push({
+                        value: q.object.value,
+                        language: language || undefined,
+                        priority: getLanguagePriority(language)
+                    });
                 } else if (q.predicate.value === conceptQnameToIri("prez:link")) {
                     c.link = q.object.value;
                 } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
@@ -449,6 +541,11 @@ async function getTopConcepts(page: number = 1) {
                     c.color = q.object.value;
                 }
             }, object, null, null, null);
+            // sort labels by language priority
+            labels.sort((a, b) => a.priority - b.priority);
+
+            // set title to highest priority language tag
+            c.title = labels.length > 0 ? labels[0].value : "";
             concepts.value.push(c);
         }, namedNode(item.value.iri), namedNode(conceptQnameToIri("skos:hasTopConcept")), null);
 
@@ -485,9 +582,15 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
                 children: [],
                 color: "",
             };
+            const labels: languageLabel[] = [];
             conceptStore.value.forEach(q => {
                 if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
-                    c.title = q.object.value;
+                    let language = (q.object as Literal).language;
+                    labels.push({
+                        value: q.object.value,
+                        language: language || undefined,
+                        priority: getLanguagePriority(language)
+                    });
                 } else if (q.predicate.value === conceptQnameToIri("prez:link")) {
                     c.link = q.object.value;
                 } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
@@ -496,6 +599,11 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
                     c.color = q.object.value;
                 }
             }, object, null, null, null);
+            // sort labels by language priority
+            labels.sort((a, b) => a.priority - b.priority);
+
+            // set title to highest priority language tag
+            c.title = labels.length > 0 ? labels[0].value : "";
             parent!.children.push(c);
         }, namedNode(parent!.iri), namedNode(conceptQnameToIri("skos:narrower")), null);
 
