@@ -88,6 +88,11 @@ a {
         padding: 4px 6px;
     }
 
+    &.lg {
+        font-size: 1.1em;
+        padding: 8px 10px;
+    }
+
     &:disabled {
         cursor: default;
         opacity: 0.6;
