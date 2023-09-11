@@ -190,3 +190,9 @@ export interface PredCellProps {
     description?: string;
     explanation?: string;
 };
+
+export type languageLabel = {
+    value: string;
+    language?: string;
+    priority: number;
+};

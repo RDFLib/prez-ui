@@ -54,6 +54,28 @@ export const sortByTitle = <T extends {title?: string; iri: string;}>(a: T, b: T
 };
 
 /**
+ * Returns an integer priority based on an RDF literal's language tag
+ * 
+ * Priority order is: 1. `@en`, 2. `@en-*`, 3. No language tag, 4. Other language tags.
+ * 
+ * @param language 
+ * @returns the priority order as an integer
+ */
+export function getLanguagePriority(language: string): number {
+    // get browser language, return 0
+    if (language === "en") {
+        return 1;
+    } else if (/en-.+/.test(language)) { // en-us, en-gb, etc.
+        return 2;
+    } else if (language === "") {
+        return 3;
+    } else {
+        return 4;
+    }
+}
+
+
+/**
  * Get the base class from the URL structure
  * 
  * @param link 
