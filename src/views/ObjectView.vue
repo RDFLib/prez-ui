@@ -10,7 +10,7 @@ import router from "@/router";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 
-const { namedNode, literal } = DataFactory;
+const { namedNode } = DataFactory;
 
 const route = useRoute();
 const ui = useUiStore();
@@ -28,15 +28,11 @@ type objectItem = {
         parentIri: string;
         parentTitle?: string;
         parentLink: string;
-        parentType: {
+        parentTypes: {
             iri: string;
             title?: string;
-        };
+        }[];
         link: string;
-        baseClass: {
-            iri: string;
-            title?: string;
-        };
     }[];
     types: {
         iri: string;
@@ -47,42 +43,6 @@ type objectItem = {
 const defaultProfile = ref<Profile | null>(null);
 const item = ref<objectItem>({} as objectItem);
 const links = ref<string[]>([]);
-
-function getBaseClassFromLink(link: string): {iri: string; title: string} {
-    const curieRegex = "[a-zA-Z0-9\\.\\-_]+:[a-zA-Z0-9\\.\\-_]+";
-    const profileRegex = new RegExp(`^(\/[csv])?\/profiles\/${curieRegex}\/?$`);
-    const catalogRegex = new RegExp(`^\/c\/catalogs\/${curieRegex}\/?$`);
-    const resourceRegex = new RegExp(`^\/c\/catalogs\/${curieRegex}\/${curieRegex}\/?$`);
-    const datasetRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/?$`);
-    const featureCollectionRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/collections\/${curieRegex}\/?$`);
-    const featureRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/collections\/${curieRegex}\/items\/${curieRegex}\/?$`);
-    const vocabRegex = new RegExp(`^\/v\/vocab\/${curieRegex}\/?$`);
-    const collectionRegex = new RegExp(`^\/v\/collection\/${curieRegex}\/?$`);
-    const conceptRegex = new RegExp(`^\/v\/(vocab|collection)\/${curieRegex}\/${curieRegex}\/?$`);
-
-    switch (true) {
-        case profileRegex.test(link):
-            return { iri: qnameToIri("prof:Profile"), title: "Profile" };
-        case catalogRegex.test(link):
-            return { iri: qnameToIri("dcat:Catalog"), title: "Catalog" };
-        case resourceRegex.test(link):
-            return { iri: qnameToIri("dcat:Resource"), title: "Resource" };
-        case datasetRegex.test(link):
-            return { iri: qnameToIri("dcat:Dataset"), title: "Dataset" };
-        case featureCollectionRegex.test(link):
-            return { iri: qnameToIri("geo:FeatureCollection"), title: "Feature Collection" };
-        case featureRegex.test(link):
-            return { iri: qnameToIri("geo:Feature"), title: "Feature" };
-        case vocabRegex.test(link):
-            return { iri: qnameToIri("skos:ConceptScheme"), title: "Concept Scheme" };
-        case collectionRegex.test(link):
-            return { iri: qnameToIri("skos:Collection"), title: "Collection" };
-        case conceptRegex.test(link):
-            return { iri: qnameToIri("skos:Concept"), title: "Concept" };
-        default:
-            return { iri: "", title: "" };
-    }
-}
 
 onMounted(async () => {
     if (route.query && route.query.uri) {
@@ -125,14 +85,21 @@ onMounted(async () => {
                             let parentId = parentIds[0].object.value;
                             let parentLink = q.object.value.split(parentId)[0] + parentId;
                             let titles = store.value.getObjects(namedNode(parentIri), namedNode(qnameToIri("rdfs:label")), null); // API only checks for rdfs:label?
+                            let parentTypes: { iri: string; title?: string; }[] = [];
+                            store.value.getObjects(namedNode(parentIri), namedNode(qnameToIri("a")), null).forEach(t => {
+                                const typeLabel = store.value.getObjects(t, namedNode(qnameToIri("rdfs:label")), null);
+                                parentTypes.push({
+                                    iri: t.value,
+                                    title: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+                                });
+                            });
 
                             item.value.links.push({
                                 parentIri: parentIri,
                                 parentLink: parentLink,
-                                parentType: getBaseClassFromLink(parentLink),
+                                parentTypes: parentTypes,
                                 parentTitle: titles.length > 0 ? titles[0].value : undefined,
-                                link: q.object.value,
-                                baseClass: getBaseClassFromLink(q.object.value)
+                                link: q.object.value
                             });
                         }
                     }
@@ -165,12 +132,12 @@ onMounted(async () => {
             <RouterLink class="link" v-for="link in item.links" :to="link.link">
                 <div class="parent">
                     <h4>{{ link.parentTitle || link.parentIri }}</h4>
-                    <span class="badge">{{ link.parentType.title || link.parentType.iri }}</span>
+                    <span v-for="t in link.parentTypes" class="badge">{{ t.title || t.iri }}</span>
                 </div>
                 <div class="separator">&gt;</div>
                 <div class="object">
                     <h4>{{ item.title || item.iri }}</h4>
-                    <span class="badge">{{ link.baseClass.title || link.baseClass.iri }}</span>
+                    <span v-for="t in item.types" class="badge">{{ t.title || t.iri }}</span>
                 </div>
             </RouterLink>
         </div>

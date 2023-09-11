@@ -52,3 +52,45 @@ export const sortByTitle = <T extends {title?: string; iri: string;}>(a: T, b: T
         return a.iri.localeCompare(b.iri);
     }
 };
+
+/**
+ * Get the base class from the URL structure
+ * 
+ * @param link 
+ * @returns 
+ */
+export function getBaseClassFromLink(link: string): {iri: string; title: string} {
+    const curieRegex = "[a-zA-Z0-9\\.\\-_]+:[a-zA-Z0-9\\.\\-_]+";
+    const profileRegex = new RegExp(`^(\/[csv])?\/profiles\/${curieRegex}\/?$`);
+    const catalogRegex = new RegExp(`^\/c\/catalogs\/${curieRegex}\/?$`);
+    const resourceRegex = new RegExp(`^\/c\/catalogs\/${curieRegex}\/${curieRegex}\/?$`);
+    const datasetRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/?$`);
+    const featureCollectionRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/collections\/${curieRegex}\/?$`);
+    const featureRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/collections\/${curieRegex}\/items\/${curieRegex}\/?$`);
+    const vocabRegex = new RegExp(`^\/v\/vocab\/${curieRegex}\/?$`);
+    const collectionRegex = new RegExp(`^\/v\/collection\/${curieRegex}\/?$`);
+    const conceptRegex = new RegExp(`^\/v\/(vocab|collection)\/${curieRegex}\/${curieRegex}\/?$`);
+
+    switch (true) {
+        case profileRegex.test(link):
+            return { iri: "http://www.w3.org/ns/dx/prof/Profile", title: "Profile" };
+        case catalogRegex.test(link):
+            return { iri: "http://www.w3.org/ns/dcat#Catalog", title: "Catalog" };
+        case resourceRegex.test(link):
+            return { iri: "http://www.w3.org/ns/dcat#Resource", title: "Resource" };
+        case datasetRegex.test(link):
+            return { iri: "http://www.w3.org/ns/dcat#Dataset", title: "Dataset" };
+        case featureCollectionRegex.test(link):
+            return { iri: "http://www.opengis.net/ont/geosparql#FeatureCollection", title: "Feature Collection" };
+        case featureRegex.test(link):
+            return { iri: "http://www.opengis.net/ont/geosparql#Feature", title: "Feature" };
+        case vocabRegex.test(link):
+            return { iri: "http://www.w3.org/2004/02/skos/core#ConceptScheme", title: "Concept Scheme" };
+        case collectionRegex.test(link):
+            return { iri: "http://www.w3.org/2004/02/skos/core#Collection", title: "Collection" };
+        case conceptRegex.test(link):
+            return { iri: "http://www.w3.org/2004/02/skos/core#Concept", title: "Concept" };
+        default:
+            return { iri: "", title: "" };
+    }
+}
