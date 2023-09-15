@@ -196,3 +196,8 @@ export type languageLabel = {
     language?: string;
     priority: number;
 };
+
+export type option = {
+    title?: string;
+    iri: string;
+};

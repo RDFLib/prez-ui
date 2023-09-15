@@ -13,6 +13,7 @@ const hover = ref(false);
 const tooltip = ref<HTMLElement | null>(null);
 const tooltipText = ref<HTMLElement | null>(null);
 
+// TODO: tooltip positioning doesn't work on page scroll - need exact position
 // TODO: use click event for touch devices
 
 function positionTop() {

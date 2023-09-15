@@ -1,4 +1,5 @@
 import { useUiStore } from "@/stores/ui";
+import type { option } from "@/types";
 
 const ui = useUiStore();
 
@@ -30,8 +31,25 @@ export function copyToClipboard(text: string) {
     navigator.clipboard.writeText(text.trim());
 }
 
+/**
+ * Capitalises the first letter of a string
+ * 
+ * @param s 
+ * @returns 
+ */
 export function titleCase(s: string): string {
     return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+/**
+ * Converts camelCase to Title Case
+ * 
+ * @param s 
+ * @returns 
+ */
+export function camelToTitleCase(s: string): string {
+    const result = s.replace(/([A-Z])/g, " $1");
+    return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
 /**
@@ -115,4 +133,15 @@ export function getBaseClassFromLink(link: string): {iri: string; title: string}
         default:
             return { iri: "", title: "" };
     }
+}
+
+/**
+ * 
+ * 
+ * @param options 
+ * @param selected 
+ * @returns 
+ */
+export function allOptionsSelected(options: option[], selected: string[]): boolean {
+    return options.every(option => selected.includes(option.iri));
 }
