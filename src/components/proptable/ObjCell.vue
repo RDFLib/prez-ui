@@ -41,6 +41,9 @@ const MAX_GEOM_LENGTH = 100; // max character length for geometry strings
                     <pre>{{ props.value.length > MAX_GEOM_LENGTH ? `${props.value.slice(0, MAX_GEOM_LENGTH)}...` : props.value }}</pre>
                     <button class="btn outline sm" title="Copy geometry" @click="copyToClipboard(props.value)"><i class="fa-regular fa-clipboard"></i></button>
                 </div>
+                <div v-else-if="props.datatype && props.datatype.qname === 'xsd:double'">
+                    {{ Number(props.value) }}
+                </div>
                 <template v-else>{{ props.value }}</template>
             </template>
         </div>
