@@ -1,110 +1,79 @@
 <script lang="ts" setup>
-import { onMounted, ref, watch, computed } from "vue";
+import { onMounted, ref, watch, computed, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
 import { DataFactory, type Literal } from "n3";
-import type { languageLabel } from "@/types";
+import type { ProfileHeader, languageLabel, option, SearchItem, selectOption, treeSelectOption } from "@/types";
+import type { WKTResult } from "@/components/MapClient.d";
 import { useUiStore } from "@/stores/ui";
-import { useApiRequest } from "@/composables/api";
+import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 import router from "@/router";
-import { sortByTitle, getLanguagePriority, allOptionsSelected, ensureProfiles } from "@/util/helpers";
+import { sortByTitle, getLanguagePriority, allOptionsSelected, ensureProfiles, getLink } from "@/util/helpers";
+import SearchResult from "@/components/search/SearchResult.vue";
+import MapClient from "@/components/MapClient.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
-import NewTooltip from "@/components/NewTooltip.vue";
+import TreeSelect from "@bosquig/vue3-treeselect";
 
 const { namedNode } = DataFactory;
-
-type option = {
-    title?: string;
-    iri: string;
-};
-
-type searchResult = {
-    label?: string;
-    uri: string;
-    source: string;
-};
 
 const route = useRoute();
 const ui = useUiStore();
 const { loading, error, apiGetRequest } = useApiRequest(); // search request
-const { store, parseIntoStore, qnameToIri } = useRdfStore(); // search results store
+const { store, parseIntoStore, qnameToIri, clearStore } = useRdfStore(); // search results store
 const { loading: catalogLoading, error: catalogError, apiGetRequest: catalogApiGetRequest } = useApiRequest(); // catalog request
 const { loading: datasetLoading, error: datasetError, apiGetRequest: datasetApiGetRequest } = useApiRequest(); // dataset request
+const { loading: fcLoading, hasError: fcError, concurrentApiRequests: fcConcurrentApiRequests } = useConcurrentApiRequests(); // feature collections request
 const { loading: vocabLoading, error: vocabError, apiGetRequest: vocabApiGetRequest } = useApiRequest(); // vocab request
 const { loading: collectionLoading, error: collectionError, apiGetRequest: collectionApiGetRequest } = useApiRequest(); // collection request
 const { store: optionsStore, parseIntoStore: optionParseIntoStore, qnameToIri: optionQnameToIri } = useRdfStore(); // options store
 
-const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
-const DEFAULT_DESC_PREDICATES = [qnameToIri("dcterms:description")];
+const DEFAULT_LABEL_PREDICATES = [
+    qnameToIri("rdfs:label"),
+    qnameToIri("dcterms:title"),
+    qnameToIri("skos:prefLabel"),
+    qnameToIri("sdo:name"),
+];
+const DEFAULT_DESC_PREDICATES = [
+    qnameToIri("dcterms:description"),
+    qnameToIri("skos:definition"),
+    qnameToIri("sdo:description"),
+];
 const SEARCH_METHOD = "default";
-
-// const SEARCH_METHODS: option[] = [
-//     {
-//         iri: "default",
-//         title: "Default"
-//     },
-//     {
-//         iri: "exactMatch",
-//         title: "Exact Match"
-//     },
-//     {
-//         iri: "jenaFTName",
-//         title: "Jena F T Name"
-//     },
-//     {
-//         iri: "skosPrefLabel",
-//         title: "Skos Pref Label"
-//     },
-//     {
-//         iri: "skosWeighted",
-//         title: "Skos Weighted"
-//     },
-// ];
-
-const BASE_CLASSES: (option & { tooltip: string })[] = [
+const BASE_CLASSES: selectOption[] = [
     {
-        iri: optionQnameToIri("dcat:Catalog"),
-        title: "Catalog",
-        tooltip: "A catalog is ..."
+        id: optionQnameToIri("dcat:Catalog"),
+        label: "Catalog",
     },
     {
-        iri: optionQnameToIri("skos:Collection"),
-        title: "Collection",
-        tooltip: "A collection is ..."
+        id: optionQnameToIri("skos:Collection"),
+        label: "Collection",
     },
     {
-        iri: optionQnameToIri("skos:Concept"),
-        title: "Concept",
-        tooltip: "A concept is ..."
+        id: optionQnameToIri("skos:Concept"),
+        label: "Concept",
     },
     {
-        iri: optionQnameToIri("skos:ConceptScheme"),
-        title: "Concept Scheme",
-        tooltip: "A concept scheme is ..."
+        id: optionQnameToIri("skos:ConceptScheme"),
+        label: "Concept Scheme",
     },
     {
-        iri: optionQnameToIri("dcat:Dataset"),
-        title: "Dataset",
-        tooltip: "A dataset is ..."
+        id: optionQnameToIri("dcat:Dataset"),
+        label: "Dataset",
     },
     {
-        iri: optionQnameToIri("geo:Feature"),
-        title: "Feature",
-        tooltip: "A feature is ..."
+        id: optionQnameToIri("geo:Feature"),
+        label: "Feature",
     },
     {
-        iri: optionQnameToIri("geo:FeatureCollection"),
-        title: "Feature Collection",
-        tooltip: "A feature collection is ..."
+        id: optionQnameToIri("geo:FeatureCollection"),
+        label: "Feature Collection",
     },
     {
-        iri: optionQnameToIri("dcat:Resource"),
-        title: "Resource",
-        tooltip: "A resource is ..."
+        id: optionQnameToIri("dcat:Resource"),
+        label: "Resource",
     },
 ];
-
 const CONTAINER_RELATIONS: { [key: string]: { predicate: string; inbound: boolean; } } = {
     "dcat:Dataset": {
         predicate: "rdfs:member",
@@ -126,12 +95,12 @@ const CONTAINER_RELATIONS: { [key: string]: { predicate: string; inbound: boolea
 
 const options = ref<{
     containers: {
-        dataset: option[];
-        catalog: option[];
-        vocab: option[];
-        collection: option[];
+        dataset: treeSelectOption[];
+        catalog: selectOption[];
+        vocab: selectOption[];
+        collection: selectOption[];
     };
-    baseClasses: (option & { tooltip: string })[];
+    baseClasses: selectOption[];
 }>({
     containers: {
         dataset: [],
@@ -141,7 +110,6 @@ const options = ref<{
     },
     baseClasses: BASE_CLASSES
 });
-
 const data = ref<{
     term: string;
     limit: number;
@@ -169,37 +137,9 @@ const data = ref<{
     outbound: [],
     inbound: []
 });
-
 const collapse = ref(false);
-const containerCollapse = ref({
-    dataset: false,
-    catalog: false,
-    vocab: false,
-    collection: false,
-});
-const datasetCollapse = ref<{ [key: string]: boolean }>({});
-const results = ref<searchResult[]>([]);
-
-const allBaseClassesSelected = computed(() => {
-    return allOptionsSelected(options.value.baseClasses, data.value.baseClasses);
-});
-
-const allContainersSelected = computed(() => {
-    return {
-        catalog: allOptionsSelected(options.value.containers.catalog, data.value.containers.catalog),
-        dataset: allOptionsSelected(options.value.containers.dataset, data.value.containers.dataset),
-        vocab: allOptionsSelected(options.value.containers.vocab, data.value.containers.vocab),
-        collection: allOptionsSelected(options.value.containers.collection, data.value.containers.collection),
-    }
-});
-
-function toggleSelectAllBaseClasses() {
-    data.value.baseClasses = !allBaseClassesSelected.value ? options.value.baseClasses.map(o => o.iri) : [];
-}
-
-function toggleSelectAllContainers(containerType: "catalog" | "dataset" | "vocab" | "collection") {
-    data.value.containers[containerType] = !allContainersSelected.value[containerType] ? options.value.containers[containerType].map(o => o.iri) : [];
-}
+const results = ref<SearchItem[]>([]);
+const geoResults = ref<WKTResult[]>([]);
 
 function getCatalogs() {
     catalogApiGetRequest("/c/catalogs").then(r => {
@@ -209,13 +149,13 @@ function getCatalogs() {
             const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
             optionParseIntoStore(catalogData);
-            const catalogOptions: option[] = [];
+            const catalogOptions: selectOption[] = [];
 
             optionsStore.value.forSubjects(subject => {
                 if (!subject.value.endsWith("/system/catprez")) { // hide system catalog
-                    const catalog: option = {
-                        iri: subject.value
-                    };
+                    const catalog: selectOption = {
+                        id: subject.value
+                    } as selectOption;
 
                     const labels: languageLabel[] = [];
 
@@ -231,32 +171,35 @@ function getCatalogs() {
                     }, subject, null, null, null);
 
                     labels.sort((a, b) => a.priority - b.priority);
-                    catalog.title = labels.length > 0 ? labels[0].value : undefined;
+                    catalog.label = labels.length > 0 ? labels[0].value : catalog.id;
 
                     catalogOptions.push(catalog);
                 }
             }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Catalog")), null);
 
-            catalogOptions.sort(sortByTitle);
+            // catalogOptions.sort(sortByTitle);
             options.value.containers.catalog = catalogOptions;
-            data.value.containers.catalog = catalogOptions.map(c => c.iri);
+            // data.value.containers.catalog = catalogOptions.map(c => c.id);
         }
     });
 }
 
 function getDatasets() {
-    datasetApiGetRequest("/s/datasets").then(r => {
+    datasetApiGetRequest("/s/datasets").then(async r => {
         const { data: datasetData, profiles } = r;
         if (data && profiles.length > 0) {
             const defaultProfile = ui.profiles[profiles.find(p => p.default)!.uri];
             const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
             optionParseIntoStore(datasetData);
-            const datasetOptions: option[] = [];
+            const datasetOptions: { [key: string]: treeSelectOption & { link: string } } = {};
 
             optionsStore.value.forSubjects(subject => {
-                const dataset: option = {
-                    iri: subject.value
+                const dataset: treeSelectOption & { link: string } = {
+                    id: subject.value,
+                    label: subject.value,
+                    link: "",
+                    children: []
                 };
 
                 const labels: languageLabel[] = [];
@@ -269,18 +212,65 @@ function getDatasets() {
                                 language: language || undefined,
                                 priority: getLanguagePriority(language)
                             });
+                        } else if (q.predicate.value === optionQnameToIri("prez:link")) {
+                            dataset.link = q.object.value;
                         }
                     }, subject, null, null, null);
 
                     labels.sort((a, b) => a.priority - b.priority);
-                    dataset.title = labels.length > 0 ? labels[0].value : undefined;
+                    dataset.label = labels.length > 0 ? labels[0].value : dataset.id;
 
-                datasetOptions.push(dataset);
+                datasetOptions[dataset.id] = dataset;
             }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Dataset")), null);
 
-            datasetOptions.sort(sortByTitle);
-            options.value.containers.dataset = datasetOptions;
-            data.value.containers.dataset = datasetOptions.map(c => c.iri);
+            const fcResults = await fcConcurrentApiRequests(Object.values(datasetOptions).map(d => `${d.link}/collections`));
+            let fcProfiles: ProfileHeader[] = [];
+            fcResults.forEach((r, index) => {
+                if (r.value) {
+                    optionParseIntoStore(r.value);
+                }
+                if (index === 0 && r.profiles) {
+                    fcProfiles = r.profiles;
+                }
+            });
+
+            const fcDefaultProfile = ui.profiles[fcProfiles.find(p => p.default)!.uri];
+            const fcLabelPredicates = fcDefaultProfile.labelPredicates.length > 0 ? fcDefaultProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
+
+            optionsStore.value.forSubjects(subject => {
+                optionsStore.value.forObjects(object => {
+                    const fc: treeSelectOption = {
+                        id: object.value,
+                        label: object.value
+                    };
+                    const labels: languageLabel[] = [];
+                    optionsStore.value.forEach(q => { // fc triples
+                        if (fcLabelPredicates.includes(q.predicate.value)) {
+                            let language = (q.object as Literal).language;
+                            labels.push({
+                                value: q.object.value,
+                                language: language || undefined,
+                                priority: getLanguagePriority(language)
+                            });
+                        }
+                    }, object, null, null, null);
+                    labels.sort((a, b) => a.priority - b.priority);
+                    fc.label = labels.length > 0 ? labels[0].value : fc.id;
+                    datasetOptions[subject.value].children?.push(fc);
+                }, subject, optionQnameToIri("rdfs:member"), null);
+
+                // sort fcs
+            }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Dataset")), null);
+
+            // datasetOptions.sort(sortByTitle);
+            options.value.containers.dataset = Object.values(datasetOptions).map(d => {
+                return {
+                    id: d.id,
+                    label: d.label,
+                    children: d.children
+                };
+            });
+            // data.value.containers.dataset = datasetOptions.map(c => c.id);
         }
     });
 }
@@ -293,12 +283,12 @@ function getVocabs() {
             const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
             optionParseIntoStore(vocabData);
-            const vocabOptions: option[] = [];
+            const vocabOptions: selectOption[] = [];
 
             optionsStore.value.forSubjects(subject => {
-                const vocab: option = {
-                    iri: subject.value
-                };
+                const vocab: selectOption = {
+                    id: subject.value
+                } as selectOption;
 
                 const labels: languageLabel[] = [];
 
@@ -314,14 +304,14 @@ function getVocabs() {
                 }, subject, null, null, null);
 
                 labels.sort((a, b) => a.priority - b.priority);
-                vocab.title = labels.length > 0 ? labels[0].value : undefined;
+                vocab.label = labels.length > 0 ? labels[0].value : vocab.id;
 
                 vocabOptions.push(vocab);
             }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:ConceptScheme")), null);
 
-            vocabOptions.sort(sortByTitle);
+            // vocabOptions.sort(sortByTitle);
             options.value.containers.vocab = vocabOptions;
-            data.value.containers.vocab = vocabOptions.map(c => c.iri);
+            // data.value.containers.vocab = vocabOptions.map(c => c.id);
         }
     });
 }
@@ -334,12 +324,12 @@ function getCollections() {
             const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
             optionParseIntoStore(collectionData);
-            const collectionOptions: option[] = [];
+            const collectionOptions: selectOption[] = [];
 
             optionsStore.value.forSubjects(subject => {
-                const collection: option = {
-                    iri: subject.value
-                };
+                const collection: selectOption = {
+                    id: subject.value
+                } as selectOption;
 
                 const labels: languageLabel[] = [];
 
@@ -355,14 +345,14 @@ function getCollections() {
                 }, subject, null, null, null);
 
                 labels.sort((a, b) => a.priority - b.priority);
-                collection.title = labels.length > 0 ? labels[0].value : undefined;
+                collection.label = labels.length > 0 ? labels[0].value : collection.id;
 
                 collectionOptions.push(collection);
             }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:Collection")), null);
 
-            collectionOptions.sort(sortByTitle);
+            // collectionOptions.sort(sortByTitle);
             options.value.containers.collection = collectionOptions;
-            data.value.containers.collection = collectionOptions.map(c => c.iri);
+            // data.value.containers.collection = collectionOptions.map(c => c.id);
         }
     });
 }
@@ -382,12 +372,11 @@ function formToQueryString(): string {
     queryList.push(`limit=${data.value.limit}`);
 
     // if some classes are selected
-    if (!allBaseClassesSelected.value && data.value.baseClasses.length > 0) {
+    if (data.value.baseClasses.length > 0) {
         queryList.push(`focus-to-filter[rdf:type]=${data.value.baseClasses.map(c => encodeURIComponent(c)).join(",")}`);
     }
 
     // if not all containers are selected
-    if (!(allContainersSelected.value.catalog && allContainersSelected.value.dataset && allContainersSelected.value.vocab && allContainersSelected.value.collection)) {
         if (data.value.containers.catalog.length > 0) {
             queryList.push(`${CONTAINER_RELATIONS["dcat:Catalog"].inbound ? 'filter-to-focus' : 'focus-to-filter'}[${CONTAINER_RELATIONS["dcat:Catalog"].predicate}]=${data.value.containers.catalog.map(c => encodeURIComponent(c)).join(",")}`);
         }
@@ -400,7 +389,6 @@ function formToQueryString(): string {
         if (data.value.containers.collection.length > 0) {
             queryList.push(`${CONTAINER_RELATIONS["skos:Collection"].inbound ? 'filter-to-focus' : 'focus-to-filter'}[${CONTAINER_RELATIONS["skos:Collection"].predicate}]=${data.value.containers.collection.map(c => encodeURIComponent(c)).join(",")}`);
         }
-    }
 
     // outbound
     if (data.value.outbound.length > 0) {
@@ -423,12 +411,99 @@ function queryStringToForm() {
     console.log("parsing query string...")
 }
 
+function reset() {
+    // reset state
+    error.value = "";
+    loading.value = false;
+    results.value = [];
+    geoResults.value = [];
+    clearStore();
+}
+
 async function submit() {
+    reset();
+
     const query = formToQueryString();
     console.log(query)
     // router.push(`/search${query}`)
-    const { data } = await apiGetRequest(`/search${query}`);
+    const { data, profiles } = await apiGetRequest(`/search${query}`);
     console.log(data)
+    if (data && profiles.length > 0 && !error.value) {
+        const defaultProfile = ui.profiles[profiles.find(p => p.default)!.uri];
+        const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+        const descPredicates = defaultProfile!.descriptionPredicates.length > 0 ? defaultProfile!.descriptionPredicates : DEFAULT_DESC_PREDICATES;
+        
+        parseIntoStore(data);
+
+        const tempResults: SearchItem[] = [];
+
+        store.value.forSubjects(subject => {
+            const result: SearchItem = {
+                weight: 0,
+                uri: "",
+                title: "",
+                links: [],
+                description: "",
+                types: []
+            };
+
+            store.value.forEach(q => {
+                if (q.predicate.value === qnameToIri("prez:searchResultWeight")) {
+                    result.weight = Number(q.object.value);
+                } else if (q.predicate.value === qnameToIri("prez:searchResultURI")) {
+                    result.uri = q.object.value;
+                    const labels: languageLabel[] = [];
+                    let resultCoordinates = undefined;
+                    store.value.forEach(q1 => {
+                        if (q1.predicate.value === qnameToIri("prez:link")) {
+                            let link = getLink(store.value, q1);
+                            if (link) {
+                                result.links.push(link);
+                            }
+                        } else if (labelPredicates.includes(q1.predicate.value)) {
+                            let language = (q1.object as Literal).language;
+                            labels.push({
+                                value: q1.object.value,
+                                language: language || undefined,
+                                priority: getLanguagePriority(language)
+                            });
+                        } else if (descPredicates.includes(q1.predicate.value)) {
+                            result.description = q1.object.value;
+                        } else if (q1.predicate.value === qnameToIri("a")) {
+                            const typeLabel = store.value.getObjects(q1.object, namedNode(qnameToIri("rdfs:label")), null);
+                            result.types.push({
+                                uri: q1.object.value,
+                                label: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+                            });
+                        } else if (q1.predicate.value === qnameToIri("geo:hasGeometry")) {
+                            store.value.forEach(geometryTriple => {
+                                resultCoordinates = geometryTriple.object.value;
+                            }, q1.object, namedNode(qnameToIri("geo:asWKT")), null, null);
+                        }
+                    }, q.object, null, null, null);
+                    labels.sort((a, b) => a.priority - b.priority);
+                    result.title = labels.length > 0 ? labels[0].value : undefined;
+                    if (resultCoordinates) {
+                        geoResults.value.push({
+                            uri: result.uri,
+                            link: `/object?uri=${result.uri}`,
+                            label: result.title ? result.title : result.uri,
+                            fcLabel: "",
+                            wkt: resultCoordinates
+                        });
+                    }
+                }
+            }, subject, null, null, null);
+
+            console.log(result);
+            tempResults.push(result);
+        }, namedNode(qnameToIri("a")), namedNode(qnameToIri("prez:SearchResult")), null);
+        
+        // filter out duplicate URIs, keep highest weight?
+
+        tempResults.sort((a, b) => b.weight - a.weight);
+        results.value = tempResults;
+    }
 }
 
 async function getResults() {
@@ -436,7 +511,6 @@ async function getResults() {
     console.log("sending query to API...")
     console.log(route.fullPath)
     const { data } = await apiGetRequest(route.fullPath);
-    console.log(data)
 }
 
 // watch(() => route.query, async (newValue, oldValue) => {
@@ -446,13 +520,18 @@ async function getResults() {
 //     }
 // }, { deep: true });
 
+onBeforeMount(() => {
+    // filling out treeselects needs to be done before mounting
+    // parse QSAs here and fill out form
+});
+
 onMounted(async () => {
     ui.rightNavConfig = { enabled: false };
     document.title = "Advanced Search | Prez";
     ui.pageHeading = { name: "Prez", url: "/" };
     ui.breadcrumbs = [{ name: "Advanced Search", url: "/search" }];
 
-    data.value.baseClasses = options.value.baseClasses.map(c => c.iri);
+    // data.value.baseClasses = options.value.baseClasses.map(c => c.id);
 
     await ensureProfiles();
 
@@ -491,168 +570,120 @@ onMounted(async () => {
                 </button>
             </div>
         </div>
-        <div v-if="!collapse" class="form-section span-x-2">
+        <div v-if="!collapse" class="form-section">
             <div class="section-title">
                 <h4>Base Classes</h4>
-                <NewTooltip class="info-tooltip">
-                    <i class="fa-regular fa-circle-question"></i>
-                    <template #text>
-                        Object types
-                    </template>
-                </NewTooltip>
+                <Tooltip>
+                    <span><i class="fa-regular fa-circle-question"></i></span>
+                    <template #popper>Object types</template>
+                </Tooltip>
             </div>
             <div class="section-body">
-                <div class="checkboxes">
-                    <div class="checkbox check-all">
-                        <input type="checkbox" name="" id="class-all" :checked="allBaseClassesSelected" @change="toggleSelectAllBaseClasses">
-                        <label for="class-all">Check All</label>
-                    </div>
-                    <div v-for="(option, index) in options.baseClasses" class="checkbox">
-                        <input type="checkbox" name="" :id="`class-${index}`" :value="option.iri" v-model="data.baseClasses">
-                        <label :for="`class-${index}`">{{ option.title || option.iri }}</label>
-                        <NewTooltip class="info-tooltip ml-auto">
-                            <i class="fa-regular fa-circle-question"></i>
-                            <template #text>
-                                {{ option.tooltip }}
-                            </template>
-                        </NewTooltip>
-                    </div>
-                </div>
+                <TreeSelect
+                    v-model="data.baseClasses"
+                    :options="options.baseClasses"
+                    multiple
+                    clearable
+                />
             </div>
         </div>
+        <div v-if="!collapse"></div>
         <div v-if="!collapse" class="form-section span-x-2 span-y-2">
             <div class="section-title">
                 <h4>Containers</h4>
-                <NewTooltip class="info-tooltip">
-                    <i class="fa-regular fa-circle-question"></i>
-                    <template #text>
-                        Filter by items contained by these objects.
-                    </template>
-                </NewTooltip>
+                <Tooltip>
+                    <span><i class="fa-regular fa-circle-question"></i></span>
+                    <template #popper>Filter by items within these objects</template>
+                </Tooltip>
             </div>
             <div class="section-body containers">
                 <div class="form-section">
                     <div class="section-title">
-                        <input type="checkbox" name="" id="catalog-all" :checked="allContainersSelected.catalog" @change="toggleSelectAllContainers('catalog')">
                         <label for="catalog-all">
                             <h5>Catalogs</h5>
                         </label>
-                        <button
-                            class="btn outline sm container-collapse-btn"
-                            @click="containerCollapse.catalog = !containerCollapse.catalog"
-                            title="Toggle collapse catalogs"
-                        >
-                            <i :class="`fa-solid fa-chevron-${containerCollapse.catalog ? 'down' : 'up'}`"></i>
-                        </button>
-                        <NewTooltip class="info-tooltip">
-                            <i class="fa-regular fa-circle-question"></i>
-                            <template #text>
-                                Catalogues
-                            </template>
-                        </NewTooltip>
+                        <Tooltip>
+                            <span><i class="fa-regular fa-circle-question"></i></span>
+                            <template #popper>Catalogs</template>
+                        </Tooltip>
                     </div>
-                    <div :class="`section-body ${containerCollapse.catalog ? 'collapse' : ''}`">
+                    <div class="section-body">
                         <ErrorMessage v-if="catalogError" :message="catalogError" />
                         <LoadingMessage v-else-if="catalogLoading" />
-                        <div v-else class="checkboxes">
-                            <div v-for="(catalog, index) in options.containers.catalog" class="checkbox">
-                                <input type="checkbox" name="" :id="`catalog-${index}`" :value="catalog.iri" v-model="data.containers.catalog">
-                                <label :for="`catalog-${index}`">{{ catalog.title || catalog.iri }}</label>
-                            </div>
-                        </div>
+                        <TreeSelect
+                            v-else
+                            v-model="data.containers.catalog"
+                            :options="options.containers.catalog"
+                            multiple
+                            clearable
+                        />
                     </div>
                 </div>
                 <div class="form-section">
                     <div class="section-title">
-                        <input type="checkbox" name="" id="dataset-all" :checked="allContainersSelected.dataset" @change="toggleSelectAllContainers('dataset')">
                         <label for="dataset-all">
                             <h5>Datasets</h5>
                         </label>
-                        <button
-                            class="btn outline sm container-collapse-btn"
-                            @click="containerCollapse.dataset = !containerCollapse.dataset"
-                            title="Toggle collapse datasets"
-                        >
-                            <i :class="`fa-solid fa-chevron-${containerCollapse.dataset ? 'down' : 'up'}`"></i>
-                        </button>
-                        <NewTooltip class="info-tooltip">
-                            <i class="fa-regular fa-circle-question"></i>
-                            <template #text>
-                                Datasets
-                            </template>
-                        </NewTooltip>
+                        <Tooltip>
+                            <span><i class="fa-regular fa-circle-question"></i></span>
+                            <template #popper>Datasets</template>
+                        </Tooltip>
                     </div>
-                    <div :class="`section-body ${containerCollapse.dataset ? 'collapse' : ''}`">
+                    <div class="section-body">
                         <ErrorMessage v-if="datasetError" :message="datasetError" />
-                        <LoadingMessage v-else-if="datasetLoading" />
-                        <div v-else class="checkboxes">
-                            <div v-for="(dataset, index) in options.containers.dataset" class="checkbox">
-                                <input type="checkbox" name="" :id="`dataset-${index}`" :value="dataset.iri" v-model="data.containers.dataset">
-                                <label :for="`dataset-${index}`">{{ dataset.title || dataset.iri }}</label>
-                            </div>
-                        </div>
+                        <LoadingMessage v-else-if="datasetLoading || fcLoading" />
+                        <TreeSelect
+                            v-else
+                            v-model="data.containers.dataset"
+                            :options="options.containers.dataset"
+                            multiple
+                            clearable
+                            flat
+                        />
                     </div>
                 </div>
                 <div class="form-section">
                     <div class="section-title">
-                        <input type="checkbox" name="" id="vocab-all" :checked="allContainersSelected.vocab" @change="toggleSelectAllContainers('vocab')">
                         <label for="vocab-all">
                             <h5>Vocabularies</h5>
                         </label>
-                        <button
-                            class="btn outline sm container-collapse-btn"
-                            @click="containerCollapse.vocab = !containerCollapse.vocab"
-                            title="Toggle collapse vocabularies"
-                        >
-                            <i :class="`fa-solid fa-chevron-${containerCollapse.vocab ? 'down' : 'up'}`"></i>
-                        </button>
-                        <NewTooltip class="info-tooltip">
-                            <i class="fa-regular fa-circle-question"></i>
-                            <template #text>
-                                Vocabularies
-                            </template>
-                        </NewTooltip>
+                        <Tooltip>
+                            <span><i class="fa-regular fa-circle-question"></i></span>
+                            <template #popper>Vocabularies</template>
+                        </Tooltip>
                     </div>
-                    <div :class="`section-body ${containerCollapse.vocab ? 'collapse' : ''}`">
+                    <div class="section-body">
                         <ErrorMessage v-if="vocabError" :message="vocabError" />
                         <LoadingMessage v-else-if="vocabLoading" />
-                        <div v-else class="checkboxes">
-                            <div v-for="(vocab, index) in options.containers.vocab" class="checkbox">
-                                <input type="checkbox" name="" :id="`vocab-${index}`" :value="vocab.iri" v-model="data.containers.vocab">
-                                <label :for="`vocab-${index}`">{{ vocab.title || vocab.iri }}</label>
-                            </div>
-                        </div>
+                        <TreeSelect
+                            v-else
+                            v-model="data.containers.vocab"
+                            :options="options.containers.vocab"
+                            multiple
+                            clearable
+                        />
                     </div>
                 </div>
                 <div class="form-section">
                     <div class="section-title">
-                        <input type="checkbox" name="" id="collection-all" :checked="allContainersSelected.collection" @change="toggleSelectAllContainers('collection')">
                         <label for="collection-all">
                             <h5>Collections</h5>
                         </label>
-                        <button
-                            class="btn outline sm container-collapse-btn"
-                            @click="containerCollapse.collection = !containerCollapse.collection"
-                            title="Toggle collapse collections"
-                        >
-                            <i :class="`fa-solid fa-chevron-${containerCollapse.collection ? 'down' : 'up'}`"></i>
-                        </button>
-                        <NewTooltip class="info-tooltip">
-                            <i class="fa-regular fa-circle-question"></i>
-                            <template #text>
-                                Collections
-                            </template>
-                        </NewTooltip>
+                        <Tooltip>
+                            <span><i class="fa-regular fa-circle-question"></i></span>
+                            <template #popper>Collections</template>
+                        </Tooltip>
                     </div>
-                    <div :class="`section-body ${containerCollapse.collection ? 'collapse' : ''}`">
+                    <div class="section-body">
                         <ErrorMessage v-if="collectionError" :message="collectionError" />
                         <LoadingMessage v-else-if="collectionLoading" />
-                        <div v-else class="checkboxes">
-                            <div v-for="(collection, index) in options.containers.collection" class="checkbox">
-                                <input type="checkbox" name="" :id="`collection-${index}`" :value="collection.iri" v-model="data.containers.collection">
-                                <label :for="`collection-${index}`">{{ collection.title || collection.iri }}</label>
-                            </div>
-                        </div>
+                        <TreeSelect
+                            v-else
+                            v-model="data.containers.collection"
+                            :options="options.containers.collection"
+                            multiple
+                            clearable
+                        />
                     </div>
                 </div>
             </div>
@@ -660,12 +691,10 @@ onMounted(async () => {
         <div v-if="!collapse" class="form-section">
             <div class="section-title">
                 <h4>Outbound Properties</h4>
-                <NewTooltip class="info-tooltip">
-                    <i class="fa-regular fa-circle-question"></i>
-                    <template #text>
-                        Properties of the item you're searching for.
-                    </template>
-                </NewTooltip>
+                <Tooltip>
+                    <span><i class="fa-regular fa-circle-question"></i></span>
+                    <template #popper>Properties of the item you're searching for.</template>
+                </Tooltip>
             </div>
             <div class="section-body">
                 <div v-for="(property, index) in data.outbound" class="custom-property">
@@ -679,12 +708,10 @@ onMounted(async () => {
         <div v-if="!collapse" class="form-section">
             <div class="section-title">
                 <h4>Inbound Properties</h4>
-                <NewTooltip class="info-tooltip">
-                    <i class="fa-regular fa-circle-question"></i>
-                    <template #text>
-                        Relational properties that point to this item.
-                    </template>
-                </NewTooltip>
+                <Tooltip>
+                    <span><i class="fa-regular fa-circle-question"></i></span>
+                    <template #popper>Relational properties that point to this item.</template>
+                </Tooltip>
             </div>
             <div class="section-body">
                 <div v-for="(property, index) in data.inbound" class="custom-property">
@@ -703,16 +730,21 @@ onMounted(async () => {
             <button class="btn lg" type="submit" @click="submit">Search <i class="fa-solid fa-magnifying-glass"></i></button>
         </div>
     </div>
-    <h2>Results</h2>
-    <LoadingMessage v-if="loading"/>
-    <!-- <ErrorMessage v-if="error" :message="error" />
+    <h2>Results<span v-if="results.length > 0"> ({{ results.length }})</span></h2>
+    <ErrorMessage v-if="error" :message="error" />
     <LoadingMessage v-else-if="loading"/>
-    <div v-else-if="results.length > 0" class="results">
-        <div v-for="result in results">
-            <pre>{{ result }}</pre>
+    <template v-else>
+        <div v-if="results.length > 0" class="results-grid">
+            <div class="results">
+                <SearchResult v-for="result in results" v-bind="result" />
+            </div>
+            <div v-if="geoResults.length > 0" class="map-container">
+                <h4>Spatial Results</h4>
+                <MapClient ref="searchMap" :geoWKT="geoResults" />
+            </div>
         </div>
-    </div>
-    <p v-else-if="!loading && results.length === 0 && Object.keys(route.query).length > 0">No results found.</p> -->
+        <p v-else-if="results.length === 0">No results found.</p>
+    </template>
 </template>
 
 <style lang="scss" scoped>
@@ -796,7 +828,7 @@ onMounted(async () => {
                 }
 
                 .section-body {
-                    overflow: hidden;
+                    // overflow: hidden;
 
                     &.collapse {
                         height: 0;
@@ -865,19 +897,25 @@ onMounted(async () => {
     }
 }
 
-.checkboxes {
+.results-grid {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    flex-direction: row;
+    gap: 12px;
 
-    .checkbox {
+    .results, .map-container {
+        flex: 1;
+    }
+
+    .results {
         display: flex;
-        flex-direction: row;
-        gap: 6px;
-        align-items: center;
+        flex-direction: column;
+        gap: 8px;
+    }
 
-        &.check-all {
-            margin-bottom: 6px;
+    .map-container {
+        h4 {
+            margin-top: 0;
+            margin-bottom: 12px;
         }
     }
 }

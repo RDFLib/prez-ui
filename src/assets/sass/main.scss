@@ -115,7 +115,7 @@ a {
     }
 }
 
-input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]), select, textarea {
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not(.vue-treeselect__input), select, textarea {
     border: 1px solid #aaaaaa;
     padding: 8px;
     border-radius: $borderRadius;

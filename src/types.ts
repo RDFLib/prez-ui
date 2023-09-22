@@ -201,3 +201,38 @@ export type option = {
     title?: string;
     iri: string;
 };
+
+export type selectOption = { // for treeselect, will convert option type to this
+    id: string;
+    label: string;
+};
+
+export type treeSelectOption = selectOption & {
+    children?: treeSelectOption[];
+};
+
+export type link = {
+    parents: { // ordered - grandparent, parent
+        iri: string;
+        title?: string;
+        link: string;
+        types: {
+            iri: string;
+            title?: string;
+        }[];
+    }[];
+    link: string;
+};
+
+export interface ObjectItem {
+    uri: string;
+    title?: string;
+    links: link[];
+    description?: string;
+    types: {
+        uri: string;
+        label?: string;
+    }[];
+};
+
+export interface SearchItem extends ObjectItem { weight: number };

@@ -1,7 +1,9 @@
+import { DataFactory, type Store, type Quad, type Literal } from "n3";
+import type { option, link, languageLabel } from "@/types";
 import { useUiStore } from "@/stores/ui";
-import type { option } from "@/types";
+import { DEFAULT_LABEL_PREDICATES, DEFAULT_PREFIXES } from "@/util/consts";
 
-const ui = useUiStore();
+const { namedNode } = DataFactory;
 
 /**
  * Periodically checks if the profiles object is set in Pinia before resolving a Promise.
@@ -9,6 +11,8 @@ const ui = useUiStore();
  * Loops every 500ms, times out after 20s.
  */
 export function ensureProfiles() {
+    const ui = useUiStore();
+
     return new Promise<void>((resolve, reject) => {
         let expTimer = setTimeout(reject, 20 * 1000); // time out after 20s
                
@@ -144,4 +148,86 @@ export function getBaseClassFromLink(link: string): {iri: string; title: string}
  */
 export function allOptionsSelected(options: option[], selected: string[]): boolean {
     return options.every(option => selected.includes(option.iri));
+}
+
+/**
+ * Constructs an object containing parent information within a link
+ * 
+ * @param store the RDF store
+ * @param linkQuad the quad containing the `prez:link`
+ * @returns the link object
+ */
+export function getLink(store: Store, linkQuad: Quad): link {
+    type linkParent = { // ordered - grandparent, parent
+        iri: string;
+        title?: string;
+        link: string;
+        types: {
+            iri: string;
+            title?: string;
+        }[];
+    };
+    const parents: linkParent[] = [];
+
+    // get matching parents by ID in the link, omitting self
+    const parentIds = store.getQuads(null, namedNode(defaultQnameToIri("dcterms:identifier")), null, null).filter(q1 => linkQuad.object.value.slice(0, linkQuad.object.value.lastIndexOf("/")).includes(q1.object.value));
+
+    parentIds.forEach(parentQuad => {
+        const parent: linkParent = {
+            iri: parentQuad.subject.value,
+            link: linkQuad.object.value.split(parentQuad.object.value)[0] + parentQuad.object.value,
+            types: []
+        };
+        
+        const labels: languageLabel[] = [];
+        store.forEach(q1 => {
+            if (DEFAULT_LABEL_PREDICATES.includes(q1.predicate.value)) {
+                let language = (q1.object as Literal).language;
+                labels.push({
+                    value: q1.object.value,
+                    language: language || undefined,
+                    priority: getLanguagePriority(language)
+                });
+            }
+        }, namedNode(parentQuad.subject.value), null, null, null);
+
+        labels.sort((a, b) => a.priority - b.priority);
+        parent.title = labels.length > 0 ? labels[0].value : undefined;
+
+        store.getObjects(namedNode(parentQuad.subject.value), namedNode(defaultQnameToIri("a")), null).forEach(t => {
+            const typeLabel = store.getObjects(t, namedNode(defaultQnameToIri("rdfs:label")), null);
+            parent.types.push({
+                iri: t.value,
+                title: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+            });
+        });
+
+        parents.push(parent);
+    });
+
+    // sort by order of appearance in link
+    parents.sort((a, b) => a.link.length - b.link.length);
+
+    return {
+        parents: parents,
+        link: linkQuad.object.value
+    };
+}
+
+/**
+ * Interprets a predicate qname into its full IRI
+ * 
+ * Uses the default list of prefixes by default
+ * 
+ * @param s 
+ * @param prefixes 
+ * @returns Predicate IRI string
+ */
+export function defaultQnameToIri(s: string, prefixes: { [token: string]: string } = DEFAULT_PREFIXES): string {
+    if (s === "a") { // special handling for "a" as rdf:type
+        return prefixes.rdf + "type";
+    } else {
+        const [prefix, pred] = s.split(":");
+        return prefixes[prefix] + pred;
+    }
 }

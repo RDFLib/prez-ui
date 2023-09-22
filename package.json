@@ -11,12 +11,14 @@
         "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false"
     },
     "dependencies": {
+        "@bosquig/vue3-treeselect": "github:drummerroma/vue3-treeselect",
         "@fawmi/vue-google-maps": "^0.9.79",
         "@terraformer/arcgis": "^2.1.2",
         "@terraformer/wkt": "^2.1.2",
         "@triply/yasqe": "^4.2.28",
         "@triply/yasr": "^4.2.28",
         "axios": "^1.3.4",
+        "floating-vue": "^2.0.0-beta.24",
         "n3": "^1.16.3",
         "pinia": "^2.0.26",
         "vite-plugin-rewrite-all": "^1.0.1",
