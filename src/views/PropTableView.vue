@@ -18,6 +18,7 @@ import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import { ensureProfiles, titleCase, sortByTitle, getLanguagePriority } from "@/util/helpers";
 import ScoreWidget from "@/components/scores/ScoreWidget.vue";
+import { ALT_PROFILE_CURIE } from "@/util/consts";
 
 const { namedNode, literal } = DataFactory;
 
@@ -37,7 +38,6 @@ const DEFAULT_DESC_PREDICATES = [qnameToIri("dcterms:description")];
 const DEFAULT_GEO_PREDICATES = [qnameToIri("geo:hasBoundingBox"), qnameToIri("geo:hasGeometry")];
 const DEFAULT_CHILDREN_PREDICATES = [qnameToIri("rdfs:member"), qnameToIri("skos:member"), qnameToIri("dcterms:hasPart")];
 const RECURSION_LIMIT = 5; // limit on recursive search of blank nodes
-const ALT_PROFILES_TOKEN = "lt-prfl:alt-profile";
 
 const item = ref<ListItem>({} as ListItem);
 const children = ref<ListItemExtra[]>([]);
@@ -60,7 +60,7 @@ const hiddenPredicates = ref<string[]>([
     qnameToIri("prez:link"),
     "https://linked.data.gov.au/def/scores/hasScore"
 ]);
-const defaultProfile = ref<Profile | null>(null);
+const currentProfile = ref<Profile | null>(null);
 const childrenConfig = ref({
     showChildren: false,
     childrenTitle: "",
@@ -140,8 +140,8 @@ function getProperties() {
     };
 
     // get label & description predicates
-    const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
-    const descPredicates = defaultProfile.value!.descriptionPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
+    const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+    const descPredicates = currentProfile.value!.descriptionPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
     hiddenPredicates.value.push(...descPredicates);
 
     const labels: languageLabel[] = [];
@@ -251,7 +251,7 @@ function getBreadcrumbs(): Breadcrumb[] {
         uri: string;
     }[] = [];
 
-    const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+    const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
     const pathSegments = route.path.split("/").slice(1, -1);
 
     pathSegments.forEach((id, index) => {
@@ -339,7 +339,7 @@ function getBreadcrumbs(): Breadcrumb[] {
 
     crumbs.push({ name: item.value.title || item.value.iri, url: route.path });
     if (isAltView.value) {
-        crumbs.push({ name: "Alternate Profiles", url: `${route.path}?_profile=${ALT_PROFILES_TOKEN}` });
+        crumbs.push({ name: "Alternate Profiles", url: `${route.path}?_profile=${ALT_PROFILE_CURIE}` });
     }
     return crumbs;
 }
@@ -362,7 +362,7 @@ function getChildren() {
             getTopConcepts();
         }
     } else {
-        const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+        const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
         store.value.forObjects((obj) => {
             let child: ListItemExtra = {
@@ -703,7 +703,7 @@ onBeforeMount(() => {
     }
 
     // check if alt profile & no mediatype, then show alt profiles page
-    if (route.query._profile === ALT_PROFILES_TOKEN && !route.query._mediatype) {
+    if (route.query._profile === ALT_PROFILE_CURIE && !route.query._mediatype) {
         isAltView.value = true;
     }
 });
@@ -721,15 +721,27 @@ onMounted(async () => {
         }
     }
 
-    const { data, profiles } = await apiGetRequest(hasFewChildren.value ? `${route.path}/all${window.location.search}` : route.fullPath);
+    let fullPath = "";
+    if (hasFewChildren.value) {
+        fullPath = `${route.path}/all${window.location.search}`;
+    } else {
+        fullPath = route.fullPath;
+    }
+    if (Object.keys(route.query).length > 0) {
+        if (isAltView.value) { // remove alt profile qsa to get title for breadcrumbs - already have profile info in pinia/link headers
+            fullPath = fullPath.replace(`_profile=${ALT_PROFILE_CURIE}`, "");
+        }
+    }
+
+    const { data, profiles } = await apiGetRequest(fullPath);
 
     if (data && profiles.length > 0 && !error.value) {
         // find the current/default profile
-        defaultProfile.value = ui.profiles[profiles.find(p => p.default)!.uri];
+        currentProfile.value = ui.profiles[profiles.find(p => p.current)!.uri];
         
         // if specify mediatype, or profile is not default or alt, redirect to API
         if ((route.query && route.query._profile) &&
-            (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
+            (route.query._mediatype || ![currentProfile.value.token, ALT_PROFILE_CURIE].includes(route.query._profile as string))) {
                 window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
         }
 

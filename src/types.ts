@@ -70,6 +70,7 @@ export interface Mediatype {
 
 export interface ProfileHeader {
     default: boolean;
+    current: boolean;
     uri: string;
     token: string;
     title: string;

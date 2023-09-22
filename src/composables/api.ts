@@ -65,6 +65,7 @@ function getProfilesFromHeaders(link: string): ProfileHeader[] {
     links.filter(l => l.rel === "type").forEach(l => {
         profileObj[l.anchor] = {
             default: false,
+            current: false,
             token: l.token,
             mediatypes: [],
             title: l.title,
@@ -73,8 +74,13 @@ function getProfilesFromHeaders(link: string): ProfileHeader[] {
         };
     });
 
-    const defaultProfile = links.find(l => l.rel === "self")!;
-    profileObj[defaultProfile.profile].default = true;
+    // find current - either use rel="self" or rel="profile"
+    const currentProfile = links.find(l => l.rel === "self")!;
+    profileObj[currentProfile.profile].current = true;
+
+    // find default - no way to get default for now - use rel="canonical" according to https://www.w3.org/TR/dx-prof-conneg/#http-listprofiles ?
+    // const defaultProfile = links.find(l => l.rel === "self")!;
+    // profileObj[defaultProfile.profile].default = true;
 
     links.filter(l => l.rel === "alternate").forEach(l => {
         if (!profileObj[l.profile].mediatypes.map(m => m.mediatype).includes(l.type)) {

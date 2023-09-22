@@ -68,8 +68,8 @@ onMounted(async () => {
     const { data: datasetData, profiles: datasetProfiles } = await datasetApiGetRequest("/s/datasets");
 
     if (datasetData && datasetProfiles.length > 0 && !datasetError.value) {
-        const defaultProfile = ui.profiles[datasetProfiles.find(p => p.default)!.uri];
-        const labelPredicates = defaultProfile.labelPredicates.length > 0 ? defaultProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
+        const currentProfile = ui.profiles[datasetProfiles.find(p => p.current)!.uri];
+        const labelPredicates = currentProfile.labelPredicates.length > 0 ? currentProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
         parseIntoStore(datasetData);
 

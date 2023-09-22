@@ -40,7 +40,7 @@ type objectItem = {
     }[];
 };
 
-const defaultProfile = ref<Profile | null>(null);
+const currentProfile = ref<Profile | null>(null);
 const item = ref<objectItem>({} as objectItem);
 const links = ref<string[]>([]);
 
@@ -62,9 +62,9 @@ onMounted(async () => {
                     links: [],
                     types: []
                 };
-                defaultProfile.value = ui.profiles[profiles.find(p => p.default)!.uri];
-                const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
-                const descPredicates = defaultProfile.value!.descriptionPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
+                currentProfile.value = ui.profiles[profiles.find(p => p.current)!.uri];
+                const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+                const descPredicates = currentProfile.value!.descriptionPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
 
                 store.value.forEach(q => {
                     if (labelPredicates.includes(q.predicate.value)) {
