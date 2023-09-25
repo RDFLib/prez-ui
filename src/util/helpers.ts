@@ -1,7 +1,7 @@
 import { DataFactory, type Store, type Quad, type Literal } from "n3";
 import type { option, link, languageLabel } from "@/types";
 import { useUiStore } from "@/stores/ui";
-import { DEFAULT_LABEL_PREDICATES, DEFAULT_PREFIXES } from "@/util/consts";
+import { DEFAULT_LABEL_PREDICATES, DEFAULT_PREFIXES, CONTAINER_RELATIONS } from "@/util/consts";
 
 const { namedNode } = DataFactory;
 
@@ -230,4 +230,14 @@ export function defaultQnameToIri(s: string, prefixes: { [token: string]: string
         const [prefix, pred] = s.split(":");
         return prefixes[prefix] + pred;
     }
+}
+
+/**
+ * Creates a query string argument based on a container's base class
+ * 
+ * @param baseClass 
+ * @returns the query string
+ */
+export function containerQsa(baseClass: string): string {
+    return `${CONTAINER_RELATIONS[baseClass].inbound ? 'filter-to-focus' : 'focus-to-filter'}[${CONTAINER_RELATIONS[baseClass].predicate}]`;
 }

@@ -18,6 +18,7 @@ import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import { ensureProfiles, titleCase, sortByTitle, getLanguagePriority } from "@/util/helpers";
 import ScoreWidget from "@/components/scores/ScoreWidget.vue";
+import RightNavSearch from "@/components/search/RightNavSearch.vue";
 
 const { namedNode, literal } = DataFactory;
 
@@ -71,6 +72,11 @@ const childrenConfig = ref({
 const hasScores = ref(false);
 const scores = ref<{[key: string]: {[key: string]: number}}>({}); // {fair: {f: 0, a: 0, i: 0, r: 0}, ...}
 const hasFewChildren = ref(false); // only for vocab
+const searchConfig = ref<{
+    containerUri?: string;
+    containerBaseClass?: string;
+    baseClass?: string;
+}>({});
 
 function configByBaseClass(baseClass: string) {
     item.value.baseClass = baseClass;
@@ -117,6 +123,7 @@ function configByBaseClass(baseClass: string) {
             childrenConfig.value.showChildren = true;
             break;
         case qnameToIri("skos:Collection"):
+            searchEnabled.value = true;
             childrenConfig.value = {
                 ...childrenConfig.value,
                 showChildren: true,
@@ -134,9 +141,12 @@ function configByBaseClass(baseClass: string) {
 function getProperties() {
     // find subject
     const subject = isObjectView.value ? namedNode(route.query.uri as string) : store.value.getSubjects(namedNode(qnameToIri("a")), namedNode(item.value.baseClass!), null)[0]; // isAltView breaks here - subject doesn't exist
-    item.value = {
-        iri: subject.id,
-        types: []
+    item.value.iri = subject.value;
+    item.value.types = [];
+
+    searchConfig.value = {
+        containerUri: subject.value,
+        containerBaseClass: iriToQname(item.value.baseClass!)
     };
 
     // get label & description predicates
@@ -818,7 +828,8 @@ onMounted(async () => {
         <LoadingMessage v-else-if="loading" />
         <ErrorMessage v-else-if="error" :message="error" />
         <Teleport v-if="searchEnabled" to="#search-teleport">
-            <AdvancedSearch v-if="flavour" :flavour="flavour" :query="searchDefaults" />
+            <!-- <AdvancedSearch v-if="flavour" :flavour="flavour" :query="searchDefaults" /> -->
+            <RightNavSearch v-bind="searchConfig" />
         </Teleport>
         <Teleport v-if="enableScores && hasScores" to="#score-teleport">
             <ScoreWidget v-for="([name, score]) in Object.entries(scores)" :name="name" :score="score" />

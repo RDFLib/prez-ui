@@ -1,21 +1,36 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import router from "@/router";
+import { containerQsa } from "@/util/helpers";
+
+const props = defineProps<{
+    containerUri?: string;
+    containerBaseClass?: string;
+    baseClass?: string;
+}>();
 
 const searchTerm = ref("");
 
-function submit() {
-    router.push({
-        name: "search",
-        query: {
-            term: searchTerm.value,
-            limit: 10
-        }
-    });
-}
-
 function clearSearch() {
     searchTerm.value = "";
+}
+
+function submit() {
+    const query: {[key: string]: string | number} = {
+        term: searchTerm.value,
+        limit: 10,
+    };
+    if (props.containerBaseClass && props.containerUri) {
+        query[containerQsa(props.containerBaseClass)] = props.containerUri;
+    }
+    if (props.baseClass) {
+        query["focus-to-filter[rdf:type]"] = props.baseClass;
+    }
+
+    router.push({
+        name: "search",
+        query: query
+    });
 }
 </script>
 
@@ -28,16 +43,18 @@ function clearSearch() {
                 id=""
                 class="search-input"
                 v-model="searchTerm"
-                placeholder="Global search..."
-                @keypress.enter="submit()"
+                placeholder="Search..."
+                @keyup.enter="searchTerm !== '' && submit()"
             >
             <button type="button" @click="clearSearch()" class="clear-btn"><i class="fa-regular fa-xmark"></i></button>
         </div>
-        <button type="submit" class="btn submit-btn" @click="submit()"><i class="fa-regular fa-magnifying-glass"></i></button>
+        <button type="submit" class="btn submit-btn" @click="submit" :disabled="searchTerm === ''"><i class="fa-regular fa-magnifying-glass"></i></button>
     </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang=scss scoped>
+@import "@/assets/sass/_variables";
+
 .search-bar-container {
     display: flex;
     flex-direction: row;
@@ -56,7 +73,7 @@ function clearSearch() {
 
         input.search-input {
             background-color: unset;
-            border: none !important;
+            border: none;
             width: 100%;
         }
 
@@ -71,6 +88,12 @@ function clearSearch() {
             &:hover {
                 color: #888888;
             }
+        }
+
+        &.full-width {
+            border-right: 1px solid #aaaaaa;
+            border-top-right-radius: $borderRadius;
+            border-bottom-right-radius: $borderRadius;
         }
     }
 

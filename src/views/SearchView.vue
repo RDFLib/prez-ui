@@ -8,7 +8,8 @@ import { useUiStore } from "@/stores/ui";
 import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 import router from "@/router";
-import { sortByTitle, getLanguagePriority, allOptionsSelected, ensureProfiles, getLink } from "@/util/helpers";
+import { sortByTitle, getLanguagePriority, allOptionsSelected, ensureProfiles, getLink, containerQsa, copyToClipboard } from "@/util/helpers";
+import { CONTAINER_RELATIONS } from "@/util/consts";
 import SearchResult from "@/components/search/SearchResult.vue";
 import MapClient from "@/components/MapClient.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
@@ -74,23 +75,18 @@ const BASE_CLASSES: selectOption[] = [
         label: "Resource",
     },
 ];
-const CONTAINER_RELATIONS: { [key: string]: { predicate: string; inbound: boolean; } } = {
-    "dcat:Dataset": {
-        predicate: "rdfs:member",
-        inbound: true
-    },
-    "dcat:Catalog": {
-        predicate: "dcterms:hasPart",
-        inbound: true
-    },
-    "skos:ConceptScheme": {
-        predicate: "skos:inScheme",
-        inbound: false
-    },
-    "skos:Collection": {
-        predicate: "skos:member",
-        inbound: true
-    },
+
+// same sorting as sortByTitle, but using new selectOption type instead of option type
+const sortByLabel = (a: selectOption, b: selectOption): number => {
+    if (a.label && b.label) {
+        return a.label.localeCompare(b.label);
+    } else if (a.label) {
+        return -1;
+    } else if (b.label) {
+        return 1;
+    } else {
+        return a.id.localeCompare(b.id);
+    }
 };
 
 const options = ref<{
@@ -114,8 +110,7 @@ const data = ref<{
     term: string;
     limit: number;
     containers: {
-        // dataset: {[key: string]: string[]}, // {datasetIRI: [fcIRI, ...], ...}
-        dataset: string[], // {datasetIRI: [fcIRI, ...], ...}
+        dataset: string[],
         catalog: string[],
         vocab: string[],
         collection: string[],
@@ -127,7 +122,6 @@ const data = ref<{
     term: "",
     limit: 10,
     containers: {
-        // dataset: {},
         dataset: [],
         catalog: [],
         vocab: [],
@@ -137,9 +131,60 @@ const data = ref<{
     outbound: [],
     inbound: []
 });
-const collapse = ref(false);
+const collapse = ref(true);
 const results = ref<SearchItem[]>([]);
 const geoResults = ref<WKTResult[]>([]);
+const doneSearch = ref(false); // flag for whether search has been done yet
+
+const query = computed(() => {
+    let queryList: string[] = [];
+
+    // term
+    if (data.value.term !== "") {
+        queryList.push(`term=${encodeURIComponent(data.value.term)}`);
+    }
+
+    // method
+    queryList.push(`method=${encodeURIComponent(SEARCH_METHOD)}`);
+
+    // limit
+    queryList.push(`limit=${encodeURIComponent(data.value.limit)}`);
+
+    // if some classes are selected
+    if (data.value.baseClasses.length > 0) {
+        queryList.push(`focus-to-filter[rdf:type]=${data.value.baseClasses.map(c => encodeURIComponent(c)).join(",")}`);
+    }
+
+    // if not all containers are selected
+        if (data.value.containers.dataset.length > 0) {
+            queryList.push(`${containerQsa("dcat:Dataset")}=${data.value.containers.dataset.map(d => encodeURIComponent(d)).join(",")}`);
+        }
+        if (data.value.containers.catalog.length > 0) {
+            queryList.push(`${containerQsa("dcat:Catalog")}=${data.value.containers.catalog.map(c => encodeURIComponent(c)).join(",")}`);
+        }
+        if (data.value.containers.vocab.length > 0) {
+            queryList.push(`${containerQsa("skos:ConceptScheme")}=${data.value.containers.vocab.map(v => encodeURIComponent(v)).join(",")}`);
+        }
+        if (data.value.containers.collection.length > 0) {
+            queryList.push(`${containerQsa("skos:Collection")}=${data.value.containers.collection.map(c => encodeURIComponent(c)).join(",")}`);
+        }
+
+    // outbound
+    if (data.value.outbound.length > 0) {
+        data.value.outbound.forEach(o => {
+            queryList.push(`focus-to-filter[${encodeURIComponent(o.predicate)}]=${encodeURIComponent(o.value)}`);
+        });
+    }
+
+    // inbound
+    if (data.value.inbound.length > 0) {
+        data.value.inbound.forEach(i => {
+            queryList.push(`filter-to-focus[${encodeURIComponent(i.predicate)}]=${encodeURIComponent(i.value)}`);
+        });
+    }
+
+    return `?${queryList.join("&")}`;
+});
 
 function getCatalogs() {
     catalogApiGetRequest("/c/catalogs").then(r => {
@@ -177,7 +222,7 @@ function getCatalogs() {
                 }
             }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Catalog")), null);
 
-            // catalogOptions.sort(sortByTitle);
+            catalogOptions.sort(sortByLabel);
             options.value.containers.catalog = catalogOptions;
             // data.value.containers.catalog = catalogOptions.map(c => c.id);
         }
@@ -260,16 +305,16 @@ function getDatasets() {
                 }, subject, optionQnameToIri("rdfs:member"), null);
 
                 // sort fcs
+                datasetOptions[subject.value].children?.sort(sortByLabel);
             }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Dataset")), null);
 
-            // datasetOptions.sort(sortByTitle);
             options.value.containers.dataset = Object.values(datasetOptions).map(d => {
                 return {
                     id: d.id,
                     label: d.label,
                     children: d.children
                 };
-            });
+            }).sort(sortByLabel);
             // data.value.containers.dataset = datasetOptions.map(c => c.id);
         }
     });
@@ -309,7 +354,7 @@ function getVocabs() {
                 vocabOptions.push(vocab);
             }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:ConceptScheme")), null);
 
-            // vocabOptions.sort(sortByTitle);
+            vocabOptions.sort(sortByLabel);
             options.value.containers.vocab = vocabOptions;
             // data.value.containers.vocab = vocabOptions.map(c => c.id);
         }
@@ -350,65 +395,58 @@ function getCollections() {
                 collectionOptions.push(collection);
             }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:Collection")), null);
 
-            // collectionOptions.sort(sortByTitle);
+            collectionOptions.sort(sortByLabel);
             options.value.containers.collection = collectionOptions;
             // data.value.containers.collection = collectionOptions.map(c => c.id);
         }
     });
 }
 
-function formToQueryString(): string {
-    let queryList: string[] = [];
-
-    // term
-    if (data.value.term !== "") {
-        queryList.push(`term=${encodeURIComponent(data.value.term)}`);
-    }
-
-    // method
-    queryList.push(`method=${SEARCH_METHOD}`);
-
-    // limit
-    queryList.push(`limit=${data.value.limit}`);
-
-    // if some classes are selected
-    if (data.value.baseClasses.length > 0) {
-        queryList.push(`focus-to-filter[rdf:type]=${data.value.baseClasses.map(c => encodeURIComponent(c)).join(",")}`);
-    }
-
-    // if not all containers are selected
-        if (data.value.containers.catalog.length > 0) {
-            queryList.push(`${CONTAINER_RELATIONS["dcat:Catalog"].inbound ? 'filter-to-focus' : 'focus-to-filter'}[${CONTAINER_RELATIONS["dcat:Catalog"].predicate}]=${data.value.containers.catalog.map(c => encodeURIComponent(c)).join(",")}`);
-        }
-        if (data.value.containers.dataset.length > 0) {
-            queryList.push(`${CONTAINER_RELATIONS["dcat:Dataset"].inbound ? 'filter-to-focus' : 'focus-to-filter'}[${CONTAINER_RELATIONS["dcat:Dataset"].predicate}]=${data.value.containers.dataset.map(d => encodeURIComponent(d)).join(",")}`);
-        }
-        if (data.value.containers.vocab.length > 0) {
-            queryList.push(`${CONTAINER_RELATIONS["skos:ConceptScheme"].inbound ? 'filter-to-focus' : 'focus-to-filter'}[${CONTAINER_RELATIONS["skos:ConceptScheme"].predicate}]=${data.value.containers.vocab.map(c => encodeURIComponent(c)).join(",")}`);
-        }
-        if (data.value.containers.collection.length > 0) {
-            queryList.push(`${CONTAINER_RELATIONS["skos:Collection"].inbound ? 'filter-to-focus' : 'focus-to-filter'}[${CONTAINER_RELATIONS["skos:Collection"].predicate}]=${data.value.containers.collection.map(c => encodeURIComponent(c)).join(",")}`);
-        }
-
-    // outbound
-    if (data.value.outbound.length > 0) {
-        data.value.outbound.forEach(o => {
-            queryList.push(`focus-to-filter[${encodeURIComponent(o.predicate)}]=${encodeURIComponent(o.value)}`);
-        });
-    }
-
-    // inbound
-    if (data.value.inbound.length > 0) {
-        data.value.inbound.forEach(i => {
-            queryList.push(`filter-to-focus[${encodeURIComponent(i.predicate)}]=${encodeURIComponent(i.value)}`);
-        });
-    }
-
-    return `?${queryList.join("&")}`;
-}
-
 function queryStringToForm() {
-    console.log("parsing query string...")
+    if (route.query.term) {
+        data.value.term = route.query.term.toString();
+    }
+    if (route.query.limit) {
+        data.value.limit = Number(route.query.limit);
+    }
+    if (route.query["focus-to-filter[rdf:type]"]) {
+        data.value.baseClasses = route.query["focus-to-filter[rdf:type]"].toString().split(",");
+    }
+    // containers
+    if (route.query[containerQsa("dcat:Dataset")]) {
+        data.value.containers.dataset = route.query[containerQsa("dcat:Dataset")]!.toString().split(",");
+    }
+    if (route.query[containerQsa("dcat:Catalog")]) {
+        data.value.containers.catalog = route.query[containerQsa("dcat:Catalog")]!.toString().split(",");
+    }
+    if (route.query[containerQsa("skos:ConceptScheme")]) {
+        data.value.containers.vocab = route.query[containerQsa("skos:ConceptScheme")]!.toString().split(",");
+    }
+    if (route.query[containerQsa("skos:Collection")]) {
+        data.value.containers.collection = route.query[containerQsa("skos:Collection")]!.toString().split(",");
+    }
+    // outbound
+    const reservedOutbound = ["rdf:type", ...Object.values(CONTAINER_RELATIONS).filter(c => !c.inbound).map(c => c.predicate)];
+    const outbounds = Object.keys(route.query).map(o => o.match(/focus-to-filter\[(.+)\]/)?.[1]).filter(o => o && !reservedOutbound.includes(o));
+    outbounds.forEach(o => {
+        if (o) {
+            data.value.outbound.push({
+                predicate: o,
+                value: route.query[`focus-to-filter[${o}]`]!.toString()
+            });
+        }
+    });
+    // inbound
+    const reservedInbound = [...Object.values(CONTAINER_RELATIONS).filter(c => c.inbound).map(c => c.predicate)];
+    const inbounds = Object.keys(route.query).map(i => i.match(/filter-to-focus\[(.+)\]/)?.[1]).filter(i => i && !reservedInbound.includes(i));
+    inbounds.forEach(i => {
+        if (i) {
+            data.value.inbound.push({
+                predicate: i,
+                value: route.query[`filter-to-focus[${i}]`]!.toString()
+            });
+        }
+    });
 }
 
 function reset() {
@@ -421,13 +459,10 @@ function reset() {
 }
 
 async function submit() {
+    doneSearch.value = true;
     reset();
 
-    const query = formToQueryString();
-    console.log(query)
-    // router.push(`/search${query}`)
-    const { data, profiles } = await apiGetRequest(`/search${query}`);
-    console.log(data)
+    const { data, profiles } = await apiGetRequest(`/search${query.value}`);
     if (data && profiles.length > 0 && !error.value) {
         const defaultProfile = ui.profiles[profiles.find(p => p.default)!.uri];
         const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
@@ -494,23 +529,24 @@ async function submit() {
                     }
                 }
             }, subject, null, null, null);
-
-            console.log(result);
             tempResults.push(result);
         }, namedNode(qnameToIri("a")), namedNode(qnameToIri("prez:SearchResult")), null);
         
-        // filter out duplicate URIs, keep highest weight?
+        // filter out duplicate URIs, keep highest weight
+        const filteredResults = Object.values(tempResults.reduce((hashMap, result) => {
+            if (result.uri in hashMap) {
+                if (result.weight > hashMap[result.uri].weight) {
+                    hashMap[result.uri] = Object.assign({}, result);
+                }
+            } else {
+                hashMap[result.uri] = Object.assign({}, result);
+            }
+            return hashMap;
+        }, {} as { [uri: string]: SearchItem }));
 
-        tempResults.sort((a, b) => b.weight - a.weight);
-        results.value = tempResults;
+        filteredResults.sort((a, b) => b.weight - a.weight);
+        results.value = filteredResults;
     }
-}
-
-async function getResults() {
-    // API call
-    console.log("sending query to API...")
-    console.log(route.fullPath)
-    const { data } = await apiGetRequest(route.fullPath);
 }
 
 // watch(() => route.query, async (newValue, oldValue) => {
@@ -520,9 +556,12 @@ async function getResults() {
 //     }
 // }, { deep: true });
 
-onBeforeMount(() => {
+onBeforeMount(async () => {
     // filling out treeselects needs to be done before mounting
-    // parse QSAs here and fill out form
+    if (Object.keys(route.query).length > 0) {
+        queryStringToForm();
+        await submit();
+    }
 });
 
 onMounted(async () => {
@@ -531,8 +570,6 @@ onMounted(async () => {
     ui.pageHeading = { name: "Prez", url: "/" };
     ui.breadcrumbs = [{ name: "Advanced Search", url: "/search" }];
 
-    // data.value.baseClasses = options.value.baseClasses.map(c => c.id);
-
     await ensureProfiles();
 
     // get form options
@@ -540,31 +577,26 @@ onMounted(async () => {
     getDatasets();
     getVocabs();
     getCollections();
-
-    // if (Object.keys(route.query).length > 0) {
-    //     queryStringToForm();
-    //     await getResults();
-    // }
 });
 </script>
 
 <template>
     <h1 class="page-title">Advanced Search</h1>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Id eum quasi exercitationem neque, obcaecati maiores, rerum culpa magni nisi aperiam recusandae. Provident quae illo nam vero necessitatibus placeat debitis officia.</p>
+    <p>Search for items in Prez by using the search field below, or expand to perform a more advanced search. To share your search query with others, click the link icon with the advanced search expanded to copy the search URL to your clipboard.</p>
     <div class="search-form">
         <div class="span-x-2">
             <div class="top-form-section">
                 <div class="search-bar">
-                    <input type="search" name="" id="" placeholder="Search..." v-model="data.term" @keyup.enter="submit">
-                    <button v-if="collapse" class="btn" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    <input type="search" name="" id="" placeholder="Search..." v-model="data.term" @keyup.enter="data.term !== '' && submit()">
+                    <button v-if="collapse" class="btn" type="submit" :disabled="data.term === ''"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
                 <button class="collapse-btn btn outline sm" @click="collapse = !collapse">
                     <template v-if="collapse">
-                        Expand
+                        Show advanced search
                         <i class="fa-solid fa-chevron-down"></i>
                     </template>
                     <template v-else>
-                        Collapse
+                        Hide advanced search
                         <i class="fa-solid fa-chevron-up"></i>
                     </template>
                 </button>
@@ -575,7 +607,7 @@ onMounted(async () => {
                 <h4>Base Classes</h4>
                 <Tooltip>
                     <span><i class="fa-regular fa-circle-question"></i></span>
-                    <template #popper>Object types</template>
+                    <template #popper>Filter your search by certain types, or leave blank to search by any type.</template>
                 </Tooltip>
             </div>
             <div class="section-body">
@@ -593,7 +625,7 @@ onMounted(async () => {
                 <h4>Containers</h4>
                 <Tooltip>
                     <span><i class="fa-regular fa-circle-question"></i></span>
-                    <template #popper>Filter by items within these objects</template>
+                    <template #popper>Filter by items within these objects.</template>
                 </Tooltip>
             </div>
             <div class="section-body containers">
@@ -604,7 +636,7 @@ onMounted(async () => {
                         </label>
                         <Tooltip>
                             <span><i class="fa-regular fa-circle-question"></i></span>
-                            <template #popper>Catalogs</template>
+                            <template #popper>Filter by items contained within specific DCAT Catalogues.</template>
                         </Tooltip>
                     </div>
                     <div class="section-body">
@@ -626,7 +658,7 @@ onMounted(async () => {
                         </label>
                         <Tooltip>
                             <span><i class="fa-regular fa-circle-question"></i></span>
-                            <template #popper>Datasets</template>
+                            <template #popper>Filter by items contained within specific DCAT Datasets. Expand each dataset to filter by GeoSPARQL Feature Collections contained within that dataset.</template>
                         </Tooltip>
                     </div>
                     <div class="section-body">
@@ -649,7 +681,7 @@ onMounted(async () => {
                         </label>
                         <Tooltip>
                             <span><i class="fa-regular fa-circle-question"></i></span>
-                            <template #popper>Vocabularies</template>
+                            <template #popper>Filter by items contained within specific SKOS Concept Schemes.</template>
                         </Tooltip>
                     </div>
                     <div class="section-body">
@@ -671,7 +703,7 @@ onMounted(async () => {
                         </label>
                         <Tooltip>
                             <span><i class="fa-regular fa-circle-question"></i></span>
-                            <template #popper>Collections</template>
+                            <template #popper>Filter by items contained within specific SKOS Collections.</template>
                         </Tooltip>
                     </div>
                     <div class="section-body">
@@ -698,9 +730,15 @@ onMounted(async () => {
             </div>
             <div class="section-body">
                 <div v-for="(property, index) in data.outbound" class="custom-property">
-                    <input type="text" name="" id="" placeholder="Predicate" v-model="property.predicate">
-                    <input type="text" name="" id="" placeholder="Value" v-model="property.value">
-                    <button class="btn outline delete-btn ml-auto" @click="data.outbound.splice(index, 1)"><i class="fa-solid fa-trash"></i></button>
+                    <div class="predicate">
+                        <label v-if="index === 0" for="">Predicate</label>
+                        <input type="text" name="" id="" placeholder="Predicate" v-model="property.predicate">
+                    </div>
+                    <div class="value">
+                        <label v-if="index === 0" for="">Value</label>
+                        <input type="text" name="" id="" placeholder="Value" v-model="property.value">
+                    </div>
+                    <button :class="`btn outline delete-btn ml-auto ${index === 0 ? 'align-end' : ''}`" @click="data.outbound.splice(index, 1)"><i class="fa-solid fa-trash"></i></button>
                 </div>
                 <button class="btn outline align-self-start" @click="data.outbound.push({predicate: '', value: ''})">+ Add Property Filter</button>
             </div>
@@ -715,25 +753,32 @@ onMounted(async () => {
             </div>
             <div class="section-body">
                 <div v-for="(property, index) in data.inbound" class="custom-property">
-                    <input type="text" name="" id="" placeholder="Predicate" v-model="property.predicate">
-                    <input type="text" name="" id="" placeholder="Value" v-model="property.value">
-                    <button class="btn outline delete-btn ml-auto" @click="data.inbound.splice(index, 1)"><i class="fa-solid fa-trash"></i></button>
+                    <div class="predicate">
+                        <label v-if="index === 0" for="">Predicate</label>
+                        <input type="text" name="" id="" placeholder="Predicate" v-model="property.predicate">
+                    </div>
+                    <div class="value">
+                        <label v-if="index === 0" for="">Value</label>
+                        <input type="text" name="" id="" placeholder="Value" v-model="property.value">
+                    </div>
+                    <button :class="`btn outline delete-btn ml-auto ${index === 0 ? 'align-end' : ''}`" @click="data.inbound.splice(index, 1)"><i class="fa-solid fa-trash"></i></button>
                 </div>
                 <button class="btn outline align-self-start" @click="data.inbound.push({predicate: '', value: ''})">+ Add Property Filter</button>
             </div>
         </div>
         <div v-if="!collapse" class="span-x-2 form-bottom">
+            <button class="btn outline" @click="copyToClipboard(query)" title="Copy search query URL"><i class="fa-solid fa-link"></i></button>
             <div class="limit-input">
-                <label for="">Limit</label>
-                <input type="number" v-model="data.limit" name="" id="" min="1" max="100">
+                <label for="limit">Limit</label>
+                <input type="number" v-model="data.limit" name="" id="limit" min="1" max="100">
             </div>
-            <button class="btn lg" type="submit" @click="submit">Search <i class="fa-solid fa-magnifying-glass"></i></button>
+            <button class="btn lg" type="submit" @click="submit" :disabled="data.term === ''">Search <i class="fa-solid fa-magnifying-glass"></i></button>
         </div>
     </div>
-    <h2>Results<span v-if="results.length > 0"> ({{ results.length }})</span></h2>
+    <h2 v-if="doneSearch">Results<span v-if="results.length > 0"> ({{ results.length }})</span></h2>
     <ErrorMessage v-if="error" :message="error" />
     <LoadingMessage v-else-if="loading"/>
-    <template v-else>
+    <template v-else-if="doneSearch">
         <div v-if="results.length > 0" class="results-grid">
             <div class="results">
                 <SearchResult v-for="result in results" v-bind="result" />
@@ -788,7 +833,7 @@ onMounted(async () => {
         .section-title {
             display: flex;
             flex-direction: row;
-            justify-content: space-between;
+            // justify-content: space-between;
             align-items: center;
             gap: 8px;
 
@@ -849,14 +894,16 @@ onMounted(async () => {
     .form-bottom {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
+        // justify-content: space-between;
         align-items: center;
+        gap: 12px;
 
         .limit-input {
             display: flex;
             flex-direction: row;
             gap: 6px;
             align-items: center;
+            margin-left: auto;
 
             input {
                 width: 66px;
@@ -884,6 +931,13 @@ onMounted(async () => {
     align-items: center;
     margin-bottom: 8px;
 
+    .predicate, .value {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
     .delete-btn {
         $red: #eb2b2b;
         
@@ -893,6 +947,11 @@ onMounted(async () => {
         &:hover {
             background-color: $red;
             color: white
+        }
+
+        &.align-end {
+            align-self: flex-end;
+            margin-bottom: 2px;
         }
     }
 }

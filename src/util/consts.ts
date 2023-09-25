@@ -35,3 +35,22 @@ export const DEFAULT_DESC_PREDICATES: string[] = [
 export const DEFAULT_EXPL_PREDICATES: string[] = [
     defaultQnameToIri("dcterms:provenance")
 ];
+
+export const CONTAINER_RELATIONS: { [key: string]: { predicate: string; inbound: boolean; } } = {
+    "dcat:Dataset": {
+        predicate: "rdfs:member",
+        inbound: true
+    },
+    "dcat:Catalog": {
+        predicate: "dcterms:hasPart",
+        inbound: true
+    },
+    "skos:ConceptScheme": {
+        predicate: "skos:inScheme",
+        inbound: false
+    },
+    "skos:Collection": {
+        predicate: "skos:member",
+        inbound: true
+    },
+};

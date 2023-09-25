@@ -121,3 +121,9 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not(.vue-t
     border-radius: $borderRadius;
     background-color: white;
 }
+
+.v-popper__popper {
+    max-width: 280px;
+    text-align: center;
+    font-size: 0.9em;
+}
