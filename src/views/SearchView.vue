@@ -592,7 +592,7 @@ onMounted(async () => {
 
 <template>
     <h1 class="page-title">Search</h1>
-    <p>Search for items in Prez by using the search field below, or expand to perform a more advanced search.</p>
+    <p>Search for items in Prez by using the search field below, or expand to perform a more advanced search. Note that you cannot filter by more than one container type for the time being.</p>
     <div class="search-form">
         <div class="span-x-2">
             <div class="top-form-section">
@@ -669,6 +669,7 @@ onMounted(async () => {
                             :options="options.containers.catalog"
                             multiple
                             clearable
+                            :disabled="data.containers.dataset.length > 0 || data.containers.vocab.length > 0 || data.containers.collection.length > 0"
                         />
                     </div>
                 </div>
@@ -692,6 +693,7 @@ onMounted(async () => {
                             multiple
                             clearable
                             flat
+                            :disabled="data.containers.catalog.length > 0 || data.containers.vocab.length > 0 || data.containers.collection.length > 0"
                         />
                     </div>
                 </div>
@@ -714,6 +716,7 @@ onMounted(async () => {
                             :options="options.containers.vocab"
                             multiple
                             clearable
+                            :disabled="data.containers.catalog.length > 0 || data.containers.dataset.length > 0 || data.containers.collection.length > 0"
                         />
                     </div>
                 </div>
@@ -736,6 +739,7 @@ onMounted(async () => {
                             :options="options.containers.collection"
                             multiple
                             clearable
+                            :disabled="data.containers.catalog.length > 0 || data.containers.dataset.length > 0 || data.containers.vocab.length > 0"
                         />
                     </div>
                 </div>
