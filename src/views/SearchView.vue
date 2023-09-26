@@ -8,7 +8,7 @@ import { useUiStore } from "@/stores/ui";
 import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 import router from "@/router";
-import { getLanguagePriority, ensureProfiles, getLink, containerQsa, copyToClipboard } from "@/util/helpers";
+import { getLanguagePriority, ensureProfiles, getLink, containerQsa } from "@/util/helpers";
 import { CONTAINER_RELATIONS } from "@/util/consts";
 import SearchResult from "@/components/search/SearchResult.vue";
 import MapClient from "@/components/MapClient.vue";
@@ -592,7 +592,7 @@ onMounted(async () => {
 
 <template>
     <h1 class="page-title">Search</h1>
-    <p>Search for items in Prez by using the search field below, or expand to perform a more advanced search. To share your search query with others, click the link icon with the advanced search expanded to copy the search URL to your clipboard.</p>
+    <p>Search for items in Prez by using the search field below, or expand to perform a more advanced search.</p>
     <div class="search-form">
         <div class="span-x-2">
             <div class="top-form-section">
@@ -788,7 +788,6 @@ onMounted(async () => {
             </div>
         </div>
         <div v-if="!collapse" class="span-x-2 form-bottom">
-            <button class="btn outline" @click="copyToClipboard(query)" title="Copy search query URL"><i class="fa-solid fa-link"></i></button>
             <div class="limit-input">
                 <label for="limit">Limit</label>
                 <input type="number" v-model="data.limit" name="" id="limit" min="1" max="100">
