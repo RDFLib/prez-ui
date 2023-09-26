@@ -7,7 +7,6 @@ import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable, type languageLabel } from "@/types";
 import ItemList from "@/components/ItemList.vue";
-import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import PaginationComponent from "@/components/PaginationComponent.vue";
@@ -15,7 +14,7 @@ import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import { ensureProfiles, sortByTitle, getLanguagePriority, getBaseClassFromLink } from "@/util/helpers";
-import RightNavSearch from "@/components/search/RightNavSearch.vue";
+import SearchBar from "@/components/search/SearchBar.vue";
 
 const { namedNode, literal } = DataFactory;
 
@@ -387,8 +386,7 @@ onMounted(async () => {
         </template>
         <template v-else>No {{ itemType.label }} found.</template>
         <Teleport v-if="searchEnabled" to="#search-teleport">
-            <!-- <AdvancedSearch :flavour="flavour" :query="searchDefaults" /> -->
-            <RightNavSearch v-bind="searchConfig" />
+            <SearchBar v-bind="searchConfig" />
         </Teleport>
     </template>
 </template>

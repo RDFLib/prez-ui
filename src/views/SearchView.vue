@@ -2,13 +2,13 @@
 import { onMounted, ref, watch, computed, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
 import { DataFactory, type Literal } from "n3";
-import type { ProfileHeader, languageLabel, option, SearchItem, selectOption, treeSelectOption } from "@/types";
+import type { ProfileHeader, languageLabel, SearchItem, selectOption, treeSelectOption } from "@/types";
 import type { WKTResult } from "@/components/MapClient.d";
 import { useUiStore } from "@/stores/ui";
 import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 import router from "@/router";
-import { sortByTitle, getLanguagePriority, allOptionsSelected, ensureProfiles, getLink, containerQsa, copyToClipboard } from "@/util/helpers";
+import { getLanguagePriority, ensureProfiles, getLink, containerQsa, copyToClipboard } from "@/util/helpers";
 import { CONTAINER_RELATIONS } from "@/util/consts";
 import SearchResult from "@/components/search/SearchResult.vue";
 import MapClient from "@/components/MapClient.vue";
@@ -140,8 +140,8 @@ const query = computed(() => {
     let queryList: string[] = [];
 
     // term
-    if (data.value.term !== "") {
-        queryList.push(`term=${encodeURIComponent(data.value.term)}`);
+    if (data.value.term.trim() !== "") {
+        queryList.push(`term=${encodeURIComponent(data.value.term.trim())}`);
     }
 
     // method
@@ -458,11 +458,14 @@ function reset() {
     clearStore();
 }
 
-async function submit() {
+function submit() {
+    router.push(`/search${query.value}`);
+}
+
+async function getResults() {
     doneSearch.value = true;
     reset();
-
-    const { data, profiles } = await apiGetRequest(`/search${query.value}`);
+    const { data, profiles } = await apiGetRequest(route.fullPath);
     if (data && profiles.length > 0 && !error.value) {
         const defaultProfile = ui.profiles[profiles.find(p => p.default)!.uri];
         const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
@@ -549,26 +552,33 @@ async function submit() {
     }
 }
 
-// watch(() => route.query, async (newValue, oldValue) => {
-//     if (Object.keys(newValue).length > 0 && newValue !== oldValue) {
-//         queryStringToForm();
-//         await getResults();
-//     }
-// }, { deep: true });
+watch(() => route.query, async (newValue, oldValue) => {
+    if (newValue !== oldValue) {
+        if (Object.keys(newValue).length > 0) {
+            queryStringToForm();
+            await getResults();
+        }
+    }
+    
+}, { deep: true });
 
 onBeforeMount(async () => {
     // filling out treeselects needs to be done before mounting
     if (Object.keys(route.query).length > 0) {
         queryStringToForm();
-        await submit();
+        // expand advanced search if options are selected
+        if (Object.keys(route.query).some(key => ["focus-to-filter", "filter-to-focus"].includes(key.split("[")[0]))) {
+            collapse.value = false;
+        }
+        await getResults();
     }
 });
 
 onMounted(async () => {
     ui.rightNavConfig = { enabled: false };
-    document.title = "Advanced Search | Prez";
+    document.title = "Search | Prez";
     ui.pageHeading = { name: "Prez", url: "/" };
-    ui.breadcrumbs = [{ name: "Advanced Search", url: "/search" }];
+    ui.breadcrumbs = [{ name: "Search", url: "/search" }];
 
     await ensureProfiles();
 
@@ -581,14 +591,25 @@ onMounted(async () => {
 </script>
 
 <template>
-    <h1 class="page-title">Advanced Search</h1>
+    <h1 class="page-title">Search</h1>
     <p>Search for items in Prez by using the search field below, or expand to perform a more advanced search. To share your search query with others, click the link icon with the advanced search expanded to copy the search URL to your clipboard.</p>
     <div class="search-form">
         <div class="span-x-2">
             <div class="top-form-section">
-                <div class="search-bar">
-                    <input type="search" name="" id="" placeholder="Search..." v-model="data.term" @keyup.enter="data.term !== '' && submit()">
-                    <button v-if="collapse" class="btn" type="submit" :disabled="data.term === ''"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <div class="search-bar-container">
+                    <div :class="`search-bar ${collapse ? '' : 'rounded'}`">
+                        <input
+                            type="search"
+                            name=""
+                            id=""
+                            class="search-input"
+                            v-model="data.term"
+                            placeholder="Search..."
+                            @keyup.enter="data.term.trim() !== '' && submit()"
+                        >
+                        <button type="button" @click="data.term = ''" class="clear-btn"><i class="fa-regular fa-xmark"></i></button>
+                    </div>
+                    <button v-if="collapse" type="submit" class="btn submit-btn" @click="submit" :disabled="data.term.trim() === ''"><i class="fa-regular fa-magnifying-glass"></i></button>
                 </div>
                 <button class="collapse-btn btn outline sm" @click="collapse = !collapse">
                     <template v-if="collapse">
@@ -772,7 +793,7 @@ onMounted(async () => {
                 <label for="limit">Limit</label>
                 <input type="number" v-model="data.limit" name="" id="limit" min="1" max="100">
             </div>
-            <button class="btn lg" type="submit" @click="submit" :disabled="data.term === ''">Search <i class="fa-solid fa-magnifying-glass"></i></button>
+            <button class="btn lg" type="submit" @click="submit" :disabled="data.term.trim() === ''">Search <i class="fa-solid fa-magnifying-glass"></i></button>
         </div>
     </div>
     <h2 v-if="doneSearch">Results<span v-if="results.length > 0"> ({{ results.length }})</span></h2>
@@ -812,12 +833,53 @@ onMounted(async () => {
         width: 50%;
         margin: 0 auto;
 
-        .search-bar {
+        .search-bar-container {
             display: flex;
             flex-direction: row;
-            
-            input {
+            width: 100%;
+
+            .search-bar {
+                display: flex;
+                flex-direction: row;
+                align-items: stretch;
+                background-color: white;
+                border-top-left-radius: $borderRadius;
+                border-bottom-left-radius: $borderRadius;
+                border: 1px solid #aaaaaa;
+                border-right: none;
                 flex-grow: 1;
+
+                &.rounded {
+                    border-top-right-radius: $borderRadius;
+                    border-bottom-right-radius: $borderRadius;
+                    border-right: 1px solid #aaaaaa;
+                }
+
+                input.search-input {
+                    background-color: unset;
+                    border: none !important;
+                    width: 100%;
+                }
+
+                button.clear-btn {
+                    padding: 8px 10px;
+                    background-color: transparent;
+                    border: none;
+                    color: #aaaaaa;
+                    cursor: pointer;
+                    @include transition(color);
+
+                    &:hover {
+                        color: #888888;
+                    }
+                }
+            }
+
+            button.submit-btn {
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+                border-top-right-radius: $borderRadius;
+                border-bottom-right-radius: $borderRadius;
             }
         }
 
