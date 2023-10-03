@@ -6,14 +6,15 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable, type languageLabel } from "@/types";
+import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
+import { ensureProfiles, sortByTitle, getLanguagePriority, getBaseClassFromLink } from "@/util/helpers";
+import { ALT_PROFILE_CURIE } from "@/util/consts";
 import ItemList from "@/components/ItemList.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import PaginationComponent from "@/components/PaginationComponent.vue";
-import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
-import { ensureProfiles, sortByTitle, getLanguagePriority, getBaseClassFromLink } from "@/util/helpers";
 import SearchBar from "@/components/search/SearchBar.vue";
 
 const { namedNode, literal } = DataFactory;
@@ -37,7 +38,6 @@ const TOP_LEVEL_TYPES = [
     qnameToIri("prez:SpacePrezProfile"),
     qnameToIri("prez:VocPrezProfile"),
 ];
-const ALT_PROFILES_TOKEN = "lt-prfl:alt-profile";
 
 // const parent = ref<ListItem>({} as ListItem); // might need to store parent info (dataset & feature collection)
 const items = ref<ListItemExtra[]>([]);
@@ -48,7 +48,7 @@ const itemType = ref({
 const count = ref(0);
 const isAltView = ref(false);
 const flavour = ref<PrezFlavour | null>(null);
-const defaultProfile = ref<Profile | null>(null);
+const currentProfile = ref<Profile | null>(null);
 const searchEnabled = ref(false);
 const searchDefaults = ref<{[key: string]: string}>({});
 const childrenConfig = ref({
@@ -129,7 +129,7 @@ function getBreadcrumbs(): Breadcrumb[] {
         uri: string;
     }[] = [];
 
-    const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+    const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
     const pathSegments = route.path.split("/").slice(1);
 
     pathSegments.forEach((id, index) => {
@@ -200,7 +200,7 @@ function getBreadcrumbs(): Breadcrumb[] {
     });
 
     if (isAltView.value) {
-        crumbs.push({ name: "Alternate Profiles", url: `${route.path}?_profile=${ALT_PROFILES_TOKEN}` });
+        crumbs.push({ name: "Alternate Profiles", url: `${route.path}?_profile=${ALT_PROFILE_CURIE}` });
     }
     return crumbs;
 }
@@ -227,8 +227,8 @@ function getProperties() {
     }
 
     // get label & description predicates
-    const labelPredicates = defaultProfile.value!.labelPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
-    const descPredicates = defaultProfile.value!.descriptionPredicates.length > 0 ? defaultProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
+    const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+    const descPredicates = currentProfile.value!.descriptionPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
 
     // fill out item list & handle vocprez items
     nodeList.forEach(member => {
@@ -329,7 +329,7 @@ onBeforeMount(() => {
     }
 
     // check if alt profile & no mediatype, then show alt profiles page
-    if (route.query._profile === ALT_PROFILES_TOKEN && !route.query._mediatype) {
+    if (route.query._profile === ALT_PROFILE_CURIE && !route.query._mediatype) {
         isAltView.value = true;
     }
 
@@ -341,17 +341,29 @@ onBeforeMount(() => {
 onMounted(async () => {
     loading.value = true;
 
-    let fullPath = Object.keys(route.query).length > 0 ? (route.query.per_page ? route.fullPath : route.fullPath + `&per_page=${perPage.value}`) : route.path + `?per_page=${perPage.value}`;
+    let fullPath = "";
+    if (Object.keys(route.query).length > 0) {
+        fullPath = route.fullPath;
+        if (isAltView.value) { // remove alt profile qsa to get title for breadcrumbs - already have profile info in pinia/link headers
+            fullPath = fullPath.replace(`_profile=${ALT_PROFILE_CURIE}`, "");
+        }
+
+        if (!route.query.per_page) {
+            fullPath += `&per_page=${perPage.value}`;
+        }
+    } else {
+        fullPath = `${route.path}?per_page=${perPage.value}`;
+    }
 
     await ensureProfiles(); // wait for profiles to be set in Pinia
 
     const { data, profiles } = await apiGetRequest(fullPath);
     if (data && profiles.length > 0 && !error.value) {
-        defaultProfile.value = ui.profiles[profiles.find(p => p.default)!.uri];
+        currentProfile.value = ui.profiles[profiles.find(p => p.current)!.uri];
             
         // if specify mediatype, or profile is not default or alt, redirect to API
         if ((route.query && route.query._profile) &&
-            (route.query._mediatype || ![defaultProfile.value.token, ALT_PROFILES_TOKEN].includes(route.query._profile as string))) {
+            (route.query._mediatype || ![currentProfile.value.token, ALT_PROFILE_CURIE].includes(route.query._profile as string))) {
                 window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
         }
 

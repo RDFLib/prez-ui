@@ -114,8 +114,8 @@ function handleMapSelectionChange(selectedCoords: Coords, shapeType: ShapeTypes)
 async function getCatalogs() {
     const { data: catalogData, profiles: catalogProfiles } = await catalogApiGetRequest("/c/catalogs");
     if (catalogData && catalogProfiles.length > 0 && !catalogError.value) {
-        const defaultProfile = ui.profiles[catalogProfiles.find(p => p.default)!.uri];
-        const labelPredicates = defaultProfile.labelPredicates.length > 0 ? defaultProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
+        const currentProfile = ui.profiles[catalogProfiles.find(p => p.current)!.uri];
+        const labelPredicates = currentProfile.labelPredicates.length > 0 ? currentProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
         parseIntoStore(catalogData);
 

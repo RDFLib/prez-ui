@@ -8,12 +8,12 @@ import { useRdfStore } from "@/composables/rdfStore";
 import { copyToClipboard, sortByTitle } from "@/util/helpers";
 import { AreaTypes, ShapeTypes, type Coords } from "@/components/MapClient.d";
 import { enumToOptions } from "@/util/mapSearchHelper";
+import { spatialSearchQuery } from "@/sparqlQueries/spatialSearch";
 import MapClient from "@/components/MapClient.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import BaseModal from "@/components/BaseModal.vue";
 import ButtonGroup from "@/components/ButtonGroup.vue";
-import { spatialSearchQuery } from "@/sparqlQueries/spatialSearch";
 
 const { namedNode } = DataFactory;
 
@@ -161,8 +161,8 @@ function handleMapSelectionChange(selectedCoords: Coords, shapeType: ShapeTypes)
 async function getDatasets() {
     const { data, profiles } = await datasetApiGetRequest("/s/datasets");
     if (data && profiles.length > 0 && !datasetError.value) {
-        const defaultProfile = ui.profiles[profiles.find(p => p.default)!.uri];
-        const labelPredicates = defaultProfile.labelPredicates.length > 0 ? defaultProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
+        const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
+        const labelPredicates = currentProfile.labelPredicates.length > 0 ? currentProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
         parseIntoStore(data);
 
@@ -198,8 +198,8 @@ async function getDatasets() {
             }
         });
 
-        const fcDefaultProfile = ui.profiles[fcProfiles.find(p => p.default)!.uri];
-        const fcLabelPredicates = fcDefaultProfile.labelPredicates.length > 0 ? fcDefaultProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
+        const fcCurrentProfile = ui.profiles[fcProfiles.find(p => p.current)!.uri];
+        const fcLabelPredicates = fcCurrentProfile.labelPredicates.length > 0 ? fcCurrentProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
         store.value.forSubjects(subject => { // get datasets
             store.value.forObjects(object => { // get fcs per dataset

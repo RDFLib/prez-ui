@@ -190,8 +190,8 @@ function getCatalogs() {
     catalogApiGetRequest("/c/catalogs").then(r => {
         const { data: catalogData, profiles } = r;
         if (data && profiles.length > 0) {
-            const defaultProfile = ui.profiles[profiles.find(p => p.default)!.uri];
-            const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+            const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
+            const labelPredicates = currentProfile!.labelPredicates.length > 0 ? currentProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
             optionParseIntoStore(catalogData);
             const catalogOptions: selectOption[] = [];
@@ -233,8 +233,8 @@ function getDatasets() {
     datasetApiGetRequest("/s/datasets").then(async r => {
         const { data: datasetData, profiles } = r;
         if (data && profiles.length > 0) {
-            const defaultProfile = ui.profiles[profiles.find(p => p.default)!.uri];
-            const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+            const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
+            const labelPredicates = currentProfile!.labelPredicates.length > 0 ? currentProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
             optionParseIntoStore(datasetData);
             const datasetOptions: { [key: string]: treeSelectOption & { link: string } } = {};
@@ -279,8 +279,8 @@ function getDatasets() {
                 }
             });
 
-            const fcDefaultProfile = ui.profiles[fcProfiles.find(p => p.default)!.uri];
-            const fcLabelPredicates = fcDefaultProfile.labelPredicates.length > 0 ? fcDefaultProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
+            const fccurrentProfile = ui.profiles[fcProfiles.find(p => p.current)!.uri];
+            const fcLabelPredicates = fccurrentProfile.labelPredicates.length > 0 ? fccurrentProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
             optionsStore.value.forSubjects(subject => {
                 optionsStore.value.forObjects(object => {
@@ -324,8 +324,8 @@ function getVocabs() {
     vocabApiGetRequest("/v/vocab").then(r => {
         const { data: vocabData, profiles } = r;
         if (data && profiles.length > 0) {
-            const defaultProfile = ui.profiles[profiles.find(p => p.default)!.uri];
-            const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+            const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
+            const labelPredicates = currentProfile!.labelPredicates.length > 0 ? currentProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
             optionParseIntoStore(vocabData);
             const vocabOptions: selectOption[] = [];
@@ -365,8 +365,8 @@ function getCollections() {
     collectionApiGetRequest("/v/collection").then(r => {
         const { data: collectionData, profiles } = r;
         if (data && profiles.length > 0) {
-            const defaultProfile = ui.profiles[profiles.find(p => p.default)!.uri];
-            const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+            const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
+            const labelPredicates = currentProfile!.labelPredicates.length > 0 ? currentProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
             optionParseIntoStore(collectionData);
             const collectionOptions: selectOption[] = [];
@@ -467,9 +467,9 @@ async function getResults() {
     reset();
     const { data, profiles } = await apiGetRequest(route.fullPath);
     if (data && profiles.length > 0 && !error.value) {
-        const defaultProfile = ui.profiles[profiles.find(p => p.default)!.uri];
-        const labelPredicates = defaultProfile!.labelPredicates.length > 0 ? defaultProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
-        const descPredicates = defaultProfile!.descriptionPredicates.length > 0 ? defaultProfile!.descriptionPredicates : DEFAULT_DESC_PREDICATES;
+        const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
+        const labelPredicates = currentProfile!.labelPredicates.length > 0 ? currentProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+        const descPredicates = currentProfile!.descriptionPredicates.length > 0 ? currentProfile!.descriptionPredicates : DEFAULT_DESC_PREDICATES;
         
         parseIntoStore(data);
 

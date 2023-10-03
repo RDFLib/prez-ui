@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useUiStore } from "@/stores/ui";
+import { ALT_PROFILE_URI } from "@/util/consts";
 
 const mediatypeNames: {[key: string]: string} = {
     "text/html": "HTML",
@@ -14,20 +15,22 @@ const mediatypeNames: {[key: string]: string} = {
 
 const ui = useUiStore();
 
-const defaultToken = computed(() => {
-    const defaultProfile = ui.rightNavConfig.profiles!.find(p => p.default);
-    if (defaultProfile === undefined) {
-        throw new TypeError("A default profile must exist.");
-    }
-    return defaultProfile.token;
-});
+// const defaultToken = computed(() => {
+//     const defaultProfile = ui.rightNavConfig.profiles!.find(p => p.default);
+//     if (defaultProfile === undefined) {
+//         throw new TypeError("A default profile must exist.");
+//     }
+//     return defaultProfile.token;
+// });
 
 const orderedProfiles = computed(() => {
     const includedProfiles = ui.rightNavConfig.profiles!.map(prof => prof.token);
+    // sort profiles - alphabetical, alternates profile last
     return Object.values(ui.profiles)
         .filter(prof => includedProfiles.includes(prof.token))
-        .sort((a, b) => Number(b.token === defaultToken.value) - Number(a.token === defaultToken.value))
-        .sort((a, b) => Number(a.namespace === "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile") - Number(b.namespace === "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile"));
+        // .sort((a, b) => Number(b.token === defaultToken.value) - Number(a.token === defaultToken.value))
+        .sort((a, b) => a.title.localeCompare(b.title))
+        .sort((a, b) => Number(a.namespace === ALT_PROFILE_URI) - Number(b.namespace === ALT_PROFILE_URI));
 });
 </script>
 
@@ -46,7 +49,7 @@ const orderedProfiles = computed(() => {
                 <RouterLink :to="`${ui.rightNavConfig.currentUrl}?_profile=${profile.token}`" title="Get profile representation">
                     {{ profile.token }}
                 </RouterLink>
-                <span v-if="(profile.token === defaultToken)" class="badge" title="This is the default profile for this endpoint">default</span>
+                <!-- <span v-if="(profile.token === defaultToken)" class="badge" title="This is the default profile for this endpoint">default</span> -->
             </td>
             <td><RouterLink :to="`/profiles/${profile.token}`" title="Go to profile page">{{ profile.title }}</RouterLink></td>
             <td>
