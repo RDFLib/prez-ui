@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { RouterLink } from "vue-router";
-import type { ProfileHeader } from "@/types";
+import { type ProfileHeader, apiBaseUrlConfigKey } from "@/types";
+import { ALT_PROFILE_CURIE, ALT_PROFILE_URI } from "@/util/consts";
 
 const mediatypeNames: {[key: string]: string} = {
     "text/html": "HTML",
@@ -13,24 +14,27 @@ const mediatypeNames: {[key: string]: string} = {
     "application/geo+json": "GeoJSON"
 };
 
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
+
 const props = defineProps<{
     profiles: ProfileHeader[];
     currentUrl: string;
 }>();
 
 const orderedProfiles = computed(() => {
-    // sort profiles - default profile first, alternates profile last
+    // sort profiles - alphabetical, alternates profile last
     return !!props.profiles
         ? props.profiles
-            .sort((a, b) => Number(b.default) - Number(a.default))
-            .sort((a, b) => Number(a.uri === "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile") - Number(b.uri === "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile"))
+            // .sort((a, b) => Number(b.default) - Number(a.default))
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .sort((a, b) => Number(a.uri === ALT_PROFILE_URI) - Number(b.uri === ALT_PROFILE_URI))
         : [];
 });
 </script>
 
 <template>
     <div>
-        <RouterLink :to="`${props.currentUrl}?_profile=lt-prfl:alt-profile`"><h4>Alternate Profiles</h4></RouterLink>
+        <RouterLink :to="`${props.currentUrl}?_profile=${ALT_PROFILE_CURIE}`"><h4>Alternate Profiles</h4></RouterLink>
         <p>View alternate views &amp; formats</p>
         <div id="profiles">
             <div v-for="profile in orderedProfiles" class="profile">
@@ -56,19 +60,20 @@ const orderedProfiles = computed(() => {
                         <i class="fa-regular fa-arrow-up-right-from-square"></i>
                     </a>
                     <span
-                        v-if="profile.default"
+                        v-if="profile.current"
                         class="badge"
-                        title="This is the default profile for this page"
+                        title="This is the current profile being used for this page"
                     >
-                        default
+                        current
                     </span>
                 </div>
                 <div class="mediatypes">
-                    <RouterLink
+                    <a
                         v-for="mediatype in profile.mediatypes"
-                        :to="`${props.currentUrl}?_profile=${profile.token}&_mediatype=${mediatype.mediatype}`"
+                        :href="`${apiBaseUrl}${props.currentUrl}?_profile=${profile.token}&_mediatype=${mediatype.mediatype}`"
+                        target="_blank"
                         class="mediatype"
-                    >{{ mediatypeNames[mediatype.mediatype] || mediatype.mediatype }}</RouterLink>
+                    >{{ mediatypeNames[mediatype.mediatype] || mediatype.mediatype }}</a>
                 </div>
             </div>
         </div>
