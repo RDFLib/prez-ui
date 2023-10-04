@@ -1,3 +1,4 @@
+import type { RouteLocationNormalizedLoaded } from "vue-router";
 import { DataFactory, type Store, type Quad, type Literal } from "n3";
 import type { option, link, languageLabel } from "@/types";
 import { useUiStore } from "@/stores/ui";
@@ -240,4 +241,45 @@ export function defaultQnameToIri(s: string, prefixes: { [token: string]: string
  */
 export function containerQsa(baseClass: string): string {
     return `${CONTAINER_RELATIONS[baseClass].inbound ? 'filter-to-focus' : 'focus-to-filter'}[${CONTAINER_RELATIONS[baseClass].predicate}]`;
+}
+
+/**
+ * Safely gets the value of a query string argument, or returns `undefined`
+ * 
+ * @param route vue-router route object from `useRoute()`
+ * @param key 
+ * @returns the value as a string, or undefined if the key doesn't exist
+ */
+export function getQSA(route: RouteLocationNormalizedLoaded, key: string): string | undefined {
+    if (Object.keys(route.query).length > 0) {
+        if (key in route.query) {
+            return route.query[key]?.toString();
+        } else {
+            return undefined;
+        }
+    } else {
+        return undefined;
+    }
+}
+
+/**
+ * Combines the arguments from the current query object with a provided one to create a new query string
+ * 
+ * @param route vue-router route object from `useRoute()`
+ * @param addQSA object representing the new `route.query` object
+ * @param removeQSA array of keys to remove from the query string
+ * @returns new query string
+ */
+export function newQSAString(route: RouteLocationNormalizedLoaded, addQSA: {[key: string]: any} = {}, removeQSA: string[] = []): string {
+    const queryObj = {...route.query, ...addQSA};
+    removeQSA?.forEach(key => {
+        if (key in queryObj) {
+            delete queryObj[key];
+        }
+    });
+    let queryString = "";
+    if (Object.keys(queryObj).length > 0) {
+        queryString += "?" + Object.entries(queryObj).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join("&");
+    }
+    return queryString;
 }

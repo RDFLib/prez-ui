@@ -1,20 +1,20 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch, computed, onBeforeMount } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, RouterLink } from "vue-router";
 import { DataFactory, type Literal } from "n3";
+import TreeSelect from "@bosquig/vue3-treeselect";
 import type { ProfileHeader, languageLabel, SearchItem, selectOption, treeSelectOption } from "@/types";
 import type { WKTResult } from "@/components/MapClient.d";
 import { useUiStore } from "@/stores/ui";
 import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 import router from "@/router";
-import { getLanguagePriority, ensureProfiles, getLink, containerQsa } from "@/util/helpers";
+import { getLanguagePriority, ensureProfiles, getLink, containerQsa, newQSAString, getQSA } from "@/util/helpers";
 import { CONTAINER_RELATIONS } from "@/util/consts";
 import SearchResult from "@/components/search/SearchResult.vue";
 import MapClient from "@/components/MapClient.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
-import TreeSelect from "@bosquig/vue3-treeselect";
 
 const { namedNode } = DataFactory;
 
@@ -75,6 +75,7 @@ const BASE_CLASSES: selectOption[] = [
         label: "Resource",
     },
 ];
+const DEFAULT_LIMIT = 20; // default for limit ref is 10, API default is 20
 
 // same sorting as sortByTitle, but using new selectOption type instead of option type
 const sortByLabel = (a: selectOption, b: selectOption): number => {
@@ -184,6 +185,23 @@ const query = computed(() => {
     }
 
     return `?${queryList.join("&")}`;
+});
+
+const perPage = computed(() => {
+    return Number(getQSA(route, "limit")) || DEFAULT_LIMIT;
+});
+
+const pageNumber = computed(() => {
+    const offset = getQSA(route, "offset");
+    if (offset) {
+        return Math.ceil(Number(offset) / perPage.value) + 1;
+    } else {
+        return 1;
+    }
+});
+
+const fullPage = computed(() => {
+    return results.value.length >= perPage.value;
 });
 
 function getCatalogs() {
@@ -799,19 +817,28 @@ onMounted(async () => {
             <button class="btn lg" type="submit" @click="submit" :disabled="data.term.trim() === ''">Search <i class="fa-solid fa-magnifying-glass"></i></button>
         </div>
     </div>
-    <h2 v-if="doneSearch">Results<span v-if="results.length > 0"> ({{ results.length }})</span></h2>
+    <h2 v-if="doneSearch">Results<span v-if="results.length > 0"> ({{ results.length }}{{ fullPage ? "+" : "" }})</span></h2>
     <ErrorMessage v-if="error" :message="error" />
     <LoadingMessage v-else-if="loading"/>
     <template v-else-if="doneSearch">
-        <div v-if="results.length > 0" class="results-grid">
-            <div class="results">
-                <SearchResult v-for="result in results" v-bind="result" />
+        <template v-if="results.length > 0">
+            <div class="results-grid">
+                <div class="results">
+                    <SearchResult v-for="result in results" v-bind="result" />
+                </div>
+                <div v-if="geoResults.length > 0" class="map-container">
+                    <h4>Spatial Results</h4>
+                    <MapClient ref="searchMap" :geoWKT="geoResults" />
+                </div>
             </div>
-            <div v-if="geoResults.length > 0" class="map-container">
-                <h4>Spatial Results</h4>
-                <MapClient ref="searchMap" :geoWKT="geoResults" />
+            <div class="search-pagination">
+                <RouterLink v-if="pageNumber > 1" class="pagination-btn btn outline" :to="newQSAString(route, {}, ['offset'])">1</RouterLink>
+                <RouterLink v-if="pageNumber > 2" class="pagination-btn btn outline" :to="newQSAString(route, {offset: perPage * (pageNumber - 2)}, [])">{{ pageNumber - 1 }}</RouterLink>
+                <button class="pagination-btn btn outline" disabled>{{ pageNumber }}</button>
+                <RouterLink v-if="fullPage" class="pagination-btn btn outline" :to="newQSAString(route, {offset: perPage * (pageNumber)}, [])">{{ pageNumber + 1 }}</RouterLink>
+                <span></span>
             </div>
-        </div>
+        </template>
         <p v-else-if="results.length === 0">No results found.</p>
     </template>
 </template>
@@ -1041,6 +1068,18 @@ onMounted(async () => {
             margin-top: 0;
             margin-bottom: 12px;
         }
+    }
+}
+
+.search-pagination {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin: 12px auto 0 auto;
+    text-align: center;
+
+    .pagination-btn {
+        font-size: 14px;
     }
 }
 </style>
