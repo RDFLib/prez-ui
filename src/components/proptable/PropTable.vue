@@ -38,10 +38,6 @@ function getAnnotation(annoNode: AnnotatedPredicate | AnnotatedObject, annotatio
     return annoNode.annotations.find(annotation => annotation.predicate.value === qnameToIri(annotationPred))?.object.value;
 }
 
-function copyIri() {
-    navigator.clipboard.writeText(props.item.iri.trim());
-}
-
 function buildRows(properties: AnnotatedQuad[]): RowPred[] {
     let propRows: {[uri: string]: RowPred} = {};
     properties.forEach(p => {

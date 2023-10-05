@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { inject, onMounted } from "vue";
+import { inject, onMounted, computed } from "vue";
 import { RouterView, useRoute } from "vue-router";
 import { DataFactory } from "n3";
 import { useUiStore } from "@/stores/ui";
@@ -9,7 +9,7 @@ import { sidenavConfigKey, type Profile } from "@/types";
 import MainNav from "@/components/navs/MainNav.vue";
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
 import RightSideBar from "@/components/navs/RightSideBar.vue";
-import GlobalSearch from "@/components/search/GlobalSearch.vue";
+import SearchBar from "./components/search/SearchBar.vue";
 import packageJson from "../package.json";
 import prezLogo from "@/assets/images/prez-logo.png";
 
@@ -27,6 +27,26 @@ const { store: rootStore, parseIntoStore: rootParseIntoStore, qnameToIri: rootQn
 const { store: profStore, parseIntoStore: profParseIntoStore, qnameToIri: profQnameToIri } = useRdfStore(); // profiles store
 
 document.title = ui.pageTitle;
+
+// query string arguments that will cause a re-render
+const renderPath = computed(() => {
+    let queryList: string[] = [];
+    if (Object.keys(route.query).length > 0) {
+        if (route.query._profile) {
+            queryList.push(route.query._profile.toString());
+        }
+        if (route.query._mediatype) {
+            queryList.push(route.query._mediatype.toString());
+        }
+        if (route.query.page) {
+            queryList.push(route.query.page.toString());
+        }
+        if (route.query.per_page) {
+            queryList.push(route.query.per_page.toString());
+        }
+    }
+    return `${route.path}${queryList.length > 0 ? `?${queryList.join("&")}` : ""}`;
+})
 
 async function getRootApiMetadata() {
     // get API details
@@ -147,7 +167,7 @@ onMounted(async () => {
                         <small id="nav-subtitle">A ConnegP Linked Data API</small>
                     </h2>
                 </div>
-                <GlobalSearch v-if="route.path !== '/search'" />
+                <SearchBar v-if="route.path !== '/search'" size="large" />
                 <div></div>
             </div>
         </div>
@@ -158,7 +178,7 @@ onMounted(async () => {
             <div id="content">
                 <RouterView v-slot="{ Component }">
                     <Transition name="fade" mode="out-in">
-                        <div id="content-body" :key="route.fullPath">
+                        <div id="content-body" :key="renderPath">
                             <Breadcrumbs />
                             <component :is="Component" />
                         </div>

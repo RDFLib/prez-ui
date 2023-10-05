@@ -1,30 +1,14 @@
 import { ref } from "vue";
 import { Store, Parser } from "n3";
-
-const defaultPrefixes: {[token: string]: string} = {
-    "altr-ext": "http://www.w3.org/ns/dx/conneg/altr-ext#",
-    "dcat": "http://www.w3.org/ns/dcat#",
-    "dcterms": "http://purl.org/dc/terms/",
-    "geo": "http://www.opengis.net/ont/geosparql#",
-    "owl": "http://www.w3.org/2002/07/owl#",
-    "prez": "https://prez.dev/",
-    "prof": "http://www.w3.org/ns/dx/prof/",
-    "prov": "http://www.w3.org/ns/prov#",
-    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-    "reg": "http://purl.org/linked-data/registry#",
-    "sdo": "https://schema.org/",
-    "sh": "http://www.w3.org/ns/shacl#",
-    "skos": "http://www.w3.org/2004/02/skos/core#",
-    "xsd": "http://www.w3.org/2001/XMLSchema#", 
-};
+import { DEFAULT_PREFIXES } from "@/util/consts";
+import { defaultQnameToIri } from "@/util/helpers";
 
 export function useRdfStore() {
     // const { namedNode, literal, defaultGraph, quad } = DataFactory;
 
     const parser = new Parser();
     const store = ref(new Store());
-    const prefixes = ref(defaultPrefixes);
+    const prefixes = ref(DEFAULT_PREFIXES);
 
     /**
      * Parses an RDF string in Turtle format into a store
@@ -35,7 +19,7 @@ export function useRdfStore() {
         s = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + s; // temp fix for missing rdf: prefix from API
         const p = parser.parse(s, null, (prefixName, prefixNode) => {
             // callback for each prefix parsed
-            if (!Object.values(defaultPrefixes).includes(prefixNode.value)) {
+            if (!Object.values(DEFAULT_PREFIXES).includes(prefixNode.value)) {
                 prefixes.value[prefixName] = prefixNode.value;
             }
             // const newPrefixes = Object.keys(parser._prefixes).filter(key => !Object.values(defaultPrefixes).includes(parser._prefixes[key]));
@@ -53,12 +37,7 @@ export function useRdfStore() {
      * @returns Predicate IRI string
      */
     function qnameToIri(s: string): string {
-        if (s === "a") { // special handling for "a" as rdf:type
-            return prefixes.value.rdf + "type";
-        } else {
-            const [prefix, pred] = s.split(":");
-            return prefixes.value[prefix] + pred;
-        }
+        return defaultQnameToIri(s, prefixes.value);
     }
 
     /**
@@ -84,7 +63,7 @@ export function useRdfStore() {
         store.value = new Store();
 
         // clear prefixes
-        prefixes.value = defaultPrefixes;
+        prefixes.value = DEFAULT_PREFIXES;
     }
 
     // function serialize() {

@@ -3,7 +3,7 @@ import { onMounted, computed } from "vue";
 import { RouterLink } from "vue-router";
 import { useUiStore } from "@/stores/ui";
 import type { PrezFlavour } from "@/types";
-import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
+import SearchBar from "@/components/search/SearchBar.vue";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 
 const ui = useUiStore();
@@ -52,7 +52,9 @@ onMounted(() => {
             <p v-if="link.description" class="link-desc">{{ link.description }}</p>
         </RouterLink>
     </div>
-    <AdvancedSearch :flavour="props.flavour" fullPage />
+    <div :style="{ width: '50%' }">
+        <SearchBar :flavour="props.flavour" size="large" />
+    </div>
     <slot></slot>
 </template>
 

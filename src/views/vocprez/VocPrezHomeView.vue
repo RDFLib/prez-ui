@@ -51,7 +51,7 @@ const links = [
         </p>
         <ul>
             <li>To search across vocabularies, use the search bar above.</li>
-            <li>To search across the entire Prez system, use the <RouterLink to="/search">Advanced Search</RouterLink>.</li>
+            <li>To search across the entire Prez system, use the <RouterLink to="/search">Search</RouterLink>.</li>
             <li>To perform custom queries, use the SPARQL query language on the <RouterLink to="/sparql">SPARQL page</RouterLink></li>
         </ul>
 </FlavourHome></template>

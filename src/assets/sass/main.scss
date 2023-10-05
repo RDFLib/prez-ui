@@ -88,6 +88,11 @@ a {
         padding: 4px 6px;
     }
 
+    &.lg {
+        font-size: 1.1em;
+        padding: 8px 10px;
+    }
+
     &:disabled {
         cursor: default;
         opacity: 0.6;
@@ -110,9 +115,15 @@ a {
     }
 }
 
-input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]), select, textarea {
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not(.vue-treeselect__input), select, textarea {
     border: 1px solid #aaaaaa;
     padding: 8px;
     border-radius: $borderRadius;
     background-color: white;
+}
+
+.v-popper__popper {
+    max-width: 280px;
+    text-align: center;
+    font-size: 0.9em;
 }

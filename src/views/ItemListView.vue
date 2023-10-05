@@ -6,16 +6,16 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable, type languageLabel } from "@/types";
+import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
+import { ensureProfiles, sortByTitle, getLanguagePriority, getBaseClassFromLink } from "@/util/helpers";
+import { ALT_PROFILE_CURIE } from "@/util/consts";
 import ItemList from "@/components/ItemList.vue";
-import AdvancedSearch from "@/components/search/AdvancedSearch.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import PaginationComponent from "@/components/PaginationComponent.vue";
-import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
 import SortableTabularList from "@/components/SortableTabularList.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
-import { ensureProfiles, sortByTitle, getLanguagePriority } from "@/util/helpers";
-import { ALT_PROFILE_CURIE } from "@/util/consts";
+import SearchBar from "@/components/search/SearchBar.vue";
 
 const { namedNode, literal } = DataFactory;
 
@@ -24,7 +24,7 @@ const defaultPerPage = inject(perPageConfigKey) as number;
 const route = useRoute();
 const ui = useUiStore();
 const { loading, error, apiGetRequest } = useApiRequest();
-const { store, parseIntoStore, qnameToIri } = useRdfStore();
+const { store, parseIntoStore, qnameToIri, iriToQname } = useRdfStore();
 
 const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
 const DEFAULT_DESC_PREDICATES = [qnameToIri("dcterms:description")];
@@ -57,6 +57,11 @@ const childrenConfig = ref({
     buttonLink: ""
 });
 const perPage = ref(Number(defaultPerPage));
+const searchConfig = ref<{
+    containerUri?: string;
+    containerBaseClass?: string;
+    baseClass?: string;
+}>({});
 
 const currentPageNumber = computed(() => {
     if (route.query && route.query.page) {
@@ -71,12 +76,12 @@ function configByType(type: string) {
     switch (type) {
         case qnameToIri("dcat:Catalog"):
             itemType.value.label = "Catalogs";
-            // searchEnabled.value = true;
+            searchEnabled.value = true;
             // searchDefaults.value = { catalog: item.value.iri };
             break;
         case qnameToIri("dcat:Dataset"):
             itemType.value.label = "Datasets";
-            // searchEnabled.value = true;
+            searchEnabled.value = true;
             // searchDefaults.value = { dataset: item.value.iri };
             childrenConfig.value = {
                 showButton: true,
@@ -86,7 +91,7 @@ function configByType(type: string) {
             break;
         case qnameToIri("geo:FeatureCollection"):
             itemType.value.label = "Feature Collections";
-            // searchEnabled.value = true;
+            searchEnabled.value = true;
             // searchDefaults.value = { collection: item.value.iri };
             childrenConfig.value = {
                 showButton: true,
@@ -96,11 +101,11 @@ function configByType(type: string) {
             break;
         case qnameToIri("geo:Feature"):
             itemType.value.label = "Features";
-            // search?
+            searchEnabled.value = true;
             break;
         case qnameToIri("skos:ConceptScheme"):
             itemType.value.label = "Vocabularies";
-            // searchEnabled.value = true;
+            searchEnabled.value = true;
             // searchDefaults.value = { vocab: item.value.iri };
             break;
         case qnameToIri("skos:Collection"):
@@ -207,10 +212,18 @@ function getProperties() {
     count.value = parseInt(countQuad.object.value);
     if (TOP_LEVEL_TYPES.includes(countQuad.subject.value)) {
         nodeList = store.value.getSubjects(namedNode(qnameToIri("a")), countQuad.subject, null);
+        searchConfig.value = {
+            baseClass: itemType.value.uri
+        };
 
         // for /c/profiles, etc. need to look for prez:CatPrezProfile, etc.
     } else {
         nodeList = store.value.getObjects(countQuad.subject, namedNode(qnameToIri("rdfs:member")), null);
+        const containerBaseClass = iriToQname(getBaseClassFromLink(route.path.slice(0, route.path.lastIndexOf("/"))).iri);
+        searchConfig.value = {
+            containerUri: countQuad.subject.value,
+            containerBaseClass: containerBaseClass === "geo:FeatureCollection" ? "dcat:Dataset" : containerBaseClass // fix FC to dataset as search treats them as the same
+        };
     }
 
     // get label & description predicates
@@ -384,8 +397,8 @@ onMounted(async () => {
             <PaginationComponent :url="route.path" :totalCount="count" :currentPage="currentPageNumber" :perPage="perPage" />
         </template>
         <template v-else>No {{ itemType.label }} found.</template>
-        <Teleport v-if="searchEnabled && flavour" to="#search-teleport">
-            <AdvancedSearch :flavour="flavour" :query="searchDefaults" />
+        <Teleport v-if="searchEnabled" to="#search-teleport">
+            <SearchBar v-bind="searchConfig" />
         </Teleport>
     </template>
 </template>

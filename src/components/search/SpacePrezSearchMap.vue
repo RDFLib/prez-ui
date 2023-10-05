@@ -8,12 +8,12 @@ import { useRdfStore } from "@/composables/rdfStore";
 import { copyToClipboard, sortByTitle } from "@/util/helpers";
 import { AreaTypes, ShapeTypes, type Coords } from "@/components/MapClient.d";
 import { enumToOptions } from "@/util/mapSearchHelper";
+import { spatialSearchQuery } from "@/sparqlQueries/spatialSearch";
 import MapClient from "@/components/MapClient.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
 import BaseModal from "@/components/BaseModal.vue";
 import ButtonGroup from "@/components/ButtonGroup.vue";
-import { spatialSearchQuery } from "@/sparqlQueries/spatialSearch";
 
 const { namedNode } = DataFactory;
 
