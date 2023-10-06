@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import { ref, onMounted, inject, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
-import { BlankNode, DataFactory, Quad, Store, Literal } from "n3";
+import { BlankNode, DataFactory, Quad, Store, Literal, type Quad_Object } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import type { WKTResult } from "@/components/MapClient.d";
 import { apiBaseUrlConfigKey, conceptPerPageConfigKey, enableScoresKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable, type languageLabel } from "@/types";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
-import { ensureProfiles, titleCase, sortByTitle, getLanguagePriority } from "@/util/helpers";
+import { ensureProfiles, titleCase, sortByTitle, getLanguagePriority, getPreferredAnnotation } from "@/util/helpers";
 import { ALT_PROFILE_CURIE } from "@/util/consts";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
@@ -153,16 +153,24 @@ function getProperties() {
     const descPredicates = currentProfile.value!.descriptionPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
     hiddenPredicates.value.push(...descPredicates);
 
-    const labels: languageLabel[] = [];
+    // const labels: languageLabel[] = [];
+    const labels: any[] = [];
 
     // get attributes for item object, fill out properties
     store.value.forEach(q => {
-        if (labelPredicates.includes(q.predicate.value)) {
-            let language = (q.object as Literal).language;
+        if (ui.annotationPredicates.label.includes(q.predicate.value)) {
+            // let language = (q.object as Literal).language;
+            // labels.push({
+            //     value: q.object.value,
+            //     language: language || undefined,
+            //     priority: getLanguagePriority(language)
+            // });
+
             labels.push({
+                termType: "Literal",
                 value: q.object.value,
-                language: language || undefined,
-                priority: getLanguagePriority(language)
+                id: q.object.id,
+                language: (q.object as Literal).language || ""
             });
         } else if (descPredicates.includes(q.predicate.value)) {
             item.value.description = q.object.value;
@@ -206,11 +214,14 @@ function getProperties() {
         }
     }, subject, null, null, null);
 
-    // sort labels by language priority
-    labels.sort((a, b) => a.priority - b.priority);
+    const preferredTitle = getPreferredAnnotation(labels);
+    item.value.title = preferredTitle.value;
 
-    // set title to highest priority language tag
-    item.value.title = labels.length > 0 ? labels[0].value : undefined;
+    // // sort labels by language priority
+    // labels.sort((a, b) => a.priority - b.priority);
+
+    // // set title to highest priority language tag
+    // item.value.title = labels.length > 0 ? labels[0].value : undefined;
 
     if (labels.length === 1) { // hide label property in table if there is only one label
         hiddenPredicates.value.push(...labelPredicates);

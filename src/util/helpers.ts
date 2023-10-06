@@ -1,5 +1,5 @@
 import type { RouteLocationNormalizedLoaded } from "vue-router";
-import { DataFactory, type Store, type Quad, type Literal } from "n3";
+import { DataFactory, type Store, type Quad, type Literal, type Quad_Object } from "n3";
 import type { option, link, languageLabel } from "@/types";
 import { useUiStore } from "@/stores/ui";
 import { DEFAULT_LABEL_PREDICATES, DEFAULT_PREFIXES, CONTAINER_RELATIONS } from "@/util/consts";
@@ -79,24 +79,26 @@ export const sortByTitle = <T extends {title?: string; iri: string;}>(a: T, b: T
 /**
  * Returns an integer priority based on an RDF literal's language tag
  * 
- * Priority order is: 1. `@en`, 2. `@en-*`, 3. No language tag, 4. Other language tags.
+ * Priority order is: browser language, then exact matches against language config, then partial matches against language config (e.g. `en` => `en-US`), then no language, then everything else
  * 
  * @param language 
  * @returns the priority order as an integer
  */
 export function getLanguagePriority(language: string): number {
-    // get browser language, return 0
-    if (language === "en") {
-        return 1;
-    } else if (/en-.+/.test(language)) { // en-us, en-gb, etc.
-        return 2;
+    const ui = useUiStore();
+
+    if (ui.languageList.includes(language)) {
+        return ui.languageList.indexOf(language);
+    } else if (language.length === 2 && ui.languageList.find(l => l.startsWith(language))) {
+        return ui.languageList.findIndex(l => l.startsWith(language)) + 1;
+    } else if (language.length === 5 && ui.languageList.find(l => language.startsWith(l))) {
+        return ui.languageList.findIndex(l => language.startsWith(l)) + 1;
     } else if (language === "") {
-        return 3;
+        return ui.languageList.length + 1;
     } else {
-        return 4;
+        return ui.languageList.length + 2;
     }
 }
-
 
 /**
  * Get the base class from the URL structure
@@ -282,4 +284,54 @@ export function newQSAString(route: RouteLocationNormalizedLoaded, addQSA: {[key
         queryString += "?" + Object.entries(queryObj).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join("&");
     }
     return queryString;
+}
+
+/**
+ * Gets an RDF list from the N3.js Store
+ * 
+ * @param store the N3.js Store
+ * @param list blank node of the RDF list
+ * @returns list of objects
+ */
+export function getRDFList(store: Store, list: Quad_Object): Quad_Object[] {
+    // RDF lists are treated as blank nodes, where they're split into "first" and "rest", except for the last element, which is nil and last element
+    let objectList: Quad_Object[] = [];
+
+    /**
+     * Recurively traverses an RDF list
+     * 
+     * @param listNode the blank node representing the RDF list
+     */
+    function traverseList(listNode: Quad_Object) {
+        const first = store.getObjects(listNode, namedNode(defaultQnameToIri("rdf:first")), null)[0];
+        const rest = store.getObjects(listNode, namedNode(defaultQnameToIri("rdf:rest")), null)[0];
+
+        objectList.push(first);
+
+        if (rest && rest.value !== defaultQnameToIri("rdf:nil")) { // rest == nil means the end of the list has been reached
+            traverseList(rest);
+        }
+    }
+
+    traverseList(list);
+
+    return objectList;
+}
+
+/**
+ * Returns the preferred annotation object from a list of potential annotation predicates, using a language-based priority
+ * 
+ * The priority is to use the annotation predicate with the highest language priority
+ * 
+ * @param objects the list of annotation objects
+ * @returns the preferred annotation object
+ */
+export function getPreferredAnnotation(objects: any[]) {
+    // usage: if (ui.annotationPredicates.label.includes(q.predicate.value)) { labels.push(q.object); } ... const preferredLabel = getPreferredAnnotation(labels);
+    const objsWithPriority = objects.map(o => {
+        return {...o, priority: getLanguagePriority((o as Literal).language)};
+    });
+    // get highest priority (lowest value)
+    const preferredObj = objsWithPriority.reduce((prev, current) => (prev && prev.priority < current.priority) ? prev : current);
+    return preferredObj;
 }

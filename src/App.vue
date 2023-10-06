@@ -6,6 +6,7 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { sidenavConfigKey, type Profile } from "@/types";
+import { getRDFList } from "@/util/helpers"
 import MainNav from "@/components/navs/MainNav.vue";
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
 import RightSideBar from "@/components/navs/RightSideBar.vue";
@@ -21,9 +22,11 @@ const sidenav = inject(sidenavConfigKey) as boolean;
 const route = useRoute();
 const ui = useUiStore();
 const { loading: rootLoading, error: rootError, apiGetRequest: rootApiGetRequest } = useApiRequest(); // main request to API root
+const { loading: predicateLoading, error: predicateError, apiGetRequest: predicateApiGetRequest } = useApiRequest(); // annotation predicates request
 const { loading: profLoading, error: profError, apiGetRequest: profApiGetRequest } = useApiRequest(); // profiles request
 const { loading: concurrentLoading, hasError: concurrentHasError, concurrentApiRequests } = useConcurrentApiRequests(); // concurrent profile requests
 const { store: rootStore, parseIntoStore: rootParseIntoStore, qnameToIri: rootQnameToIri } = useRdfStore(); // store for API root data
+const { store: predicateStore, parseIntoStore: predicateParseIntoStore, qnameToIri: predicateQnameToIri } = useRdfStore(); // store for annotation predicates
 const { store: profStore, parseIntoStore: profParseIntoStore, qnameToIri: profQnameToIri } = useRdfStore(); // profiles store
 
 document.title = ui.pageTitle;
@@ -74,6 +77,36 @@ async function getRootApiMetadata() {
         }, null, rootQnameToIri("prez:enabledPrezFlavour"), null);
         ui.searchMethods = searchMethods;
     }
+}
+
+async function getAnnotationPredicates() {
+    // get annotation predicates
+    const { data } = await predicateApiGetRequest("/annotation-predicates");
+    if (data && !predicateError.value) {
+        predicateParseIntoStore(data);
+
+        const labelList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:labelList")), null)[0];
+        const labels = getRDFList(predicateStore.value, labelList).map(o => o.value);
+        const descriptionList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:descriptionList")), null)[0];
+        const descriptions = getRDFList(predicateStore.value, descriptionList).map(o => o.value);
+        const provenanceList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:provenanceList")), null)[0];
+        const provenances = getRDFList(predicateStore.value, provenanceList).map(o => o.value);
+
+        ui.annotationPredicates = {
+            label: labels,
+            description: descriptions,
+            provenance: provenances
+        };
+    }
+}
+
+async function getLanguageList() {
+    // browser language goes first
+    const browserLanguages = navigator.languages;
+    // languages from API config - hardcoded for now
+    const configLanguages = ["en"];
+    // adds languages that aren't in the list already
+    ui.languageList.push(...browserLanguages, ...configLanguages.filter(l => !browserLanguages.includes(l)));
 }
 
 async function getProfiles() {
@@ -152,7 +185,7 @@ async function getProfiles() {
 }
 
 onMounted(async () => {
-    await Promise.all([getRootApiMetadata(), getProfiles()]);
+    await Promise.all([getRootApiMetadata(), getAnnotationPredicates(), getLanguageList(), getProfiles()]);
 });
 </script>
 

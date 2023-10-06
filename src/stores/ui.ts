@@ -22,6 +22,16 @@ export const useUiStore = defineStore("ui", () => {
     const profiles = ref<{[token: string]: Profile}>({});
     const apiVersion = ref("");
     const searchMethods = ref<{[key: string]: string[]}>({});
+    const annotationPredicates = ref<{
+        label: string[];
+        description: string[];
+        provenance: string[];
+    }>({
+        label: [],
+        description: [],
+        provenance: []
+    });
+    const languageList = ref<string[]>([]);
 
     // getters
 
@@ -45,7 +55,9 @@ export const useUiStore = defineStore("ui", () => {
         breadcrumbs,
         profiles,
         apiVersion,
-        searchMethods
+        searchMethods,
+        annotationPredicates,
+        languageList
 
         // getters
 
