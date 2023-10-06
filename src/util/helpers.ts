@@ -108,7 +108,7 @@ export function getBaseClassFromLink(link: string): {iri: string; title: string}
     const curieRegex = "[a-zA-Z0-9\\.\\-_]+:[a-zA-Z0-9\\.\\-_]+";
     const profileRegex = new RegExp(`^(\/[csv])?\/profiles\/${curieRegex}\/?$`);
     const catalogRegex = new RegExp(`^\/c\/catalogs\/${curieRegex}\/?$`);
-    const resourceRegex = new RegExp(`^\/c\/catalogs\/${curieRegex}\/${curieRegex}\/?$`);
+    const resourceRegex = new RegExp(`^\/c\/catalogs\/${curieRegex}\/resources\/${curieRegex}\/?$`);
     const datasetRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/?$`);
     const featureCollectionRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/collections\/${curieRegex}\/?$`);
     const featureRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/collections\/${curieRegex}\/items\/${curieRegex}\/?$`);

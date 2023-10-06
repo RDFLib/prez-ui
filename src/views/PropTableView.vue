@@ -84,9 +84,11 @@ function configByBaseClass(baseClass: string) {
             searchEnabled.value = true;
             searchDefaults.value = { catalog: item.value.iri };
             childrenConfig.value = {
-                ...childrenConfig.value,
-                showChildren: true,
-                childrenTitle: "Resources"
+                showChildren: false,
+                showButton: true,
+                childrenTitle: "Resources",
+                buttonTitle: "Resources",
+                buttonLink: "/resources"
             };
             break;
         case qnameToIri("dcat:Resource"):
@@ -307,6 +309,9 @@ function getBreadcrumbs(): Breadcrumb[] {
                         skipSegment = true;
                     }
                     break;
+                case "resources":
+                    crumbs.push({ name: "Resources", url: `/c/catalogs/${route.params.catalogId}/resources` });
+                    break;
                 case "datasets":
                     crumbs.push({ name: "Datasets", url: "/s/datasets" });
                     if (index + 1 !== pathSegments.length) {
@@ -395,26 +400,7 @@ function getChildren() {
                     links.push(q.object.value);
                 } else if (q.predicate.value === qnameToIri("a")) {
                     child.baseClass = q.object.value;
-                } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:publisher")) {
-                    const publisher: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
-
-                    store.value.forObjects(result => {
-                        publisher.label = result.value;
-                    }, q.object, qnameToIri("rdfs:label"), null);
-
-                    child.extras.publisher = publisher;
-                } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:creator")) {
-                    const creator: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
-
-                    store.value.forObjects(result => {
-                        creator.label = result.value;
-                    }, q.object, qnameToIri("rdfs:label"), null);
-                    
-                    child.extras.creator = creator;
-                } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:issued")) {
-                    const issued: ListItemSortable = { label: q.object.value };
-                    child.extras.issued = issued;
-                } 
+                }
             }, obj, null, null, null);
 
             // sort labels by language priority
@@ -675,7 +661,7 @@ onBeforeMount(() => {
         flavour.value = "CatPrez";
         if (route.path.match(/c\/profiles\/.+/)) {
             configByBaseClass(qnameToIri("prof:Profile"));
-        } else if (route.path.match(/c\/catalogs\/.+\/.+/)) {
+        } else if (route.path.match(/c\/catalogs\/.+\/resources\/.+/)) {
             configByBaseClass(qnameToIri("dcat:Resource"));
         } else if (route.path.match(/c\/catalogs\/.+/)) {
             configByBaseClass(qnameToIri("dcat:Catalog"));
@@ -815,12 +801,7 @@ onMounted(async () => {
             <template v-else-if="childrenConfig.showChildren" #bottom>
                 <tr>
                     <th>{{ childrenConfig.childrenTitle }}</th>
-                    <SortableTabularList
-                        v-if="item.baseClass === qnameToIri('dcat:Catalog')"
-                        :items="children"
-                        :predicates="['publisher', 'creator', 'issued']"
-                    />
-                    <td v-else>
+                    <td>
                         <div class="children-list">
                             <RouterLink v-for="child in children" :to="child.link || ''">{{ child.title || child.iri }}</RouterLink>
                         </div>
