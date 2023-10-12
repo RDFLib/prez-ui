@@ -6,7 +6,7 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { sidenavConfigKey, type Profile } from "@/types";
-import { getRDFList } from "@/util/helpers"
+import { getAnnotation, getRDFList } from "@/util/helpers"
 import MainNav from "@/components/navs/MainNav.vue";
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
 import RightSideBar from "@/components/navs/RightSideBar.vue";
@@ -80,23 +80,25 @@ async function getRootApiMetadata() {
 }
 
 async function getAnnotationPredicates() {
-    // get annotation predicates
-    const { data } = await predicateApiGetRequest("/annotation-predicates");
-    if (data && !predicateError.value) {
-        predicateParseIntoStore(data);
+    if (ui.annotationPredicates.label.length === 0 && ui.annotationPredicates.description.length === 0 && ui.annotationPredicates.provenance.length === 0) {
+        // get annotation predicates
+        const { data } = await predicateApiGetRequest("/annotation-predicates");
+        if (data && !predicateError.value) {
+            predicateParseIntoStore(data);
 
-        const labelList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:labelList")), null)[0];
-        const labels = getRDFList(predicateStore.value, labelList).map(o => o.value);
-        const descriptionList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:descriptionList")), null)[0];
-        const descriptions = getRDFList(predicateStore.value, descriptionList).map(o => o.value);
-        const provenanceList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:provenanceList")), null)[0];
-        const provenances = getRDFList(predicateStore.value, provenanceList).map(o => o.value);
+            const labelList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:labelList")), null)[0];
+            const labels = getRDFList(predicateStore.value, labelList).map(o => o.value);
+            const descriptionList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:descriptionList")), null)[0];
+            const descriptions = getRDFList(predicateStore.value, descriptionList).map(o => o.value);
+            const provenanceList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:provenanceList")), null)[0];
+            const provenances = getRDFList(predicateStore.value, provenanceList).map(o => o.value);
 
-        ui.annotationPredicates = {
-            label: labels,
-            description: descriptions,
-            provenance: provenances
-        };
+            ui.annotationPredicates = {
+                label: labels,
+                description: descriptions,
+                provenance: provenances
+            };
+        }
     }
 }
 
@@ -155,15 +157,12 @@ async function getProfiles() {
                     descriptionPredicates: [],
                     explanationPredicates: []
                 };
+
+                p.title = getAnnotation(subject.id, "label", profStore.value).value;
+                p.description = getAnnotation(subject.id, "description", profStore.value).value;
                 
                 profStore.value.forEach(q => {
-                    if (q.predicate.value === profQnameToIri("dcterms:title")) { // need to use label predicate from profile
-                        p.title = q.object.value;
-                    } else if (q.predicate.value === profQnameToIri("dcterms:description")) { // need to use description predicate from profile
-                        p.description = q.object.value;
-                    // } else if (q.predicate.value === profQnameToIri("dcterms:identifier")) {
-                    //     p.token = q.object.value;
-                    } else if (q.predicate.value === profQnameToIri("altr-ext:hasResourceFormat")) {
+                    if (q.predicate.value === profQnameToIri("altr-ext:hasResourceFormat")) {
                         p.mediatypes.push(q.object.value);
                     } else if (q.predicate.value === profQnameToIri("altr-ext:hasDefaultResourceFormat")) {
                         p.defaultMediatype = q.object.value;
@@ -175,6 +174,7 @@ async function getProfiles() {
                         p.explanationPredicates.push(q.object.value);
                     }
                 }, subject, null, null, null);
+
                 p.mediatypes.sort((a, b) => Number(b === p.defaultMediatype) - Number(a === p.defaultMediatype));
                 profs.push(p);
             }, namedNode(profQnameToIri("a")), namedNode(profQnameToIri("prof:Profile")), null);

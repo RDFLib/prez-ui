@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import { ref, computed, inject, onMounted, watch } from "vue";
 import { DataFactory } from "n3";
-import { apiBaseUrlConfigKey, mapConfigKey, type MapConfig, type ProfileHeader } from "@/types";
-import { useUiStore } from "@/stores/ui";
+import { apiBaseUrlConfigKey, mapConfigKey, type MapConfig } from "@/types";
 import { useApiRequest, useConcurrentApiRequests, useSparqlRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
-import { copyToClipboard, sortByTitle } from "@/util/helpers";
+import { copyToClipboard, ensureAnnotationPredicates, getAnnotation, sortByTitle } from "@/util/helpers";
 import { AreaTypes, ShapeTypes, type Coords } from "@/components/MapClient.d";
 import { enumToOptions } from "@/util/mapSearchHelper";
 import { spatialSearchQuery } from "@/sparqlQueries/spatialSearch";
@@ -34,14 +33,12 @@ type SparqlBinding = {
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 const mapConfig = inject(mapConfigKey) as MapConfig;
 
-const ui = useUiStore();
 const { loading: datasetLoading, error: datasetError, apiGetRequest: datasetApiGetRequest } = useApiRequest(); // list of datasets
 const { loading: fcLoading, hasError: fcError, concurrentApiRequests: fcConcurrentApiRequests } = useConcurrentApiRequests(); // concurrent lists of feature collections
 const { loading: searchLoading, error: searchError, sparqlGetRequest: searchSparqlGetRequest } = useSparqlRequest(); // spatial search SPARQL query
 const { store, parseIntoStore, qnameToIri } = useRdfStore();
 
 const LIVE_SEARCH = true;
-const DEFAULT_LABEL_PREDICATES = [qnameToIri("dcterms:title")];
 const AREA_BUTTONS = enumToOptions(AreaTypes)
 
 const datasets = ref<(Option & {link: string, featureCollections: Option[]})[]>([]);
@@ -159,11 +156,8 @@ function handleMapSelectionChange(selectedCoords: Coords, shapeType: ShapeTypes)
  * Gets the list of Datasets from the API endpoint `/s/datasets` & creates the list of dataset options
  */
 async function getDatasets() {
-    const { data, profiles } = await datasetApiGetRequest("/s/datasets");
-    if (data && profiles.length > 0 && !datasetError.value) {
-        const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
-        const labelPredicates = currentProfile.labelPredicates.length > 0 ? currentProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
-
+    const { data } = await datasetApiGetRequest("/s/datasets");
+    if (data &&  !datasetError.value) {
         parseIntoStore(data);
 
         const datasetOptions: {[key: string]: (Option & {link: string, featureCollections: Option[]})} = {};
@@ -175,42 +169,31 @@ async function getDatasets() {
                 featureCollections: []
             };
 
-            store.value.forEach(q => {
-                if (labelPredicates.includes(q.predicate.value)) {
-                    dataset.title = q.object.value;
-                } else if (q.predicate.value === qnameToIri("prez:link")) {
-                    dataset.link = q.object.value;
-                }
-            }, subject, null, null, null);
+            dataset.title = getAnnotation(subject.value, "label", store.value).value;
+
+            store.value.forObjects(object => {
+                dataset.link = object.value;
+            }, subject, namedNode(qnameToIri("prez:link")), null);
 
             datasetOptions[subject.value] = dataset;
         }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Dataset")), null);
 
         const fcData = await fcConcurrentApiRequests(Object.values(datasetOptions).map(d => `${d.link}/collections`));
-        let fcProfiles: ProfileHeader[] = [];
 
-        fcData.forEach((r, index) => {
+        fcData.forEach(r => {
             if (r.value) {
                 parseIntoStore(r.value);
             }
-            if (index === 0 && r.profiles) {
-                fcProfiles = r.profiles;
-            }
         });
-
-        const fcCurrentProfile = ui.profiles[fcProfiles.find(p => p.current)!.uri];
-        const fcLabelPredicates = fcCurrentProfile.labelPredicates.length > 0 ? fcCurrentProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
 
         store.value.forSubjects(subject => { // get datasets
             store.value.forObjects(object => { // get fcs per dataset
                 const fc: Option = {
                     iri: object.value
                 };
-                store.value.forEach(q => { // fc triples
-                    if (fcLabelPredicates.includes(q.predicate.value)) {
-                        fc.title = q.object.value;
-                    }
-                }, object, null, null, null);
+
+                fc.title = getAnnotation(object.value, "label", store.value).value;
+
                 datasetOptions[subject.value].featureCollections.push(fc);
             }, subject, namedNode(qnameToIri("rdfs:member")), null);
 
@@ -280,6 +263,7 @@ watch(spatialSelectionType, async (newValue, oldValue) => {
 });
 
 onMounted(async () => {
+    await ensureAnnotationPredicates();
     await getDatasets();
 
     // select all by default

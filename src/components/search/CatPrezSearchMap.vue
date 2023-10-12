@@ -3,12 +3,11 @@ import { onMounted, ref, computed, inject, watch } from "vue";
 import { DataFactory } from "n3";
 import { apiBaseUrlConfigKey } from "@/types";
 import { ShapeTypes, type Coords } from "@/components/MapClient.d";
-import { useUiStore } from "@/stores/ui";
 import { useApiRequest, useSparqlRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 import { catalogSpatialSearch, getThemesQuery } from "@/sparqlQueries/catalogSearch";
 import { shapeQueryPart } from "@/util/mapSearchHelper"
-import { copyToClipboard, sortByTitle } from "@/util/helpers";
+import { copyToClipboard, ensureAnnotationPredicates, getAnnotation, sortByTitle } from "@/util/helpers";
 import MapClient from "@/components/MapClient.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
@@ -41,14 +40,12 @@ type SparqlBinding = {
 
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 
-const ui = useUiStore();
 const { loading: catalogLoading, error: catalogError, apiGetRequest: catalogApiGetRequest } = useApiRequest();
 const { loading: themesLoading, error: themesError, sparqlGetRequest: themesSparqlGetRequest } = useSparqlRequest();
 const { loading: searchLoading, error: searchError, sparqlGetRequest: searchSparqlGetRequest } = useSparqlRequest();
 const { store, parseIntoStore, qnameToIri } = useRdfStore();
 
 const LIVE_SEARCH = true;
-const DEFAULT_LABEL_PREDICATES = [qnameToIri("dcterms:title")];
 const MAX_DESC_LENGTH = 200;
 
 const catalogs = ref<Option[]>([]);
@@ -112,12 +109,9 @@ function handleMapSelectionChange(selectedCoords: Coords, shapeType: ShapeTypes)
  * Gets the list of Catalogs from the API endpoint `/c/catalogs` & creates the list of catalog options
  */
 async function getCatalogs() {
-    const { data: catalogData, profiles: catalogProfiles } = await catalogApiGetRequest("/c/catalogs");
-    if (catalogData && catalogProfiles.length > 0 && !catalogError.value) {
-        const currentProfile = ui.profiles[catalogProfiles.find(p => p.current)!.uri];
-        const labelPredicates = currentProfile.labelPredicates.length > 0 ? currentProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
-
-        parseIntoStore(catalogData);
+    const { data } = await catalogApiGetRequest("/c/catalogs");
+    if (data && !catalogError.value) {
+        parseIntoStore(data);
 
         const catalogOptions: Option[] = [];
 
@@ -127,11 +121,7 @@ async function getCatalogs() {
                     iri: subject.value
                 };
 
-                store.value.forEach(q => {
-                    if (labelPredicates.includes(q.predicate.value)) {
-                        catalog.title = q.object.value;
-                    }
-                }, subject, null, null, null);
+                catalog.title = getAnnotation(subject.value, "label", store.value).value;
 
                 catalogOptions.push(catalog);
             }
@@ -210,6 +200,7 @@ watch(shape, async (newValue, oldValue) => {
 }, { deep: true });
 
 onMounted(async () => {
+    await ensureAnnotationPredicates();
     await getCatalogs();
     selectedCatalogs.value = catalogs.value.map(catalog => catalog.iri); // select all by default
     await getThemes();

@@ -47,6 +47,16 @@ export const useUiStore = defineStore("ui", () => {
         sessionStorage.setItem("profiles", JSON.stringify(state));
     }, { deep: true });
 
+    // get annotationPredicates from local storage
+    if (sessionStorage.getItem("annotationPredicates")) {
+        annotationPredicates.value = JSON.parse(sessionStorage.getItem("annotationPredicates") || "");
+    }
+
+    // watch & save annotationPredicates to local storage
+    watch(annotationPredicates, (state) => {
+        sessionStorage.setItem("annotationPredicates", JSON.stringify(state));
+    }, { deep: true });
+
     return {
         // state
         rightNavConfig,

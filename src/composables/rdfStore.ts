@@ -1,11 +1,9 @@
 import { ref } from "vue";
 import { Store, Parser } from "n3";
 import { DEFAULT_PREFIXES } from "@/util/consts";
-import { defaultQnameToIri } from "@/util/helpers";
+import { defaultQnameToIri, defaultIriToQname } from "@/util/helpers";
 
 export function useRdfStore() {
-    // const { namedNode, literal, defaultGraph, quad } = DataFactory;
-
     const parser = new Parser();
     const store = ref(new Store());
     const prefixes = ref(DEFAULT_PREFIXES);
@@ -22,8 +20,6 @@ export function useRdfStore() {
             if (!Object.values(DEFAULT_PREFIXES).includes(prefixNode.value)) {
                 prefixes.value[prefixName] = prefixNode.value;
             }
-            // const newPrefixes = Object.keys(parser._prefixes).filter(key => !Object.values(defaultPrefixes).includes(parser._prefixes[key]));
-            // prefixes.value = {...prefixes.value, ...newPrefixes};
         });
         store.value.addQuads(p);
     }
@@ -49,13 +45,7 @@ export function useRdfStore() {
      * @returns Generated qname
      */
     function iriToQname(iri: string): string {
-        let qname = "";
-        Object.entries(prefixes.value).forEach(([prefix, prefixIri]) => {
-            if (iri.startsWith(prefixIri)) {
-                qname = prefix + ":" + iri.split(prefixIri)[1];
-            }
-        });
-        return qname;
+        return defaultIriToQname(iri, prefixes.value);
     }
 
     function clearStore() {

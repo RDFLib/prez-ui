@@ -1,5 +1,5 @@
 import type { RouteLocationNormalizedLoaded } from "vue-router";
-import { DataFactory, type Store, type Quad, type Literal, type Quad_Object } from "n3";
+import { DataFactory, type Store, type Quad, type Literal, type Quad_Object, type NamedNode, type Quad_Predicate } from "n3";
 import type { option, link, languageLabel } from "@/types";
 import { useUiStore } from "@/stores/ui";
 import { DEFAULT_LABEL_PREDICATES, DEFAULT_PREFIXES, CONTAINER_RELATIONS } from "@/util/consts";
@@ -236,6 +236,25 @@ export function defaultQnameToIri(s: string, prefixes: { [token: string]: string
 }
 
 /**
+ * Creates a qname from an IRI
+ * 
+ * Uses the default list of prefixes by default
+ * 
+ * @param iri 
+ * @param prefixes 
+ * @returns qname string
+ */
+export function defaultIriToQname(iri: string, prefixes: { [token: string]: string } = DEFAULT_PREFIXES): string {
+    let qname = "";
+    Object.entries(prefixes).forEach(([prefix, prefixIri]) => {
+        if (iri.startsWith(prefixIri)) {
+            qname = prefix + ":" + iri.split(prefixIri)[1];
+        }
+    });
+    return qname;
+}
+
+/**
  * Creates a query string argument based on a container's base class
  * 
  * @param baseClass 
@@ -327,11 +346,112 @@ export function getRDFList(store: Store, list: Quad_Object): Quad_Object[] {
  * @returns the preferred annotation object
  */
 export function getPreferredAnnotation(objects: any[]) {
-    // usage: if (ui.annotationPredicates.label.includes(q.predicate.value)) { labels.push(q.object); } ... const preferredLabel = getPreferredAnnotation(labels);
     const objsWithPriority = objects.map(o => {
         return {...o, priority: getLanguagePriority((o as Literal).language)};
     });
+    const initialValue = {
+        termType: "Literal",
+        value: undefined,
+        id: undefined,
+        language: undefined,
+        priority: undefined
+    };
     // get highest priority (lowest value)
-    const preferredObj = objsWithPriority.reduce((prev, current) => (prev && prev.priority < current.priority) ? prev : current);
+    const preferredObj = objsWithPriority.reduce((prev, current) => (prev && prev.priority < current.priority) ? prev : current, initialValue);
     return preferredObj;
+}
+
+/**
+ * Periodically checks if the annotationPredicates object is set in Pinia before resolving a Promise.
+ * 
+ * Loops every 200ms, times out after 10s.
+ */
+export function ensureAnnotationPredicates() {
+    const ui = useUiStore();
+
+    return new Promise<void>((resolve, reject) => {
+        let expTimer = setTimeout(reject, 10 * 1000); // time out after 10s
+               
+        (function waitForAnnotationPredicates() {
+            if (ui.annotationPredicates.label.length > 0 || ui.annotationPredicates.description.length > 0 || ui.annotationPredicates.provenance.length > 0) {
+                clearTimeout(expTimer);
+                return resolve();
+            };
+            setTimeout(waitForAnnotationPredicates, 200); // checks every 200ms
+        })();
+    });
+};
+
+/**
+ * Gets an array of N3 Quad_Objects from by providing an array of predicates
+ * 
+ * @param subject 
+ * @param predicates 
+ * @param store 
+ * @returns the array of objects
+ */
+export function getObjects(subject: string, predicates: string[], store: Store): Quad_Object[] {
+    const objs: Quad_Object[] = [];
+
+    predicates.forEach(p => {
+        objs.push(...store.getObjects(namedNode(subject), namedNode(p), null));
+    });
+
+    return objs;
+}
+
+/**
+ * Gets the preferred annotation of a node if possible
+ * 
+ * Chooses from a list of supported annotation predicates, gets the highest priority annotation based on language preference
+ * 
+ * @param iri 
+ * @param annotation 
+ * @param store 
+ * @returns The preferred annotation
+ */
+export function getAnnotation(iri: string, annotation: "label" | "description" | "provenance", store: Store) {
+    const ui = useUiStore();
+
+    const objs = getObjects(iri, ui.annotationPredicates[annotation], store).map(o => {
+        return {
+            value: o.value,
+            language: (o as Literal).language
+        }
+    })
+    return getPreferredAnnotation(objs);
+}
+
+interface AnnotatedTerm {
+    id: string;
+    value: string;
+    termType: "NamedNode" | "Variable" | "Literal" | "BlankNode";
+    qname?: string;
+    language?: string;
+    datatype?: NamedNode;
+    label?: string;
+    description?: string;
+    provenance?: string;
+};
+
+/**
+ * Creates a generic annotated term object containing all possible preferred annotations
+ * 
+ * @param term 
+ * @param store 
+ * @param prefixes 
+ * @returns the term containing annotations
+ */
+export function createAnnotatedTerm(term: Quad_Predicate | Quad_Object, store: Store, prefixes?: {[token: string]: string}): AnnotatedTerm {
+    return {
+        id: term.id,
+        value: term.value,
+        termType: term.termType,
+        qname: term.termType === "NamedNode" ? defaultIriToQname(term.value, prefixes) : undefined,
+        language: term.termType === "Literal" ? term.language : undefined,
+        datatype: term.termType === "Literal" ? term.datatype : undefined,
+        label: term.termType === "NamedNode" ? getAnnotation(term.value, "label", store) : undefined,
+        description: term.termType === "NamedNode" ? getAnnotation(term.value, "description", store) : undefined,
+        provenance: term.termType === "NamedNode" ? getAnnotation(term.value, "provenance", store) : undefined,
+    };
 }
