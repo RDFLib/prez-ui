@@ -2,12 +2,11 @@ import { fileURLToPath, URL } from "node:url";
 
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import VueTypeImports from "vite-plugin-vue-type-imports";
 import pluginRewriteAll from "vite-plugin-rewrite-all";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [vue(), VueTypeImports(), pluginRewriteAll(),],
+    plugins: [vue(), pluginRewriteAll(),],
     resolve: {
         alias: {
             "@": fileURLToPath(new URL("./src", import.meta.url))

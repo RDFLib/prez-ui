@@ -18,16 +18,10 @@ const rows = ref<PropTableRow[]>([]);
 function buildRows(properties: AnnotatedTriple[]): PropTableRow[] {
     let propRows: {[uri: string]: PropTableRow} = {};
     properties.forEach(p => {
-        // const { value, ...pred } = p.predicate; // omit & rename "value" to "iri"
+        const { value, ...pred } = p.predicate; // omit & rename "value" to "iri"
         propRows[p.predicate.value] ??= {
             iri: p.predicate.value,
-            // ...pred,
-            id: p.predicate.id,
-            termType: p.predicate.termType,
-            label: p.predicate.label,
-            description: p.predicate.description,
-            provenance: p.predicate.provenance,
-            qname: p.predicate.qname,
+            ...pred,
             order: 0,
             objects: [],
         };
