@@ -9,7 +9,7 @@ import { useUiStore } from "@/stores/ui";
 import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 import router from "@/router";
-import { getLink, containerQsa, newQSAString, getQSA, ensureAnnotationPredicates, getAnnotation } from "@/util/helpers";
+import { getLink, containerQsa, newQSAString, getQSA, ensureAnnotationPredicates, getLabel, getDescription } from "@/util/helpers";
 import { CONTAINER_RELATIONS } from "@/util/consts";
 import SearchResult from "@/components/search/SearchResult.vue";
 import MapClient from "@/components/MapClient.vue";
@@ -205,7 +205,7 @@ async function getCatalogs() {
                     id: subject.value
                 } as selectOption;
 
-                catalog.label = getAnnotation(subject.value, "label", optionsStore.value).value;
+                catalog.label = getLabel(subject.value, optionsStore.value);
 
                 catalogOptions.push(catalog);
             }
@@ -231,7 +231,7 @@ async function getDatasets() {
                 children: []
             };
 
-            dataset.label = getAnnotation(subject.value, "label", optionsStore.value).value;
+            dataset.label = getLabel(subject.value, optionsStore.value);
 
             optionsStore.value.forObjects(object => {
                 dataset.link = object.value;
@@ -254,7 +254,7 @@ async function getDatasets() {
                     label: object.value
                 };
 
-                fc.label = getAnnotation(object.value, "label", optionsStore.value).value;
+                fc.label = getLabel(object.value, optionsStore.value);
 
                 datasetOptions[subject.value].children?.push(fc);
             }, subject, optionQnameToIri("rdfs:member"), null);
@@ -285,7 +285,7 @@ async function getVocabs() {
                 id: subject.value
             } as selectOption;
 
-            vocab.label = getAnnotation(subject.value, "label", optionsStore.value).value;
+            vocab.label = getLabel(subject.value, optionsStore.value);
 
             vocabOptions.push(vocab);
         }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:ConceptScheme")), null);
@@ -307,7 +307,7 @@ async function getCollections() {
                 id: subject.value
             } as selectOption;
 
-            collection.label = getAnnotation(subject.value, "label", optionsStore.value).value;
+            collection.label = getLabel(subject.value, optionsStore.value);
 
             collectionOptions.push(collection);
         }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:Collection")), null);
@@ -402,8 +402,8 @@ async function getResults() {
                     result.weight = Number(q.object.value);
                 } else if (q.predicate.value === qnameToIri("prez:searchResultURI")) {
                     result.uri = q.object.value;
-                    result.title = getAnnotation(q.object.value, "label", store.value).value;
-                    result.description = getAnnotation(q.object.value, "description", store.value).value;
+                    result.title = getLabel(q.object.value, store.value);
+                    result.description = getDescription(q.object.value, store.value);
                     let resultCoordinates = undefined;
 
                     store.value.forEach(q1 => {
@@ -415,7 +415,7 @@ async function getResults() {
                         } else if (q1.predicate.value === qnameToIri("a")) {
                             result.types.push({
                                 uri: q1.object.value,
-                                label: getAnnotation(q1.object.value, "label", store.value).value,
+                                label: getLabel(q1.object.value, store.value),
                             });
                         } else if (q1.predicate.value === qnameToIri("geo:hasGeometry")) {
                             store.value.forEach(geometryTriple => {

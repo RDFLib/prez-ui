@@ -7,7 +7,7 @@ import { useApiRequest, useSparqlRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 import { catalogSpatialSearch, getThemesQuery } from "@/sparqlQueries/catalogSearch";
 import { shapeQueryPart } from "@/util/mapSearchHelper"
-import { copyToClipboard, ensureAnnotationPredicates, getAnnotation, sortByTitle } from "@/util/helpers";
+import { copyToClipboard, ensureAnnotationPredicates, getLabel, sortByTitle } from "@/util/helpers";
 import MapClient from "@/components/MapClient.vue";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
@@ -121,7 +121,7 @@ async function getCatalogs() {
                     iri: subject.value
                 };
 
-                catalog.title = getAnnotation(subject.value, "label", store.value).value;
+                catalog.title = getLabel(subject.value, store.value);
 
                 catalogOptions.push(catalog);
             }

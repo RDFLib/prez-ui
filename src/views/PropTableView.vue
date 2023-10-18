@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import { ref, onMounted, inject, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
-import { BlankNode, DataFactory, Quad, Store, Literal } from "n3";
+import { BlankNode, DataFactory, Quad, Store } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import type { WKTResult } from "@/components/MapClient.d";
 import { apiBaseUrlConfigKey, conceptPerPageConfigKey, enableScoresKey, type ListItem, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable, type AnnotatedTriple, type Prefixes } from "@/types";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
-import { titleCase, sortByTitle, getAnnotation, ensureAnnotationPredicates, createAnnotatedTerm } from "@/util/helpers";
+import { titleCase, sortByTitle, ensureAnnotationPredicates, createAnnotatedTerm, getLabel, getDescription } from "@/util/helpers";
 import { ALT_PROFILE_CURIE } from "@/util/consts";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
@@ -142,8 +142,8 @@ async function getProperties() {
             hiddenPredicates.value.push(q.predicate.value);
         } else if (q.predicate.value === qnameToIri("a")) {
             configByBaseClass(q.object.value); // might not be needed anymore with the /object changes
-            const typeLabel = getAnnotation(q.object.value, "label", store.value).value;
-            const typeDesc = getAnnotation(q.object.value, "description", store.value).value;
+            const typeLabel = getLabel(q.object.value, store.value);
+            const typeDesc = getDescription(q.object.value, store.value);
             const typeQname = iriToQname(q.object.value);
 
             item.value.types!.push({
@@ -169,12 +169,11 @@ async function getProperties() {
         }
 
         if (!isAltView.value) {
-            // const annoQuad = createAnnoQuad(q, store.value, ui.annotationPredicates.label);
             const annoQuad = createAnnotatedTriple(q, store.value, prefixes.value);
             properties.value.push(annoQuad);
 
             let recursionCounter = 0;
-            findBlankNodes2(q, store.value, recursionCounter, prefixes.value);
+            findBlankNodes(q, store.value, recursionCounter, prefixes.value);
         }
     }, namedNode(item.value.iri), null, null, null);
 
@@ -231,7 +230,7 @@ function getBreadcrumbs(): Breadcrumb[] {
                 uri: quads[0].subject.value
             };
 
-            parent.title = getAnnotation(quads[0].subject.value, "label", store.value).value;
+            parent.title = getLabel(quads[0].subject.value, store.value);
             parents.push(parent);
         }
     });
@@ -330,7 +329,7 @@ async function getChildren() {
                 extras: {}
             };
 
-            child.title = getAnnotation(obj.value, "label", store.value).value;
+            child.title = getLabel(obj.value, store.value);
             const links: string[] = [];
 
             store.value.forEach(q => {
@@ -341,14 +340,14 @@ async function getChildren() {
                 } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:publisher")) {
                     const publisher: ListItemSortable = {
                         iri: q.object.value,
-                        label: getAnnotation(q.object.value, "label", store.value).value || getIRILocalName(q.object.value)
+                        label: getLabel(q.object.value, store.value) || getIRILocalName(q.object.value)
                     };
 
                     child.extras.publisher = publisher;
                 } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:creator")) {
                     const creator: ListItemSortable = {
                         iri: q.object.value,
-                        label: getAnnotation(q.object.value, "label", store.value).value || getIRILocalName(q.object.value)
+                        label: getLabel(q.object.value, store.value) || getIRILocalName(q.object.value)
                     };
                     
                     child.extras.creator = creator;
@@ -392,7 +391,7 @@ async function getAllConcepts() {
             children: []
         };
 
-        c.title = getAnnotation(subject.value, "label", store.value).value;
+        c.title = getLabel(subject.value, store.value);
         
         store.value.forEach(q => {
             if (q.predicate.value === qnameToIri("prez:link") && q.object.value.startsWith(route.path)) { // enforce links within current vocab
@@ -458,7 +457,7 @@ async function getTopConcepts(page: number = 1) {
                 color: "",
             };
             
-            c.title = getAnnotation(object.value, "label", conceptStore.value).value;
+            c.title = getLabel(object.value, conceptStore.value);
 
             conceptStore.value.forEach(q => {
                 if (q.predicate.value === conceptQnameToIri("prez:link")) {
@@ -506,7 +505,7 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
                 color: "",
             };
 
-            c.title = getAnnotation(object.value, "label", conceptStore.value).value;
+            c.title = getLabel(object.value, conceptStore.value);
             
             conceptStore.value.forEach(q => {
                 if (q.predicate.value === conceptQnameToIri("prez:link")) {
@@ -532,14 +531,14 @@ function createAnnotatedTriple(q: Quad, store: Store, prefixes?: Prefixes): Anno
     }
 }
 
-function findBlankNodes2(q: Quad, store: Store, recursionCounter: number, prefixes?: Prefixes) {
+function findBlankNodes(q: Quad, store: Store, recursionCounter: number, prefixes?: Prefixes) {
     if (q.object instanceof BlankNode) {
         recursionCounter++;
         store.forEach(q1 => {
             const annoQuad1 = createAnnotatedTriple(q1, store, prefixes);
             blankNodes.value.push(annoQuad1);
             if (recursionCounter < RECURSION_LIMIT) {
-                findBlankNodes2(q1, store, recursionCounter, prefixes);
+                findBlankNodes(q1, store, recursionCounter, prefixes);
             }
         }, q.object, null, null, null)
     }
@@ -648,8 +647,8 @@ onMounted(async () => {
         await ensureAnnotationPredicates();
 
         hiddenPredicates.value.push(...ui.annotationPredicates.label, ...ui.annotationPredicates.description);
-        item.value.title = getAnnotation(item.value.iri, "label", store.value).value;
-        item.value.description = getAnnotation(item.value.iri, "description", store.value).value;
+        item.value.title = getLabel(item.value.iri, store.value);
+        item.value.description = getDescription(item.value.iri, store.value);
 
         // fire off getProperties() & getChildren() concurrently
         if (!isAltView.value) {

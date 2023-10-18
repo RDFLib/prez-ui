@@ -4,7 +4,7 @@ import { DataFactory } from "n3";
 import { apiBaseUrlConfigKey, mapConfigKey, type MapConfig } from "@/types";
 import { useApiRequest, useConcurrentApiRequests, useSparqlRequest } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
-import { copyToClipboard, ensureAnnotationPredicates, getAnnotation, sortByTitle } from "@/util/helpers";
+import { copyToClipboard, ensureAnnotationPredicates, getLabel, sortByTitle } from "@/util/helpers";
 import { AreaTypes, ShapeTypes, type Coords } from "@/components/MapClient.d";
 import { enumToOptions } from "@/util/mapSearchHelper";
 import { spatialSearchQuery } from "@/sparqlQueries/spatialSearch";
@@ -169,7 +169,7 @@ async function getDatasets() {
                 featureCollections: []
             };
 
-            dataset.title = getAnnotation(subject.value, "label", store.value).value;
+            dataset.title = getLabel(subject.value, store.value);
 
             store.value.forObjects(object => {
                 dataset.link = object.value;
@@ -192,7 +192,7 @@ async function getDatasets() {
                     iri: object.value
                 };
 
-                fc.title = getAnnotation(object.value, "label", store.value).value;
+                fc.title = getLabel(object.value, store.value);
 
                 datasetOptions[subject.value].featureCollections.push(fc);
             }, subject, namedNode(qnameToIri("rdfs:member")), null);

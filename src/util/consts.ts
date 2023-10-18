@@ -1,5 +1,4 @@
 import type { Prefixes } from "@/types";
-import { defaultQnameToIri } from "@/util/helpers";
 
 export const ALT_PROFILE_CURIE = "altr-ext:alt-profile";
 
@@ -22,24 +21,6 @@ export const DEFAULT_PREFIXES: Prefixes = {
     "skos": "http://www.w3.org/2004/02/skos/core#",
     "xsd": "http://www.w3.org/2001/XMLSchema#", 
 };
-
-// soon will get these from Prez API root endpoint as config
-export const DEFAULT_LABEL_PREDICATES: string[] = [
-    defaultQnameToIri("rdfs:label"),
-    defaultQnameToIri("dcterms:title"),
-    defaultQnameToIri("skos:prefLabel"),
-    defaultQnameToIri("sdo:name"),
-];
-
-export const DEFAULT_DESC_PREDICATES: string[] = [
-    defaultQnameToIri("dcterms:description"),
-    defaultQnameToIri("skos:definition"),
-    defaultQnameToIri("sdo:description"),
-];
-
-export const DEFAULT_EXPL_PREDICATES: string[] = [
-    defaultQnameToIri("dcterms:provenance")
-];
 
 export const CONTAINER_RELATIONS: { [key: string]: { predicate: string; inbound: boolean; } } = {
     "dcat:Dataset": {

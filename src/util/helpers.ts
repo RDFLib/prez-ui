@@ -1,8 +1,8 @@
 import type { RouteLocationNormalizedLoaded } from "vue-router";
-import { DataFactory, type Store, type Quad, type Literal, type Quad_Object, type NamedNode, type Quad_Predicate } from "n3";
-import type { option, link, languageLabel, AnnotatedTerm, Prefixes, AnnotatedPredicate } from "@/types";
+import { DataFactory, type Store, type Quad, type Quad_Object, type Quad_Predicate } from "n3";
+import type { option, link, AnnotatedTerm, Prefixes } from "@/types";
 import { useUiStore } from "@/stores/ui";
-import { DEFAULT_LABEL_PREDICATES, DEFAULT_PREFIXES, CONTAINER_RELATIONS } from "@/util/consts";
+import { DEFAULT_PREFIXES, CONTAINER_RELATIONS } from "@/util/consts";
 
 const { namedNode } = DataFactory;
 
@@ -179,29 +179,14 @@ export function getLink(store: Store, linkQuad: Quad): link {
         const parent: linkParent = {
             iri: parentQuad.subject.value,
             link: linkQuad.object.value.split(parentQuad.object.value)[0] + parentQuad.object.value,
-            types: []
+            types: [],
+            title: getLabel(parentQuad.subject.value, store)
         };
-        
-        const labels: languageLabel[] = [];
-        store.forEach(q1 => {
-            if (DEFAULT_LABEL_PREDICATES.includes(q1.predicate.value)) {
-                let language = (q1.object as Literal).language;
-                labels.push({
-                    value: q1.object.value,
-                    language: language || undefined,
-                    priority: getLanguagePriority(language)
-                });
-            }
-        }, namedNode(parentQuad.subject.value), null, null, null);
-
-        labels.sort((a, b) => a.priority - b.priority);
-        parent.title = labels.length > 0 ? labels[0].value : undefined;
 
         store.getObjects(namedNode(parentQuad.subject.value), namedNode(defaultQnameToIri("a")), null).forEach(t => {
-            const typeLabel = store.getObjects(t, namedNode(defaultQnameToIri("rdfs:label")), null);
             parent.types.push({
                 iri: t.value,
-                title: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+                title: getLabel(t.value, store),
             });
         });
 
@@ -345,20 +330,18 @@ export function getRDFList(store: Store, list: Quad_Object): Quad_Object[] {
  * @param objects the list of annotation objects
  * @returns the preferred annotation object
  */
-export function getPreferredAnnotation(objects: any[]) {
+export function getPreferredAnnotation(objects: { value: string, language: string }[]): { value: string, language: string } {
     const objsWithPriority = objects.map(o => {
-        return {...o, priority: getLanguagePriority((o as Literal).language)};
+        return {...o, priority: getLanguagePriority(o.language)};
     });
     const initialValue = {
-        termType: "Literal",
-        value: undefined,
-        id: undefined,
-        language: undefined,
-        priority: undefined
+        value: "",
+        language: "",
+        priority: 100
     };
     // get highest priority (lowest value)
     const preferredObj = objsWithPriority.reduce((prev, current) => (prev && prev.priority < current.priority) ? prev : current, initialValue);
-    return preferredObj;
+    return { value: preferredObj.value, language: preferredObj.language };
 }
 
 /**
@@ -383,7 +366,7 @@ export function ensureAnnotationPredicates() {
 };
 
 /**
- * Gets an array of N3 Quad_Objects from by providing an array of predicates
+ * Gets an array of N3 `Quad_Objects` from a `Store` by providing an array of predicates
  * 
  * @param subject 
  * @param predicates 
@@ -410,27 +393,48 @@ export function getObjects(subject: string, predicates: string[], store: Store):
  * @param store 
  * @returns The preferred annotation
  */
-export function getAnnotation(iri: string, annotation: "label" | "description" | "provenance", store: Store) {
+export function getAnnotation(iri: string, annotation: "label" | "description" | "provenance", store: Store): { value: string, language: string } {
     const ui = useUiStore();
 
     const objs = getObjects(iri, ui.annotationPredicates[annotation], store).map(o => {
         return {
             value: o.value,
-            language: (o as Literal).language
+            language: o.termType === "Literal" ? o.language : ""
         }
     })
     return getPreferredAnnotation(objs);
 }
 
-export function getLabel(iri: string, store: Store) {
+/**
+ * Gets the preferred label of a node
+ * 
+ * @param iri 
+ * @param store 
+ * @returns 
+ */
+export function getLabel(iri: string, store: Store): string {
     return getAnnotation(iri, "label", store).value;
 };
 
-export function getDescription(iri: string, store: Store) {
+/**
+ * Gets the preferred description of a node
+ * 
+ * @param iri 
+ * @param store 
+ * @returns 
+ */
+export function getDescription(iri: string, store: Store): string {
     return getAnnotation(iri, "description", store).value;
 };
 
-export function getProvenance(iri: string, store: Store) {
+/**
+ * Gets the preferred provenance of a node
+ * 
+ * @param iri 
+ * @param store 
+ * @returns 
+ */
+export function getProvenance(iri: string, store: Store): string {
     return getAnnotation(iri, "provenance", store).value;
 };
 

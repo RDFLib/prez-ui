@@ -6,7 +6,7 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import type { Profile } from "@/types";
-import { ensureAnnotationPredicates, getAnnotation } from "@/util/helpers";
+import { ensureAnnotationPredicates, getDescription, getLabel } from "@/util/helpers";
 import router from "@/router";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
@@ -63,14 +63,14 @@ onMounted(async () => {
 
                 await ensureAnnotationPredicates();
                 
-                item.value.title = getAnnotation(subject.value, "label", store.value).value;
-                item.value.description = getAnnotation(subject.value, "description", store.value).value;
+                item.value.title = getLabel(subject.value, store.value);
+                item.value.description = getDescription(subject.value, store.value);
 
                 store.value.forEach(q => {
                     if (q.predicate.value === qnameToIri("a")) {
                         item.value.types.push({
                             iri: q.object.value,
-                            title: getAnnotation(q.object.value, "label", store.value).value,
+                            title: getLabel(q.object.value, store.value),
                         });
                     } else if (q.predicate.value === qnameToIri("prez:link")) {
                         const parentIds = store.value.getQuads(null, namedNode(qnameToIri("dcterms:identifier")), null, null).filter(q1 => q.object.value.includes(q1.object.value));
@@ -80,13 +80,13 @@ onMounted(async () => {
                             let parentId = parentIds[0].object.value;
                             let parentLink = q.object.value.split(parentId)[0] + parentId;
 
-                            const parentTitle = getAnnotation(parentIds[0].subject.value, "label", store.value).value;
+                            const parentTitle = getLabel(parentIds[0].subject.value, store.value);
 
                             let parentTypes: { iri: string; title?: string; }[] = [];
                             store.value.getObjects(namedNode(parentIri), namedNode(qnameToIri("a")), null).forEach(t => {
                                 parentTypes.push({
                                     iri: t.value,
-                                    title: getAnnotation(t.value, "label", store.value).value,
+                                    title: getLabel(t.value, store.value),
                                 });
                             });
 

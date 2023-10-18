@@ -6,7 +6,7 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { sidenavConfigKey, type Profile } from "@/types";
-import { getAnnotation, getRDFList } from "@/util/helpers"
+import { getDescription, getLabel, getRDFList } from "@/util/helpers"
 import MainNav from "@/components/navs/MainNav.vue";
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
 import RightSideBar from "@/components/navs/RightSideBar.vue";
@@ -133,8 +133,8 @@ async function getProfiles() {
                     explanationPredicates: []
                 };
 
-                p.title = getAnnotation(subject.id, "label", profStore.value).value;
-                p.description = getAnnotation(subject.id, "description", profStore.value).value;
+                p.title = getLabel(subject.id, profStore.value);
+                p.description = getDescription(subject.id, profStore.value);
                 
                 profStore.value.forEach(q => {
                     if (q.predicate.value === profQnameToIri("altr-ext:hasResourceFormat")) {

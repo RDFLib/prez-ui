@@ -7,7 +7,7 @@ import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
-import { sortByTitle, getBaseClassFromLink, getAnnotation, ensureAnnotationPredicates } from "@/util/helpers";
+import { sortByTitle, getBaseClassFromLink, ensureAnnotationPredicates, getLabel, getDescription } from "@/util/helpers";
 import { ALT_PROFILE_CURIE } from "@/util/consts";
 import ItemList from "@/components/ItemList.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
@@ -141,7 +141,7 @@ function getBreadcrumbs(): Breadcrumb[] {
                 uri: quads[0].subject.value
             };
 
-            parent.title = getAnnotation(quads[0].subject.value, "label", store.value).value;
+            parent.title = getLabel(quads[0].subject.value, store.value);
             
             parents.push(parent);
         }
@@ -228,8 +228,8 @@ function getProperties() {
             extras: {}
         };
 
-        c.title = getAnnotation(c.iri, "label", store.value).value;
-        c.description = getAnnotation(c.iri, "description", store.value).value;
+        c.title = getLabel(c.iri, store.value);
+        c.description = getDescription(c.iri, store.value);
 
         store.value.forEach(q => {
             if (q.predicate.value === qnameToIri("prez:link")) {
@@ -237,7 +237,7 @@ function getProperties() {
             } else if (flavour.value === "VocPrez" && q.predicate.value === qnameToIri("reg:status")) {
                 const status: ListItemSortable = {
                     iri: q.object.value,
-                    label: getAnnotation(q.object.value, "label", store.value).value || getIRILocalName(q.object.value)
+                    label: getLabel(q.object.value, store.value) || getIRILocalName(q.object.value)
                 };
 
                 store.value.forObjects(result => {
@@ -249,7 +249,7 @@ function getProperties() {
                 store.value.forObjects(result => {
                     const mode: ListItemSortable = {
                         iri: result.value,
-                        label: getAnnotation(result.value, "label", store.value).value || getIRILocalName(result.value)
+                        label: getLabel(result.value, store.value) || getIRILocalName(result.value)
                     };
 
                     c.extras.derivationMode = mode;
