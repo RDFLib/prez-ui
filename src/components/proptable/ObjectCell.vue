@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import type { RowObj } from "@/types";
+import type { PropTableObject } from "@/types";
 import { copyToClipboard } from "@/util/helpers";
 import PropRow from "@/components/proptable/PropRow.vue";
 import ToolTip from "@/components/ToolTip.vue";
 
-const props = defineProps<RowObj>();
+const props = defineProps<PropTableObject>();
 
 const geometryPreds = [
     "http://www.opengis.net/ont/geosparql#geoJSONLiteral",
@@ -33,7 +33,7 @@ const MAX_GEOM_LENGTH = 100; // max character length for geometry strings
                 <template #text>{{ props.description }}</template>
             </component>
             <template v-else>
-                <template v-if="props.predIri === 'https://schema.org/color'">{{ props.value }}<span v-if="!!props.value" :style="{color: props.value, marginLeft: '4px'}" class="fa-solid fa-circle fa-2xs"></span></template>
+                <template v-if="props.predicateIri === 'https://schema.org/color'">{{ props.value }}<span v-if="!!props.value" :style="{color: props.value, marginLeft: '4px'}" class="fa-solid fa-circle fa-2xs"></span></template>
                 <template v-else-if="props.value.startsWith('http')">
                     <a :href="props.value" target="_blank" rel="noopener noreferrer">{{ props.value }}</a>
                 </template>

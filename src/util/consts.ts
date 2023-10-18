@@ -1,10 +1,11 @@
+import type { Prefixes } from "@/types";
 import { defaultQnameToIri } from "@/util/helpers";
 
 export const ALT_PROFILE_CURIE = "altr-ext:alt-profile";
 
 export const ALT_PROFILE_URI = "http://www.w3.org/ns/dx/conneg/altr-ext#alt-profile";
 
-export const DEFAULT_PREFIXES: { [token: string]: string } = {
+export const DEFAULT_PREFIXES: Prefixes = {
     "altr-ext": "http://www.w3.org/ns/dx/conneg/altr-ext#",
     "dcat": "http://www.w3.org/ns/dcat#",
     "dcterms": "http://purl.org/dc/terms/",

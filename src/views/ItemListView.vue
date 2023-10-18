@@ -235,23 +235,22 @@ function getProperties() {
             if (q.predicate.value === qnameToIri("prez:link")) {
                 c.link = q.object.value;
             } else if (flavour.value === "VocPrez" && q.predicate.value === qnameToIri("reg:status")) {
-                const status: ListItemSortable = {iri: q.object.value, label: getIRILocalName(q.object.value)};
-
-                store.value.forObjects(result => {
-                    status.label = result.value;
-                }, q.object, qnameToIri("rdfs:label"), null);
+                const status: ListItemSortable = {
+                    iri: q.object.value,
+                    label: getAnnotation(q.object.value, "label", store.value).value || getIRILocalName(q.object.value)
+                };
 
                 store.value.forObjects(result => {
                     status.color = result.value;
                 }, q.object, qnameToIri("sdo:color"), null);
+
                 c.extras.status = status;
             } else if (flavour.value === "VocPrez" && q.predicate.value === qnameToIri("prov:qualifiedDerivation")) {
                 store.value.forObjects(result => {
-                    const mode: ListItemSortable = {iri: result.value, label: getIRILocalName(result.value)};
-
-                    store.value.forObjects(innerResult => {
-                        mode.label = innerResult.value;
-                    }, result,qnameToIri("rdfs:label"), null);
+                    const mode: ListItemSortable = {
+                        iri: result.value,
+                        label: getAnnotation(result.value, "label", store.value).value || getIRILocalName(result.value)
+                    };
 
                     c.extras.derivationMode = mode;
                 }, q.object, qnameToIri("prov:hadRole"), null);

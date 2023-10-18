@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import ToolTip from "@/components/ToolTip.vue";
-import type { PredCellProps } from "@/types";
+import type { PropTablePredicate } from "@/types";
 
-const props = defineProps<PredCellProps>();
+const props = defineProps<PropTablePredicate>();
 </script>
 
 <template>

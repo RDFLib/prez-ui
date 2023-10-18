@@ -1,5 +1,5 @@
 import type { InjectionKey } from "vue";
-import type { Quad, NamedNode } from "n3";
+import type { Quad, NamedNode, Quad_Subject } from "n3";
 
 export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
 
@@ -116,26 +116,26 @@ export interface ListItemSortable {
     color?: string;
 };
 
-export interface AnnotatedPredicate {
-    termType: "NamedNode" | "Variable";
-    value: string;
-    id: string;
-    annotations: Quad[];
-};
+// export interface AnnotatedPredicate {
+//     termType: "NamedNode" | "Variable";
+//     value: string;
+//     id: string;
+//     annotations: Quad[];
+// };
 
-export interface AnnotatedObject {
-    termType: "NamedNode" | "Variable" | "Literal" | "BlankNode";
-    value: string;
-    id: string;
-    language?: string;
-    datatype?: NamedNode;
-    annotations: Quad[];
-};
+// export interface AnnotatedObject {
+//     termType: "NamedNode" | "Variable" | "Literal" | "BlankNode";
+//     value: string;
+//     id: string;
+//     language?: string;
+//     datatype?: NamedNode;
+//     annotations: Quad[];
+// };
 
-export interface AnnotatedQuad extends Omit<Quad, "predicate" | "object"> {
-    predicate: AnnotatedPredicate;
-    object: AnnotatedObject;
-};
+// export interface AnnotatedQuad extends Omit<Quad, "predicate" | "object"> {
+//     predicate: AnnotatedPredicate;
+//     object: AnnotatedObject;
+// };
 
 export interface RowObj {
     predIri: string;
@@ -237,3 +237,49 @@ export interface ObjectItem {
 };
 
 export interface SearchItem extends ObjectItem { weight: number };
+
+export interface AnnotatedTerm {
+    id: string;
+    value: string;
+    termType: "NamedNode" | "Variable" | "Literal" | "BlankNode";
+    qname?: string;
+    language?: string; // language needs a label? e.g. English, US English, French, etc. (language label will need a language)
+    datatype?: {
+        value: string;
+        label?: string;
+        qname?: string;
+    };
+    label?: string;
+    description?: string;
+    provenance?: string;
+};
+
+export interface AnnotatedPredicate extends Omit<AnnotatedTerm, "language" | "datatype"> {
+    termType: "NamedNode" | "Variable"
+};
+
+export interface AnnotatedObject extends AnnotatedTerm {};
+
+export interface AnnotatedTriple {
+    subject: Quad_Subject,
+    predicate: AnnotatedPredicate,
+    object: AnnotatedObject
+};
+
+export interface Prefixes {
+    [namespace: string]: string;
+};
+
+export interface PropTableRow extends PropTablePredicate {
+    order: number,
+    objects: PropTableObject[]
+};
+
+export interface PropTablePredicate extends Omit<AnnotatedPredicate, "value"> {
+    iri: string;
+};
+
+export interface PropTableObject extends AnnotatedObject {
+    predicateIri: string;
+    rows: PropTableRow[];
+};

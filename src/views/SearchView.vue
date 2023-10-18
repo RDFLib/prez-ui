@@ -413,10 +413,9 @@ async function getResults() {
                                 result.links.push(link);
                             }
                         } else if (q1.predicate.value === qnameToIri("a")) {
-                            const typeLabel = store.value.getObjects(q1.object, namedNode(qnameToIri("rdfs:label")), null);
                             result.types.push({
                                 uri: q1.object.value,
-                                label: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+                                label: getAnnotation(q1.object.value, "label", store.value).value,
                             });
                         } else if (q1.predicate.value === qnameToIri("geo:hasGeometry")) {
                             store.value.forEach(geometryTriple => {

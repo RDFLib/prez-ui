@@ -68,10 +68,9 @@ onMounted(async () => {
 
                 store.value.forEach(q => {
                     if (q.predicate.value === qnameToIri("a")) {
-                        const typeLabel = store.value.getObjects(q.object, namedNode(qnameToIri("rdfs:label")), null);
                         item.value.types.push({
                             iri: q.object.value,
-                            title: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+                            title: getAnnotation(q.object.value, "label", store.value).value,
                         });
                     } else if (q.predicate.value === qnameToIri("prez:link")) {
                         const parentIds = store.value.getQuads(null, namedNode(qnameToIri("dcterms:identifier")), null, null).filter(q1 => q.object.value.includes(q1.object.value));
@@ -85,10 +84,9 @@ onMounted(async () => {
 
                             let parentTypes: { iri: string; title?: string; }[] = [];
                             store.value.getObjects(namedNode(parentIri), namedNode(qnameToIri("a")), null).forEach(t => {
-                                const typeLabel = store.value.getObjects(t, namedNode(qnameToIri("rdfs:label")), null);
                                 parentTypes.push({
                                     iri: t.value,
-                                    title: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+                                    title: getAnnotation(t.value, "label", store.value).value,
                                 });
                             });
 

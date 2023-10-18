@@ -1,6 +1,6 @@
 import type { RouteLocationNormalizedLoaded } from "vue-router";
 import { DataFactory, type Store, type Quad, type Literal, type Quad_Object, type NamedNode, type Quad_Predicate } from "n3";
-import type { option, link, languageLabel } from "@/types";
+import type { option, link, languageLabel, AnnotatedTerm, Prefixes, AnnotatedPredicate } from "@/types";
 import { useUiStore } from "@/stores/ui";
 import { DEFAULT_LABEL_PREDICATES, DEFAULT_PREFIXES, CONTAINER_RELATIONS } from "@/util/consts";
 
@@ -226,7 +226,7 @@ export function getLink(store: Store, linkQuad: Quad): link {
  * @param prefixes 
  * @returns Predicate IRI string
  */
-export function defaultQnameToIri(s: string, prefixes: { [token: string]: string } = DEFAULT_PREFIXES): string {
+export function defaultQnameToIri(s: string, prefixes: Prefixes = DEFAULT_PREFIXES): string {
     if (s === "a") { // special handling for "a" as rdf:type
         return prefixes.rdf + "type";
     } else {
@@ -244,7 +244,7 @@ export function defaultQnameToIri(s: string, prefixes: { [token: string]: string
  * @param prefixes 
  * @returns qname string
  */
-export function defaultIriToQname(iri: string, prefixes: { [token: string]: string } = DEFAULT_PREFIXES): string {
+export function defaultIriToQname(iri: string, prefixes: Prefixes = DEFAULT_PREFIXES): string {
     let qname = "";
     Object.entries(prefixes).forEach(([prefix, prefixIri]) => {
         if (iri.startsWith(prefixIri)) {
@@ -422,16 +422,16 @@ export function getAnnotation(iri: string, annotation: "label" | "description" |
     return getPreferredAnnotation(objs);
 }
 
-interface AnnotatedTerm {
-    id: string;
-    value: string;
-    termType: "NamedNode" | "Variable" | "Literal" | "BlankNode";
-    qname?: string;
-    language?: string;
-    datatype?: NamedNode;
-    label?: string;
-    description?: string;
-    provenance?: string;
+export function getLabel(iri: string, store: Store) {
+    return getAnnotation(iri, "label", store).value;
+};
+
+export function getDescription(iri: string, store: Store) {
+    return getAnnotation(iri, "description", store).value;
+};
+
+export function getProvenance(iri: string, store: Store) {
+    return getAnnotation(iri, "provenance", store).value;
 };
 
 /**
@@ -442,16 +442,28 @@ interface AnnotatedTerm {
  * @param prefixes 
  * @returns the term containing annotations
  */
-export function createAnnotatedTerm(term: Quad_Predicate | Quad_Object, store: Store, prefixes?: {[token: string]: string}): AnnotatedTerm {
-    return {
+export function createAnnotatedTerm<T extends AnnotatedTerm>(term: Quad_Predicate | Quad_Object, store: Store, prefixes?: Prefixes) {
+    const annoTerm: T = {
         id: term.id,
-        value: term.value,
-        termType: term.termType,
-        qname: term.termType === "NamedNode" ? defaultIriToQname(term.value, prefixes) : undefined,
-        language: term.termType === "Literal" ? term.language : undefined,
-        datatype: term.termType === "Literal" ? term.datatype : undefined,
-        label: term.termType === "NamedNode" ? getAnnotation(term.value, "label", store) : undefined,
-        description: term.termType === "NamedNode" ? getAnnotation(term.value, "description", store) : undefined,
-        provenance: term.termType === "NamedNode" ? getAnnotation(term.value, "provenance", store) : undefined,
-    };
+        value: term.value
+    } as T;
+
+    const termType: T["termType"] = term.termType;
+    annoTerm.termType = termType;
+
+    if (term.termType === "NamedNode") {
+        annoTerm.qname = defaultIriToQname(term.value, prefixes);
+        annoTerm.label = getLabel(term.value, store);
+        annoTerm.description = getDescription(term.value, store);
+        annoTerm.provenance = getProvenance(term.value, store);
+    } else if (term.termType === "Literal") {
+        annoTerm.language = term.language;
+        annoTerm.datatype = {
+            value: term.datatype.value,
+            label: getLabel(term.datatype.value, store),
+            qname: defaultIriToQname(term.datatype.value, prefixes)
+        };
+    }
+
+    return annoTerm;
 }

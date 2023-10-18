@@ -6,9 +6,9 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import type { WKTResult } from "@/components/MapClient.d";
-import { apiBaseUrlConfigKey, conceptPerPageConfigKey, enableScoresKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
+import { apiBaseUrlConfigKey, conceptPerPageConfigKey, enableScoresKey, type ListItem, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable, type AnnotatedTriple, type Prefixes } from "@/types";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
-import { titleCase, sortByTitle, getAnnotation, ensureAnnotationPredicates } from "@/util/helpers";
+import { titleCase, sortByTitle, getAnnotation, ensureAnnotationPredicates, createAnnotatedTerm } from "@/util/helpers";
 import { ALT_PROFILE_CURIE } from "@/util/consts";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
@@ -40,8 +40,8 @@ const RECURSION_LIMIT = 5; // limit on recursive search of blank nodes
 const item = ref<ListItem>({} as ListItem);
 const children = ref<ListItemExtra[]>([]);
 const concepts = ref<Concept[]>([]); // only for vocab
-const properties = ref<AnnotatedQuad[]>([]);
-const blankNodes = ref<AnnotatedQuad[]>([]);
+const properties = ref<AnnotatedTriple[]>([]);
+const blankNodes = ref<AnnotatedTriple[]>([]);
 const collapseConcepts = ref(true); // only for vocab
 const geoResults = ref<WKTResult[]>([]); // for spatial results
 const isAltView = ref(false);
@@ -169,11 +169,12 @@ async function getProperties() {
         }
 
         if (!isAltView.value) {
-            const annoQuad = createAnnoQuad(q, store.value, ui.annotationPredicates.label);
+            // const annoQuad = createAnnoQuad(q, store.value, ui.annotationPredicates.label);
+            const annoQuad = createAnnotatedTriple(q, store.value, prefixes.value);
             properties.value.push(annoQuad);
 
             let recursionCounter = 0;
-            findBlankNodes(q, store.value, recursionCounter);
+            findBlankNodes2(q, store.value, recursionCounter, prefixes.value);
         }
     }, namedNode(item.value.iri), null, null, null);
 
@@ -338,19 +339,17 @@ async function getChildren() {
                 } else if (q.predicate.value === qnameToIri("a")) {
                     child.baseClass = q.object.value;
                 } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:publisher")) {
-                    const publisher: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
-
-                    store.value.forObjects(result => {
-                        publisher.label = result.value;
-                    }, q.object, qnameToIri("rdfs:label"), null);
+                    const publisher: ListItemSortable = {
+                        iri: q.object.value,
+                        label: getAnnotation(q.object.value, "label", store.value).value || getIRILocalName(q.object.value)
+                    };
 
                     child.extras.publisher = publisher;
                 } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:creator")) {
-                    const creator: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
-
-                    store.value.forObjects(result => {
-                        creator.label = result.value;
-                    }, q.object, qnameToIri("rdfs:label"), null);
+                    const creator: ListItemSortable = {
+                        iri: q.object.value,
+                        label: getAnnotation(q.object.value, "label", store.value).value || getIRILocalName(q.object.value)
+                    };
                     
                     child.extras.creator = creator;
                 } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:issued")) {
@@ -525,50 +524,22 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
     }
 }
 
-function createAnnoQuad(q: Quad, store: Store, labelPredicates: string[]): AnnotatedQuad {
-    const annoQuad = {
+function createAnnotatedTriple(q: Quad, store: Store, prefixes?: Prefixes): AnnotatedTriple {
+    return {
         subject: q.subject,
-        predicate: {
-            termType: q.predicate.termType,
-            value: q.predicate.value,
-            id: q.predicate.id,
-            annotations: store.getQuads(q.predicate, null, null, null)
-        },
-        object: {
-            termType: q.object.termType,
-            value: q.object.value,
-            id: q.object.id,
-            datatype: q.object instanceof Literal ? q.object.datatype : undefined,
-            language: q.object instanceof Literal ? q.object.language : undefined,
-            annotations: store.getQuads(q.object, null, null, null)
-        },
-        value: q.value,
-        graph: q.graph,
-        termType: q.termType,
-        equals: q.equals,
-        toJSON: q.toJSON
-    };
-
-    for (const labelPred of labelPredicates) {
-        const quads = store.getQuads(q.object, namedNode(labelPred), null, null)
-        if (quads.length > 0) {
-            for (const quad of quads) {
-                annoQuad.object.annotations.push(new Quad(quad.subject, namedNode(qnameToIri("rdfs:label")), quad.object))
-            }
-        }
+        predicate: createAnnotatedTerm(q.predicate, store, prefixes),
+        object: createAnnotatedTerm(q.object, store, prefixes)
     }
-
-    return annoQuad
 }
 
-function findBlankNodes(q: Quad, store: Store, recursionCounter: number) {
+function findBlankNodes2(q: Quad, store: Store, recursionCounter: number, prefixes?: Prefixes) {
     if (q.object instanceof BlankNode) {
         recursionCounter++;
         store.forEach(q1 => {
-            const annoQuad1 = createAnnoQuad(q1, store, []);
+            const annoQuad1 = createAnnotatedTriple(q1, store, prefixes);
             blankNodes.value.push(annoQuad1);
             if (recursionCounter < RECURSION_LIMIT) {
-                findBlankNodes(q1, store, recursionCounter);
+                findBlankNodes2(q1, store, recursionCounter, prefixes);
             }
         }, q.object, null, null, null)
     }
@@ -686,7 +657,6 @@ onMounted(async () => {
             if (childrenConfig.value.showChildren) {
                 getChildren();
             }
-            
         }
 
         document.title = item.value.title ? `${item.value.title} | Prez` : "Prez";
@@ -698,7 +668,7 @@ onMounted(async () => {
 <template>
     <ProfilesTable v-if="isAltView" />
     <template v-else>
-        <PropTable v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPreds="hiddenPredicates">
+        <PropTable v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPredicates="hiddenPredicates">
             <template #map>
                 <MapClient v-if="geoResults.length"
                     ref="searchMapRef" 

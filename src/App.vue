@@ -22,11 +22,9 @@ const sidenav = inject(sidenavConfigKey) as boolean;
 const route = useRoute();
 const ui = useUiStore();
 const { loading: rootLoading, error: rootError, apiGetRequest: rootApiGetRequest } = useApiRequest(); // main request to API root
-const { loading: predicateLoading, error: predicateError, apiGetRequest: predicateApiGetRequest } = useApiRequest(); // annotation predicates request
 const { loading: profLoading, error: profError, apiGetRequest: profApiGetRequest } = useApiRequest(); // profiles request
 const { loading: concurrentLoading, hasError: concurrentHasError, concurrentApiRequests } = useConcurrentApiRequests(); // concurrent profile requests
 const { store: rootStore, parseIntoStore: rootParseIntoStore, qnameToIri: rootQnameToIri } = useRdfStore(); // store for API root data
-const { store: predicateStore, parseIntoStore: predicateParseIntoStore, qnameToIri: predicateQnameToIri } = useRdfStore(); // store for annotation predicates
 const { store: profStore, parseIntoStore: profParseIntoStore, qnameToIri: profQnameToIri } = useRdfStore(); // profiles store
 
 document.title = ui.pageTitle;
@@ -53,45 +51,22 @@ const renderPath = computed(() => {
 
 async function getRootApiMetadata() {
     // get API details
-    const { data: rootData } = await rootApiGetRequest("/");
-    if (rootData && !rootError.value) {
-        rootParseIntoStore(rootData);
+    const { data } = await rootApiGetRequest("/");
+    if (data && !rootError.value) {
+        rootParseIntoStore(data);
 
         // get API version
         const version = rootStore.value.getObjects(null, rootQnameToIri("prez:version"), null)[0];
         ui.apiVersion = version.value;
 
-        // get search methods per flavour
-        let searchMethods: {[key: string]: string[]} = {};
-        rootStore.value.forObjects(object => {
-            let flavour = "";
-            let methods: string[] = [];
-            rootStore.value.forEach(q => {
-                if (q.predicate.value === rootQnameToIri("a")) {
-                    flavour = q.object.value.split(`${rootQnameToIri("prez:")}`)[1];
-                } else if (q.predicate.value === rootQnameToIri("prez:availableSearchMethod")) {
-                    methods.push(q.object.value.split(`${rootQnameToIri("prez:")}`)[1]);
-                }
-            }, object, null, null, null);
-            searchMethods[flavour] = methods;
-        }, null, rootQnameToIri("prez:enabledPrezFlavour"), null);
-        ui.searchMethods = searchMethods;
-    }
-}
-
-async function getAnnotationPredicates() {
-    if (ui.annotationPredicates.label.length === 0 && ui.annotationPredicates.description.length === 0 && ui.annotationPredicates.provenance.length === 0) {
         // get annotation predicates
-        const { data } = await predicateApiGetRequest("/annotation-predicates");
-        if (data && !predicateError.value) {
-            predicateParseIntoStore(data);
-
-            const labelList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:labelList")), null)[0];
-            const labels = getRDFList(predicateStore.value, labelList).map(o => o.value);
-            const descriptionList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:descriptionList")), null)[0];
-            const descriptions = getRDFList(predicateStore.value, descriptionList).map(o => o.value);
-            const provenanceList = predicateStore.value.getObjects(namedNode(predicateQnameToIri("prez:AnnotationPropertyList")), namedNode(predicateQnameToIri("prez:provenanceList")), null)[0];
-            const provenances = getRDFList(predicateStore.value, provenanceList).map(o => o.value);
+        if (ui.annotationPredicates.label.length === 0 && ui.annotationPredicates.description.length === 0 && ui.annotationPredicates.provenance.length === 0) {
+            const labelList = rootStore.value.getObjects(namedNode(rootQnameToIri("prez:AnnotationPropertyList")), namedNode(rootQnameToIri("prez:labelList")), null)[0];
+            const labels = getRDFList(rootStore.value, labelList).map(o => o.value);
+            const descriptionList = rootStore.value.getObjects(namedNode(rootQnameToIri("prez:AnnotationPropertyList")), namedNode(rootQnameToIri("prez:descriptionList")), null)[0];
+            const descriptions = getRDFList(rootStore.value, descriptionList).map(o => o.value);
+            const provenanceList = rootStore.value.getObjects(namedNode(rootQnameToIri("prez:AnnotationPropertyList")), namedNode(rootQnameToIri("prez:provenanceList")), null)[0];
+            const provenances = getRDFList(rootStore.value, provenanceList).map(o => o.value);
 
             ui.annotationPredicates = {
                 label: labels,
@@ -185,7 +160,7 @@ async function getProfiles() {
 }
 
 onMounted(async () => {
-    await Promise.all([getRootApiMetadata(), getAnnotationPredicates(), getLanguageList(), getProfiles()]);
+    await Promise.all([getRootApiMetadata(), getLanguageList(), getProfiles()]);
 });
 </script>
 
