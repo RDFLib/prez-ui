@@ -133,7 +133,12 @@ const router = createRouter({
             component: () => import("@/views/PropTableView.vue"),
         },
         {
-            path: "/c/catalogs/:catalogId/:resourceId",
+            path: "/c/catalogs/:catalogId/resources",
+            name: "resources",
+            component: () => import("@/views/ItemListView.vue"),
+        },
+        {
+            path: "/c/catalogs/:catalogId/resources/:resourceId",
             name: "resource",
             component: () => import("@/views/PropTableView.vue"),
         },
