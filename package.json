@@ -10,7 +10,7 @@
         "bench": "vitest bench",
         "test:unit": "vitest --environment jsdom --root src/",
         "test:component": "cypress run --config video=false --component",
-        "test:e2e": "cypress run --config video=false --e2e",
+        "test:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --config video=false --config baseUrl=http://localhost:4173 --e2e'",
         "cypress": "cypress open",
         "build-only": "vite build",
         "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false"
