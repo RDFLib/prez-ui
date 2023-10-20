@@ -72,23 +72,28 @@ const MAX_GEOM_LENGTH = 100; // max character length for geometry strings
     align-items: center;
     justify-content: space-between;
 
-    table {
-        font-size: 0.95em;
-        background-color: rgba(0, 0, 0, 0.05);
-    }
+    .obj-value {
+        flex-grow: 1;
 
-    .geom-cell {
-        display: flex;
-        flex-direction: row;
-        gap: 4px;
-
-        pre {
-            margin: 0;
-            white-space: pre-wrap;
+        table {
+            font-size: 0.95em;
+            background-color: rgba(0, 0, 0, 0.05);
+            width: 100%;
         }
 
-        button {
-            align-self: center;
+        .geom-cell {
+            display: flex;
+            flex-direction: row;
+            gap: 4px;
+
+            pre {
+                margin: 0;
+                white-space: pre-wrap;
+            }
+
+            button {
+                align-self: center;
+            }
         }
     }
 
