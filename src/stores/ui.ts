@@ -21,7 +21,17 @@ export const useUiStore = defineStore("ui", () => {
     const breadcrumbs = ref<Breadcrumb[]>([]);
     const profiles = ref<{[token: string]: Profile}>({});
     const apiVersion = ref("");
-    const searchMethods = ref<{[key: string]: string[]}>({});
+    // const searchMethods = ref<{[key: string]: string[]}>({});
+    const annotationPredicates = ref<{
+        label: string[];
+        description: string[];
+        provenance: string[];
+    }>({
+        label: [],
+        description: [],
+        provenance: []
+    });
+    const languageList = ref<string[]>([]);
 
     // getters
 
@@ -37,6 +47,16 @@ export const useUiStore = defineStore("ui", () => {
         sessionStorage.setItem("profiles", JSON.stringify(state));
     }, { deep: true });
 
+    // get annotationPredicates from local storage
+    if (sessionStorage.getItem("annotationPredicates")) {
+        annotationPredicates.value = JSON.parse(sessionStorage.getItem("annotationPredicates") || "");
+    }
+
+    // watch & save annotationPredicates to local storage
+    watch(annotationPredicates, (state) => {
+        sessionStorage.setItem("annotationPredicates", JSON.stringify(state));
+    }, { deep: true });
+
     return {
         // state
         rightNavConfig,
@@ -45,7 +65,9 @@ export const useUiStore = defineStore("ui", () => {
         breadcrumbs,
         profiles,
         apiVersion,
-        searchMethods
+        // searchMethods,
+        annotationPredicates,
+        languageList
 
         // getters
 

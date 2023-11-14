@@ -6,6 +6,7 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import type { Profile } from "@/types";
+import { ensureAnnotationPredicates, getDescription, getLabel } from "@/util/helpers";
 import router from "@/router";
 import LoadingMessage from "@/components/LoadingMessage.vue";
 import ErrorMessage from "@/components/ErrorMessage.vue";
@@ -16,9 +17,6 @@ const route = useRoute();
 const ui = useUiStore();
 const { store, parseIntoStore, qnameToIri } = useRdfStore();
 const { loading, error, apiGetRequest } = useApiRequest();
-
-const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
-const DEFAULT_DESC_PREDICATES = [qnameToIri("dcterms:description")];
 
 type objectItem = {
     iri: string;
@@ -62,20 +60,17 @@ onMounted(async () => {
                     links: [],
                     types: []
                 };
-                currentProfile.value = ui.profiles[profiles.find(p => p.current)!.uri];
-                const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
-                const descPredicates = currentProfile.value!.descriptionPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
+
+                await ensureAnnotationPredicates();
+                
+                item.value.title = getLabel(subject.value, store.value);
+                item.value.description = getDescription(subject.value, store.value);
 
                 store.value.forEach(q => {
-                    if (labelPredicates.includes(q.predicate.value)) {
-                        item.value.title = q.object.value;
-                    } else if (descPredicates.includes(q.predicate.value)) {
-                        item.value.description = q.object.value;
-                    } else if (q.predicate.value === qnameToIri("a")) {
-                        const typeLabel = store.value.getObjects(q.object, namedNode(qnameToIri("rdfs:label")), null);
+                    if (q.predicate.value === qnameToIri("a")) {
                         item.value.types.push({
                             iri: q.object.value,
-                            title: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+                            title: getLabel(q.object.value, store.value),
                         });
                     } else if (q.predicate.value === qnameToIri("prez:link")) {
                         const parentIds = store.value.getQuads(null, namedNode(qnameToIri("dcterms:identifier")), null, null).filter(q1 => q.object.value.includes(q1.object.value));
@@ -84,13 +79,14 @@ onMounted(async () => {
                             let parentIri = parentIds[0].subject.value;
                             let parentId = parentIds[0].object.value;
                             let parentLink = q.object.value.split(parentId)[0] + parentId;
-                            let titles = store.value.getObjects(namedNode(parentIri), namedNode(qnameToIri("rdfs:label")), null); // API only checks for rdfs:label?
+
+                            const parentTitle = getLabel(parentIds[0].subject.value, store.value);
+
                             let parentTypes: { iri: string; title?: string; }[] = [];
                             store.value.getObjects(namedNode(parentIri), namedNode(qnameToIri("a")), null).forEach(t => {
-                                const typeLabel = store.value.getObjects(t, namedNode(qnameToIri("rdfs:label")), null);
                                 parentTypes.push({
                                     iri: t.value,
-                                    title: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+                                    title: getLabel(t.value, store.value),
                                 });
                             });
 
@@ -98,7 +94,7 @@ onMounted(async () => {
                                 parentIri: parentIri,
                                 parentLink: parentLink,
                                 parentTypes: parentTypes,
-                                parentTitle: titles.length > 0 ? titles[0].value : undefined,
+                                parentTitle: parentTitle,
                                 link: q.object.value
                             });
                         }

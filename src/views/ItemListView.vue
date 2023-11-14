@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import { onMounted, onBeforeMount, ref, computed, inject } from "vue";
 import { useRoute } from "vue-router";
-import { DataFactory, type Quad_Object, type Quad_Subject, type Literal } from "n3";
+import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
-import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable, type languageLabel } from "@/types";
+import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
-import { ensureProfiles, sortByTitle, getLanguagePriority, getBaseClassFromLink } from "@/util/helpers";
+import { sortByTitle, getBaseClassFromLink, ensureAnnotationPredicates, getLabel, getDescription } from "@/util/helpers";
 import { ALT_PROFILE_CURIE } from "@/util/consts";
 import ItemList from "@/components/ItemList.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
@@ -26,8 +26,6 @@ const ui = useUiStore();
 const { loading, error, apiGetRequest } = useApiRequest();
 const { store, parseIntoStore, qnameToIri, iriToQname } = useRdfStore();
 
-const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
-const DEFAULT_DESC_PREDICATES = [qnameToIri("dcterms:description")];
 const TOP_LEVEL_TYPES = [
     qnameToIri("dcat:Catalog"),
     qnameToIri("dcat:Dataset"),
@@ -76,6 +74,16 @@ function configByType(type: string) {
     switch (type) {
         case qnameToIri("dcat:Catalog"):
             itemType.value.label = "Catalogs";
+            searchEnabled.value = true;
+            childrenConfig.value = {
+                showButton: true,
+                buttonTitle: "Resources",
+                buttonLink: "/resources"
+            };
+            // searchDefaults.value = { catalog: item.value.iri };
+            break;
+        case qnameToIri("dcat:Resource"):
+            itemType.value.label = "Resources";
             searchEnabled.value = true;
             // searchDefaults.value = { catalog: item.value.iri };
             break;
@@ -129,7 +137,6 @@ function getBreadcrumbs(): Breadcrumb[] {
         uri: string;
     }[] = [];
 
-    const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
     const pathSegments = route.path.split("/").slice(1);
 
     pathSegments.forEach((id, index) => {
@@ -143,11 +150,9 @@ function getBreadcrumbs(): Breadcrumb[] {
                 id: id,
                 uri: quads[0].subject.value
             };
-            store.value.forEach(q => {
-                if (labelPredicates.includes(q.predicate.value)) {
-                    parent.title = q.object.value;
-                }
-            }, quads[0].subject, null, null, null);
+
+            parent.title = getLabel(quads[0].subject.value, store.value);
+            
             parents.push(parent);
         }
     });
@@ -168,6 +173,13 @@ function getBreadcrumbs(): Breadcrumb[] {
         switch (pathSegment) {
             case "catalogs":
                 crumbs.push({ name: "Catalogs", url: "/c/catalogs" });
+                if (index + 1 !== pathSegments.length) {
+                    crumbs.push({ name: parents[0].title || parents[0].uri, url: `/c/catalogs/${route.params.catalogId}` });
+                    skipSegment = true;
+                }
+                break;
+            case "resources":
+                crumbs.push({ name: "Resources", url: `/c/catalogs/${route.params.catalogId}/resources` });
                 break;
             case "datasets":
                 crumbs.push({ name: "Datasets", url: "/s/datasets" });
@@ -218,17 +230,14 @@ function getProperties() {
 
         // for /c/profiles, etc. need to look for prez:CatPrezProfile, etc.
     } else {
-        nodeList = store.value.getObjects(countQuad.subject, namedNode(qnameToIri("rdfs:member")), null);
+        // nodeList = store.value.getObjects(countQuad.subject, namedNode(qnameToIri("rdfs:member")), null);
+        nodeList = store.value.getObjects(countQuad.subject, namedNode(qnameToIri("dcterms:hasPart")), null); // TODO: need to cater for rdfs:member & dcterms:hasPart
         const containerBaseClass = iriToQname(getBaseClassFromLink(route.path.slice(0, route.path.lastIndexOf("/"))).iri);
         searchConfig.value = {
             containerUri: countQuad.subject.value,
             containerBaseClass: containerBaseClass === "geo:FeatureCollection" ? "dcat:Dataset" : containerBaseClass // fix FC to dataset as search treats them as the same
         };
     }
-
-    // get label & description predicates
-    const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
-    const descPredicates = currentProfile.value!.descriptionPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
 
     // fill out item list & handle vocprez items
     nodeList.forEach(member => {
@@ -237,48 +246,52 @@ function getProperties() {
             extras: {}
         };
 
-        const labels: languageLabel[] = [];
+        c.title = getLabel(c.iri, store.value);
+        c.description = getDescription(c.iri, store.value);
 
         store.value.forEach(q => {
-            if (labelPredicates.includes(q.predicate.value)) {
-                let language = (q.object as Literal).language;
-                labels.push({
-                    value: q.object.value,
-                    language: language || undefined,
-                    priority: getLanguagePriority(language)
-                });
-            } else if (descPredicates.includes(q.predicate.value)) {
-                c.description = q.object.value;
-            } else if (q.predicate.value === qnameToIri("prez:link")) {
+            if (q.predicate.value === qnameToIri("prez:link")) {
                 c.link = q.object.value;
             } else if (flavour.value === "VocPrez" && q.predicate.value === qnameToIri("reg:status")) {
-                const status: ListItemSortable = {iri: q.object.value, label: getIRILocalName(q.object.value)};
-
-                store.value.forObjects(result => {
-                    status.label = result.value;
-                }, q.object, qnameToIri("rdfs:label"), null);
+                const status: ListItemSortable = {
+                    iri: q.object.value,
+                    label: getLabel(q.object.value, store.value) || getIRILocalName(q.object.value)
+                };
 
                 store.value.forObjects(result => {
                     status.color = result.value;
                 }, q.object, qnameToIri("sdo:color"), null);
+
                 c.extras.status = status;
             } else if (flavour.value === "VocPrez" && q.predicate.value === qnameToIri("prov:qualifiedDerivation")) {
                 store.value.forObjects(result => {
-                    const mode: ListItemSortable = {iri: result.value, label: getIRILocalName(result.value)};
-
-                    store.value.forObjects(innerResult => {
-                        mode.label = innerResult.value;
-                    }, result,qnameToIri("rdfs:label"), null);
+                    const mode: ListItemSortable = {
+                        iri: result.value,
+                        label: getLabel(result.value, store.value) || getIRILocalName(result.value)
+                    };
 
                     c.extras.derivationMode = mode;
                 }, q.object, qnameToIri("prov:hadRole"), null);
-            }
-        }, member, null, null, null);
-        // sort labels by language priority
-        labels.sort((a, b) => a.priority - b.priority);
+            } else if (itemType.value.uri === qnameToIri("dcat:Resource") && q.predicate.value === qnameToIri("dcterms:publisher")) {
+                const publisher: ListItemSortable = {
+                    iri: q.object.value,
+                    label: getLabel(q.object.value, store.value) || getIRILocalName(q.object.value)
+                };
 
-        // set title to highest priority language tag
-        c.title = labels.length > 0 ? labels[0].value : undefined;
+                c.extras.publisher = publisher;
+            } else if (itemType.value.uri === qnameToIri("dcat:Resource") && q.predicate.value === qnameToIri("dcterms:creator")) {
+                const creator: ListItemSortable = {
+                    iri: q.object.value,
+                    label: getLabel(q.object.value, store.value) || getIRILocalName(q.object.value)
+                };
+                
+                c.extras.creator = creator;
+            } else if (itemType.value.uri === qnameToIri("dcat:Resource") && q.predicate.value === qnameToIri("dcterms:issued")) {
+                const issued: ListItemSortable = { label: q.object.value };
+                c.extras.issued = issued;
+            } 
+        }, member, null, null, null);
+
         items.value.push(c);
     });
 
@@ -301,6 +314,8 @@ onBeforeMount(() => {
         flavour.value = "CatPrez";
         if (route.path.match(/c\/profiles/)) {
             configByType(qnameToIri("prof:Profile"));
+        } else if (route.path.match(/c\/catalogs\/.+\/resources/)) {
+            configByType(qnameToIri("dcat:Resource"));
         } else if (route.path.match(/c\/catalogs/)) {
             configByType(qnameToIri("dcat:Catalog"));
         }
@@ -355,8 +370,6 @@ onMounted(async () => {
         fullPath = `${route.path}?per_page=${perPage.value}`;
     }
 
-    await ensureProfiles(); // wait for profiles to be set in Pinia
-
     const { data, profiles } = await apiGetRequest(fullPath);
     if (data && profiles.length > 0 && !error.value) {
         currentProfile.value = ui.profiles[profiles.find(p => p.current)!.uri];
@@ -375,6 +388,7 @@ onMounted(async () => {
         };
 
         parseIntoStore(data);
+        await ensureAnnotationPredicates();
         getProperties();
 
         document.title = `${itemType.value.label} | Prez`;
@@ -393,6 +407,7 @@ onMounted(async () => {
         <LoadingMessage v-else-if="loading" />
         <template v-else-if="items.length > 0">
             <SortableTabularList v-if="flavour === 'VocPrez'" :items="items" :predicates="['description', 'status', 'derivationMode']" />
+            <SortableTabularList v-else-if="itemType.uri === qnameToIri('dcat:Resource')" :items="items" :predicates="['publisher', 'creator', 'issued']"/>
             <ItemList v-else :items="items" :childName="childrenConfig.buttonTitle" :childLink="childrenConfig.buttonLink" />
             <PaginationComponent :url="route.path" :totalCount="count" :currentPage="currentPageNumber" :perPage="perPage" />
         </template>

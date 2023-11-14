@@ -6,6 +6,7 @@ import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { sidenavConfigKey, type Profile } from "@/types";
+import { getDescription, getLabel, getRDFList } from "@/util/helpers"
 import MainNav from "@/components/navs/MainNav.vue";
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
 import RightSideBar from "@/components/navs/RightSideBar.vue";
@@ -50,30 +51,39 @@ const renderPath = computed(() => {
 
 async function getRootApiMetadata() {
     // get API details
-    const { data: rootData } = await rootApiGetRequest("/");
-    if (rootData && !rootError.value) {
-        rootParseIntoStore(rootData);
+    const { data } = await rootApiGetRequest("/");
+    if (data && !rootError.value) {
+        rootParseIntoStore(data);
 
         // get API version
         const version = rootStore.value.getObjects(null, rootQnameToIri("prez:version"), null)[0];
         ui.apiVersion = version.value;
 
-        // get search methods per flavour
-        let searchMethods: {[key: string]: string[]} = {};
-        rootStore.value.forObjects(object => {
-            let flavour = "";
-            let methods: string[] = [];
-            rootStore.value.forEach(q => {
-                if (q.predicate.value === rootQnameToIri("a")) {
-                    flavour = q.object.value.split(`${rootQnameToIri("prez:")}`)[1];
-                } else if (q.predicate.value === rootQnameToIri("prez:availableSearchMethod")) {
-                    methods.push(q.object.value.split(`${rootQnameToIri("prez:")}`)[1]);
-                }
-            }, object, null, null, null);
-            searchMethods[flavour] = methods;
-        }, null, rootQnameToIri("prez:enabledPrezFlavour"), null);
-        ui.searchMethods = searchMethods;
+        // get annotation predicates
+        if (ui.annotationPredicates.label.length === 0 && ui.annotationPredicates.description.length === 0 && ui.annotationPredicates.provenance.length === 0) {
+            const labelList = rootStore.value.getObjects(namedNode(rootQnameToIri("prez:AnnotationPropertyList")), namedNode(rootQnameToIri("prez:labelList")), null)[0];
+            const labels = getRDFList(rootStore.value, labelList).map(o => o.value);
+            const descriptionList = rootStore.value.getObjects(namedNode(rootQnameToIri("prez:AnnotationPropertyList")), namedNode(rootQnameToIri("prez:descriptionList")), null)[0];
+            const descriptions = getRDFList(rootStore.value, descriptionList).map(o => o.value);
+            const provenanceList = rootStore.value.getObjects(namedNode(rootQnameToIri("prez:AnnotationPropertyList")), namedNode(rootQnameToIri("prez:provenanceList")), null)[0];
+            const provenances = getRDFList(rootStore.value, provenanceList).map(o => o.value);
+
+            ui.annotationPredicates = {
+                label: labels,
+                description: descriptions,
+                provenance: provenances
+            };
+        }
     }
+}
+
+async function getLanguageList() {
+    // browser language goes first
+    const browserLanguages = navigator.languages;
+    // languages from API config - hardcoded for now
+    const configLanguages = ["en"];
+    // adds languages that aren't in the list already
+    ui.languageList.push(...browserLanguages, ...configLanguages.filter(l => !browserLanguages.includes(l)));
 }
 
 async function getProfiles() {
@@ -122,15 +132,12 @@ async function getProfiles() {
                     descriptionPredicates: [],
                     explanationPredicates: []
                 };
+
+                p.title = getLabel(subject.id, profStore.value);
+                p.description = getDescription(subject.id, profStore.value);
                 
                 profStore.value.forEach(q => {
-                    if (q.predicate.value === profQnameToIri("dcterms:title")) { // need to use label predicate from profile
-                        p.title = q.object.value;
-                    } else if (q.predicate.value === profQnameToIri("dcterms:description")) { // need to use description predicate from profile
-                        p.description = q.object.value;
-                    // } else if (q.predicate.value === profQnameToIri("dcterms:identifier")) {
-                    //     p.token = q.object.value;
-                    } else if (q.predicate.value === profQnameToIri("altr-ext:hasResourceFormat")) {
+                    if (q.predicate.value === profQnameToIri("altr-ext:hasResourceFormat")) {
                         p.mediatypes.push(q.object.value);
                     } else if (q.predicate.value === profQnameToIri("altr-ext:hasDefaultResourceFormat")) {
                         p.defaultMediatype = q.object.value;
@@ -142,6 +149,7 @@ async function getProfiles() {
                         p.explanationPredicates.push(q.object.value);
                     }
                 }, subject, null, null, null);
+
                 p.mediatypes.sort((a, b) => Number(b === p.defaultMediatype) - Number(a === p.defaultMediatype));
                 profs.push(p);
             }, namedNode(profQnameToIri("a")), namedNode(profQnameToIri("prof:Profile")), null);
@@ -152,7 +160,7 @@ async function getProfiles() {
 }
 
 onMounted(async () => {
-    await Promise.all([getRootApiMetadata(), getProfiles()]);
+    await Promise.all([getRootApiMetadata(), getLanguageList(), getProfiles()]);
 });
 </script>
 

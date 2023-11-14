@@ -1,15 +1,15 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch, computed, onBeforeMount } from "vue";
 import { useRoute, RouterLink } from "vue-router";
-import { DataFactory, type Literal } from "n3";
+import { DataFactory } from "n3";
 import TreeSelect from "@bosquig/vue3-treeselect";
-import type { ProfileHeader, languageLabel, SearchItem, selectOption, treeSelectOption } from "@/types";
+import type { SearchItem, selectOption, treeSelectOption } from "@/types";
 import type { WKTResult } from "@/components/MapClient.d";
 import { useUiStore } from "@/stores/ui";
 import { useApiRequest, useConcurrentApiRequests } from "@/composables/api";
 import { useRdfStore } from "@/composables/rdfStore";
 import router from "@/router";
-import { getLanguagePriority, ensureProfiles, getLink, containerQsa, newQSAString, getQSA } from "@/util/helpers";
+import { getLink, containerQsa, newQSAString, getQSA, ensureAnnotationPredicates, getLabel, getDescription } from "@/util/helpers";
 import { CONTAINER_RELATIONS } from "@/util/consts";
 import SearchResult from "@/components/search/SearchResult.vue";
 import MapClient from "@/components/MapClient.vue";
@@ -29,17 +29,6 @@ const { loading: vocabLoading, error: vocabError, apiGetRequest: vocabApiGetRequ
 const { loading: collectionLoading, error: collectionError, apiGetRequest: collectionApiGetRequest } = useApiRequest(); // collection request
 const { store: optionsStore, parseIntoStore: optionParseIntoStore, qnameToIri: optionQnameToIri } = useRdfStore(); // options store
 
-const DEFAULT_LABEL_PREDICATES = [
-    qnameToIri("rdfs:label"),
-    qnameToIri("dcterms:title"),
-    qnameToIri("skos:prefLabel"),
-    qnameToIri("sdo:name"),
-];
-const DEFAULT_DESC_PREDICATES = [
-    qnameToIri("dcterms:description"),
-    qnameToIri("skos:definition"),
-    qnameToIri("sdo:description"),
-];
 const SEARCH_METHOD = "default";
 const BASE_CLASSES: selectOption[] = [
     {
@@ -204,220 +193,129 @@ const fullPage = computed(() => {
     return results.value.length >= perPage.value;
 });
 
-function getCatalogs() {
-    catalogApiGetRequest("/c/catalogs").then(r => {
-        const { data: catalogData, profiles } = r;
-        if (data && profiles.length > 0) {
-            const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
-            const labelPredicates = currentProfile!.labelPredicates.length > 0 ? currentProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+async function getCatalogs() {
+    const { data } = await catalogApiGetRequest("/c/catalogs");
+    if (data) {
+        optionParseIntoStore(data);
+        const catalogOptions: selectOption[] = [];
 
-            optionParseIntoStore(catalogData);
-            const catalogOptions: selectOption[] = [];
-
-            optionsStore.value.forSubjects(subject => {
-                if (!subject.value.endsWith("/system/catprez")) { // hide system catalog
-                    const catalog: selectOption = {
-                        id: subject.value
-                    } as selectOption;
-
-                    const labels: languageLabel[] = [];
-
-                    optionsStore.value.forEach(q => {
-                        if (labelPredicates.includes(q.predicate.value)) {
-                            let language = (q.object as Literal).language;
-                            labels.push({
-                                value: q.object.value,
-                                language: language || undefined,
-                                priority: getLanguagePriority(language)
-                            });
-                        }
-                    }, subject, null, null, null);
-
-                    labels.sort((a, b) => a.priority - b.priority);
-                    catalog.label = labels.length > 0 ? labels[0].value : catalog.id;
-
-                    catalogOptions.push(catalog);
-                }
-            }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Catalog")), null);
-
-            catalogOptions.sort(sortByLabel);
-            options.value.containers.catalog = catalogOptions;
-            // data.value.containers.catalog = catalogOptions.map(c => c.id);
-        }
-    });
-}
-
-function getDatasets() {
-    datasetApiGetRequest("/s/datasets").then(async r => {
-        const { data: datasetData, profiles } = r;
-        if (data && profiles.length > 0) {
-            const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
-            const labelPredicates = currentProfile!.labelPredicates.length > 0 ? currentProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
-
-            optionParseIntoStore(datasetData);
-            const datasetOptions: { [key: string]: treeSelectOption & { link: string } } = {};
-
-            optionsStore.value.forSubjects(subject => {
-                const dataset: treeSelectOption & { link: string } = {
-                    id: subject.value,
-                    label: subject.value,
-                    link: "",
-                    children: []
-                };
-
-                const labels: languageLabel[] = [];
-
-                    optionsStore.value.forEach(q => {
-                        if (labelPredicates.includes(q.predicate.value)) {
-                            let language = (q.object as Literal).language;
-                            labels.push({
-                                value: q.object.value,
-                                language: language || undefined,
-                                priority: getLanguagePriority(language)
-                            });
-                        } else if (q.predicate.value === optionQnameToIri("prez:link")) {
-                            dataset.link = q.object.value;
-                        }
-                    }, subject, null, null, null);
-
-                    labels.sort((a, b) => a.priority - b.priority);
-                    dataset.label = labels.length > 0 ? labels[0].value : dataset.id;
-
-                datasetOptions[dataset.id] = dataset;
-            }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Dataset")), null);
-
-            const fcResults = await fcConcurrentApiRequests(Object.values(datasetOptions).map(d => `${d.link}/collections`));
-            let fcProfiles: ProfileHeader[] = [];
-            fcResults.forEach((r, index) => {
-                if (r.value) {
-                    optionParseIntoStore(r.value);
-                }
-                if (index === 0 && r.profiles) {
-                    fcProfiles = r.profiles;
-                }
-            });
-
-            const fccurrentProfile = ui.profiles[fcProfiles.find(p => p.current)!.uri];
-            const fcLabelPredicates = fccurrentProfile.labelPredicates.length > 0 ? fccurrentProfile.labelPredicates : DEFAULT_LABEL_PREDICATES;
-
-            optionsStore.value.forSubjects(subject => {
-                optionsStore.value.forObjects(object => {
-                    const fc: treeSelectOption = {
-                        id: object.value,
-                        label: object.value
-                    };
-                    const labels: languageLabel[] = [];
-                    optionsStore.value.forEach(q => { // fc triples
-                        if (fcLabelPredicates.includes(q.predicate.value)) {
-                            let language = (q.object as Literal).language;
-                            labels.push({
-                                value: q.object.value,
-                                language: language || undefined,
-                                priority: getLanguagePriority(language)
-                            });
-                        }
-                    }, object, null, null, null);
-                    labels.sort((a, b) => a.priority - b.priority);
-                    fc.label = labels.length > 0 ? labels[0].value : fc.id;
-                    datasetOptions[subject.value].children?.push(fc);
-                }, subject, optionQnameToIri("rdfs:member"), null);
-
-                // sort fcs
-                datasetOptions[subject.value].children?.sort(sortByLabel);
-            }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Dataset")), null);
-
-            options.value.containers.dataset = Object.values(datasetOptions).map(d => {
-                return {
-                    id: d.id,
-                    label: d.label,
-                    children: d.children
-                };
-            }).sort(sortByLabel);
-            // data.value.containers.dataset = datasetOptions.map(c => c.id);
-        }
-    });
-}
-
-function getVocabs() {
-    vocabApiGetRequest("/v/vocab").then(r => {
-        const { data: vocabData, profiles } = r;
-        if (data && profiles.length > 0) {
-            const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
-            const labelPredicates = currentProfile!.labelPredicates.length > 0 ? currentProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
-
-            optionParseIntoStore(vocabData);
-            const vocabOptions: selectOption[] = [];
-
-            optionsStore.value.forSubjects(subject => {
-                const vocab: selectOption = {
+        optionsStore.value.forSubjects(subject => {
+            if (!subject.value.endsWith("/system/catprez")) { // hide system catalog
+                const catalog: selectOption = {
                     id: subject.value
                 } as selectOption;
 
-                const labels: languageLabel[] = [];
+                catalog.label = getLabel(subject.value, optionsStore.value);
 
-                optionsStore.value.forEach(q => {
-                    if (labelPredicates.includes(q.predicate.value)) {
-                        let language = (q.object as Literal).language;
-                        labels.push({
-                            value: q.object.value,
-                            language: language || undefined,
-                            priority: getLanguagePriority(language)
-                        });
-                    }
-                }, subject, null, null, null);
+                catalogOptions.push(catalog);
+            }
+        }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Catalog")), null);
 
-                labels.sort((a, b) => a.priority - b.priority);
-                vocab.label = labels.length > 0 ? labels[0].value : vocab.id;
-
-                vocabOptions.push(vocab);
-            }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:ConceptScheme")), null);
-
-            vocabOptions.sort(sortByLabel);
-            options.value.containers.vocab = vocabOptions;
-            // data.value.containers.vocab = vocabOptions.map(c => c.id);
-        }
-    });
+        catalogOptions.sort(sortByLabel);
+        options.value.containers.catalog = catalogOptions;
+        // data.value.containers.catalog = catalogOptions.map(c => c.id);
+    }
 }
 
-function getCollections() {
-    collectionApiGetRequest("/v/collection").then(r => {
-        const { data: collectionData, profiles } = r;
-        if (data && profiles.length > 0) {
-            const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
-            const labelPredicates = currentProfile!.labelPredicates.length > 0 ? currentProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
+async function getDatasets() {
+    const { data } = await datasetApiGetRequest("/s/datasets");
+    if (data) {
+        optionParseIntoStore(data);
+        const datasetOptions: { [key: string]: treeSelectOption & { link: string } } = {};
 
-            optionParseIntoStore(collectionData);
-            const collectionOptions: selectOption[] = [];
+        optionsStore.value.forSubjects(subject => {
+            const dataset: treeSelectOption & { link: string } = {
+                id: subject.value,
+                label: subject.value,
+                link: "",
+                children: []
+            };
 
-            optionsStore.value.forSubjects(subject => {
-                const collection: selectOption = {
-                    id: subject.value
-                } as selectOption;
+            dataset.label = getLabel(subject.value, optionsStore.value);
 
-                const labels: languageLabel[] = [];
+            optionsStore.value.forObjects(object => {
+                dataset.link = object.value;
+            }, subject, namedNode(optionQnameToIri("prez:link")), null);
 
-                optionsStore.value.forEach(q => {
-                    if (labelPredicates.includes(q.predicate.value)) {
-                        let language = (q.object as Literal).language;
-                        labels.push({
-                            value: q.object.value,
-                            language: language || undefined,
-                            priority: getLanguagePriority(language)
-                        });
-                    }
-                }, subject, null, null, null);
+            datasetOptions[dataset.id] = dataset;
+        }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Dataset")), null);
 
-                labels.sort((a, b) => a.priority - b.priority);
-                collection.label = labels.length > 0 ? labels[0].value : collection.id;
+        const fcResults = await fcConcurrentApiRequests(Object.values(datasetOptions).map(d => `${d.link}/collections`));
+        fcResults.forEach(r => {
+            if (r.value) {
+                optionParseIntoStore(r.value);
+            }
+        });
 
-                collectionOptions.push(collection);
-            }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:Collection")), null);
+        optionsStore.value.forSubjects(subject => {
+            optionsStore.value.forObjects(object => {
+                const fc: treeSelectOption = {
+                    id: object.value,
+                    label: object.value
+                };
 
-            collectionOptions.sort(sortByLabel);
-            options.value.containers.collection = collectionOptions;
-            // data.value.containers.collection = collectionOptions.map(c => c.id);
-        }
-    });
+                fc.label = getLabel(object.value, optionsStore.value);
+
+                datasetOptions[subject.value].children?.push(fc);
+            }, subject, optionQnameToIri("rdfs:member"), null);
+
+            // sort fcs
+            datasetOptions[subject.value].children?.sort(sortByLabel);
+        }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Dataset")), null);
+
+        options.value.containers.dataset = Object.values(datasetOptions).map(d => {
+            return {
+                id: d.id,
+                label: d.label,
+                children: d.children
+            };
+        }).sort(sortByLabel);
+        // data.value.containers.dataset = datasetOptions.map(c => c.id);
+    }
+}
+
+async function getVocabs() {
+    const { data } = await vocabApiGetRequest("/v/vocab");
+    if (data) {
+        optionParseIntoStore(data);
+        const vocabOptions: selectOption[] = [];
+
+        optionsStore.value.forSubjects(subject => {
+            const vocab: selectOption = {
+                id: subject.value
+            } as selectOption;
+
+            vocab.label = getLabel(subject.value, optionsStore.value);
+
+            vocabOptions.push(vocab);
+        }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:ConceptScheme")), null);
+
+        vocabOptions.sort(sortByLabel);
+        options.value.containers.vocab = vocabOptions;
+        // data.value.containers.vocab = vocabOptions.map(c => c.id);
+    }
+}
+
+async function getCollections() {
+    const { data } = await collectionApiGetRequest("/v/collection");
+    if (data) {
+        optionParseIntoStore(data);
+        const collectionOptions: selectOption[] = [];
+
+        optionsStore.value.forSubjects(subject => {
+            const collection: selectOption = {
+                id: subject.value
+            } as selectOption;
+
+            collection.label = getLabel(subject.value, optionsStore.value);
+
+            collectionOptions.push(collection);
+        }, namedNode(qnameToIri("a")), namedNode(qnameToIri("skos:Collection")), null);
+
+        collectionOptions.sort(sortByLabel);
+        options.value.containers.collection = collectionOptions;
+        // data.value.containers.collection = collectionOptions.map(c => c.id);
+    }
 }
 
 function queryStringToForm() {
@@ -483,12 +381,8 @@ function submit() {
 async function getResults() {
     doneSearch.value = true;
     reset();
-    const { data, profiles } = await apiGetRequest(route.fullPath);
-    if (data && profiles.length > 0 && !error.value) {
-        const currentProfile = ui.profiles[profiles.find(p => p.current)!.uri];
-        const labelPredicates = currentProfile!.labelPredicates.length > 0 ? currentProfile!.labelPredicates : DEFAULT_LABEL_PREDICATES;
-        const descPredicates = currentProfile!.descriptionPredicates.length > 0 ? currentProfile!.descriptionPredicates : DEFAULT_DESC_PREDICATES;
-        
+    const { data } = await apiGetRequest(route.fullPath);
+    if (data && !error.value) {
         parseIntoStore(data);
 
         const tempResults: SearchItem[] = [];
@@ -508,28 +402,20 @@ async function getResults() {
                     result.weight = Number(q.object.value);
                 } else if (q.predicate.value === qnameToIri("prez:searchResultURI")) {
                     result.uri = q.object.value;
-                    const labels: languageLabel[] = [];
+                    result.title = getLabel(q.object.value, store.value);
+                    result.description = getDescription(q.object.value, store.value);
                     let resultCoordinates = undefined;
+
                     store.value.forEach(q1 => {
                         if (q1.predicate.value === qnameToIri("prez:link")) {
                             let link = getLink(store.value, q1);
                             if (link) {
                                 result.links.push(link);
                             }
-                        } else if (labelPredicates.includes(q1.predicate.value)) {
-                            let language = (q1.object as Literal).language;
-                            labels.push({
-                                value: q1.object.value,
-                                language: language || undefined,
-                                priority: getLanguagePriority(language)
-                            });
-                        } else if (descPredicates.includes(q1.predicate.value)) {
-                            result.description = q1.object.value;
                         } else if (q1.predicate.value === qnameToIri("a")) {
-                            const typeLabel = store.value.getObjects(q1.object, namedNode(qnameToIri("rdfs:label")), null);
                             result.types.push({
                                 uri: q1.object.value,
-                                label: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+                                label: getLabel(q1.object.value, store.value),
                             });
                         } else if (q1.predicate.value === qnameToIri("geo:hasGeometry")) {
                             store.value.forEach(geometryTriple => {
@@ -537,8 +423,7 @@ async function getResults() {
                             }, q1.object, namedNode(qnameToIri("geo:asWKT")), null, null);
                         }
                     }, q.object, null, null, null);
-                    labels.sort((a, b) => a.priority - b.priority);
-                    result.title = labels.length > 0 ? labels[0].value : undefined;
+
                     if (resultCoordinates) {
                         geoResults.value.push({
                             uri: result.uri,
@@ -598,7 +483,7 @@ onMounted(async () => {
     ui.pageHeading = { name: "Prez", url: "/" };
     ui.breadcrumbs = [{ name: "Search", url: "/search" }];
 
-    await ensureProfiles();
+    await ensureAnnotationPredicates();
 
     // get form options
     getCatalogs();

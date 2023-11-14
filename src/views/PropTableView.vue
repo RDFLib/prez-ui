@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import { ref, onMounted, inject, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
-import { BlankNode, DataFactory, Quad, Store, Literal } from "n3";
+import { BlankNode, DataFactory, Quad, Store } from "n3";
 import { useUiStore } from "@/stores/ui";
 import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import type { WKTResult } from "@/components/MapClient.d";
-import { apiBaseUrlConfigKey, conceptPerPageConfigKey, enableScoresKey, type ListItem, type AnnotatedQuad, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable, type languageLabel } from "@/types";
+import { apiBaseUrlConfigKey, conceptPerPageConfigKey, enableScoresKey, type ListItem, type Breadcrumb, type Concept, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable, type AnnotatedTriple, type Prefixes } from "@/types";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
-import { ensureProfiles, titleCase, sortByTitle, getLanguagePriority } from "@/util/helpers";
+import { titleCase, sortByTitle, ensureAnnotationPredicates, createAnnotatedTerm, getLabel, getDescription } from "@/util/helpers";
 import { ALT_PROFILE_CURIE } from "@/util/consts";
 import PropTable from "@/components/proptable/PropTable.vue";
 import ConceptComponent from "@/components/ConceptComponent.vue";
@@ -33,8 +33,6 @@ const { loading, error, apiGetRequest } = useApiRequest(); // main request
 const { loading: countLoading, error: countError, apiGetRequest: countApiGetRequest } = useApiRequest(); // count concepts for vocab request
 const { loading: conceptLoading, error: conceptError, apiGetRequest: conceptApiGetRequest } = useApiRequest(); // concept related requests
 
-const DEFAULT_LABEL_PREDICATES = [qnameToIri("rdfs:label")];
-const DEFAULT_DESC_PREDICATES = [qnameToIri("dcterms:description")];
 const DEFAULT_GEO_PREDICATES = [qnameToIri("geo:hasBoundingBox"), qnameToIri("geo:hasGeometry")];
 const DEFAULT_CHILDREN_PREDICATES = [qnameToIri("rdfs:member"), qnameToIri("skos:member"), qnameToIri("dcterms:hasPart")];
 const RECURSION_LIMIT = 5; // limit on recursive search of blank nodes
@@ -42,8 +40,8 @@ const RECURSION_LIMIT = 5; // limit on recursive search of blank nodes
 const item = ref<ListItem>({} as ListItem);
 const children = ref<ListItemExtra[]>([]);
 const concepts = ref<Concept[]>([]); // only for vocab
-const properties = ref<AnnotatedQuad[]>([]);
-const blankNodes = ref<AnnotatedQuad[]>([]);
+const properties = ref<AnnotatedTriple[]>([]);
+const blankNodes = ref<AnnotatedTriple[]>([]);
 const collapseConcepts = ref(true); // only for vocab
 const geoResults = ref<WKTResult[]>([]); // for spatial results
 const isAltView = ref(false);
@@ -84,9 +82,11 @@ function configByBaseClass(baseClass: string) {
             searchEnabled.value = true;
             searchDefaults.value = { catalog: item.value.iri };
             childrenConfig.value = {
-                ...childrenConfig.value,
-                showChildren: true,
-                childrenTitle: "Resources"
+                showChildren: false,
+                showButton: true,
+                childrenTitle: "Resources",
+                buttonTitle: "Resources",
+                buttonLink: "/resources"
             };
             break;
         case qnameToIri("dcat:Resource"):
@@ -137,54 +137,27 @@ function configByBaseClass(baseClass: string) {
     }
 }
 
-function getProperties() {
-    // find subject
-    const subject = isObjectView.value ? namedNode(route.query.uri as string) : store.value.getSubjects(namedNode(qnameToIri("a")), namedNode(item.value.baseClass!), null)[0]; // isAltView breaks here - subject doesn't exist
-    item.value.iri = subject.value;
-    item.value.types = [];
-
-    searchConfig.value = {
-        containerUri: subject.value,
-        containerBaseClass: iriToQname(item.value.baseClass!)
-    };
-
-    // get label & description predicates
-    const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
-    const descPredicates = currentProfile.value!.descriptionPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_DESC_PREDICATES;
-    hiddenPredicates.value.push(...descPredicates);
-
-    const labels: languageLabel[] = [];
-
-    // get attributes for item object, fill out properties
+async function getProperties() {
     store.value.forEach(q => {
-        if (labelPredicates.includes(q.predicate.value)) {
-            let language = (q.object as Literal).language;
-            labels.push({
-                value: q.object.value,
-                language: language || undefined,
-                priority: getLanguagePriority(language)
-            });
-        } else if (descPredicates.includes(q.predicate.value)) {
-            item.value.description = q.object.value;
-        } else if (DEFAULT_CHILDREN_PREDICATES.includes(q.predicate.value)) {
+        if (DEFAULT_CHILDREN_PREDICATES.includes(q.predicate.value)) {
             childrenPredicate.value = q.predicate.value;
             hiddenPredicates.value.push(q.predicate.value);
         } else if (q.predicate.value === qnameToIri("a")) {
             configByBaseClass(q.object.value); // might not be needed anymore with the /object changes
-            const typeLabel = store.value.getObjects(q.object, namedNode(qnameToIri("rdfs:label")), null);
-            const typeDesc = store.value.getObjects(q.object, namedNode(qnameToIri("dcterms:description")), null);
+            const typeLabel = getLabel(q.object.value, store.value);
+            const typeDesc = getDescription(q.object.value, store.value);
             const typeQname = iriToQname(q.object.value);
 
             item.value.types!.push({
                 value: q.object.value,
                 qname: typeQname !== "" ? typeQname : undefined,
-                label: typeLabel.length > 0 ? typeLabel[0].value : undefined,
-                description: typeDesc.length > 0 ? typeDesc[0].value : undefined,
+                label: typeLabel,
+                description: typeDesc,
             });
-        } else if (DEFAULT_GEO_PREDICATES.indexOf(q.predicate.value) >= 0) {
+        } else if (DEFAULT_GEO_PREDICATES.includes(q.predicate.value)) {
             store.value.forEach(geoQ => {
                 geoResults.value.push({
-                    label: "",
+                    label: item.value.title ? item.value.title : item.value.iri,
                     fcLabel: "",
                     wkt: geoQ.object.value,
                     uri: item.value.iri,
@@ -198,32 +171,17 @@ function getProperties() {
         }
 
         if (!isAltView.value) {
-            const annoQuad = createAnnoQuad(q, store.value, labelPredicates);
+            const annoQuad = createAnnotatedTriple(q, store.value, prefixes.value);
             properties.value.push(annoQuad);
 
             let recursionCounter = 0;
-            findBlankNodes(q, store.value, recursionCounter);
+            findBlankNodes(q, store.value, recursionCounter, prefixes.value);
         }
-    }, subject, null, null, null);
-
-    // sort labels by language priority
-    labels.sort((a, b) => a.priority - b.priority);
-
-    // set title to highest priority language tag
-    item.value.title = labels.length > 0 ? labels[0].value : undefined;
-
-    if (labels.length === 1) { // hide label property in table if there is only one label
-        hiddenPredicates.value.push(...labelPredicates);
-    }
+    }, namedNode(item.value.iri), null, null, null);
 
     if (hasScores.value) {
         getScores();
     }
-
-    // set the item title after the item title has been set
-    geoResults.value.forEach(result => {
-        result.label = item.value.title ? item.value.title : item.value.iri
-    });
 }
 
 function getScore(scoreName: string, normalised: boolean = false): {[key: string]: number} {
@@ -260,10 +218,9 @@ function getBreadcrumbs(): Breadcrumb[] {
         uri: string;
     }[] = [];
 
-    const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
     const pathSegments = route.path.split("/").slice(1, -1);
 
-    pathSegments.forEach((id, index) => {
+    pathSegments.forEach(id => {
         const quads = store.value.getQuads(null, namedNode(qnameToIri("dcterms:identifier")), literal(id, namedNode(qnameToIri("prez:identifier"))), null);
         if (quads.length > 0) {
             let parent: {
@@ -274,11 +231,8 @@ function getBreadcrumbs(): Breadcrumb[] {
                 id: id,
                 uri: quads[0].subject.value
             };
-            store.value.forEach(q => {
-                if (labelPredicates.includes(q.predicate.value)) {
-                    parent.title = q.object.value;
-                }
-            }, quads[0].subject, null, null, null);
+
+            parent.title = getLabel(quads[0].subject.value, store.value);
             parents.push(parent);
         }
     });
@@ -306,6 +260,9 @@ function getBreadcrumbs(): Breadcrumb[] {
                         crumbs.push({ name: parents[0].title || parents[0].uri, url: `/c/catalogs/${route.params.catalogId}` });
                         skipSegment = true;
                     }
+                    break;
+                case "resources":
+                    crumbs.push({ name: "Resources", url: `/c/catalogs/${route.params.catalogId}/resources` });
                     break;
                 case "datasets":
                     crumbs.push({ name: "Datasets", url: "/s/datasets" });
@@ -363,7 +320,7 @@ function getIRILocalName(iri: string) {
     }
 }
 
-function getChildren() {
+async function getChildren() {
     if (item.value.baseClass === qnameToIri("skos:ConceptScheme")) {
         if (hasFewChildren.value) {
             getAllConcepts();
@@ -371,57 +328,22 @@ function getChildren() {
             getTopConcepts();
         }
     } else {
-        const labelPredicates = currentProfile.value!.labelPredicates.length > 0 ? currentProfile.value!.labelPredicates : DEFAULT_LABEL_PREDICATES;
-
-        store.value.forObjects((obj) => {
+        store.value.forObjects(obj => {
             let child: ListItemExtra = {
                 iri: obj.id,
                 extras: {}
             };
 
-            const labels: languageLabel[] = [];
-
-            let links: string[] = [];
+            child.title = getLabel(obj.value, store.value);
+            const links: string[] = [];
 
             store.value.forEach(q => {
-                if (labelPredicates.includes(q.predicate.value)) {
-                    let language = (q.object as Literal).language;
-                    labels.push({
-                        value: q.object.value,
-                        language: language || undefined,
-                        priority: getLanguagePriority(language)
-                    });
-                } else if (q.predicate.value === qnameToIri("prez:link")) {
+                if (q.predicate.value === qnameToIri("prez:link")) {
                     links.push(q.object.value);
                 } else if (q.predicate.value === qnameToIri("a")) {
                     child.baseClass = q.object.value;
-                } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:publisher")) {
-                    const publisher: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
-
-                    store.value.forObjects(result => {
-                        publisher.label = result.value;
-                    }, q.object, qnameToIri("rdfs:label"), null);
-
-                    child.extras.publisher = publisher;
-                } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:creator")) {
-                    const creator: ListItemSortable = { iri: q.object.value, label: getIRILocalName(q.object.value) };
-
-                    store.value.forObjects(result => {
-                        creator.label = result.value;
-                    }, q.object, qnameToIri("rdfs:label"), null);
-                    
-                    child.extras.creator = creator;
-                } else if (item.value.baseClass === qnameToIri("dcat:Catalog") && q.predicate.value === qnameToIri("dcterms:issued")) {
-                    const issued: ListItemSortable = { label: q.object.value };
-                    child.extras.issued = issued;
-                } 
+                }
             }, obj, null, null, null);
-
-            // sort labels by language priority
-            labels.sort((a, b) => a.priority - b.priority);
-
-            // set title to highest priority language tag
-            child.title = labels.length > 0 ? labels[0].value : undefined;
 
             // ensure the correct link is set
             if (links.length > 1) {
@@ -443,9 +365,9 @@ function getChildren() {
     }
 }
 
-function getAllConcepts() {
+async function getAllConcepts() {
     let conceptArray: Concept[] = [];
-    
+
     store.value.forSubjects(subject => {
         let c: Concept = {
             iri: subject.id,
@@ -457,17 +379,10 @@ function getAllConcepts() {
             children: []
         };
 
-        const labels: languageLabel[] = [];
+        c.title = getLabel(subject.value, store.value);
         
         store.value.forEach(q => {
-            if (q.predicate.value === qnameToIri("skos:prefLabel")) {
-                let language = (q.object as Literal).language;
-                labels.push({
-                    value: q.object.value,
-                    language: language || undefined,
-                    priority: getLanguagePriority(language)
-                });
-            } else if (q.predicate.value === qnameToIri("prez:link") && q.object.value.startsWith(route.path)) { // enforce links within current vocab
+            if (q.predicate.value === qnameToIri("prez:link") && q.object.value.startsWith(route.path)) { // enforce links within current vocab
                 c.link = q.object.value;
             } else if (q.predicate.value === qnameToIri("skos:narrower")) {
                 c.narrower!.push(q.object.value);
@@ -475,11 +390,7 @@ function getAllConcepts() {
                 c.broader = q.object.value;
             }
         }, subject, null, null, null);
-        // sort labels by language priority
-        labels.sort((a, b) => a.priority - b.priority);
 
-        // set title to highest priority language tag
-        c.title = labels.length > 0 ? labels[0].value : "";
         c.childrenCount = c.narrower!.length;
         conceptArray.push(c);
     }, namedNode(qnameToIri("skos:inScheme")), namedNode(item.value.iri), null);
@@ -520,9 +431,9 @@ function getAllConcepts() {
 
 async function getTopConcepts(page: number = 1) {
     conceptClearStore();
-    const { data: conceptData } = await conceptApiGetRequest(`${route.path}/top-concepts?page=${page}&per_page=${conceptPerPage}`);
-    if (conceptData && !conceptError.value) {
-        conceptParseIntoStore(conceptData);
+    const { data } = await conceptApiGetRequest(`${route.path}/top-concepts?page=${page}&per_page=${conceptPerPage}`);
+    if (data && !conceptError.value) {
+        conceptParseIntoStore(data);
 
         conceptStore.value.forObjects(object => {
             let c: Concept = {
@@ -533,16 +444,11 @@ async function getTopConcepts(page: number = 1) {
                 children: [],
                 color: "",
             };
-            const labels: languageLabel[] = [];
+            
+            c.title = getLabel(object.value, conceptStore.value);
+
             conceptStore.value.forEach(q => {
-                if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
-                    let language = (q.object as Literal).language;
-                    labels.push({
-                        value: q.object.value,
-                        language: language || undefined,
-                        priority: getLanguagePriority(language)
-                    });
-                } else if (q.predicate.value === conceptQnameToIri("prez:link")) {
+                if (q.predicate.value === conceptQnameToIri("prez:link")) {
                     c.link = q.object.value;
                 } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
                     c.childrenCount = Number(q.object.value);
@@ -550,11 +456,6 @@ async function getTopConcepts(page: number = 1) {
                     c.color = q.object.value;
                 }
             }, object, null, null, null);
-            // sort labels by language priority
-            labels.sort((a, b) => a.priority - b.priority);
-
-            // set title to highest priority language tag
-            c.title = labels.length > 0 ? labels[0].value : "";
             concepts.value.push(c);
         }, namedNode(item.value.iri), namedNode(conceptQnameToIri("skos:hasTopConcept")), null);
 
@@ -578,9 +479,9 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
     });
     
     conceptClearStore();
-    const { data: conceptData } = await conceptApiGetRequest(`${link}/narrowers?page=${page}&per_page=${conceptPerPage}`);
-    if (conceptData && !conceptError.value) {
-        conceptParseIntoStore(conceptData);
+    const { data } = await conceptApiGetRequest(`${link}/narrowers?page=${page}&per_page=${conceptPerPage}`);
+    if (data && !conceptError.value) {
+        conceptParseIntoStore(data);
 
         conceptStore.value.forObjects(object => {
             let c: Concept = {
@@ -591,16 +492,11 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
                 children: [],
                 color: "",
             };
-            const labels: languageLabel[] = [];
+
+            c.title = getLabel(object.value, conceptStore.value);
+            
             conceptStore.value.forEach(q => {
-                if (q.predicate.value === conceptQnameToIri("skos:prefLabel")) {
-                    let language = (q.object as Literal).language;
-                    labels.push({
-                        value: q.object.value,
-                        language: language || undefined,
-                        priority: getLanguagePriority(language)
-                    });
-                } else if (q.predicate.value === conceptQnameToIri("prez:link")) {
+                if (q.predicate.value === conceptQnameToIri("prez:link")) {
                     c.link = q.object.value;
                 } else if (q.predicate.value === conceptQnameToIri("prez:childrenCount")) {
                     c.childrenCount = Number(q.object.value);
@@ -608,11 +504,6 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
                     c.color = q.object.value;
                 }
             }, object, null, null, null);
-            // sort labels by language priority
-            labels.sort((a, b) => a.priority - b.priority);
-
-            // set title to highest priority language tag
-            c.title = labels.length > 0 ? labels[0].value : "";
             parent!.children.push(c);
         }, namedNode(parent!.iri), namedNode(conceptQnameToIri("skos:narrower")), null);
 
@@ -620,50 +511,22 @@ async function getNarrowers({ iriPath, link, page = 1 }: { iriPath: string, link
     }
 }
 
-function createAnnoQuad(q: Quad, store: Store, labelPredicates: string[]): AnnotatedQuad {
-    const annoQuad = {
+function createAnnotatedTriple(q: Quad, store: Store, prefixes?: Prefixes): AnnotatedTriple {
+    return {
         subject: q.subject,
-        predicate: {
-            termType: q.predicate.termType,
-            value: q.predicate.value,
-            id: q.predicate.id,
-            annotations: store.getQuads(q.predicate, null, null, null)
-        },
-        object: {
-            termType: q.object.termType,
-            value: q.object.value,
-            id: q.object.id,
-            datatype: q.object instanceof Literal ? q.object.datatype : undefined,
-            language: q.object instanceof Literal ? q.object.language : undefined,
-            annotations: store.getQuads(q.object, null, null, null)
-        },
-        value: q.value,
-        graph: q.graph,
-        termType: q.termType,
-        equals: q.equals,
-        toJSON: q.toJSON
-    };
-
-    for (const labelPred of labelPredicates) {
-        const quads = store.getQuads(q.object, namedNode(labelPred), null, null)
-        if (quads.length > 0) {
-            for (const quad of quads) {
-                annoQuad.object.annotations.push(new Quad(quad.subject, namedNode(qnameToIri("rdfs:label")), quad.object))
-            }
-        }
+        predicate: createAnnotatedTerm(q.predicate, store, prefixes),
+        object: createAnnotatedTerm(q.object, store, prefixes)
     }
-
-    return annoQuad
 }
 
-function findBlankNodes(q: Quad, store: Store, recursionCounter: number) {
+function findBlankNodes(q: Quad, store: Store, recursionCounter: number, prefixes?: Prefixes) {
     if (q.object instanceof BlankNode) {
         recursionCounter++;
         store.forEach(q1 => {
-            const annoQuad1 = createAnnoQuad(q1, store, []);
+            const annoQuad1 = createAnnotatedTriple(q1, store, prefixes);
             blankNodes.value.push(annoQuad1);
             if (recursionCounter < RECURSION_LIMIT) {
-                findBlankNodes(q1, store, recursionCounter);
+                findBlankNodes(q1, store, recursionCounter, prefixes);
             }
         }, q.object, null, null, null)
     }
@@ -675,7 +538,7 @@ onBeforeMount(() => {
         flavour.value = "CatPrez";
         if (route.path.match(/c\/profiles\/.+/)) {
             configByBaseClass(qnameToIri("prof:Profile"));
-        } else if (route.path.match(/c\/catalogs\/.+\/.+/)) {
+        } else if (route.path.match(/c\/catalogs\/.+\/resources\/.+/)) {
             configByBaseClass(qnameToIri("dcat:Resource"));
         } else if (route.path.match(/c\/catalogs\/.+/)) {
             configByBaseClass(qnameToIri("dcat:Catalog"));
@@ -719,7 +582,6 @@ onBeforeMount(() => {
 
 onMounted(async () => {
     loading.value = true;
-    await ensureProfiles(); // wait for profiles to be set in Pinia
 
     if (item.value.baseClass === qnameToIri("skos:ConceptScheme")) {
         const { data: countData } = await countApiGetRequest(`/count?curie=${route.path.split("/").slice(-1)[0]}&inbound=${encodeURIComponent(qnameToIri("skos:inScheme"))}`);
@@ -734,7 +596,7 @@ onMounted(async () => {
     if (hasFewChildren.value) {
         fullPath = `${route.path}/all${window.location.search}`;
     } else {
-        fullPath = route.fullPath;
+        fullPath = route.fullPath; // should use normal path for vocab for alt view to avoid getting concepts
     }
     if (Object.keys(route.query).length > 0) {
         if (isAltView.value) { // remove alt profile qsa to get title for breadcrumbs - already have profile info in pinia/link headers
@@ -745,10 +607,10 @@ onMounted(async () => {
     const { data, profiles } = await apiGetRequest(fullPath);
 
     if (data && profiles.length > 0 && !error.value) {
-        // find the current/default profile
+        // find the current profile
         currentProfile.value = ui.profiles[profiles.find(p => p.current)!.uri];
         
-        // if specify mediatype, or profile is not default or alt, redirect to API
+        // if specify mediatype, or profile is not current or alt, redirect to API
         if ((route.query && route.query._profile) &&
             (route.query._mediatype || ![currentProfile.value.token, ALT_PROFILE_CURIE].includes(route.query._profile as string))) {
                 window.location.replace(`${apiBaseUrl}${route.path}?_profile=${route.query._profile}${route.query._mediatype ? `&_mediatype=${route.query._mediatype}` : ""}`);
@@ -761,11 +623,29 @@ onMounted(async () => {
         };
     
         parseIntoStore(data);
-        getProperties();
-        if (!isAltView.value && childrenConfig.value.showChildren) {
-            getChildren();
+
+        const subject = isObjectView.value ? namedNode(route.query.uri as string) : store.value.getSubjects(namedNode(qnameToIri("a")), namedNode(item.value.baseClass!), null)[0]; // isAltView breaks here - subject doesn't exist
+        item.value.iri = subject.value;
+        item.value.types = [];
+        searchConfig.value = {
+            containerUri: subject.value,
+            containerBaseClass: iriToQname(item.value.baseClass!)
+        };
+
+        await ensureAnnotationPredicates();
+
+        hiddenPredicates.value.push(...ui.annotationPredicates.label, ...ui.annotationPredicates.description);
+        item.value.title = getLabel(item.value.iri, store.value);
+        item.value.description = getDescription(item.value.iri, store.value);
+
+        // fire off getProperties() & getChildren() concurrently
+        if (!isAltView.value) {
+            getProperties();
+            if (childrenConfig.value.showChildren) {
+                getChildren();
+            }
         }
-    
+
         document.title = item.value.title ? `${item.value.title} | Prez` : "Prez";
         ui.breadcrumbs = getBreadcrumbs();
     }
@@ -775,7 +655,7 @@ onMounted(async () => {
 <template>
     <ProfilesTable v-if="isAltView" />
     <template v-else>
-        <PropTable v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPreds="hiddenPredicates">
+        <PropTable v-if="properties.length > 0" :item="item" :properties="properties" :blankNodes="blankNodes" :prefixes="prefixes" :hiddenPredicates="hiddenPredicates">
             <template #map>
                 <MapClient v-if="geoResults.length"
                     ref="searchMapRef" 
@@ -815,12 +695,7 @@ onMounted(async () => {
             <template v-else-if="childrenConfig.showChildren" #bottom>
                 <tr>
                     <th>{{ childrenConfig.childrenTitle }}</th>
-                    <SortableTabularList
-                        v-if="item.baseClass === qnameToIri('dcat:Catalog')"
-                        :items="children"
-                        :predicates="['publisher', 'creator', 'issued']"
-                    />
-                    <td v-else>
+                    <td>
                         <div class="children-list">
                             <RouterLink v-for="child in children" :to="child.link || ''">{{ child.title || child.iri }}</RouterLink>
                         </div>

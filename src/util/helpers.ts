@@ -1,8 +1,8 @@
 import type { RouteLocationNormalizedLoaded } from "vue-router";
-import { DataFactory, type Store, type Quad, type Literal } from "n3";
-import type { option, link, languageLabel } from "@/types";
+import { DataFactory, type Store, type Quad, type Quad_Object, type Quad_Predicate } from "n3";
+import type { option, link, AnnotatedTerm, Prefixes } from "@/types";
 import { useUiStore } from "@/stores/ui";
-import { DEFAULT_LABEL_PREDICATES, DEFAULT_PREFIXES, CONTAINER_RELATIONS } from "@/util/consts";
+import { DEFAULT_PREFIXES, CONTAINER_RELATIONS } from "@/util/consts";
 
 const { namedNode } = DataFactory;
 
@@ -79,24 +79,26 @@ export const sortByTitle = <T extends {title?: string; iri: string;}>(a: T, b: T
 /**
  * Returns an integer priority based on an RDF literal's language tag
  * 
- * Priority order is: 1. `@en`, 2. `@en-*`, 3. No language tag, 4. Other language tags.
+ * Priority order is: browser language, then exact matches against language config, then partial matches against language config (e.g. `en` => `en-US`), then no language, then everything else
  * 
  * @param language 
  * @returns the priority order as an integer
  */
 export function getLanguagePriority(language: string): number {
-    // get browser language, return 0
-    if (language === "en") {
-        return 1;
-    } else if (/en-.+/.test(language)) { // en-us, en-gb, etc.
-        return 2;
+    const ui = useUiStore();
+
+    if (ui.languageList.includes(language)) {
+        return ui.languageList.indexOf(language);
+    } else if (language.length === 2 && ui.languageList.find(l => l.startsWith(language))) {
+        return ui.languageList.findIndex(l => l.startsWith(language)) + 1;
+    } else if (language.length === 5 && ui.languageList.find(l => language.startsWith(l))) {
+        return ui.languageList.findIndex(l => language.startsWith(l)) + 1;
     } else if (language === "") {
-        return 3;
+        return ui.languageList.length + 1;
     } else {
-        return 4;
+        return ui.languageList.length + 2;
     }
 }
-
 
 /**
  * Get the base class from the URL structure
@@ -108,7 +110,7 @@ export function getBaseClassFromLink(link: string): {iri: string; title: string}
     const curieRegex = "[a-zA-Z0-9\\.\\-_]+:[a-zA-Z0-9\\.\\-_]+";
     const profileRegex = new RegExp(`^(\/[csv])?\/profiles\/${curieRegex}\/?$`);
     const catalogRegex = new RegExp(`^\/c\/catalogs\/${curieRegex}\/?$`);
-    const resourceRegex = new RegExp(`^\/c\/catalogs\/${curieRegex}\/${curieRegex}\/?$`);
+    const resourceRegex = new RegExp(`^\/c\/catalogs\/${curieRegex}\/resources\/${curieRegex}\/?$`);
     const datasetRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/?$`);
     const featureCollectionRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/collections\/${curieRegex}\/?$`);
     const featureRegex = new RegExp(`^\/s\/datasets\/${curieRegex}\/collections\/${curieRegex}\/items\/${curieRegex}\/?$`);
@@ -177,29 +179,14 @@ export function getLink(store: Store, linkQuad: Quad): link {
         const parent: linkParent = {
             iri: parentQuad.subject.value,
             link: linkQuad.object.value.split(parentQuad.object.value)[0] + parentQuad.object.value,
-            types: []
+            types: [],
+            title: getLabel(parentQuad.subject.value, store)
         };
-        
-        const labels: languageLabel[] = [];
-        store.forEach(q1 => {
-            if (DEFAULT_LABEL_PREDICATES.includes(q1.predicate.value)) {
-                let language = (q1.object as Literal).language;
-                labels.push({
-                    value: q1.object.value,
-                    language: language || undefined,
-                    priority: getLanguagePriority(language)
-                });
-            }
-        }, namedNode(parentQuad.subject.value), null, null, null);
-
-        labels.sort((a, b) => a.priority - b.priority);
-        parent.title = labels.length > 0 ? labels[0].value : undefined;
 
         store.getObjects(namedNode(parentQuad.subject.value), namedNode(defaultQnameToIri("a")), null).forEach(t => {
-            const typeLabel = store.getObjects(t, namedNode(defaultQnameToIri("rdfs:label")), null);
             parent.types.push({
                 iri: t.value,
-                title: typeLabel.length > 0 ? typeLabel[0].value : undefined,
+                title: getLabel(t.value, store),
             });
         });
 
@@ -224,13 +211,32 @@ export function getLink(store: Store, linkQuad: Quad): link {
  * @param prefixes 
  * @returns Predicate IRI string
  */
-export function defaultQnameToIri(s: string, prefixes: { [token: string]: string } = DEFAULT_PREFIXES): string {
+export function defaultQnameToIri(s: string, prefixes: Prefixes = DEFAULT_PREFIXES): string {
     if (s === "a") { // special handling for "a" as rdf:type
         return prefixes.rdf + "type";
     } else {
         const [prefix, pred] = s.split(":");
         return prefixes[prefix] + pred;
     }
+}
+
+/**
+ * Creates a qname from an IRI
+ * 
+ * Uses the default list of prefixes by default
+ * 
+ * @param iri 
+ * @param prefixes 
+ * @returns qname string
+ */
+export function defaultIriToQname(iri: string, prefixes: Prefixes = DEFAULT_PREFIXES): string {
+    let qname = "";
+    Object.entries(prefixes).forEach(([prefix, prefixIri]) => {
+        if (iri.startsWith(prefixIri)) {
+            qname = prefix + ":" + iri.split(prefixIri)[1];
+        }
+    });
+    return qname;
 }
 
 /**
@@ -282,4 +288,186 @@ export function newQSAString(route: RouteLocationNormalizedLoaded, addQSA: {[key
         queryString += "?" + Object.entries(queryObj).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join("&");
     }
     return queryString;
+}
+
+/**
+ * Gets an RDF list from the N3.js Store
+ * 
+ * @param store the N3.js Store
+ * @param list blank node of the RDF list
+ * @returns list of objects
+ */
+export function getRDFList(store: Store, list: Quad_Object): Quad_Object[] {
+    // RDF lists are treated as blank nodes, where they're split into "first" and "rest", except for the last element, which is nil and last element
+    let objectList: Quad_Object[] = [];
+
+    /**
+     * Recurively traverses an RDF list
+     * 
+     * @param listNode the blank node representing the RDF list
+     */
+    function traverseList(listNode: Quad_Object) {
+        const first = store.getObjects(listNode, namedNode(defaultQnameToIri("rdf:first")), null)[0];
+        const rest = store.getObjects(listNode, namedNode(defaultQnameToIri("rdf:rest")), null)[0];
+
+        objectList.push(first);
+
+        if (rest && rest.value !== defaultQnameToIri("rdf:nil")) { // rest == nil means the end of the list has been reached
+            traverseList(rest);
+        }
+    }
+
+    traverseList(list);
+
+    return objectList;
+}
+
+/**
+ * Returns the preferred annotation object from a list of potential annotation predicates, using a language-based priority
+ * 
+ * The priority is to use the annotation predicate with the highest language priority
+ * 
+ * @param objects the list of annotation objects
+ * @returns the preferred annotation object
+ */
+export function getPreferredAnnotation(objects: { value: string, language: string }[]): { value: string, language: string } {
+    const objsWithPriority = objects.map(o => {
+        return {...o, priority: getLanguagePriority(o.language)};
+    });
+    const initialValue = {
+        value: "",
+        language: "",
+        priority: 100
+    };
+    // get highest priority (lowest value)
+    const preferredObj = objsWithPriority.reduce((prev, current) => (prev && prev.priority < current.priority) ? prev : current, initialValue);
+    return { value: preferredObj.value, language: preferredObj.language };
+}
+
+/**
+ * Periodically checks if the annotationPredicates object is set in Pinia before resolving a Promise.
+ * 
+ * Loops every 200ms, times out after 10s.
+ */
+export function ensureAnnotationPredicates() {
+    const ui = useUiStore();
+
+    return new Promise<void>((resolve, reject) => {
+        let expTimer = setTimeout(reject, 10 * 1000); // time out after 10s
+               
+        (function waitForAnnotationPredicates() {
+            if (ui.annotationPredicates.label.length > 0 || ui.annotationPredicates.description.length > 0 || ui.annotationPredicates.provenance.length > 0) {
+                clearTimeout(expTimer);
+                return resolve();
+            };
+            setTimeout(waitForAnnotationPredicates, 200); // checks every 200ms
+        })();
+    });
+};
+
+/**
+ * Gets an array of N3 `Quad_Objects` from a `Store` by providing an array of predicates
+ * 
+ * @param subject 
+ * @param predicates 
+ * @param store 
+ * @returns the array of objects
+ */
+export function getObjects(subject: string, predicates: string[], store: Store): Quad_Object[] {
+    const objs: Quad_Object[] = [];
+
+    predicates.forEach(p => {
+        objs.push(...store.getObjects(namedNode(subject), namedNode(p), null));
+    });
+
+    return objs;
+}
+
+/**
+ * Gets the preferred annotation of a node if possible
+ * 
+ * Chooses from a list of supported annotation predicates, gets the highest priority annotation based on language preference
+ * 
+ * @param iri 
+ * @param annotation 
+ * @param store 
+ * @returns The preferred annotation
+ */
+export function getAnnotation(iri: string, annotation: "label" | "description" | "provenance", store: Store): { value: string, language: string } {
+    const ui = useUiStore();
+
+    const objs = getObjects(iri, ui.annotationPredicates[annotation], store).map(o => {
+        return {
+            value: o.value,
+            language: o.termType === "Literal" ? o.language : ""
+        }
+    })
+    return getPreferredAnnotation(objs);
+}
+
+/**
+ * Gets the preferred label of a node
+ * 
+ * @param iri 
+ * @param store 
+ * @returns 
+ */
+export function getLabel(iri: string, store: Store): string {
+    return getAnnotation(iri, "label", store).value;
+};
+
+/**
+ * Gets the preferred description of a node
+ * 
+ * @param iri 
+ * @param store 
+ * @returns 
+ */
+export function getDescription(iri: string, store: Store): string {
+    return getAnnotation(iri, "description", store).value;
+};
+
+/**
+ * Gets the preferred provenance of a node
+ * 
+ * @param iri 
+ * @param store 
+ * @returns 
+ */
+export function getProvenance(iri: string, store: Store): string {
+    return getAnnotation(iri, "provenance", store).value;
+};
+
+/**
+ * Creates a generic annotated term object containing all possible preferred annotations
+ * 
+ * @param term 
+ * @param store 
+ * @param prefixes 
+ * @returns the term containing annotations
+ */
+export function createAnnotatedTerm<T extends AnnotatedTerm>(term: Quad_Predicate | Quad_Object, store: Store, prefixes?: Prefixes) {
+    const annoTerm: T = {
+        id: term.id,
+        value: term.value
+    } as T;
+
+    const termType: T["termType"] = term.termType;
+    annoTerm.termType = termType;
+
+    if (term.termType === "NamedNode") {
+        annoTerm.qname = defaultIriToQname(term.value, prefixes);
+        annoTerm.label = getLabel(term.value, store);
+        annoTerm.description = getDescription(term.value, store);
+        annoTerm.provenance = getProvenance(term.value, store);
+    } else if (term.termType === "Literal") {
+        annoTerm.language = term.language;
+        annoTerm.datatype = {
+            value: term.datatype.value,
+            label: getLabel(term.datatype.value, store),
+            qname: defaultIriToQname(term.datatype.value, prefixes)
+        };
+    }
+
+    return annoTerm;
 }

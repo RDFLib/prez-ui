@@ -1,66 +1,34 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import type { AnnotatedObject, AnnotatedPredicate, AnnotatedQuad, ListItem, RowPred } from "@/types";
+import type { AnnotatedTriple, ListItem, Prefixes, PropTableRow } from "@/types";
 import { copyToClipboard } from "@/util/helpers";
 import PropRow from "@/components/proptable/PropRow.vue";
 import ToolTip from "@/components/ToolTip.vue";
 
 const props = defineProps<{
     item: ListItem;
-    properties: AnnotatedQuad[];
-    blankNodes: AnnotatedQuad[];
-    prefixes: {[token: string]: string};
-    hiddenPreds: string[];
+    properties: AnnotatedTriple[];
+    blankNodes: AnnotatedTriple[];
+    prefixes: Prefixes;
+    hiddenPredicates: string[];
 }>();
 
-const rows = ref<RowPred[]>([]);
+const rows = ref<PropTableRow[]>([]);
 
-function iriToQname(iri: string): string { // doesn't require a store, uses prefixes from props
-    let qname = "";
-    Object.entries(props.prefixes).forEach(([prefix, prefixIri]) => {
-        if (iri.startsWith(prefixIri)) {
-            qname = prefix + ":" + iri.split(prefixIri)[1];
-        }
-    });
-    return qname;
-}
-
-function qnameToIri(s: string): string { // doesn't require a store, uses prefixes from props
-    if (s === "a") { // special handling for "a" as rdf:type
-        return props.prefixes.rdf + "type";
-    } else {
-        const [prefix, pred] = s.split(":");
-        return props.prefixes[prefix] + pred;
-    }
-}
-
-function getAnnotation(annoNode: AnnotatedPredicate | AnnotatedObject, annotationPred: string): string | undefined {
-    return annoNode.annotations.find(annotation => annotation.predicate.value === qnameToIri(annotationPred))?.object.value;
-}
-
-function buildRows(properties: AnnotatedQuad[]): RowPred[] {
-    let propRows: {[uri: string]: RowPred} = {};
+function buildRows(properties: AnnotatedTriple[]): PropTableRow[] {
+    let propRows: {[uri: string]: PropTableRow} = {};
     properties.forEach(p => {
+        const { value, ...pred } = p.predicate; // omit & rename "value" to "iri"
         propRows[p.predicate.value] ??= {
             iri: p.predicate.value,
-            objs: [],
-            qname: iriToQname(p.predicate.value),
-            label: getAnnotation(p.predicate, "rdfs:label"),
-            description: getAnnotation(p.predicate, "dcterms:description"),
-            explanation: getAnnotation(p.predicate, "dcterms:provenance"),
-            order: 0
+            ...pred,
+            order: 0,
+            objects: [],
         };
 
-        propRows[p.predicate.value].objs.push({
-            predIri: p.predicate.value,
-            value: p.object.value,
-            qname: p.object.termType === "NamedNode" ? iriToQname(p.object.value) : undefined,
-            datatype: p.object.termType === "Literal" ? { value: p.object.datatype!.value, qname: iriToQname(p.object.datatype!.value) } : undefined,
-            language: p.object.termType === "Literal" ? p.object.language : undefined,
-            termType: p.object.termType,
-            label: getAnnotation(p.object, "rdfs:label"),
-            description: getAnnotation(p.object, "dcterms:description"),
-            explanation: getAnnotation(p.object, "dcterms:provenance"),
+        propRows[p.predicate.value].objects.push({
+            ...p.object,
+            predicateIri: p.predicate.value,
             rows: p.object.termType === "BlankNode" ? buildRows(props.blankNodes.filter(p1 => p1.subject.id === p.object.id)) : []
         });
     });
@@ -68,7 +36,7 @@ function buildRows(properties: AnnotatedQuad[]): RowPred[] {
 }
 
 onMounted(() => {
-    const properties = props.properties.filter(p => !props.hiddenPreds.includes(p.predicate.value));
+    const properties = props.properties.filter(p => !props.hiddenPredicates.includes(p.predicate.value));
     rows.value = buildRows(properties);
 });
 </script>
