@@ -407,13 +407,17 @@ async function getAllConcepts() {
     }, {});
 
     let conceptsList: Concept[] = [];
+
+    // set broader first
     conceptArray.forEach(c => {
         if (c.narrower!.length > 0) {
             c.narrower!.forEach(n => {
                 conceptArray[indexMap[n]].broader = c.iri;
             });
         }
+    });
 
+    conceptArray.forEach(c => {
         if (topConcepts.includes(c.iri)) {
             conceptsList.push(c);
             return;
