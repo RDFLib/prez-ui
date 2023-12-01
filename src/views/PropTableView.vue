@@ -143,7 +143,6 @@ async function getProperties() {
             childrenPredicate.value = q.predicate.value;
             hiddenPredicates.value.push(q.predicate.value);
         } else if (q.predicate.value === qnameToIri("a")) {
-            configByBaseClass(q.object.value); // might not be needed anymore with the /object changes
             const typeLabel = getLabel(q.object.value, store.value);
             const typeDesc = getDescription(q.object.value, store.value);
             const typeQname = iriToQname(q.object.value);
