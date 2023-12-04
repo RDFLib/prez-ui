@@ -1,0 +1,10 @@
+$primary: #ff8c84; //#e63d30;
+$maxPageWidth: 1400px;
+$borderRadius: 6px;
+$linkColor: $primary;
+$linkHover: adjust-color($color: $primary, $saturation: 10%, $lightness: -8%);
+
+// breakpoints
+$smBreakpoint: 428px;
+$mdBreakpoint: 800px;
+$lgBreakpoint: 120px;

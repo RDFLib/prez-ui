@@ -1,0 +1,2 @@
+# Prez Lib
+This is a JS library that contains framework-independent logic to send API requests, process RDF using [N3.js](https://github.com/rdfjs/N3.js), and other non-display logic for resuse in Prez UI (& potentially other non-Vue applications).
