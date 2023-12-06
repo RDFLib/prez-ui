@@ -460,6 +460,9 @@ export function createAnnotatedTerm<T extends AnnotatedTerm>(term: Quad_Predicat
         annoTerm.label = getLabel(term.value, store);
         annoTerm.description = getDescription(term.value, store);
         annoTerm.provenance = getProvenance(term.value, store);
+
+        const links = store.getObjects(namedNode(term.value), namedNode(defaultQnameToIri("prez:link")), null);
+        annoTerm.links = links.length > 0 ? links.map(l => l.value) : undefined;
     } else if (term.termType === "Literal") {
         annoTerm.language = term.language;
         annoTerm.datatype = {

@@ -7,7 +7,7 @@ import { useRdfStore } from "@/composables/rdfStore";
 import { useApiRequest } from "@/composables/api";
 import { apiBaseUrlConfigKey, perPageConfigKey, type Breadcrumb, type PrezFlavour, type Profile, type ListItemExtra, type ListItemSortable } from "@/types";
 import { getPrezSystemLabel } from "@/util/prezSystemLabelMapping";
-import { sortByTitle, getBaseClassFromLink, ensureAnnotationPredicates, getLabel, getDescription } from "@/util/helpers";
+import { sortByTitle, getBaseClassFromLink, ensureAnnotationPredicates, getLabel, getDescription, getObjects } from "@/util/helpers";
 import { ALT_PROFILE_CURIE } from "@/util/consts";
 import ItemList from "@/components/ItemList.vue";
 import ProfilesTable from "@/components/ProfilesTable.vue";
@@ -230,8 +230,7 @@ function getProperties() {
 
         // for /c/profiles, etc. need to look for prez:CatPrezProfile, etc.
     } else {
-        // nodeList = store.value.getObjects(countQuad.subject, namedNode(qnameToIri("rdfs:member")), null);
-        nodeList = store.value.getObjects(countQuad.subject, namedNode(qnameToIri("dcterms:hasPart")), null); // TODO: need to cater for rdfs:member & dcterms:hasPart
+        nodeList = getObjects(countQuad.subject.value, [qnameToIri("rdfs:member"), qnameToIri("dcterms:hasPart")], store.value);
         const containerBaseClass = iriToQname(getBaseClassFromLink(route.path.slice(0, route.path.lastIndexOf("/"))).iri);
         searchConfig.value = {
             containerUri: countQuad.subject.value,

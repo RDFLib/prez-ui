@@ -2,7 +2,7 @@
 import type { PropTableObject } from "@/types";
 import { copyToClipboard } from "@/util/helpers";
 import PropRow from "@/components/proptable/PropRow.vue";
-import ToolTip from "@/components/ToolTip.vue";
+import InternalLink from "@/components/InternalLink.vue";
 
 const props = defineProps<PropTableObject>();
 
@@ -20,18 +20,7 @@ const MAX_GEOM_LENGTH = 100; // max character length for geometry strings
             <table v-if="props.termType === 'BlankNode'">
                 <PropRow v-for="row in props.rows" v-bind="row" />
             </table>
-            <component v-else-if="props.termType === 'NamedNode'" :is="!!props.description ? ToolTip : 'slot'">
-                <a
-                    :href="props.value"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <template v-if="!!props.label">{{ props.label }}</template>
-                    <template v-else-if="!!props.qname">{{ props.qname }}</template>
-                    <template v-else>{{ props.value }}</template>
-                </a>
-                <template #text>{{ props.description }}</template>
-            </component>
+            <InternalLink v-else-if="props.termType === 'NamedNode'" v-bind="props" />
             <template v-else>
                 <template v-if="props.predicateIri === 'https://schema.org/color'">{{ props.value }}<span v-if="!!props.value" :style="{color: props.value, marginLeft: '4px'}" class="fa-solid fa-circle fa-2xs"></span></template>
                 <template v-else-if="props.value.startsWith('http')">

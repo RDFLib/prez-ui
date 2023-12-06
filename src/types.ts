@@ -162,6 +162,7 @@ export interface AnnotatedTerm {
     label?: string;
     description?: string;
     provenance?: string;
+    links?: string[];
 };
 
 export interface AnnotatedPredicate extends Omit<AnnotatedTerm, "language" | "datatype"> {
