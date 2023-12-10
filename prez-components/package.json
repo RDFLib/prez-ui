@@ -1,0 +1,63 @@
+{
+  "name": "prez-components",
+  "version": "0.0.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/prez-components.umd.cjs",
+  "module": "./dist/prez-components.js",
+  "exports": {
+    ".": {
+      "import": "./dist/prez-components.js",
+      "require": "./dist/prez-components.umd.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jamiefeiss/prez-ui-nuxt.git",
+    "directory": "prez-components"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && vue-tsc --emitDeclarationOnly",
+    "types": "vue-tsc ",
+    "preview": "vite preview",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^7.5.3",
+    "@storybook/addon-interactions": "^7.5.3",
+    "@storybook/addon-links": "^7.5.3",
+    "@storybook/blocks": "^7.5.3",
+    "@storybook/testing-library": "^0.2.2",
+    "@storybook/vue3": "^7.5.3",
+    "@storybook/vue3-vite": "^7.5.3",
+    "@types/node": "^20.4.1",
+    "@vitejs/plugin-vue": "^4.2.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sass": "^1.63.6",
+    "storybook": "^7.5.3",
+    "storybook-vue3-router": "^4.25.0",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.2",
+    "vite-plugin-libcss": "^1.1.1",
+    "vue-tsc": "^1.8.4"
+  },
+  "dependencies": {
+    "prez-lib": "file:../prez-lib",
+    "primevue": "^3.41.1"
+  }
+}
