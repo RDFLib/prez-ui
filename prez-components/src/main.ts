@@ -5,7 +5,10 @@ import App from "./App.vue";
 import "primevue/resources/themes/lara-dark-indigo/theme.css";
 import "./assets/sass/main.scss";
 
+import Tooltip from 'primevue/tooltip';
+
 const app = createApp(App);
+app.directive('tooltip', Tooltip);
 app.use(router);
 app.use(PrimeVue);
 app.mount("#app");

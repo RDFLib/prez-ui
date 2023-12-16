@@ -1,3 +1,80 @@
+
+export type PrezTerm = {
+    dataType?: PrezNode;
+    termType: 'Literal' | 'Node' | 'BlankNode';
+}
+
+export type PrezLiteral = PrezTerm & {
+    termType: 'Literal';
+    text: string;
+    language?: string;
+}
+
+export type PrezNode = PrezTerm & {
+    termType: 'Node';
+    label?: PrezLiteral;
+    description?: PrezLiteral;
+    uri: string;
+    curie?: string;
+}
+
+/*export type PrezObject = {
+    class: PrezTerm;
+    title: PrezTerm;
+    description?: PrezTerm;
+    properties: PrezProperties;
+}
+
+export type PrezProperties = Record<string, PrezProperty>;
+
+export type PrezProperty = {
+    name: PrezNode;
+    value: PrezTerm|PrezTerm[];
+}  
+  
+export type PrezBlankNode = PrezTerm & {
+    termType: 'BlankNode';
+    form: PrezObject;
+}*/
+
+export const PrezDataFactory = {
+    prezNode(paramsOrURI:{uri: string, label?: PrezLiteral|string, description?: PrezLiteral|string, curie?: string}|string): PrezNode {
+        if(typeof(paramsOrURI) == 'string') {
+            return {
+                termType: 'Node',
+                uri: paramsOrURI
+            }
+        }
+        const {uri, label, description, curie} = paramsOrURI;
+        return {
+          termType: 'Node',
+          uri,
+          curie,
+          label: (typeof(label) == 'string' ? this.prezLiteral(label) : label),
+          description: (typeof(description) == 'string' ? this.prezLiteral(description) : description),
+        };
+    },
+
+    prezLiteral(paramsOrLiteral:{text: string, language?: string, dataType?: PrezNode}|string): PrezLiteral {
+        if(typeof(paramsOrLiteral) == 'string') {
+            return {
+                termType: 'Literal',
+                text: paramsOrLiteral
+            }
+        }
+        const {text, language, dataType} = paramsOrLiteral;
+        return {
+            termType: 'Literal',
+            text,
+            language,
+            dataType
+        };
+    }
+};
+
+
+
+
 export interface ListItem {
     label?: string;
     uri: string;

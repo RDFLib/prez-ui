@@ -1,9 +1,12 @@
 import { type Preview, setup } from "@storybook/vue3";
 import PrimeVue from "primevue/config";
-import "primevue/resources/themes/lara-dark-indigo/theme.css";
+//import "primevue/resources/themes/lara-dark-indigo/theme.css";
+import "primevue/resources/themes/saga-blue/theme.css";
+import Tooltip from 'primevue/tooltip';
 
 setup((app) => {
-    app.use(PrimeVue);
+  app.directive('tooltip', Tooltip);
+  app.use(PrimeVue);
 });
 
 const preview: Preview = {
