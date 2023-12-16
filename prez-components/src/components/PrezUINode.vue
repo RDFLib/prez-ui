@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import type { PrezUINodeProps } from '../types';
-import PrezUITerm from './PrezUITerm.vue';
 import Chip from "primevue/chip";
 
 const props = defineProps<PrezUINodeProps>();

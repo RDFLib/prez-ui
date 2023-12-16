@@ -1,16 +1,15 @@
-
-export type PrezTerm = {
+export interface PrezTerm {
     dataType?: PrezNode;
     termType: 'Literal' | 'Node' | 'BlankNode';
 }
 
-export type PrezLiteral = PrezTerm & {
+export interface PrezLiteral extends PrezTerm {
     termType: 'Literal';
     text: string;
     language?: string;
 }
 
-export type PrezNode = PrezTerm & {
+export interface PrezNode extends PrezTerm {
     termType: 'Node';
     label?: PrezLiteral;
     description?: PrezLiteral;
@@ -18,24 +17,37 @@ export type PrezNode = PrezTerm & {
     curie?: string;
 }
 
-/*export type PrezObject = {
+export interface PrezList {
     class: PrezTerm;
-    title: PrezTerm;
-    description?: PrezTerm;
+    title?: PrezLiteral;
+    description?: PrezLiteral;
+    rows: PrezListRow[];
+    headers: Record<string, PrezNode>;
+}
+
+export interface PrezListRow {
+    [key: string]: PrezTerm;
+}
+
+export interface PrezObject {
+    class: PrezTerm;
+    title: PrezLiteral;
+    description?: PrezLiteral;
     properties: PrezProperties;
 }
 
+// index each property based on their name/curie for simple access
 export type PrezProperties = Record<string, PrezProperty>;
 
-export type PrezProperty = {
-    name: PrezNode;
-    value: PrezTerm|PrezTerm[];
-}  
-  
-export type PrezBlankNode = PrezTerm & {
+export interface PrezProperty {
+    predicate: PrezNode;
+    object: PrezTerm|PrezTerm[];
+}
+
+export interface PrezBlankNode extends PrezTerm {
     termType: 'BlankNode';
-    form: PrezObject;
-}*/
+    properties: PrezProperties;
+}
 
 export const PrezDataFactory = {
     prezNode(paramsOrURI:{uri: string, label?: PrezLiteral|string, description?: PrezLiteral|string, curie?: string}|string): PrezNode {
@@ -55,22 +67,31 @@ export const PrezDataFactory = {
         };
     },
 
-    prezLiteral(paramsOrLiteral:{text: string, language?: string, dataType?: PrezNode}|string): PrezLiteral {
-        if(typeof(paramsOrLiteral) == 'string') {
+    prezLiteral(paramsOrString:{text: string, language?: string, dataType?: PrezNode}|string): PrezLiteral {
+        if(typeof(paramsOrString) == 'string') {
             return {
                 termType: 'Literal',
-                text: paramsOrLiteral
+                text: paramsOrString
             }
         }
-        const {text, language, dataType} = paramsOrLiteral;
+        const {text, language, dataType} = paramsOrString;
         return {
             termType: 'Literal',
             text,
             language,
             dataType
         };
+    },
+
+    prezBlankNode(node: PrezProperties): PrezBlankNode {
+        return {
+          termType: 'BlankNode',
+          properties
+        };
     }
+
 };
+
 
 
 
