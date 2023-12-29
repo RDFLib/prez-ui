@@ -180,24 +180,22 @@ onMounted(async () => {
             </div>
         </div>
     </header>
-    <main>
-        <div id="main-content" :class="`${sidenav ? 'sidenav' : ''}`">
-            <MainNav :sidenav="sidenav" :version="version" />
-            <div id="content">
-                <RouterView v-slot="{ Component }">
-                    <Transition name="fade" mode="out-in">
-                        <div id="content-body" :key="renderPath">
-                            <Breadcrumbs />
-                            <component :is="Component" />
-                        </div>
-                    </Transition>
-                </RouterView>
-                <Transition name="fade">
-                    <RightSideBar v-show="ui.rightNavConfig.enabled" :profiles="ui.rightNavConfig.profiles || []" :currentUrl="ui.rightNavConfig.currentUrl || ''" />
+    <div id="main-content" :class="`${sidenav ? 'sidenav' : ''}`">
+        <MainNav :sidenav="sidenav" :version="version" />
+        <main id="content">
+            <RouterView v-slot="{ Component }">
+                <Transition name="fade" mode="out-in">
+                    <div id="content-body" :key="renderPath">
+                        <Breadcrumbs />
+                        <component :is="Component" />
+                    </div>
                 </Transition>
-            </div>
-        </div>
-    </main>
+            </RouterView>
+            <Transition name="fade">
+                <RightSideBar v-show="ui.rightNavConfig.enabled" :profiles="ui.rightNavConfig.profiles || []" :currentUrl="ui.rightNavConfig.currentUrl || ''" />
+            </Transition>
+        </main>
+    </div>
 </template>
 
 <style lang="scss" scoped>
@@ -219,6 +217,10 @@ header {
             display: grid;
             grid-template-columns:  1fr 1fr 1fr  ;
             gap: 20px;
+
+            @media (max-width: 800px) {
+                grid-template-columns:  auto 1fr 0  ;
+            }
 
             #nav-header {
                 display: flex;
@@ -247,34 +249,44 @@ header {
     }
 }
 
-main {
+#main-content {
+    width: 100%;
+    margin: 0 auto;
     flex-grow: 1;
+    position: relative;
     display: flex;
-    // background-color: $mainBg;
+    flex-direction: column;
 
-    #main-content {
-        width: 100%;
-        margin: 0 auto;
+    #content {
+        flex-grow: 1;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
+        padding: $contentPadding;
+        gap: $contentPadding;
 
-        &.sidenav {
-            flex-direction: row;
-        }
-
-        #content {
-            flex-grow: 1;
+        #content-body {
             display: flex;
-            flex-direction: row;
-            padding: $contentPadding;
-            gap: $contentPadding;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+    }
+}
 
-            #content-body {
-                display: flex;
-                flex-direction: column;
-                flex-grow: 1;
+@media (min-width: 500px) {
+    #main-content.sidenav {
+        flex-direction: row;
+
+        @media (max-width: 1000px) {
+            #content {
+                padding-left: 40px;
             }
         }
+    }
+}
+
+@media (max-width: 500px) {
+    #header-bottom :deep(.search-bar-container) {
+        display: none;
     }
 }
 </style>
