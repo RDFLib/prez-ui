@@ -264,6 +264,10 @@ header {
         padding: $contentPadding;
         gap: $contentPadding;
 
+        @media (max-width: 700px) {
+            flex-direction: column;
+        }
+
         #content-body {
             display: flex;
             flex-direction: column;
