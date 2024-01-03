@@ -1,27 +1,45 @@
-import { ListItem, PrezTerm, PrezLiteral, PrezNode } from "prez-lib";
+import { ListItem } from "prez-lib";
 
-// having trouble accessing the prez-lib from other locations.
-export type UI_PrezLiteral = PrezLiteral;
-
-export interface PrezUITermProps {
-    color?: "primary" | "secondary";
-    term: PrezTerm;
+// for prez-lib
+type PrezLiteral = {
+    value: string;
+    datatype?: PrezNode;
+    language?: string;
+    rdfType: "literal";
 }
 
-export interface PrezUILiteralProps {
-    color?: "primary" | "secondary";
-    term: PrezLiteral;
+type PrezNode = {
+    iri: string;
+    label?: PrezLiteral;
+    description?: PrezLiteral;
+    provenance?: PrezLiteral;
+    qname?: string;
+    links?: string[];
+    types?: PrezNode[];
+    rdfType: "node";
 }
 
-export interface PrezUINodeProps {
-    color?: "primary" | "secondary";
-    size?: "normal" | "small";
-    term: PrezNode;
+type PrezBlankNode = {
+    id: string;
+    properties: {
+        predicate: PrezNode;
+        object: (PrezLiteral | PrezNode | PrezBlankNode)[];
+    }[];
+    rdfType: "blanknode";
 }
 
-export interface ButtonProps {
-    color?: "primary" | "secondary";
-    size?: "sm" | "lg";
+export interface PrezUILiteralProps extends PrezLiteral {
+    isGeometry?: boolean;
+};
+
+export interface PrezUINodeProps extends PrezNode {
+    showType?: boolean;
+    showProv?: boolean;
+};
+
+export interface PrezUIBlankNodeProps extends PrezBlankNode {
+    showType?: boolean;
+    showProv?: boolean;
 };
 
 export interface ListTableProps {

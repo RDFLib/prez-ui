@@ -83,12 +83,12 @@ export const PrezDataFactory = {
         };
     },
 
-    prezBlankNode(node: PrezProperties): PrezBlankNode {
-        return {
-          termType: 'BlankNode',
-          properties
-        };
-    }
+    // prezBlankNode(node: PrezProperties): PrezBlankNode {
+    //     return {
+    //       termType: 'BlankNode',
+    //       properties
+    //     };
+    // }
 
 };
 
