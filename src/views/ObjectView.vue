@@ -66,6 +66,8 @@ onMounted(async () => {
                 item.value.title = getLabel(subject.value, store.value);
                 item.value.description = getDescription(subject.value, store.value);
 
+                const id = store.value.getObjects(subject, namedNode(qnameToIri("dcterms:identifier")), null)[0].value;
+
                 store.value.forEach(q => {
                     if (q.predicate.value === qnameToIri("a")) {
                         item.value.types.push({
@@ -73,7 +75,7 @@ onMounted(async () => {
                             title: getLabel(q.object.value, store.value),
                         });
                     } else if (q.predicate.value === qnameToIri("prez:link")) {
-                        const parentIds = store.value.getQuads(null, namedNode(qnameToIri("dcterms:identifier")), null, null).filter(q1 => q.object.value.includes(q1.object.value));
+                        const parentIds = store.value.getQuads(null, namedNode(qnameToIri("dcterms:identifier")), null, null).filter(q1 => q1.object.value !== id && q.object.value.includes(q1.object.value));
                         
                         if (parentIds.length === 1) {
                             let parentIri = parentIds[0].subject.value;
