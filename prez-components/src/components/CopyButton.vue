@@ -23,6 +23,7 @@ function onClick() {
 
 <template>
     <Button
+        class="copy-btn"
         :icon="`pi pi-${clicked ? 'check' : 'copy'}`"
         size="small"
         v-tooltip.top="'Copy to clipboard'"

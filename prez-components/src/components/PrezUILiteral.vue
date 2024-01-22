@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import Chip from "primevue/chip";
+import Tag from "primevue/tag";
 import { PrezUILiteralProps } from "../types";
 import CopyButton from "./CopyButton.vue"
 
@@ -14,17 +14,19 @@ const props = defineProps<PrezUILiteralProps>();
             <a v-if="props.value.startsWith('http')" :href="props.value" target="_blank" rel="noopener noreferrer">{{ props.value }}</a>
             <span v-else-if="props.isGeometry" class="geometry">
                 <pre>{{ props.value.length > MAX_GEOM_LENGTH ? `${props.value.slice(0, MAX_GEOM_LENGTH)}...` : props.value }}</pre>
-                <CopyButton :value="props.value" iconOnly />
+                <CopyButton :value="props.value" iconOnly class="sm" />
             </span>
             <template v-else>{{ props.value }}</template>
         </span>
-        <span v-if="props.language" class="language"><Chip :label="props.language" icon="pi pi-language" v-tooltip.top="'Language'" /></span>
+        <span v-if="props.language" class="language">
+            <Tag :value="props.language" icon="pi pi-language" />
+        </span>
         <span v-else-if="props.datatype" class="datatype">
             <a :href="props.datatype.iri" target="_blank" rel="noopener noreferrer">
-                <Chip
-                    v-tooltip.top="'Datatype'"
+                <Tag
+                    v-tooltip.top="props.datatype.description?.value || undefined"
                     icon="pi pi-code"
-                    :label="props.datatype.label ? props.datatype.label.value : (props.datatype.qname || props.datatype.iri)"
+                    :value="props.datatype.label?.value || (props.datatype.qname || props.datatype.iri)"
                 />
             </a>
         </span>
@@ -61,5 +63,10 @@ const props = defineProps<PrezUILiteralProps>();
     .datatype {
 
     }
+}
+
+.copy-btn.sm {
+    padding: 8px 10px;
+    width: unset;
 }
 </style>

@@ -1,4 +1,4 @@
-import { PrezUILiteralProps, PrezUINodeProps, PrezUIBlankNodeProps } from "../types"
+import { PrezUILiteralProps, PrezUINodeProps, PrezUIBlankNodeProps, PrezUIItemListProps, PrezUIObjectTableProps } from "../types"
 
 // Literal
 export const literalLang: PrezUILiteralProps = {
@@ -25,6 +25,11 @@ export const literalGeom: PrezUILiteralProps = {
         qname: "geo:asWKT",
         label: {
             value: "As WKT",
+            language: "en",
+            rdfType: "literal"
+        },
+        description: {
+            value: "A description for asWKT",
             language: "en",
             rdfType: "literal"
         },
@@ -170,7 +175,7 @@ export const blankNode: PrezUIBlankNodeProps = {
     id: "_:1",
     properties: [
         {
-            predicate: node,
+            predicate: nodePredicate,
             object: [
                 literalLang,
                 literalDatatype,
@@ -178,4 +183,168 @@ export const blankNode: PrezUIBlankNodeProps = {
         }
     ],
     rdfType: "blanknode"
+};
+
+// PrezUIItemList
+export const listProps: PrezUIItemListProps = {
+    items: [
+        {
+            iri: "https://example.com/ksdjhfjksdhfsdf",
+            label: {
+                value: "W",
+                rdfType: "literal"
+            },
+            links: ["/link 1"],
+            description: {
+                value: "description 1",
+                rdfType: "literal"
+            },
+            rdfType: "node"
+        },
+        {
+            iri: "https://example.com/89ok43rikiowefgomsd",
+            label: {
+                value: "A",
+                rdfType: "literal"
+            },
+            links: ["/link 2"],
+            description: {
+                value: "description 2",
+                rdfType: "literal"
+            },
+            rdfType: "node",
+            extras: {
+                "https://example.com/issued": {
+                    value: "12-01-2024",
+                    rdfType: "literal"
+                }
+            }
+        },
+        {
+            iri: "https://example.com/poeidfopohsdnf",
+            label: {
+                value: "J",
+                rdfType: "literal"
+            },
+            links: ["/link 3"],
+            description: {
+                value: "description 3",
+                rdfType: "literal"
+            },
+            rdfType: "node",
+            extras: {
+                "https://example.com/publisher": {
+                    iri: "https://example.com/me",
+                    label: {
+                        value: "me",
+                        rdfType: "literal"
+                    },
+                    description: {
+                        value: "desc",
+                        rdfType: "literal"
+                    },
+                    rdfType: "node"
+                }
+            }
+        },
+    ],
+    predicates: [
+        {
+            label: {
+                value: "Publisher",
+                rdfType: "literal"
+            },
+            iri: "https://example.com/publisher",
+            description: {
+                value: "Publisher description",
+                rdfType: "literal"
+            },
+            rdfType: "node"
+        },
+        {
+            label: {
+                value: "Issued",
+                rdfType: "literal"
+            },
+            iri: "https://example.com/issued",
+            description: {
+                value: "Issued description",
+                rdfType: "literal"
+            },
+            rdfType: "node"
+        },
+        {
+            label: {
+                value: "Created",
+                rdfType: "literal"
+            },
+            iri: "https://example.com/created",
+            description: {
+                value: "Created description",
+                rdfType: "literal"
+            },
+            rdfType: "node"
+        },
+    ],
+    childButton: {
+        suffix: "/items",
+        label: "Children"
+    }
+};
+
+const bnodeNested: PrezUIBlankNodeProps = {
+    id: "_:2",
+    properties: [
+        {
+            predicate: nodePredicate,
+            object: [
+                literalLang,
+                literalDatatype,
+                blankNode
+            ],
+        }
+    ],
+    rdfType: "blanknode"
+};
+
+// PrezUIObjectTable
+export const tableProps: PrezUIObjectTableProps = {
+    properties: [
+        {
+            predicate: nodePredicate,
+            object: [
+                literalLang,
+                literalDatatype,
+                literalGeom,
+                node,
+                nodeLink
+            ]
+        },
+        {
+            predicate: nodePredicate,
+            object: [
+                literalLang,
+                literalDatatype,
+                blankNode
+            ]
+        },
+        {
+            predicate: nodePredicate,
+            object: [
+                literalLang,
+                literalDatatype,
+                blankNode,
+                blankNode,
+                blankNode
+            ]
+        },
+        {
+            predicate: nodePredicate,
+            object: [
+                literalLang,
+                literalDatatype,
+                bnodeNested
+            ]
+        }
+    ]
 };

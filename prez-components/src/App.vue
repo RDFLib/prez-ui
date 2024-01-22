@@ -24,12 +24,12 @@ const items = [
 
 <template>
     <Menubar :model="items">
-        <template #item="{ item, props, hasSubmenu }">
-            <router-link v-slot="{ href, navigate }" :to="item.route" custom>
+        <template #item="{ item, props }">
+            <RouterLink v-slot="{ href, navigate }" :to="item.route" custom>
                 <a v-ripple :href="href" v-bind="props.action" @click="navigate">
                     <span class="ml-2">{{ item.label }}</span>
                 </a>
-            </router-link>
+            </RouterLink>
         </template>
     </Menubar>
     <RouterView></RouterView>

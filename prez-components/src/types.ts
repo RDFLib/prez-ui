@@ -1,14 +1,14 @@
-import { ListItem } from "prez-lib";
+// import { ListItem } from "prez-lib";
 
 // for prez-lib
-type PrezLiteral = {
+export type PrezLiteral = {
     value: string;
     datatype?: PrezNode;
     language?: string;
     rdfType: "literal";
 }
 
-type PrezNode = {
+export type PrezNode = {
     iri: string;
     label?: PrezLiteral;
     description?: PrezLiteral;
@@ -19,14 +19,24 @@ type PrezNode = {
     rdfType: "node";
 }
 
-type PrezBlankNode = {
+export type PrezBlankNode = {
     id: string;
-    properties: {
-        predicate: PrezNode;
-        object: (PrezLiteral | PrezNode | PrezBlankNode)[];
-    }[];
+    properties: TableProperty[];
     rdfType: "blanknode";
 }
+
+export type ItemExtra = PrezNode & {
+    extras?: {
+        [key: string]: PrezLiteral | PrezNode;
+    };
+};
+
+type TableProperty = {
+    predicate: PrezNode;
+    object: (PrezLiteral | PrezNode | PrezBlankNode)[];
+};
+
+// ---------------------
 
 export interface PrezUILiteralProps extends PrezLiteral {
     isGeometry?: boolean;
@@ -37,22 +47,34 @@ export interface PrezUINodeProps extends PrezNode {
     showProv?: boolean;
 };
 
-export interface PrezUIBlankNodeProps extends PrezBlankNode {
-    showType?: boolean;
-    showProv?: boolean;
+export interface PrezUIBlankNodeProps extends PrezBlankNode {};
+
+export interface PrezUIItemListProps {
+    items: ItemExtra[];
+    predicates?: PrezNode[];
+    childButton?: {
+        suffix: string;
+        label: string;
+    };
 };
 
-export interface ListTableProps {
-    items: ListItem[];
-    predicates?: {
-        label: string;
-        uri: string;
-    }[];
-}
+export interface PrezUIObjectTableProps {
+    properties: TableProperty[];
+};
 
-export interface ObjectTableProps {
-    properties: {
-        predicate: string;
-        object: string;
-    }[];
-}
+// -------------old--------------
+
+// export interface ListTableProps {
+//     items: ListItem[];
+//     predicates?: {
+//         label: string;
+//         uri: string;
+//     }[];
+// }
+
+// export interface ObjectTableProps {
+//     properties: {
+//         predicate: string;
+//         object: string;
+//     }[];
+// }

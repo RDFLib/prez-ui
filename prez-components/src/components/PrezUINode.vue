@@ -10,10 +10,10 @@ const props = defineProps<PrezUINodeProps>();
     <div class="node">
         <component
             :is="props.links ? (props.links.length === 1 ? RouterLink : 'span') : 'a'"
-            class="value"
+            :class="`value ${props.links?.length === 1 ? 'link' : ''}`"
             :href="!props.links ? props.iri : undefined"
             :to="props.links?.length === 1 ? props.links[0] : undefined"
-            v-tooltip.top="props.description ? props.description.value : undefined"
+            v-tooltip.top="props.description?.value || undefined"
         >
             <template v-if="props.label">{{ props.label.value }}</template>
             <template v-else-if="props.qname">{{ props.qname }}</template>
@@ -42,8 +42,8 @@ const props = defineProps<PrezUINodeProps>();
         <span v-if="props.types && props.showType" class="types">
             <a v-for="t in props.types" class="type" :href="t.iri" target="_blank" rel="noopener noreferrer">
                 <Chip
-                    :label="t.label ? t.label.value : (t.qname || t.iri)"
-                    v-tooltip.top="t.description ? t.description.value : undefined"
+                    :label="t.label?.value || (t.qname || t.iri)"
+                    v-tooltip.top="t.description?.value || undefined"
                 />
             </a>
         </span>
@@ -56,6 +56,14 @@ const props = defineProps<PrezUINodeProps>();
     flex-direction: row;
     gap: 8px;
     align-items: center;
+
+    .value {
+        &.link {
+            color: #8c8cff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    }
 
     .links {
         display: flex;
