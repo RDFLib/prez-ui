@@ -59,7 +59,7 @@ jobs:
         id: version
         run: echo "VALUE=$(npx --yes semver ${{ github.event.release.tag_name }})" >> "$GITHUB_OUTPUT"
 
-      - name: Update project version and zip file
+      - name: Update project version
         run: |
           npm version ${{ steps.version.outputs.VALUE }} --no-git-tag-version
 
