@@ -1,0 +1,54 @@
+name: Create release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Git tag value in sem ver"
+        required: true
+        type: string
+
+env:
+  PYTHON_VERSION: "3.11"
+  GIT_MAIN_BRANCH: main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.GIT_MAIN_BRANCH }}
+
+      - name: Use Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+
+      - name: Set up Git user
+        uses: fregante/setup-git-user@v2
+
+      - name: Get release version
+        id: version
+        run: echo "VALUE=$(npx --yes semver ${{ github.event.inputs.tag }})" >> "$GITHUB_OUTPUT"
+
+      - name: Update project version
+        run: |
+          npm version ${{ steps.version.outputs.VALUE }}
+          git add package.json
+          git commit -m "chore: release ${{ steps.version.outputs.VALUE }}"
+          git tag ${{ steps.version.outputs.VALUE }}
+          git push origin ${{ steps.version.outputs.VALUE }}
