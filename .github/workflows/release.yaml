@@ -77,9 +77,9 @@ jobs:
       - name: Update project version and zip file
         run: |
           npm version ${{ steps.version.outputs.VALUE }} --no-git-tag-version
-          cd .. && zip -r prez-ui-${{ steps.version.outputs.VALUE }}.zip prez-ui
+          cd .. && zip -r prez-ui/prez-ui-${{ steps.version.outputs.VALUE }}.zip prez-ui
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v1
         with:
-          files: ../prez-ui-${{ steps.version.outputs.VALUE }}.zip
+          files: prez-ui-${{ steps.version.outputs.VALUE }}.zip
