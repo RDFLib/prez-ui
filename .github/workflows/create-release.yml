@@ -38,5 +38,6 @@ jobs:
           npm version ${{ steps.version.outputs.VALUE }}
           git add package.json
           git commit -m "chore: release ${{ steps.version.outputs.VALUE }}"
+          git push
           git tag ${{ steps.version.outputs.VALUE }}
           git push origin ${{ steps.version.outputs.VALUE }}
