@@ -72,7 +72,7 @@ jobs:
 
       - name: Get release version
         id: version
-        run: echo "VALUE=$(npx --yes semver ${{ github.event.inputs.tag }})" >> "$GITHUB_OUTPUT"
+        run: echo "VALUE=$(npx --yes semver ${{ github.event.release.tag_name }})" >> "$GITHUB_OUTPUT"
 
       - name: Update project version and zip file
         run: |
