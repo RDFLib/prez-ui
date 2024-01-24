@@ -35,7 +35,7 @@ jobs:
 
       - name: Update project version
         run: |
-          npm version ${{ steps.version.outputs.VALUE }}
+          npm version ${{ steps.version.outputs.VALUE }} --no-git-tag-version
           git add package.json
           git commit -m "chore: release ${{ steps.version.outputs.VALUE }}"
           git push
