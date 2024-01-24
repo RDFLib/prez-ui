@@ -49,6 +49,19 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Get release version
+        id: version
+        run: echo "VALUE=$(npx --yes semver ${{ github.event.release.tag_name }})" >> "$GITHUB_OUTPUT"
+
+      - name: Update project version and zip file
+        run: |
+          npm version ${{ steps.version.outputs.VALUE }} --no-git-tag-version
 
       - name: Build and push
         uses: docker/build-push-action@v4
