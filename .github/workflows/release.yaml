@@ -15,7 +15,7 @@ env:
 
 # Grants permissions for GITHUB_TOKEN
 permissions:
-  contents: read
+  contents: write # to upload release asset
   id-token: write # to verify the deployment originates from an appropriate source
   packages: write # to push to GHCR package
 
