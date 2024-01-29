@@ -16,7 +16,7 @@ const props = defineProps<PrezUINodeProps>();
             v-tooltip.top="props.description?.value || undefined"
         >
             <template v-if="props.label">{{ props.label.value }}</template>
-            <template v-else-if="props.qname">{{ props.qname }}</template>
+            <template v-else-if="props.curie">{{ props.curie }}</template>
             <template v-else>{{ props.iri }}</template>
         </component>
         <span
@@ -42,7 +42,7 @@ const props = defineProps<PrezUINodeProps>();
         <span v-if="props.types && props.showType" class="types">
             <a v-for="t in props.types" class="type" :href="t.iri" target="_blank" rel="noopener noreferrer">
                 <Chip
-                    :label="t.label?.value || (t.qname || t.iri)"
+                    :label="t.label?.value || (t.curie || t.iri)"
                     v-tooltip.top="t.description?.value || undefined"
                 />
             </a>

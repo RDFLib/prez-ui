@@ -36,11 +36,11 @@ export class RDFStore {
     }
 
     /**
-     * Interprets a predicate qname into its full URI
+     * Interprets a predicate curie into its full URI
      * 
      * Note: must be called after `load()`
      * 
-     * @param s qname string
+     * @param s curie string
      * @returns Predicate URI string
      */
     public toUri(s: string): string {
@@ -48,12 +48,12 @@ export class RDFStore {
     }
 
     /**
-     * Generates a qname from a URI
+     * Generates a curie from a URI
      * 
      * Note: must be called after `load()`
      * 
      * @param uri the URI string
-     * @returns Generated qname
+     * @returns Generated curie
      */
     public fromUri(uri: string): string {
         return defaultFromUri(uri, this.prefixes);

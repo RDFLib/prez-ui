@@ -12,12 +12,12 @@ const meta = {
         label: { description: "The node's label" },
         description: { description: "The node's description" },
         provenance: { description: "The node's provenance - used for a custom explanation of how this node/predicate is used in Prez" },
-        qname: { description: "The node's qname, a shorthand notation using the namespace's prefix", type: "string" },
+        curie: { description: "The node's curie, a shorthand notation using the namespace's prefix", type: "string" },
         links: { description: "An array of Prez links" },
         types: { description: "An array of types" },
         showType: { description: "Toggles showing the type badges", type: "boolean" },
         showProv: { description: "Toggles showing the provenance tooltip", type: "boolean" },
-        rdfType: { table: { disable: true } }
+        termType: { table: { disable: true } }
     },
 } satisfies Meta<typeof PrezUINode>;
 

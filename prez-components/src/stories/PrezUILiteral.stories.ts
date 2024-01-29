@@ -11,7 +11,7 @@ const meta = {
         datatype: { description: "The datatype of the literal", },
         language: { description: "The language code of the literal (following the IETF BCP 47 language codes)", type: "string" },
         isGeometry: { description: "A flag to indicate whether a literal is a geometry string", type: "boolean" },
-        rdfType: { table: { disable: true } }
+        termType: { table: { disable: true } }
     },
 } satisfies Meta<typeof PrezUILiteral>;
 
@@ -21,7 +21,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
     args: {
         value: "Literal",
-        rdfType: "literal"
+        termType: "literal"
     },
 };
 

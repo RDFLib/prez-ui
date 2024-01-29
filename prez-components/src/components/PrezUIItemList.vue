@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { RouterLink } from "vue-router";
-import DataView from 'primevue/dataview';
+import DataView from "primevue/dataview";
 import Button from "primevue/button";
 import { ItemExtra, PrezNode, PrezLiteral, PrezUIItemListProps } from "../types";
 import { sortLiterals, sortNodes } from "../util/helpers";
@@ -31,7 +31,7 @@ function handleSortClick(field: string) {
 
 function sortByExtra(a: ItemExtra, b: ItemExtra, predicate: string, direction: "asc" | "desc" = "asc"): number {
     if (a.extras?.[predicate] && b.extras?.[predicate]) {
-        return a.extras?.[predicate].rdfType === "literal"
+        return a.extras?.[predicate].termType === "literal"
             ? sortLiterals(a.extras[predicate] as PrezLiteral, b.extras[predicate] as PrezLiteral, direction)
             : sortNodes(a.extras[predicate] as PrezNode, b.extras[predicate] as PrezNode, direction);
     } else if (a.extras?.[predicate]) {
@@ -66,8 +66,8 @@ function sortByExtra(a: ItemExtra, b: ItemExtra, predicate: string, direction: "
                         </td>
                         <td v-for="predicate in props.predicates">
                             <template v-if="item.extras && item.extras[predicate.iri]">
-                                <PrezUINode v-if="item.extras[predicate.iri].rdfType === 'node'" v-bind="item.extras[predicate.iri]" showProv showType />
-                                <PrezUILiteral v-else-if="item.extras[predicate.iri].rdfType === 'literal'" v-bind="item.extras[predicate.iri]" />
+                                <PrezUINode v-if="item.extras[predicate.iri].termType === 'node'" v-bind="item.extras[predicate.iri]" showProv showType />
+                                <PrezUILiteral v-else-if="item.extras[predicate.iri].termType === 'literal'" v-bind="item.extras[predicate.iri]" />
                             </template>
                             
                         </td>

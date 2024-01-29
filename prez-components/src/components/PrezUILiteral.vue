@@ -26,7 +26,7 @@ const props = defineProps<PrezUILiteralProps>();
                 <Tag
                     v-tooltip.top="props.datatype.description?.value || undefined"
                     icon="pi pi-code"
-                    :value="props.datatype.label?.value || (props.datatype.qname || props.datatype.iri)"
+                    :value="props.datatype.label?.value || (props.datatype.curie || props.datatype.iri)"
                 />
             </a>
         </span>

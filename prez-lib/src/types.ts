@@ -133,7 +133,7 @@ export interface ObjectItem {
 
 // export interface Value {
 //     value: string;
-//     qname?: string;
+//     curie?: string;
 //     label?: string;
 //     description?: string;
 //     provenance?: string;

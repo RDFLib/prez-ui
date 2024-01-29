@@ -19,9 +19,9 @@ const props = defineProps<PrezUIObjectTableProps>();
         <Column field="object" headerStyle="display: none;">
             <template #body="slotProps">
                 <template v-for="o in slotProps.data.object">
-                    <PrezUINode v-if="o.rdfType === 'node'" v-bind="o" showProv showType />
-                    <PrezUILiteral v-else-if="o.rdfType === 'literal'" v-bind="o" />
-                    <PrezUIBlankNode v-else-if="o.rdfType === 'blanknode'" v-bind="o" />
+                    <PrezUINode v-if="o.termType === 'node'" v-bind="o" showProv showType />
+                    <PrezUILiteral v-else-if="o.termType === 'literal'" v-bind="o" />
+                    <PrezUIBlankNode v-else-if="o.termType === 'blanknode'" v-bind="o" />
                 </template>
             </template>
         </Column>

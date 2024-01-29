@@ -1,28 +1,38 @@
 // import { ListItem } from "prez-lib";
 
 // for prez-lib
-export type PrezLiteral = {
+export type PrezTerm = {
+    termType: "literal" | "node" | "blanknode";
+}
+
+export type PrezLiteral = PrezTerm & {
     value: string;
     datatype?: PrezNode;
     language?: string;
-    rdfType: "literal";
+    termType: "literal";
 }
 
-export type PrezNode = {
+export type PrezNode = PrezTerm & {
     iri: string;
     label?: PrezLiteral;
     description?: PrezLiteral;
     provenance?: PrezLiteral;
-    qname?: string;
-    links?: string[];
-    types?: PrezNode[];
-    rdfType: "node";
+    curie?: string;
+    links?: PrezLink[];
+    rdfTypes?: PrezNode[];
+    termType: "node";
 }
 
-export type PrezBlankNode = {
+export type PrezLink = {
+    value: string;
+    parents?: PrezNode[];
+    // maybe label?
+};
+
+export type PrezBlankNode = PrezTerm & {
     id: string;
     properties: TableProperty[];
-    rdfType: "blanknode";
+    termType: "blanknode";
 }
 
 export type ItemExtra = PrezNode & {
@@ -31,9 +41,20 @@ export type ItemExtra = PrezNode & {
     };
 };
 
-type TableProperty = {
+export type TableProperty = {
     predicate: PrezNode;
-    object: (PrezLiteral | PrezNode | PrezBlankNode)[];
+    object: PrezTerm[];
+};
+
+export type PrezSearchResult = {
+    hash: string;
+    weight: number;
+    predicate: PrezNode;
+    match: PrezLiteral;
+    // resource: PrezNode & {
+    //     geometry?: PrezLiteral;
+    // };
+    resource: PrezItem;
 };
 
 // ---------------------
@@ -60,21 +81,38 @@ export interface PrezUIItemListProps {
 
 export interface PrezUIObjectTableProps {
     properties: TableProperty[];
+    members?: string[];
 };
 
-// -------------old--------------
+// used for both item & list pages
+// export interface PrezItem extends PrezNode {
+//     properties: TableProperty[];
+//     members: PrezNode[];
+// };
 
-// export interface ListTableProps {
-//     items: ListItem[];
-//     predicates?: {
-//         label: string;
-//         uri: string;
-//     }[];
-// }
+export interface PrezItem {
+    focusNode: PrezNode & {
+        members?: {
+            link: string;
+            label: string;
+        }[];
+    };
+    properties: TableProperty[];
+};
 
-// export interface ObjectTableProps {
-//     properties: {
-//         predicate: string;
-//         object: string;
-//     }[];
-// }
+export interface PrezItemPage extends PrezItem {};
+
+export interface PrezListPage {
+    items: PrezItem[];
+    headers?: PrezNode[];
+    // childButton?: {
+    //     suffix: string;
+    //     label: string;
+    // };
+};
+
+export interface NavItemProps {
+    label: string;
+    route?: string;
+    items?: NavItemProps[];
+};

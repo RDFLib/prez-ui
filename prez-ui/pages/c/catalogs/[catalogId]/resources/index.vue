@@ -41,37 +41,32 @@ const predicates: PrezNode[] = [
     },
 ];
 
-const childButton = {
-    suffix: "/resources",
-    label: "Resources"
-};
-
-const catalogs: ItemExtra[] = [
+const resources: ItemExtra[] = [
     {
         label: {
-            value: "Catalog 1",
+            value: "Resource 1",
             termType: "literal"
         },
-        iri: "https://example.com/catalog1",
-        links: ["/c/catalogs/1"],
+        iri: "https://example.com/resource1",
+        links: ["/c/catalogs/1/resources/1"],
         termType: "node"
     },
     {
         label: {
-            value: "Catalog 2",
+            value: "Resource 2",
             termType: "literal"
         },
-        iri: "https://example.com/catalog2",
-        links: ["/c/catalogs/2"],
+        iri: "https://example.com/resource2",
+        links: ["/c/catalogs/2/resources/1"],
         termType: "node"
     },
     {
         label: {
-            value: "Catalog 3",
+            value: "Resource 3",
             termType: "literal"
         },
-        iri: "https://example.com/catalog3",
-        links: ["/c/catalogs/3"],
+        iri: "https://example.com/resource3",
+        links: ["/c/catalogs/3/resources/1"],
         extras: {
             "https://example.com/created": {
                 value: "2024-01-24",
@@ -84,8 +79,8 @@ const catalogs: ItemExtra[] = [
 </script>
 
 <template>
-    <h1>Catalogs</h1>
-    <PrezUIItemList :items="catalogs" :predicates="predicates" :childButton="childButton" />
+    <h1>Resources</h1>
+    <PrezUIItemList :items="resources" :predicates="predicates" />
 </template>
 
 <style lang="scss" scoped></style>

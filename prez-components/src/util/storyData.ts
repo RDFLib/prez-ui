@@ -4,17 +4,17 @@ import { PrezUILiteralProps, PrezUINodeProps, PrezUIBlankNodeProps, PrezUIItemLi
 export const literalLang: PrezUILiteralProps = {
     value: "Literal 1",
     language: "en",
-    rdfType: "literal"
+    termType: "literal"
 };
 
 export const literalDatatype: PrezUILiteralProps = {
     value: "https://example.com/literal2",
     datatype: {
         iri: "http://www.w3.org/2001/XMLSchema#anyURI",
-        qname: "xsd:anyURI",
-        rdfType: "node"
+        curie: "xsd:anyURI",
+        termType: "node"
     },
-    rdfType: "literal"
+    termType: "literal"
 };
 
 export const literalGeom: PrezUILiteralProps = {
@@ -22,20 +22,20 @@ export const literalGeom: PrezUILiteralProps = {
     isGeometry: true,
     datatype: {
         iri: "http://www.opengis.net/ont/geosparql#asWKT",
-        qname: "geo:asWKT",
+        curie: "geo:asWKT",
         label: {
             value: "As WKT",
             language: "en",
-            rdfType: "literal"
+            termType: "literal"
         },
         description: {
             value: "A description for asWKT",
             language: "en",
-            rdfType: "literal"
+            termType: "literal"
         },
-        rdfType: "node"
+        termType: "node"
     },
-    rdfType: "literal"
+    termType: "literal"
 };
 
 // Node
@@ -44,19 +44,19 @@ export const node: PrezUINodeProps = {
     label: {
         value: "Node 1",
         language: "en",
-        rdfType: "literal"
+        termType: "literal"
     },
     description: {
         value: "Desc 1",
         language: "en",
-        rdfType: "literal"
+        termType: "literal"
     },
     provenance: {
         value: "Prov 1",
         language: "en",
-        rdfType: "literal"
+        termType: "literal"
     },
-    qname: "ex:node1",
+    curie: "ex:node1",
     links: ["/node1"],
     types: [
         {
@@ -64,18 +64,18 @@ export const node: PrezUINodeProps = {
             label: {
                 value: "Type 1",
                 language: "en",
-                rdfType: "literal"
+                termType: "literal"
             },
             description: {
                 value: "Desc of type 1",
                 language: "en",
-                rdfType: "literal"
+                termType: "literal"
             },
-            qname: "ex:type1",
-            rdfType: "node"
+            curie: "ex:type1",
+            termType: "node"
         }
     ],
-    rdfType: "node"
+    termType: "node"
 };
 
 export const nodePredicate: PrezUINodeProps = {
@@ -83,37 +83,37 @@ export const nodePredicate: PrezUINodeProps = {
     label: {
         value: "Node 1",
         language: "en",
-        rdfType: "literal"
+        termType: "literal"
     },
     description: {
         value: "Desc 1",
         language: "en",
-        rdfType: "literal"
+        termType: "literal"
     },
     provenance: {
         value: "Prov 1",
         language: "en",
-        rdfType: "literal"
+        termType: "literal"
     },
-    qname: "ex:node1",
+    curie: "ex:node1",
     types: [
         {
             iri: "https://example.com/type1",
             label: {
                 value: "Type 1",
                 language: "en",
-                rdfType: "literal"
+                termType: "literal"
             },
             description: {
                 value: "Desc of type 1",
                 language: "en",
-                rdfType: "literal"
+                termType: "literal"
             },
-            qname: "ex:type1",
-            rdfType: "node"
+            curie: "ex:type1",
+            termType: "node"
         }
     ],
-    rdfType: "node"
+    termType: "node"
 };
 
 export const nodeLink: PrezUINodeProps = {
@@ -121,19 +121,19 @@ export const nodeLink: PrezUINodeProps = {
     label: {
         value: "Node 1",
         language: "en",
-        rdfType: "literal"
+        termType: "literal"
     },
     description: {
         value: "Desc 1",
         language: "en",
-        rdfType: "literal"
+        termType: "literal"
     },
     provenance: {
         value: "Prov 1",
         language: "en",
-        rdfType: "literal"
+        termType: "literal"
     },
-    qname: "ex:node1",
+    curie: "ex:node1",
     links: ["/c/node1", "/s/node1", "/v/node1"],
     types: [
         {
@@ -141,33 +141,33 @@ export const nodeLink: PrezUINodeProps = {
             label: {
                 value: "Type 1",
                 language: "en",
-                rdfType: "literal"
+                termType: "literal"
             },
             description: {
                 value: "Desc of type 1",
                 language: "en",
-                rdfType: "literal"
+                termType: "literal"
             },
-            qname: "ex:type1",
-            rdfType: "node"
+            curie: "ex:type1",
+            termType: "node"
         },
         {
             iri: "https://example.com/type2",
             label: {
                 value: "Type 2",
                 language: "en",
-                rdfType: "literal"
+                termType: "literal"
             },
             description: {
                 value: "Desc of type 2",
                 language: "en",
-                rdfType: "literal"
+                termType: "literal"
             },
-            qname: "ex:type1",
-            rdfType: "node"
+            curie: "ex:type1",
+            termType: "node"
         }
     ],
-    rdfType: "node"
+    termType: "node"
 };
 
 // BlankNode
@@ -182,7 +182,7 @@ export const blankNode: PrezUIBlankNodeProps = {
             ],
         }
     ],
-    rdfType: "blanknode"
+    termType: "blanknode"
 };
 
 // PrezUIItemList
@@ -192,31 +192,31 @@ export const listProps: PrezUIItemListProps = {
             iri: "https://example.com/ksdjhfjksdhfsdf",
             label: {
                 value: "W",
-                rdfType: "literal"
+                termType: "literal"
             },
             links: ["/link 1"],
             description: {
                 value: "description 1",
-                rdfType: "literal"
+                termType: "literal"
             },
-            rdfType: "node"
+            termType: "node"
         },
         {
             iri: "https://example.com/89ok43rikiowefgomsd",
             label: {
                 value: "A",
-                rdfType: "literal"
+                termType: "literal"
             },
             links: ["/link 2"],
             description: {
                 value: "description 2",
-                rdfType: "literal"
+                termType: "literal"
             },
-            rdfType: "node",
+            termType: "node",
             extras: {
                 "https://example.com/issued": {
                     value: "12-01-2024",
-                    rdfType: "literal"
+                    termType: "literal"
                 }
             }
         },
@@ -224,26 +224,26 @@ export const listProps: PrezUIItemListProps = {
             iri: "https://example.com/poeidfopohsdnf",
             label: {
                 value: "J",
-                rdfType: "literal"
+                termType: "literal"
             },
             links: ["/link 3"],
             description: {
                 value: "description 3",
-                rdfType: "literal"
+                termType: "literal"
             },
-            rdfType: "node",
+            termType: "node",
             extras: {
                 "https://example.com/publisher": {
                     iri: "https://example.com/me",
                     label: {
                         value: "me",
-                        rdfType: "literal"
+                        termType: "literal"
                     },
                     description: {
                         value: "desc",
-                        rdfType: "literal"
+                        termType: "literal"
                     },
-                    rdfType: "node"
+                    termType: "node"
                 }
             }
         },
@@ -252,38 +252,38 @@ export const listProps: PrezUIItemListProps = {
         {
             label: {
                 value: "Publisher",
-                rdfType: "literal"
+                termType: "literal"
             },
             iri: "https://example.com/publisher",
             description: {
                 value: "Publisher description",
-                rdfType: "literal"
+                termType: "literal"
             },
-            rdfType: "node"
+            termType: "node"
         },
         {
             label: {
                 value: "Issued",
-                rdfType: "literal"
+                termType: "literal"
             },
             iri: "https://example.com/issued",
             description: {
                 value: "Issued description",
-                rdfType: "literal"
+                termType: "literal"
             },
-            rdfType: "node"
+            termType: "node"
         },
         {
             label: {
                 value: "Created",
-                rdfType: "literal"
+                termType: "literal"
             },
             iri: "https://example.com/created",
             description: {
                 value: "Created description",
-                rdfType: "literal"
+                termType: "literal"
             },
-            rdfType: "node"
+            termType: "node"
         },
     ],
     childButton: {
@@ -304,7 +304,7 @@ const bnodeNested: PrezUIBlankNodeProps = {
             ],
         }
     ],
-    rdfType: "blanknode"
+    termType: "blanknode"
 };
 
 // PrezUIObjectTable

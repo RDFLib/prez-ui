@@ -13,11 +13,11 @@ export function sortNodes(a: PrezNode, b: PrezNode, direction: "asc" | "desc" = 
         return direction === "asc" ? -1 : 1;
     } else if (b.label) {
         return direction === "asc" ? 1 : -1;
-    } else if (a.qname && b.qname) {
-        return direction === "asc" ? a.qname.localeCompare(b.qname) : b.qname.localeCompare(a.qname);
-    } else if (a.qname) {
+    } else if (a.curie && b.curie) {
+        return direction === "asc" ? a.curie.localeCompare(b.curie) : b.curie.localeCompare(a.curie);
+    } else if (a.curie) {
         return direction === "asc" ? -1 : 1;
-    } else if (b.qname) {
+    } else if (b.curie) {
         return direction === "asc" ? 1 : -1;
     } else {
         return direction === "asc" ? a.iri.localeCompare(b.iri) : b.iri.localeCompare(a.iri);

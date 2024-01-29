@@ -2,7 +2,7 @@ import type { Prefixes } from "./types";
 import { DEFAULT_PREFIXES } from "./consts";
 
 /**
- * Interprets a predicate qname into its full URI
+ * Interprets a predicate curie into its full URI
  * 
  * Uses the default list of prefixes by default
  * 
@@ -20,20 +20,20 @@ export function defaultToUri(s: string, prefixes: Prefixes = DEFAULT_PREFIXES): 
 }
 
 /**
- * Creates a qname from an URI
+ * Creates a curie from an URI
  * 
  * Uses the default list of prefixes by default
  * 
  * @param uri 
  * @param prefixes 
- * @returns qname string
+ * @returns curie string
  */
 export function defaultFromUri(uri: string, prefixes: Prefixes = DEFAULT_PREFIXES): string {
-    let qname = "";
+    let curie = "";
     Object.entries(prefixes).forEach(([prefix, prefixIri]) => {
         if (uri.startsWith(prefixIri)) {
-            qname = prefix + ":" + uri.split(prefixIri)[1];
+            curie = prefix + ":" + uri.split(prefixIri)[1];
         }
     });
-    return qname;
+    return curie;
 }

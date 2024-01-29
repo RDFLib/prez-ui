@@ -19,6 +19,10 @@ const items = [
         label: "Object",
         route: "/object"
     },
+    {
+        label: "Navigation",
+        route: "/nav"
+    },
 ];
 </script>
 
