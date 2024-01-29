@@ -1,183 +1,99 @@
-export interface PrezTerm {
-    dataType?: PrezNode;
-    termType: 'Literal' | 'Node' | 'BlankNode';
+// import { ListItem } from "prez-lib";
+
+// for prez-lib
+export type PrezTerm = {
+    termType: "literal" | "node" | "blanknode";
 }
 
-export interface PrezLiteral extends PrezTerm {
-    termType: 'Literal';
-    text: string;
+export type PrezLiteral = PrezTerm & {
+    value: string;
+    datatype?: PrezNode;
     language?: string;
+    termType: "literal";
 }
 
-export interface PrezNode extends PrezTerm {
-    termType: 'Node';
+export type PrezNode = PrezTerm & {
+    iri: string;
     label?: PrezLiteral;
     description?: PrezLiteral;
-    uri: string;
+    provenance?: PrezLiteral;
     curie?: string;
+    links?: PrezLink[];
+    rdfTypes?: PrezNode[];
+    termType: "node";
+}
+
+export type PrezLink = {
+    value: string;
+    parents?: PrezNode[];
+    // maybe label?
+}
+
+export type PrezBlankNode = PrezTerm & {
+    id: string;
+    properties: PrezProperty[];
+    termType: "blanknode";
+}
+
+export type ItemExtra = PrezNode & {
+    extras?: {
+        [key: string]: PrezLiteral | PrezNode;
+    };
+}
+
+export type PrezProperty = {
+    predicate: PrezNode;
+    object: PrezTerm[];
+}
+
+
+export interface PrezItem {
+    focusNode: PrezNode
+    properties: PrezProperty[];
 }
 
 export interface PrezList {
-    class: PrezTerm;
-    title?: PrezLiteral;
-    description?: PrezLiteral;
-    rows: PrezListRow[];
-    headers: Record<string, PrezNode>;
-}
-
-export interface PrezListRow {
-    [key: string]: PrezTerm;
-}
-
-export interface PrezObject {
-    class: PrezTerm;
+    items: PrezItem[];
+    count: number;
     title: PrezLiteral;
-    description?: PrezLiteral;
-    properties: PrezProperties;
 }
 
-// index each property based on their name/curie for simple access
-export type PrezProperties = Record<string, PrezProperty>;
-
-export interface PrezProperty {
+export type PrezSearchResult = {
+    hash: string;
+    weight: number;
     predicate: PrezNode;
-    object: PrezTerm|PrezTerm[];
+    match: PrezLiteral;
+    resource: PrezNode;
+};
+
+// ---------------------
+
+
+export interface PrezUILiteralProps extends PrezLiteral {
+    isGeometry?: boolean;
 }
 
-export interface PrezBlankNode extends PrezTerm {
-    termType: 'BlankNode';
-    properties: PrezProperties;
+export interface PrezUINodeProps extends PrezNode {
+    showType?: boolean;
+    showProv?: boolean;
 }
 
-export const PrezDataFactory = {
-    prezNode(paramsOrURI:{uri: string, label?: PrezLiteral|string, description?: PrezLiteral|string, curie?: string}|string): PrezNode {
-        if(typeof(paramsOrURI) == 'string') {
-            return {
-                termType: 'Node',
-                uri: paramsOrURI
-            }
-        }
-        const {uri, label, description, curie} = paramsOrURI;
-        return {
-          termType: 'Node',
-          uri,
-          curie,
-          label: (typeof(label) == 'string' ? this.prezLiteral(label) : label),
-          description: (typeof(description) == 'string' ? this.prezLiteral(description) : description),
-        };
-    },
-
-    prezLiteral(paramsOrString:{text: string, language?: string, dataType?: PrezNode}|string): PrezLiteral {
-        if(typeof(paramsOrString) == 'string') {
-            return {
-                termType: 'Literal',
-                text: paramsOrString
-            }
-        }
-        const {text, language, dataType} = paramsOrString;
-        return {
-            termType: 'Literal',
-            text,
-            language,
-            dataType
-        };
-    },
-
-    // prezBlankNode(node: PrezProperties): PrezBlankNode {
-    //     return {
-    //       termType: 'BlankNode',
-    //       properties
-    //     };
-    // }
-
-};
+export interface PrezUIBlankNodeProps extends PrezBlankNode {};
 
 
+//prez ui library:
+export interface PrezUIItemPage {
+    item: PrezItem;
+    displayProperties?: string[]; // use curies or uris
+}
 
+export interface PrezUIListPage {
+    list: PrezList;
+    displayProperties?: string[]; // use curies or uris
+}
 
-
-export interface ListItem {
-    label?: string;
-    uri: string;
-    description?: string;
-    link?: string;
-    extras?: {
-        [key: string]: string;
-    };
-};
-
-export interface ObjectItem {
-    label?: string;
-    uri: string;
-    description?: string;
-    link?: string;
-    properties: {
-        predicate: string;
-        object: string;
-    }[];
-};
-
-// export interface ObjectRowProps {
-    
-// };
-
-// export interface ObjectTableProps {
-//     label?: string;
-//     uri: string;
-//     types: string[];
-//     baseClass: string;
-//     description?: string;
-//     geometries?: string[];
-//     properties: ObjectRowProps[];
-// };
-
-// export interface Value {
-//     value: string;
-//     curie?: string;
-//     label?: string;
-//     description?: string;
-//     provenance?: string;
-//     language?: string;
-// };
-
-export interface Prefixes {
-    [namespace: string]: string;
-};
-
-export interface Profile {
-    namespace: string;
-    token: string;
-    title: string;
-    description: string;
-    mediatypes: string[];
-    defaultMediatype: string;
-    labelPredicates: string[];
-    descriptionPredicates: string[];
-    explanationPredicates: string[];
-};
-
-export interface Mediatype {
-    title: string;
-    mediatype: string;
-    default: boolean;
-};
-
-export interface ProfileHeader {
-    default: boolean;
-    current: boolean;
-    uri: string;
-    token: string;
-    title: string;
-    description: string;
-    mediatypes: Mediatype[];
-};
-
-export interface LinkObject {
-    uriRef: string;
-    rel: string;
-    title: string;
-    anchor: string;
-    token: string;
-    profile: string;
-    type: string;
-};
+export interface NavItemProps {
+    label: string;
+    route?: string;
+    items?: NavItemProps[];
+}
