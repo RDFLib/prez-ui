@@ -1,6 +1,6 @@
 // to be moved to prez-lib
 
-import { PrezLiteral, PrezNode } from "../types";
+import { PrezLiteral, PrezNode } from "prez-lib";
 
 export function sortLiterals(a: PrezLiteral, b: PrezLiteral, direction: "asc" | "desc" = "asc"): number {
     return direction === "asc" ? a.value.localeCompare(b.value) : b.value.localeCompare(a.value);

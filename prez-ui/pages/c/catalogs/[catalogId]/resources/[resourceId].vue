@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { PrezNode, TableProperty } from 'prez-components';
+import type { PrezNode, PrezProperty } from 'prez-components';
 import PrezUIObjectTable from '~/components/PrezUIObjectTable.vue';
 
 interface Item extends PrezNode {
-    properties: TableProperty[]
+    properties: PrezProperty[]
 };
 
 const resource: Item = {

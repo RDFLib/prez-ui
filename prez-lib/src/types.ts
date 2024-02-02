@@ -1,17 +1,23 @@
-// import { ListItem } from "prez-lib";
-
-// for prez-lib
+/**
+ * Base type for `PrezLiteral`, `PrezNode` & `PrezBlankNode`
+ */
 export type PrezTerm = {
     termType: "literal" | "node" | "blanknode";
-}
+};
 
+/**
+ * Represents an RDF Literal
+ */
 export type PrezLiteral = PrezTerm & {
     value: string;
     datatype?: PrezNode;
     language?: string;
     termType: "literal";
-}
+};
 
+/**
+ * Represents an RDF Named Node
+ */
 export type PrezNode = PrezTerm & {
     iri: string;
     label?: PrezLiteral;
@@ -21,79 +27,61 @@ export type PrezNode = PrezTerm & {
     links?: PrezLink[];
     rdfTypes?: PrezNode[];
     termType: "node";
-}
+};
 
+/**
+ * Represents a `prez:link` value, containing parent info
+ */
 export type PrezLink = {
     value: string;
     parents?: PrezNode[];
     // maybe label?
-}
+};
 
+/**
+ * Represents an RDF Blank Node
+ */
 export type PrezBlankNode = PrezTerm & {
     id: string;
     properties: PrezProperty[];
     termType: "blanknode";
-}
+};
 
-export type ItemExtra = PrezNode & {
-    extras?: {
-        [key: string]: PrezLiteral | PrezNode;
-    };
-}
-
+/**
+ * Represents a 'row' in an item table
+ */
 export type PrezProperty = {
     predicate: PrezNode;
     object: PrezTerm[];
-}
+};
 
-
-export interface PrezItem {
-    focusNode: PrezNode
-    properties: PrezProperty[];
-}
-
-export interface PrezList {
-    items: PrezItem[];
-    count: number;
-    title: PrezLiteral;
-}
-
+/**
+ * Represents a search result
+ */
 export type PrezSearchResult = {
     hash: string;
     weight: number;
     predicate: PrezNode;
     match: PrezLiteral;
-    resource: PrezNode;
+    resource: PrezItem;
 };
 
-// ---------------------
+// to be replaced by PrezItem?
+export type ItemExtra = PrezNode & {
+    extras?: {
+        [key: string]: PrezLiteral | PrezNode;
+    };
+};
 
-
-export interface PrezUILiteralProps extends PrezLiteral {
-    isGeometry?: boolean;
-}
-
-export interface PrezUINodeProps extends PrezNode {
-    showType?: boolean;
-    showProv?: boolean;
-}
-
-export interface PrezUIBlankNodeProps extends PrezBlankNode {};
-
-
-//prez ui library:
-export interface PrezUIItemPage {
-    item: PrezItem;
-    displayProperties?: string[]; // use curies or uris
-}
-
-export interface PrezUIListPage {
-    list: PrezList;
-    displayProperties?: string[]; // use curies or uris
-}
-
-export interface NavItemProps {
-    label: string;
-    route?: string;
-    items?: NavItemProps[];
-}
+/**
+ * 
+ */
+export interface PrezItem {
+    focusNode: PrezNode & {
+        members?: {
+            link: string;
+            label: string;
+        }[];
+    };
+    properties: PrezProperty[];
+};

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import { literalLang, literalDatatype, literalGeom } from "../util/storyData";
+import { literalLang, literalDatatype, literalGeom } from "../util/story-data/PrezUILiteral";
 import PrezUILiteral from "../components/PrezUILiteral.vue";
 
 const meta = {

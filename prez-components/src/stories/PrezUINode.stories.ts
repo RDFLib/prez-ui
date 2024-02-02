@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import { vueRouter } from "storybook-vue3-router";
-import { node, nodeLink, nodePredicate } from "../util/storyData";
+import { node, nodeLink, nodePredicate } from "../util/story-data/PrezUINode";
 import PrezUINode from "../components/PrezUINode.vue";
 
 const meta = {
@@ -14,7 +14,7 @@ const meta = {
         provenance: { description: "The node's provenance - used for a custom explanation of how this node/predicate is used in Prez" },
         curie: { description: "The node's curie, a shorthand notation using the namespace's prefix", type: "string" },
         links: { description: "An array of Prez links" },
-        types: { description: "An array of types" },
+        rdfTypes: { description: "An array of types" },
         showType: { description: "Toggles showing the type badges", type: "boolean" },
         showProv: { description: "Toggles showing the provenance tooltip", type: "boolean" },
         termType: { table: { disable: true } }

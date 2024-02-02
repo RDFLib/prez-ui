@@ -12,7 +12,7 @@ const props = defineProps<PrezUINodeProps>();
             :is="props.links ? (props.links.length === 1 ? RouterLink : 'span') : 'a'"
             :class="`value ${props.links?.length === 1 ? 'link' : ''}`"
             :href="!props.links ? props.iri : undefined"
-            :to="props.links?.length === 1 ? props.links[0] : undefined"
+            :to="props.links?.length === 1 ? props.links[0].value : undefined"
             v-tooltip.top="props.description?.value || undefined"
         >
             <template v-if="props.label">{{ props.label.value }}</template>
@@ -27,7 +27,7 @@ const props = defineProps<PrezUINodeProps>();
             <i class="pi pi-info-circle"></i>
         </span>
         <span v-if="props.links && props.links.length > 1" class="links">
-            <RouterLink v-for="link in props.links" class="link" :to="link">{{ link }}</RouterLink>
+            <RouterLink v-for="link in props.links" class="link" :to="link.value">{{ link.value }}</RouterLink>
         </span>
         <a
             v-if="props.links"
@@ -39,8 +39,8 @@ const props = defineProps<PrezUINodeProps>();
         >
             <i class="pi pi-external-link"></i>
         </a>
-        <span v-if="props.types && props.showType" class="types">
-            <a v-for="t in props.types" class="type" :href="t.iri" target="_blank" rel="noopener noreferrer">
+        <span v-if="props.rdfTypes && props.showType" class="types">
+            <a v-for="t in props.rdfTypes" class="type" :href="t.iri" target="_blank" rel="noopener noreferrer">
                 <Chip
                     :label="t.label?.value || (t.curie || t.iri)"
                     v-tooltip.top="t.description?.value || undefined"

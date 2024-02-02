@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import { vueRouter } from "storybook-vue3-router";
 import PrezUIItemList from "../components/PrezUIItemList.vue";
-import { listProps } from "../util/storyData";
+import { listProps } from "../util/story-data/PrezUIItemList";
 
 const meta = {
     title: "PrezUIItemList",

@@ -29,7 +29,8 @@
         }
     },
     "exclude": [
-        "src/main.ts"
+        "src/main.ts",
+        "src/old/*"
     ],
     "include": [
         "src/**/*.ts",

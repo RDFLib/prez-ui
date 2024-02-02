@@ -1,19 +1,24 @@
 <script lang="ts" setup>
-import type { PrezNode, TableProperty } from 'prez-components';
-import PrezUIObjectTable from '~/components/PrezUIObjectTable.vue';
-
-interface Item extends PrezNode {
-    properties: TableProperty[]
-};
+import type { PrezItemPage } from "prez-components";
+import type ItemLayout from "~/components/ItemLayout.vue";
 
 const route = useRoute();
 
-const catalog: Item = {
-    label: {
-        value: "Catalog 1",
-        termType: "literal"
+const catalog: PrezItemPage = {
+    focusNode: {
+        label: {
+            value: "Catalog 1",
+            termType: "literal"
+        },
+        iri: "https://example.com/catalog1",
+        // members: [
+        //     {
+        //         link: "",
+        //         label: ""
+        //     }
+        // ],
+        termType: "node"
     },
-    iri: "https://example.com/catalog1",
     properties: [
         {
             predicate: {
@@ -37,10 +42,8 @@ const catalog: Item = {
 </script>
 
 <template>
-    <h1>{{ catalog.label?.value || catalog.iri }}</h1>
-    <p v-if="catalog.description"><em>{{ catalog.description }}</em></p>
+    <ItemLayout v-bind="catalog" />
     <NuxtLink :to="route.path + '/resources'">Resources</NuxtLink>
-    <PrezUIObjectTable :properties="catalog.properties" />
 </template>
 
 <style lang="scss" scoped>

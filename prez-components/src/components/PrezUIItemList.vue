@@ -3,7 +3,8 @@ import { ref } from "vue";
 import { RouterLink } from "vue-router";
 import DataView from "primevue/dataview";
 import Button from "primevue/button";
-import { ItemExtra, PrezNode, PrezLiteral, PrezUIItemListProps } from "../types";
+import type { PrezNode, PrezLiteral, ItemExtra } from "prez-lib"
+import { PrezUIItemListProps } from "../types";
 import { sortLiterals, sortNodes } from "../util/helpers";
 import PrezUINode from "./PrezUINode.vue";
 import PrezUILiteral from "./PrezUILiteral.vue";

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import { vueRouter } from "storybook-vue3-router";
 import PrezUIObjectTable from "../components/PrezUIObjectTable.vue";
-import { tableProps } from "../util/storyData";
+import { tableProps } from "../util/story-data/PrezUIObjectTable";
 
 const meta = {
     title: "PrezUIObjectTable",
