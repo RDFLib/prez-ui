@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+    // ssr: false,
     devtools: { enabled: true },
     modules: [
         "@pinia/nuxt",
@@ -20,7 +21,7 @@ export default defineNuxtConfig({
     nitro: {
         esbuild: {
             options: {
-                target: 'esnext'
+                target: "esnext"
             }
         }
     }

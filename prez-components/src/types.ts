@@ -1,40 +1,51 @@
-import { ListItem, PrezTerm, PrezLiteral, PrezNode } from "prez-lib";
+import type { PrezNode, PrezLiteral, PrezBlankNode, PrezProperty, PrezItem, ItemExtra } from "prez-lib";
 
-// having trouble accessing the prez-lib from other locations.
-export type UI_PrezLiteral = PrezLiteral;
-
-export interface PrezUITermProps {
-    color?: "primary" | "secondary";
-    term: PrezTerm;
-}
-
-export interface PrezUILiteralProps {
-    color?: "primary" | "secondary";
-    term: PrezLiteral;
-}
-
-export interface PrezUINodeProps {
-    color?: "primary" | "secondary";
-    size?: "normal" | "small";
-    term: PrezNode;
-}
-
-export interface ButtonProps {
-    color?: "primary" | "secondary";
-    size?: "sm" | "lg";
+export interface PrezUILiteralProps extends PrezLiteral {
+    isGeometry?: boolean;
 };
 
-export interface ListTableProps {
-    items: ListItem[];
-    predicates?: {
-        label: string;
-        uri: string;
-    }[];
-}
+export interface PrezUINodeProps extends PrezNode {
+    showType?: boolean;
+    showProv?: boolean;
+};
 
-export interface ObjectTableProps {
-    properties: {
-        predicate: string;
-        object: string;
-    }[];
-}
+export interface PrezUIBlankNodeProps extends PrezBlankNode { };
+
+export interface PrezUIItemListProps {
+    items: ItemExtra[];
+    predicates?: PrezNode[];
+    childButton?: {
+        suffix: string;
+        label: string;
+    };
+};
+
+export interface PrezUIObjectTableProps {
+    properties: PrezProperty[];
+    members?: string[];
+};
+
+// used for both item & list pages
+// export interface PrezItem extends PrezNode {
+//     properties: PrezProperty[];
+//     members: PrezNode[];
+// };
+
+
+
+export interface PrezItemPage extends PrezItem { };
+
+export interface PrezListPage {
+    items: PrezItem[];
+    headers?: PrezNode[];
+    // childButton?: {
+    //     suffix: string;
+    //     label: string;
+    // };
+};
+
+export interface NavItemProps {
+    label: string;
+    route?: string;
+    items?: NavItemProps[];
+};
