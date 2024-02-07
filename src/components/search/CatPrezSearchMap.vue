@@ -1,344 +1,495 @@
 <script lang="ts" setup>
-// the searchable map component and related map type definitions
+import { onMounted, ref, computed, inject, watch } from "vue";
+import { DataFactory } from "n3";
+import { apiBaseUrlConfigKey } from "@/types";
+import { ShapeTypes, type Coords } from "@/components/MapClient.d";
+import { useApiRequest, useSparqlRequest } from "@/composables/api";
+import { useRdfStore } from "@/composables/rdfStore";
+import { catalogSpatialSearch, getThemesQuery } from "@/sparqlQueries/catalogSearch";
+import { shapeQueryPart } from "@/util/mapSearchHelper"
+import { copyToClipboard, ensureAnnotationPredicates, getLabel, sortByTitle } from "@/util/helpers";
 import MapClient from "@/components/MapClient.vue";
-import { AreaTypes, ShapeTypes, type Coords } from "@/components/MapClient.d";
+import LoadingMessage from "@/components/LoadingMessage.vue";
+import ErrorMessage from "@/components/ErrorMessage.vue";
+import BaseModal from "@/components/BaseModal.vue";
 
-// the pinia search store and related type definitions to manage the returned dataset tree
-import { refDataStore } from "@/stores/refDataStore";
-import { onMounted, ref } from "vue";
-import { QUERY_GET_CATALOGS, QUERY_GET_THEMES, QUERY_SEARCH } from '@/stores/catalogQueries'
-import type { RDCatalog, RDSearch, RDTheme } from '@/stores/catalogQueries.d'
-import { shapeQueryPart } from '@/util/mapSearchHelper'
+const { namedNode } = DataFactory;
 
-const rdCatalogs = refDataStore('catalogs')()
-const rdThemes = refDataStore('themes')()
-const rdSearch = refDataStore('search')()
+type Option = {
+    title?: string;
+    iri: string;
+};
 
-const searchTermRef = ref('')
-const selectedCatalogsRef = ref<string[]>([])
-const selectedThemesRef = ref<string[]>([])
-const shapeTypeRef = ref(ShapeTypes.None)
-const coordsRef = ref<Coords>([])
-const showQueryRef = ref(false)
-const sparqlQueryRef = ref('')
-const limitRef = ref(10)
-
-// called when a selection has changed
-const updateSelection = async (selectedCoords:Coords, shapeType:ShapeTypes) => {
-    //shapeTypeRef.value = selectedCoords.length == 0 ? ShapeTypes.None : (selectedCoords.length == 1 ? ShapeTypes.Point : ShapeTypes.Polygon)
-    shapeTypeRef.value = shapeType
-    coordsRef.value = selectedCoords
-    await performSearch();
-}
-
-const links = [
-    {
-        label: "Catalogs",
-        url: "/c/catalogs",
-        description: "A list of DCAT Catalogs"
+type SparqlBinding = {
+    [key: string]: {
+        type: string;
+        datatype?: string;
+        value: string;
+        "xml:lang"?: string;
     }
-];
+};
 
-const fetchThemes = async () => {
-    await rdThemes.fetch<RDTheme[]>('c', QUERY_GET_THEMES(selectedCatalogsRef.value));
+// type SparqlSelectResponse = {
+//     head: {
+//         vars: string[];
+//     };
+//     results: {
+//         bindings: SparqlBinding[];
+//     };
+// };
+
+const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
+
+const { loading: catalogLoading, error: catalogError, apiGetRequest: catalogApiGetRequest } = useApiRequest();
+const { loading: themesLoading, error: themesError, sparqlGetRequest: themesSparqlGetRequest } = useSparqlRequest();
+const { loading: searchLoading, error: searchError, sparqlGetRequest: searchSparqlGetRequest } = useSparqlRequest();
+const { store, parseIntoStore, qnameToIri } = useRdfStore();
+
+const LIVE_SEARCH = true;
+const MAX_DESC_LENGTH = 200;
+
+const catalogs = ref<Option[]>([]);
+const themes = ref<Option[]>([]);
+const selectedCatalogs = ref<string[]>([]);
+const selectedThemes = ref<string[]>([]);
+const searchTerm = ref("");
+const limit = ref(10);
+const shape = ref<{
+    type: ShapeTypes;
+    coords: Coords;
+}>({
+    type: ShapeTypes.None,
+    coords: []
+});
+const showQuery = ref(false);
+const results = ref<{
+    iri: string;
+    title: string;
+    description: string;
+    themes: {
+        iri: string;
+        title: string;
+    }[];
+}[]>([]);
+
+const query = computed(() => {
+    return catalogSpatialSearch(
+        selectedCatalogs.value,
+        searchTerm.value,
+        selectedThemes.value,
+        shapeQueryPart(shape.value.coords),
+        limit.value > 0 ? parseInt(limit.value.toString()) : 0
+    );
+});
+
+const allCatalogsSelected = computed(() => {
+    return catalogs.value.every(catalog => selectedCatalogs.value.includes(catalog.iri));
+});
+
+const allThemesSelected = computed(() => {
+    return themes.value.every(theme => selectedThemes.value.includes(theme.iri));
+});
+
+function toggleSelectAllCatalogs() {
+    selectedCatalogs.value = !allCatalogsSelected.value ? catalogs.value.map(catalog => catalog.iri) : [];
 }
 
-const performSearch = async(event: Event|null=null) => {
-    if(event) {
-        event.preventDefault();
+function toggleSelectAllThemes() {
+    selectedThemes.value = !allThemesSelected.value ? themes.value.map(theme => theme.iri) : [];
+}
+
+function handleMapSelectionChange(selectedCoords: Coords, shapeType: ShapeTypes) {
+    shape.value = {
+        type: shapeType,
+        coords: selectedCoords
+    };
+}
+
+/**
+ * Gets the list of Catalogs from the API endpoint `/c/catalogs` & creates the list of catalog options
+ */
+async function getCatalogs() {
+    const { data } = await catalogApiGetRequest("/c/catalogs");
+    if (data && !catalogError.value) {
+        parseIntoStore(data);
+
+        const catalogOptions: Option[] = [];
+
+        store.value.forSubjects(subject => {
+            if (!subject.value.endsWith("/system/catprez")) { // hide system catalog
+                const catalog: Option = {
+                    iri: subject.value
+                };
+
+                catalog.title = getLabel(subject.value, store.value);
+
+                catalogOptions.push(catalog);
+            }
+        }, namedNode(qnameToIri("a")), namedNode(qnameToIri("dcat:Catalog")), null);
+
+        catalogs.value = catalogOptions.sort(sortByTitle);
     }
-    sparqlQueryRef.value = QUERY_SEARCH(selectedCatalogsRef.value, searchTermRef.value, selectedThemesRef.value, shapeQueryPart(coordsRef.value), //limitRef.value);
-        (limitRef.value > 0 ? parseInt(limitRef.value.toString()) + 1 : 0));
-    await rdSearch.fetch<RDSearch[]>('c', sparqlQueryRef.value)
 }
 
-// start off by loading the main filter lists for catalogs and themes
-onMounted(async ()=>{
-    await rdCatalogs.fetch<RDCatalog[]>('c', QUERY_GET_CATALOGS);
-    (rdCatalogs.data as RDCatalog[]).forEach(cat=>{
-        selectedCatalogsRef.value.push(cat.c)
-    });
-    await fetchThemes();
-    (rdThemes.data as RDTheme[]).forEach(theme=>{
-        selectedThemesRef.value.push(theme.th);
-    })
-    await performSearch();
-})
+/**
+ * Gets a list of themes from a SPARQL query from the API & creates the list of theme options
+ */
+async function getThemes() {
+    const themesData = await themesSparqlGetRequest(`${apiBaseUrl}/sparql`, getThemesQuery(selectedCatalogs.value));
+    if (themesData && !themesError.value) {
+        themes.value = (themesData.results.bindings as SparqlBinding[]).map(result => {
+            return {
+                title: result.title.value,
+                iri: result.theme.value
+            };
+        });
+    }
+}
 
+/**
+ * Performs search via a SPARQL query
+ */
+async function doSearch() {
+    const searchData = await searchSparqlGetRequest(`${apiBaseUrl}/sparql`, query.value);
+    if (searchData && !searchError.value) {
+        results.value = (searchData.results.bindings as SparqlBinding[]).map(result => {
+            return {
+                iri: result.resource.value,
+                title: result.title.value,
+                description: result.desc.value,
+                themes: result.themeList.value.split("\t").map((theme, index) => {
+                    return {
+                        iri: theme,
+                        title: result.themeListLabels.value.split("\t")[index]
+                    };
+                })
+            }
+        });
+    }
+}
+
+watch(selectedCatalogs, async (newValue, oldValue) => {
+    await getThemes();
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+}, { deep: true });
+
+watch(selectedThemes, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+}, { deep: true });
+
+watch(limit, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+});
+
+watch(searchTerm, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+});
+
+watch(shape, async (newValue, oldValue) => {
+    if (LIVE_SEARCH) {
+        await doSearch();
+    }
+}, { deep: true });
+
+onMounted(async () => {
+    await ensureAnnotationPredicates();
+    await getCatalogs();
+    selectedCatalogs.value = catalogs.value.map(catalog => catalog.iri); // select all by default
+    await getThemes();
+    selectedThemes.value = themes.value.map(theme => theme.iri); // select all by default
+    // await doSearch();
+});
 </script>
 
 <template>
-    <div class="container">
-        <div class="left-panel">
-            <form @submit="(event)=>performSearch(event)" class="query-options">
-                <div class="query-option">
-                    <h4 class="query-option-title">Catalogues to include</h4>
-                    <ul>
-                        <li v-for="cat in <RDCatalog[]>rdCatalogs.data" :key="cat.c">
-                            <label>
-                                <input type="checkbox" 
-                                    :value="cat.c" 
-                                    v-model="selectedCatalogsRef" 
-                                    @change="async (event) => { await fetchThemes(); await performSearch(); }"
-                                /> {{ cat.t }}
-                            </label>
-                        </li>
-                    </ul>
-
-                    <h4 class="query-option-title">Search text</h4>
-                    <p>
+    <div class="catalog-search">
+        <div class="search-options">
+            <div class="search-form-container">
+                <div class="search-form">
+                    <div class="form-section">
+                        <h4>Text Search</h4>
                         <input
                             type="search"
                             name="term"
                             class="search-input"
-                            v-model="searchTermRef"
-                            placeholder="enter search terms"
+                            v-model="searchTerm"
+                            placeholder="Search..."
+                            @keyup.enter="doSearch()"
                         >
-                    </p>
-
-                    <h4 class="query-option-title">Theme filter</h4>
-                    <ul>
-                        <li v-for="theme in <RDTheme[]>rdThemes.data" :key="theme.th">
-                            <label>
-                                <input type="checkbox" 
-                                    :value="theme.th" 
-                                    v-model="selectedThemesRef" 
-                                    @change="(event) => performSearch()"
-                                /> {{ theme.pl }}
-                            </label>
-                        </li>
-                        <li v-if="rdThemes.data.length == 0">(none)</li>
-                    </ul>
+                    </div>
+                    <div class="form-section">
+                        <h4>Catalogues</h4>
+                        <div class="catalog-buttons">
+                            <div class="select-all-input">
+                                <input
+                                    type="checkbox"
+                                    name="select-all-catalogs"
+                                    id="select-all-catalogs"
+                                    @change="toggleSelectAllCatalogs"
+                                    :checked="allCatalogsSelected"
+                                >
+                                <label for="select-all-catalogs">Select all</label>
+                            </div>
+                        </div>
+                        <LoadingMessage v-if="catalogLoading" />
+                        <ErrorMessage v-else-if="catalogError" :message="`Unable to load catalogs: ${catalogError}`" />
+                        <ul v-else-if="catalogs.length > 0" class="catalog-options">
+                            <li v-for="(catalog, index) in catalogs" class="catalog-option">
+                                <input
+                                    type="checkbox"
+                                    :id="`catalog-${index}`"
+                                    :value="catalog.iri"
+                                    v-model="selectedCatalogs"
+                                />
+                                <label :for="`catalog-${index}`">{{ catalog.title }}</label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="form-section">
+                        <h4>Themes</h4>
+                        <div class="theme-buttons">
+                            <div class="select-all-input">
+                                <input
+                                    type="checkbox"
+                                    name="select-all-themes"
+                                    id="select-all-themes"
+                                    @change="toggleSelectAllThemes"
+                                    :checked="allThemesSelected"
+                                >
+                                <label for="select-all-themes">Select all</label>
+                            </div>
+                        </div>
+                        <LoadingMessage v-if="themesLoading" />
+                        <ErrorMessage v-else-if="themesError" :message="`Unable to load catalogs: ${themesError}`" />
+                        <ul v-else-if="themes.length > 0" class="theme-options">
+                            <li v-for="(theme, index) in themes" class="theme-option">
+                                <input
+                                    type="checkbox" 
+                                    :value="theme.iri" 
+                                    v-model="selectedThemes"
+                                    :id="`theme-${index}`"
+                                />
+                                <label :for="`theme-${index}`">{{ theme.title }}</label>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-
-                <div class="btn-container">
-                    <span class="nowrap">Results limit: <input id="input-limit" class="space-right" v-model="limitRef" /></span>
-                    <span class="nowrap"><label class="space-right"><input v-model="showQueryRef" type="checkbox">Show query</label></span>
-                    <button class="btn" type="submit">Search</button>
+                <div class="bottom-buttons">
+                    <button class="btn outline" @click="showQuery = true">Show Query <i class="fa-regular fa-code"></i></button>
+                    <div class="right-buttons">
+                        <div class="result-limit-input">
+                            <label for="result-limit">Result limit</label>
+                            <input id="result-limit" type="number" v-model="limit" min="1" max="100">
+                        </div>
+                        <button class="btn" @click="doSearch()">Search <i class="fa-regular fa-magnifying-glass"></i></button>
+                    </div>
                 </div>
-
-            </form>
+            </div>
+            <div class="search-map">
+                <MapClient
+                    :drawing-modes="['RECTANGLE']"
+                    @selectionUpdated="handleMapSelectionChange"
+                />
+            </div>
         </div>
-        <div class="right-panel">
-            <MapClient 
-                ref="searchMapRef" 
-                :drawing-modes="['RECTANGLE']"
-                @selectionUpdated="updateSelection"
-                :style="'width: 100%; height: 550px; background-color: #eee;'"
-            />
-        </div>
-
-    </div>
-
-    <div v-if="rdSearch.loading">
-        <h3>Loading...</h3>
-        <div class="loading-icon"></div>
-    </div>
-    <div v-else>
-        <div v-if="rdSearch.data && rdSearch.data.length > 0">
-            <h3>Result set ({{ limitRef == 0 ? `${limitRef}` : rdSearch.data.length > limitRef ? `${limitRef}+` : rdSearch.data.length }})</h3>
-            <table>
+        <div class="results">
+            <h3>Results</h3>
+            <LoadingMessage v-if="searchLoading" />
+            <ErrorMessage v-else-if="searchError" :message="searchError" />
+            <table v-else-if="results.length > 0">
                 <thead>
-                    <th>Resource Label</th>
-                    <th>Resource Description</th>
-                    <th>Theme Labels</th>
+                    <tr>
+                        <th>Title</th>
+                        <th>Themes</th>
+                    </tr>
                 </thead>
                 <tbody>
-                    <template v-for="(result, index) in <RDSearch[]>rdSearch.data">
-                        <tr :key="index" v-if="limitRef === 0 || index < limitRef">                            
-                            <td><a target="_blank" v-bind:href="`/object?uri=${result.r}`">{{ result.t }}</a></td>
-                            <td>{{ result.d }}</td>
-                            <td class="th-list"><a v-for="(th, tindex) in result.thlist.split('\t')" target="_blank" v-bind:href="`/object?uri=${th}`">{{ result.thpllist.split('\t')[tindex] }}</a></td>
+                    <template v-for="(result, index) in results">
+                        <tr :class="`${index % 2 === 1 ? 'grey' : '' }`">
+                            <td><a :href="`/object?uri=${encodeURIComponent(result.iri)}`">{{ result.title }}</a></td>
+                            <td>
+                                <template v-for="theme in result.themes">
+                                    <a :href="`/object?uri=${theme.iri}`">
+                                        {{ theme.title }}
+                                    </a>
+                                    <br/>
+                                </template>
+                            </td>
+                        </tr>
+                        <tr v-if="result.description" :class="`${index % 2 === 1 ? 'grey' : '' }`">
+                            <td colspan="2" class="desc">{{ result.description.length > MAX_DESC_LENGTH ? result.description.slice(0, MAX_DESC_LENGTH) + '...' : result.description }}</td>
                         </tr>
                     </template>
                 </tbody>
             </table>
-        </div>
-        <div v-else-if="rdSearch.error">
-            <h3>Unable to search map</h3>
-            <div class="error">
-                {{ rdSearch.error }}
+            <div v-else>
+                No results
             </div>
         </div>
-        <div v-else>
-            <h3>No results</h3>
-        </div>
     </div>
-
-
-<pre v-if="showQueryRef" class="debug">
-
-<b>SPARQL query:</b>
-
-{{ sparqlQueryRef }}
-
-</pre>
-
-
+    <BaseModal v-if="showQuery" @modalClosed="showQuery = false">
+        <template #headerMiddle>Spatial Search SPARQL Query</template>
+        <div class="sparql-query-content">
+            <pre>{{ query.trim() }}</pre>
+        </div>
+        <template #footer>
+            <button class="btn outline sparql-copy-btn" @click="copyToClipboard(query)" title="Copy SPARQL query">Copy <i class="fa-regular fa-copy"></i></button>
+        </template>
+    </BaseModal>
 </template>
 
 <style lang="scss" scoped>
 @import "@/assets/sass/_variables.scss";
 
-.btn-container {
-    margin-top: auto;
-    text-align:right;
-}
-
-.th-list a {
-    display:block;
-}
-
-table {
-    border-collapse: collapse;
-    background-color: white;
-    width:100%;
-    thead {
-        th {
-            padding: 10px;
-            background-color: #ccc;
-            text-align:left;
-        }
-    }
-    tbody {
-        td {
-            padding: 5px;
-        }
-    }
-    tr {
-        th, td {
-        }
-
-        th {
-            text-align: center;
-        }
-
-        &:nth-child(2n) {
-            background-color: var(--tableBg);
-        }
-    }
-}
-
-
-.container {
-    display: grid;
-    grid-template-columns: 1fr 3fr; /* set the column widths to 1/4 and 3/4 of the container width */
-}
-
-.left-panel {
-    min-width: 480px;
-    padding-right: 1em;
-}
-.right-panel {
-}
-
-.search-input {
-    width: 100%;
-}
-
-
-/* Media query for small screens */
-@media (max-width: 1024px) {
-    .container {
-        grid-template-columns: 1fr;
-    }
-    .left-panel {
-        margin-bottom: 2em;
-        width: 100%;
-        padding-right: 0;
-    }
-    .search-input {
-        width:100%;
-    }
-}
-
-.space-right {
-    margin-right:1em;    
-}
-
-#input-limit {
-    width:3em;
-}
-
-.msg {
-    color: var(--primary);    
-}
-
-.nowrap {
-    display:inline-block;
-    white-space: nowrap;
-    margin-top:10px;
-}
-
-ul li {
-    list-style-type: none;
-    padding-bottom: 4px;
-}
-
-ul {
-    padding-left:0;
-    margin-left:0;
-}
-
-pre.debug {
-    white-space: break-spaces;
-}
-
-.small-input {
-    font-size:small;
-    height:1.5em;
-    width:3em; 
-}
-.query-options {
+.catalog-search {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    background-color: var(--cardBg);
-    padding: 10px;
-    border-radius: $borderRadius;
-    min-height: 550px;
+    gap: 20px;
 
-    .query-option {
+    .search-options {
+        display: grid;
+        grid-template-columns: 2fr 3fr;
+        // gap: 20px;
 
-        padding-bottom: 20px;
+        .search-form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 12px;
+            background-color: var(--cardBg);
+            border-radius: $borderRadius;
+            height: 500px;
 
-        .query-option-title {
-            padding-top:0;
-            margin-top:5px;
-            margin-bottom:8px;
+            .search-form {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                flex-grow: 1;
+                overflow-y: auto;
+
+                .form-section {
+                    display: flex;
+                    flex-direction: column;
+
+                    h4 {
+                        margin: 0px 0px 10px 0px;
+                    }
+
+                    // .search-input {
+                    //     width: 100%;
+                    // }
+
+                    .catalog-buttons, .theme-buttons {
+                        display: flex;
+                        flex-direction: row;
+                        gap: 8px;
+                        align-items: center;
+                        margin-bottom: 12px;
+                    }
+
+                    ul.catalog-options, ul.theme-options {
+                        padding-left: 0;
+                        margin: 0;
+                        
+                        li.catalog-option, li.theme-option {
+                            list-style-type: none;
+                            margin-bottom: 6px;
+                        }
+                    }
+                }
+            }
+
+            .bottom-buttons {
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                justify-content: space-between;
+                align-items: center;
+
+                .right-buttons {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 8px;
+                    align-items: center;
+
+                    .result-limit-input {
+                        display: flex;
+                        flex-direction: row;
+                        gap: 4px;
+                        align-items: center;
+
+                        input {
+                            width: 60px;
+                            padding: 6px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .results {
+        h3 {
+            margin-top: 0;
         }
 
-        .button {
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            // table-layout: fixed;
 
+            thead {
+                th {
+                    padding: 10px;
+                    background-color: #ccc;
+                    text-align: center;
+                }
+            }
+
+            tbody {
+                td {
+                    padding: 5px;
+                }
+            }
+
+            tr.grey {
+                background-color: var(--tableBg);
+            }
+
+            .desc {
+                font-size: 0.8em;
+                padding: 0px 8px 8px 8px;
+                color: grey;
+                font-style: italic;
+            }
         }
-
     }
 }
 
-.error {
-    background-color: lightcoral;
-    display: inline-block;
+.sparql-query-content {
+    padding: 12px;
+
+    pre {
+        white-space: pre-wrap;
+        margin: 0;
+    }
 }
 
-.loading-icon {
-  position: relative;
-  width: 20px;
-  height: 20px; 
-  margin:0;
-  padding:0;
-  -webkit-animation: fa-spin 2s infinite linear;
-  animation: fa-spin 2s infinite linear;
+.sparql-copy-btn {
+    margin-left: auto;
 }
 
-.loading-icon:before {
-  content: "\f1ce";
-  font-family: FontAwesome;
-  font-size:20px;
-  line-height:21px;
-  position: absolute;
-  top: 0; 
-  bottom:0;
+@media (max-width: 1024px) {
+    .search-options {
+        grid-template-columns: 1fr !important;
+    }
 }
-
-
 </style>

@@ -1,13 +1,16 @@
 import type { InjectionKey } from "vue";
-import type { Quad } from "n3";
+import type { Quad_Subject } from "n3";
 
-export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
-
+// env config keys
 export const mapConfigKey: InjectionKey<MapConfig> = Symbol();
 export const sidenavConfigKey: InjectionKey<boolean> = Symbol();
+export const perPageConfigKey: InjectionKey<number> = Symbol();
+export const conceptPerPageConfigKey: InjectionKey<number> = Symbol();
 export const enabledPrezsConfigKey: InjectionKey<PrezFlavour[]> = Symbol();
+export const enableScoresKey: InjectionKey<boolean> = Symbol();
 export const apiBaseUrlConfigKey: InjectionKey<string> = Symbol();
 
+// map types
 export interface MapConfig {
     settings: MapSettings,
     search: MapSearchConfig
@@ -42,6 +45,7 @@ export interface MapSettings {
     options: MapOptions;
 }
 
+// profile types
 export interface Profile {
     namespace: string;
     token: string;
@@ -54,25 +58,15 @@ export interface Profile {
     explanationPredicates: string[];
 };
 
-export interface Breadcrumb {
-    name: string,
-    url: string
-};
-
-export interface Mediatype {
-    title: string;
-    mediatype: string;
-    default: boolean;
-};
-
 export interface ProfileHeader {
     default: boolean;
+    current: boolean;
     uri: string;
     token: string;
     title: string;
     description: string;
     mediatypes: Mediatype[];
-}
+};
 
 export interface LinkObject {
     uriRef: string;
@@ -84,12 +78,26 @@ export interface LinkObject {
     type: string;
 };
 
+export interface Mediatype {
+    title: string;
+    mediatype: string;
+    default: boolean;
+};
+
+// page props
 export interface ListItem {
     iri: string;
     title?: string;
     description?: string;
     link?: string;
-    type?: string;
+    baseClass?: string;
+    types?: {
+        value: string;
+        qname?: string;
+        label?: string;
+        description?: string;
+    }[];
+    childrenCount?: number;
 };
 
 // extra properies for SortableTable display go in extras
@@ -105,62 +113,118 @@ export interface ListItemSortable {
     color?: string;
 };
 
-export interface AnnotatedPredicate {
-    termType: "NamedNode" | "Variable";
-    value: string;
-    id: string;
-    annotations: Quad[];
-};
-
-export interface AnnotatedQuad extends Omit<Quad, "predicate"> {
-    predicate: AnnotatedPredicate;
-};
-
-export interface RowObj {
-    value: string;
-    qname?: string;
-    datatype?: {
-        value: string;
-        qname?: string;
-    };
-    language?: string;
-    description?: string;
-    termType: string;
-    label?: string;
-    rows: RowPred[];
-};
-
-export interface RowPred {
-    iri: string;
-    objs: RowObj[];
-    qname?: string;
-    label?: string;
-    description?: string;
-    explanation?: string;
-    order: number;
-};
-
 export interface Concept {
     iri: string;
     title: string;
     link: string;
-    children?: Concept[];
-    narrower: string[]; // not used here
-    broader: string; // not used here
+    childrenCount: number;
+    children: Concept[];
+    narrower?: string[];
+    broader?: string;
+    color?: string;
 };
 
 // extending an interface for defineProps in-file causes errors, defined here instead
 export interface ConceptProps extends Concept {
     baseUrl: string;
     collapseAll: boolean;
+    parentPath: string; // used to find where in hierarchy tree to insert narrowers - parentIRI1|parentIRI2|parentIRI3...
+    doNarrowerEmits: boolean;
 };
 
-// export interface PredCellProps extends Omit<RowPred, "order" | "objs"> {};
-// Omit doesn't work here?
-export interface PredCellProps {
+// form types
+export type option = {
+    title?: string;
     iri: string;
+};
+
+export type selectOption = { // for treeselect, will convert option type to this
+    id: string;
+    label: string;
+};
+
+export type treeSelectOption = selectOption & {
+    children?: treeSelectOption[];
+};
+
+// annotation & PropTable types
+export interface AnnotatedTerm {
+    id: string;
+    value: string;
+    termType: "NamedNode" | "Variable" | "Literal" | "BlankNode";
     qname?: string;
+    language?: string; // language needs a label? e.g. English, US English, French, etc. (language label will need a language)
+    datatype?: {
+        value: string;
+        label?: string;
+        qname?: string;
+    };
     label?: string;
     description?: string;
-    explanation?: string;
+    provenance?: string;
+    links?: string[];
 };
+
+export interface AnnotatedPredicate extends Omit<AnnotatedTerm, "language" | "datatype"> {
+    termType: "NamedNode" | "Variable"
+};
+
+export interface AnnotatedObject extends AnnotatedTerm {};
+
+export interface AnnotatedTriple {
+    subject: Quad_Subject,
+    predicate: AnnotatedPredicate,
+    object: AnnotatedObject
+};
+
+export interface Prefixes {
+    [namespace: string]: string;
+};
+
+export interface PropTableRow extends PropTablePredicate {
+    order: number,
+    objects: PropTableObject[]
+};
+
+export interface PropTablePredicate extends Omit<AnnotatedPredicate, "value"> {
+    iri: string;
+};
+
+export interface PropTableObject extends AnnotatedObject {
+    predicateIri: string;
+    rows: PropTableRow[];
+};
+
+// misc
+export type PrezFlavour = "CatPrez" | "SpacePrez" | "VocPrez";
+
+export interface Breadcrumb {
+    name: string,
+    url: string
+};
+
+export type link = {
+    parents: { // ordered - grandparent, parent
+        iri: string;
+        title?: string;
+        link: string;
+        types: {
+            iri: string;
+            title?: string;
+        }[];
+    }[];
+    link: string;
+};
+
+export interface ObjectItem {
+    uri: string;
+    title?: string;
+    links: link[];
+    description?: string;
+    types: {
+        uri: string;
+        label?: string;
+    }[];
+};
+
+export interface SearchItem extends ObjectItem { weight: number };

@@ -1,22 +1,24 @@
 <script lang="ts" setup>
-import PredCell from "@/components/proptable/PredCell.vue";
-import ObjCell from "@/components/proptable/ObjCell.vue";
-import type { RowPred } from "@/types";
+import PredicateCell from "@/components/proptable/PredicateCell.vue";
+import ObjectCell from "@/components/proptable/ObjectCell.vue";
+import type { PropTableRow } from "@/types";
 
-const props = defineProps<RowPred>();
+const props = defineProps<PropTableRow>();
 </script>
 
 <template>
     <tr>
-        <PredCell
+        <PredicateCell
+            :id="props.id"
+            :termType="props.termType"
             :iri="props.iri"
             :qname="props.qname"
             :label="props.label"
             :description="props.description"
-            :explanation="props.explanation"
+            :provenance="props.provenance"
         />
         <td class="prop-objs">
-            <ObjCell v-for="obj in props.objs" v-bind="obj" />
+            <ObjectCell v-for="obj in props.objects" v-bind="obj" :predIri="props.iri" />
         </td>
     </tr>
 </template>

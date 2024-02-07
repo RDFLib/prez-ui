@@ -1,13 +1,12 @@
 <script lang="ts" setup>
-
 /// <reference path="../../node_modules/@types/google.maps/index.d.ts" /> 
 
-import { wktToGeoJSON } from "@terraformer/wkt"
 import { inject, reactive, ref, watch, type PropType } from 'vue'
+import { wktToGeoJSON } from "@terraformer/wkt"
 import { mapConfigKey, type MapConfig } from "@/types";
 import { convertConfigTypes } from '@/util/mapSearchHelper'
 import type { MapOptionsCenter } from '@/types'
-import type { WKTResult } from '@/stores/mapSearchStore.d';
+import type { WKTResult } from "@/components/MapClient.d";
 import { ShapeTypes, type DrawingModes } from "@/components/MapClient.d";
 
 
@@ -33,7 +32,7 @@ const props = defineProps({
     style: {
         type: String,
         default: 'width: 100%; height: 500px; background-color: #eee;'
-    }    
+    }
 })
 
 // when the map object has loaded, it will call this function to set mapDrawFunc, so an external component can call it when needed
@@ -94,7 +93,12 @@ watch(mapRef, googleMap => {
                 features = []
                 results.forEach(result=>{
                     try {
-                        const geoJson = wktToGeoJSON(result.wkt)
+                        // The terraformer wkt parser does not handle CRS values as IRIs.
+                        // The following regex strips out any IRIs in the WKT.
+                        // Note that the regex does not conform to IRIs but simply strips
+                        // out anything that is surrounded by angled brackets.
+                        let wkt = result.wkt.replace(/(<([^>]+)>)/gi, "")
+                        const geoJson = wktToGeoJSON(wkt)
                         const featureGeoJson = {
                             type: 'Feature',
                             geometry: geoJson,
@@ -112,7 +116,7 @@ watch(mapRef, googleMap => {
                                 bounds.extend(latlng);
                             });
                         });
-                        setShape(result.wkt)
+                        setShape(wkt)
                         map.fitBounds(bounds);                
                     } catch (ex) {
                         // can happen if we're unable to parse the result, just consoled out for now
@@ -237,5 +241,4 @@ watch(mapRef, googleMap => {
         :style="props.style" 
     >
     </GMapMap>
-
 </template>
