@@ -22,11 +22,11 @@ const props = defineProps<PrezUILiteralProps>();
             <Tag :value="props.language" icon="pi pi-language" />
         </span>
         <span v-else-if="props.datatype" class="datatype">
-            <a :href="props.datatype.iri" target="_blank" rel="noopener noreferrer">
+            <a :href="props.datatype.value" target="_blank" rel="noopener noreferrer">
                 <Tag
                     v-tooltip.top="props.datatype.description?.value || undefined"
                     icon="pi pi-code"
-                    :value="props.datatype.label?.value || (props.datatype.curie || props.datatype.iri)"
+                    :value="props.datatype.label?.value || (props.datatype.curie || props.datatype.value)"
                 />
             </a>
         </span>

@@ -20,7 +20,7 @@ export function sortNodes(a: PrezNode, b: PrezNode, direction: "asc" | "desc" = 
     } else if (b.curie) {
         return direction === "asc" ? 1 : -1;
     } else {
-        return direction === "asc" ? a.iri.localeCompare(b.iri) : b.iri.localeCompare(a.iri);
+        return direction === "asc" ? a.value.localeCompare(b.value) : b.value.localeCompare(a.value);
     }
 };
 

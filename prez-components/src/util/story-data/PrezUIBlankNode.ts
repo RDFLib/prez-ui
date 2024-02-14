@@ -4,15 +4,15 @@ import { literalDatatype, literalLang } from "./PrezUILiteral";
 
 // BlankNode
 export const blankNode: PrezUIBlankNodeProps = {
-    id: "_:1",
-    properties: [
-        {
+    value: "_:1",
+    properties: {
+        [nodePredicate.value]: {
             predicate: nodePredicate,
-            object: [
+            objects: [
                 literalLang,
                 literalDatatype,
             ],
         }
-    ],
-    termType: "blanknode"
+    },
+    termType: "BlankNode"
 };

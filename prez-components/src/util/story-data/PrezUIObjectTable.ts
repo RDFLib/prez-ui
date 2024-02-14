@@ -4,26 +4,27 @@ import { literalDatatype, literalGeom, literalLang } from "./PrezUILiteral";
 import { blankNode } from "./PrezUIBlankNode";
 
 const bnodeNested: PrezUIBlankNodeProps = {
-    id: "_:2",
-    properties: [
-        {
+    value: "_:2",
+    properties: {
+        [nodePredicate.value]: {
             predicate: nodePredicate,
-            object: [
+            objects: [
                 literalLang,
                 literalDatatype,
                 blankNode
             ],
         }
-    ],
-    termType: "blanknode"
+        
+    },
+    termType: "BlankNode"
 };
 
 // PrezUIObjectTable
 export const tableProps: PrezUIObjectTableProps = {
-    properties: [
-        {
+    properties: {
+        [nodePredicate.value]: {
             predicate: nodePredicate,
-            object: [
+            objects: [
                 literalLang,
                 literalDatatype,
                 literalGeom,
@@ -31,17 +32,17 @@ export const tableProps: PrezUIObjectTableProps = {
                 nodeLink
             ]
         },
-        {
+        [nodePredicate.value]: {
             predicate: nodePredicate,
-            object: [
+            objects: [
                 literalLang,
                 literalDatatype,
                 blankNode
             ]
         },
-        {
+        [nodePredicate.value]: {
             predicate: nodePredicate,
-            object: [
+            objects: [
                 literalLang,
                 literalDatatype,
                 blankNode,
@@ -49,13 +50,13 @@ export const tableProps: PrezUIObjectTableProps = {
                 blankNode
             ]
         },
-        {
+        [nodePredicate.value]: {
             predicate: nodePredicate,
-            object: [
+            objects: [
                 literalLang,
                 literalDatatype,
                 bnodeNested
             ]
         }
-    ]
+    }
 };

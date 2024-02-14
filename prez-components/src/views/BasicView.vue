@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import { literalLang, literalDatatype, literalGeom, node, blankNode } from "../util/storyData";
+import { literalLang, literalDatatype, literalGeom } from "../util/story-data/PrezUILiteral";
+import { node } from "../util/story-data/PrezUINode";
+import { blankNode } from "../util/story-data/PrezUIBlankNode";
 import PrezUILiteral from "../components/PrezUILiteral.vue";
 import PrezUINode from "../components/PrezUINode.vue";
 import PrezUIBlankNode from "../components/PrezUIBlankNode.vue";
