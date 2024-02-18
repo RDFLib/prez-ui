@@ -6,6 +6,7 @@ interface ImportMetaEnv {
     readonly VITE_PER_PAGE: number;
     readonly VITE_CONCEPT_PER_PAGE: number;
     readonly VITE_API_BASE_URL: string;
+    readonly VITE_BASE_URL: string;
     readonly VITE_MAP_SETTINGS_API_KEY: string;
     readonly VITE_MAP_SETTINGS_OPTIONS_CENTER_LAT: number;
     readonly VITE_MAP_SETTINGS_OPTIONS_CENTER_LNG: number;

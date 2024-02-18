@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# insert env vars in index.js
 INDEX_FILE=/app/assets/index-*.js;
 
 grep "=" .env | while read -r line; do # loop over VITE_ env vars
@@ -12,5 +13,13 @@ grep "=" .env | while read -r line; do # loop over VITE_ env vars
         sed -i 's|{}\.'"${left}"'|"'"${right}"'"|g' $INDEX_FILE;
     fi
 done
+
+# insert base url in index.html
+if (declare -p "VITE_BASE_URL" &>/dev/null)
+then
+    sed -i "s|BASE_URL = \"/\"|BASE_URL = \"$VITE_BASE_URL\"|g" /app/index.html
+    sed -i "s|/@BASE_URL@/|$VITE_BASE_URL|g" /app/index.html ${INDEX_FILE}
+    cp /app/index.html /app/404.html
+fi
 
 nginx -g 'daemon off;';
