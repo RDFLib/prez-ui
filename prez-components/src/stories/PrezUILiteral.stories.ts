@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import { literalLang, literalDatatype, literalGeom } from "../util/story-data/PrezUILiteral";
+import { literal, node } from "prez-lib"
 import PrezUILiteral from "../components/PrezUILiteral.vue";
 
 const meta = {
@@ -19,20 +19,40 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-    args: {
-        value: "Literal",
-        termType: "literal"
-    },
+    args: literal("Literal"),
 };
 
 export const Language: Story = {
-    args: literalLang,
+    args: literal({ value: "English Literal", language: "en" }),
 };
 
 export const Datatype: Story = {
-    args: literalDatatype,
+    args: literal({
+        value: "https://example.com/Literal2",
+        datatype: node({
+            value: "http://www.w3.org/2001/XMLSchema#anyURI",
+            curie: "xsd:anyURI"
+        })
+    }),
 };
 
 export const Geometry: Story = {
-    args: literalGeom,
+    args: {
+        ...literal({
+            value: "POINT((22 22))",
+            datatype: node({
+                value: "http://www.opengis.net/ont/geosparql#asWKT",
+                curie: "geo:asWKT",
+                label: literal({
+                    value: "As WKT",
+                    language: "en",
+                }),
+                description: literal({
+                    value: "A description for asWKT",
+                    language: "en",
+                })
+            })
+        }),
+        isGeometry: true
+    },
 };

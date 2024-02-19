@@ -86,7 +86,7 @@ function sortByTerm(a: PrezItem, b: PrezItem, predicateIri: string, direction: "
                         </td>
                     </tr>
                     <tr>
-                        <td class="desc" :colspan="predicates.length + 2">{{ item.focusNode.description?.value }} Lorem ipsum dolor sit, amet consectetur adipisicing elit. Provident alias sed temporibus, eum explicabo aut accusamus nam eos doloremque. Atque eligendi illo similique! Unde eum iusto earum quasi reiciendis placeat.</td>
+                        <td class="desc" :colspan="predicates.length + 2">{{ item.focusNode.description?.value || "" }}</td>
                     </tr>
                 </template>
             </table>

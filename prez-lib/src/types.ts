@@ -11,17 +11,27 @@ export type PrezTerm = PrezLiteral | PrezNode | PrezBlankNode;
 /**
  * Represents an RDF Literal
  */
-export interface PrezLiteral extends Omit<Literal, "datatype"> {
+export interface PrezLiteral extends Omit<Literal, "language" | "datatype" | "equals"> {
+    /**
+     * The language code of the literal, e.g. `en`
+     */
+    language?: string;
     /**
      * A PrezNode whose IRI represents the datatype of the literal.
      */
     datatype?: PrezNode;
+    /**
+     * @param other The term to compare with.
+     * @return True if and only if other has termType "Literal"
+     *                   and the same `value`, `language`, and `datatype`.
+     */
+    equals(other: PrezTerm | null | undefined): boolean;
 };
 
 /**
  * Represents an RDF Named Node
  */
-export interface PrezNode extends NamedNode {
+export interface PrezNode extends Omit<NamedNode, "equals"> {
     /**
      * The node's label
      */
@@ -47,16 +57,26 @@ export interface PrezNode extends NamedNode {
      */
     rdfTypes?: PrezNode[];
     // order: number; // for predicates - new extended type?
+    /**
+     * @param other The term to compare with.
+     * @return True if and only if other has termType "NamedNode" and the same `value`.
+     */
+    equals(other: PrezTerm | null | undefined): boolean;
 };
 
 /**
  * Represents an RDF Blank Node
  */
-export interface PrezBlankNode extends BlankNode {
+export interface PrezBlankNode extends Omit<BlankNode, "equals"> {
     /**
      * Contains children triples within the blank node
      */
     properties: PrezProperties;
+    /**
+     * @param other The term to compare with.
+     * @return True if and only if other has termType "BlankNode" and the same `value`.
+     */
+    equals(other: PrezTerm | null | undefined): boolean;
 };
 
 /**
