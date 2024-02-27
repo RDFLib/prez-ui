@@ -1,19 +1,25 @@
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { RouterLink } from "vue-router";
 import DataView from "primevue/dataview";
 import Button from "primevue/button";
-import type { PrezNode, PrezLiteral, ItemExtra } from "prez-lib"
+import type { PrezNode, PrezLiteral, PrezItem } from "prez-lib"
 import { PrezUIItemListProps } from "../types";
 import { sortLiterals, sortNodes } from "../util/helpers";
 import PrezUINode from "./PrezUINode.vue";
-import PrezUILiteral from "./PrezUILiteral.vue";
+import PrezUITerm from "./PrezUITerm.vue";
 
 const props = defineProps<PrezUIItemListProps>();
 
 const sortField = ref("");
 const sortOrder = ref<"asc" | "desc">("asc");
-const sortedItems = ref<ItemExtra[]>(props.items);
+const sortedItems = ref<PrezItem[]>(props.items);
+
+// get the list of predicates that exist in item properties
+const predicates = computed<PrezNode[]>(() => {
+    const list = props.items.map(item => Object.values(item.properties).map(prop => prop.predicate));
+    return Array.from(new Set(list.flat()));
+});
 
 function handleSortClick(field: string) {
     if (sortField.value === field) {
@@ -24,20 +30,25 @@ function handleSortClick(field: string) {
     }
 
     if (sortField.value === "label") {
-        sortedItems.value = props.items.sort((a, b) => sortNodes(a, b, sortOrder.value));
+        sortedItems.value = props.items.sort((a, b) => sortNodes(a.focusNode, b.focusNode, sortOrder.value));
     } else {
-        sortedItems.value = props.items.sort((a, b) => sortByExtra(a, b, sortField.value, sortOrder.value));
+        sortedItems.value = props.items.sort((a, b) => sortByTerm(a, b, sortField.value, sortOrder.value));
     }
 }
 
-function sortByExtra(a: ItemExtra, b: ItemExtra, predicate: string, direction: "asc" | "desc" = "asc"): number {
-    if (a.extras?.[predicate] && b.extras?.[predicate]) {
-        return a.extras?.[predicate].termType === "literal"
-            ? sortLiterals(a.extras[predicate] as PrezLiteral, b.extras[predicate] as PrezLiteral, direction)
-            : sortNodes(a.extras[predicate] as PrezNode, b.extras[predicate] as PrezNode, direction);
-    } else if (a.extras?.[predicate]) {
+// sort terms by first object in objects list
+function sortByTerm(a: PrezItem, b: PrezItem, predicateIri: string, direction: "asc" | "desc" = "asc"): number {
+    if (a.properties[predicateIri] && b.properties[predicateIri]) {
+        const aFirstObj = a.properties[predicateIri].objects[0];
+        const bFirstObj = b.properties[predicateIri].objects[0];
+
+        // assume all objects of the same predicate are EITHER a literal or a node - a predicate's range is consistent
+        return aFirstObj.termType === "Literal"
+            ? sortLiterals(aFirstObj as PrezLiteral, bFirstObj as PrezLiteral, direction)
+            : sortNodes(aFirstObj as PrezNode, bFirstObj as PrezNode, direction);
+    } else if (a.properties[predicateIri]) {
         return direction === "asc" ? -1 : 1;
-    } else if (b.extras?.[predicate]) {
+    } else if (b.properties[predicateIri]) {
         return direction === "asc" ? 1 : -1;
     } else {
         return 0;
@@ -46,7 +57,7 @@ function sortByExtra(a: ItemExtra, b: ItemExtra, predicate: string, direction: "
 </script>
 
 <template>
-    <DataView :value="sortedItems" dataKey="iri">
+    <DataView :value="sortedItems" dataKey="value">
         <template #list="slotProps">
             <table>
                 <tr>
@@ -54,32 +65,28 @@ function sortByExtra(a: ItemExtra, b: ItemExtra, predicate: string, direction: "
                         Label
                         <Button :icon="`pi pi-sort-alpha-${sortField === 'label' && sortOrder === 'desc' ? 'up' : 'down'}`" @click="handleSortClick('label')" :outlined="sortField !== 'label'" />
                     </th>
-                    <th v-for="predicate in props.predicates">
+                    <th v-for="predicate in predicates">
                         <PrezUINode v-bind="predicate" />
-                        <Button :icon="`pi pi-sort-alpha-${sortField === predicate.iri && sortOrder === 'desc' ? 'up' : 'down'}`" @click="handleSortClick(predicate.iri)" :outlined="sortField !== predicate.iri" />
+                        <Button :icon="`pi pi-sort-alpha-${sortField === predicate.value && sortOrder === 'desc' ? 'up' : 'down'}`" @click="handleSortClick(predicate.value)" :outlined="sortField !== predicate.value" />
                     </th>
-                    <th v-if="props.childButton"></th>
+                    <th></th>
                 </tr>
-                <template v-for="item in slotProps.items">
+                <template v-for="item in (slotProps.items as PrezItem[])">
                     <tr>
-                        <td class="label">
-                            <RouterLink :to="item.links[0]">{{ item.label?.value }}</RouterLink>
-                        </td>
-                        <td v-for="predicate in props.predicates">
-                            <template v-if="item.extras && item.extras[predicate.iri]">
-                                <PrezUINode v-if="item.extras[predicate.iri].termType === 'node'" v-bind="item.extras[predicate.iri]" showProv showType />
-                                <PrezUILiteral v-else-if="item.extras[predicate.iri].termType === 'literal'" v-bind="item.extras[predicate.iri]" />
+                        <td class="label"><PrezUINode v-bind="item.focusNode" /></td>
+                        <td v-for="predicate in predicates">
+                            <template v-if="predicate.value in item.properties">
+                                <PrezUITerm v-for="obj in item.properties[predicate.value].objects" v-bind="obj" />
                             </template>
-                            
                         </td>
-                        <td v-if="childButton">
-                            <RouterLink :to="item.links[0] + props.childButton?.suffix">
-                                <Button size="small" outlined>{{ props.childButton?.label }}</Button>
+                        <td v-if="item.focusNode.members">
+                            <RouterLink v-for="member in item.focusNode.members" :to="member.link">
+                                <Button size="small" outlined>{{ member.label }}</Button>
                             </RouterLink>
                         </td>
                     </tr>
                     <tr>
-                        <td class="desc" colspan="5">{{ item.description?.value }} Lorem ipsum dolor sit, amet consectetur adipisicing elit. Provident alias sed temporibus, eum explicabo aut accusamus nam eos doloremque. Atque eligendi illo similique! Unde eum iusto earum quasi reiciendis placeat.</td>
+                        <td class="desc" :colspan="predicates.length + 2">{{ item.focusNode.description?.value || "" }}</td>
                     </tr>
                 </template>
             </table>
@@ -91,10 +98,6 @@ function sortByExtra(a: ItemExtra, b: ItemExtra, predicate: string, direction: "
 table {
     border-collapse: collapse;
     width: 100%;
-
-    th {
-        
-    }
 
     & > tr {
         &:nth-child(4n - 2), &:nth-child(4n - 1) {

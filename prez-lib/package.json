@@ -34,6 +34,7 @@
         "test:unit": "vitest --environment jsdom --root src/"
     },
     "devDependencies": {
+        "@rdfjs/types": "^1.1.0",
         "@types/n3": "^1.16.4",
         "@vitest/coverage-v8": "^0.34.6",
         "concurrently": "^8.2.2",

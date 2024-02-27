@@ -1,58 +1,112 @@
+import type { NamedNode, Literal, BlankNode } from "@rdfjs/types";
+
 /**
- * Base type for `PrezLiteral`, `PrezNode` & `PrezBlankNode`
+ * Contains a `PrezLiteral`, `PrezNode` or `PrezBlankNode`
+ * @see PrezLiteral
+ * @see PrezNode
+ * @see PrezBlankNode
  */
-export type PrezTerm = {
-    termType: "literal" | "node" | "blanknode";
-};
+export type PrezTerm = PrezLiteral | PrezNode | PrezBlankNode;
 
 /**
  * Represents an RDF Literal
  */
-export type PrezLiteral = PrezTerm & {
-    value: string;
-    datatype?: PrezNode;
+export interface PrezLiteral extends Omit<Literal, "language" | "datatype" | "equals"> {
+    /**
+     * The language code of the literal, e.g. `en`
+     */
     language?: string;
-    termType: "literal";
+    /**
+     * A PrezNode whose IRI represents the datatype of the literal.
+     */
+    datatype?: PrezNode;
+    /**
+     * @param other The term to compare with.
+     * @return True if and only if other has termType "Literal"
+     *                   and the same `value`, `language`, and `datatype`.
+     */
+    equals(other: PrezTerm | null | undefined): boolean;
 };
 
 /**
  * Represents an RDF Named Node
  */
-export type PrezNode = PrezTerm & {
-    iri: string;
+export interface PrezNode extends Omit<NamedNode, "equals"> {
+    /**
+     * The node's label
+     */
     label?: PrezLiteral;
+    /**
+     * The node's description
+     */
     description?: PrezLiteral;
+    /**
+     * The node's provenance - used for info about how this node is used in Prez rather than a formal description
+     */
     provenance?: PrezLiteral;
+    /**
+     * The node's curie - a shorthand notation using prefixes - e.g. `prefix:abc`
+     */
     curie?: string;
+    /**
+     * The node's `prez:links`
+     */
     links?: PrezLink[];
+    /**
+     * The node's RDF types
+     */
     rdfTypes?: PrezNode[];
-    termType: "node";
+    // order: number; // for predicates - new extended type?
+    /**
+     * @param other The term to compare with.
+     * @return True if and only if other has termType "NamedNode" and the same `value`.
+     */
+    equals(other: PrezTerm | null | undefined): boolean;
+};
+
+/**
+ * Represents an RDF Blank Node
+ */
+export interface PrezBlankNode extends Omit<BlankNode, "equals"> {
+    /**
+     * Contains children triples within the blank node
+     */
+    properties: PrezProperties;
+    /**
+     * @param other The term to compare with.
+     * @return True if and only if other has termType "BlankNode" and the same `value`.
+     */
+    equals(other: PrezTerm | null | undefined): boolean;
 };
 
 /**
  * Represents a `prez:link` value, containing parent info
  */
 export type PrezLink = {
+    /**
+     * The link string value
+     */
     value: string;
+    /**
+     * An ordered array of 'parent' items - e.g. [dataset, feature collection] for a feature
+     */
     parents?: PrezNode[];
     // maybe label?
 };
 
 /**
- * Represents an RDF Blank Node
+ * Represents a 'row' in an item table
  */
-export type PrezBlankNode = PrezTerm & {
-    id: string;
-    properties: PrezProperty[];
-    termType: "blanknode";
+export interface PrezProperty {
+    predicate: PrezNode;
+    objects: PrezTerm[];
 };
 
 /**
- * Represents a 'row' in an item table
+ * A list of PrezProperty objects indexed by the predicate's IRI
  */
-export type PrezProperty = {
-    predicate: PrezNode;
-    object: PrezTerm[];
+export interface PrezProperties {
+    [predicateIri: string]: PrezProperty;
 };
 
 /**
@@ -66,15 +120,8 @@ export type PrezSearchResult = {
     resource: PrezItem;
 };
 
-// to be replaced by PrezItem?
-export type ItemExtra = PrezNode & {
-    extras?: {
-        [key: string]: PrezLiteral | PrezNode;
-    };
-};
-
 /**
- * 
+ * Represents an item in Prez that contains node info and its related properties
  */
 export interface PrezItem {
     focusNode: PrezNode & {
@@ -83,5 +130,5 @@ export interface PrezItem {
             label: string;
         }[];
     };
-    properties: PrezProperty[];
+    properties: PrezProperties;
 };

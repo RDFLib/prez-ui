@@ -11,13 +11,13 @@ const props = defineProps<PrezUINodeProps>();
         <component
             :is="props.links ? (props.links.length === 1 ? RouterLink : 'span') : 'a'"
             :class="`value ${props.links?.length === 1 ? 'link' : ''}`"
-            :href="!props.links ? props.iri : undefined"
+            :href="!props.links ? props.value : undefined"
             :to="props.links?.length === 1 ? props.links[0].value : undefined"
             v-tooltip.top="props.description?.value || undefined"
         >
             <template v-if="props.label">{{ props.label.value }}</template>
             <template v-else-if="props.curie">{{ props.curie }}</template>
-            <template v-else>{{ props.iri }}</template>
+            <template v-else>{{ props.value }}</template>
         </component>
         <span
             v-if="props.provenance && props.showProv"
@@ -32,7 +32,7 @@ const props = defineProps<PrezUINodeProps>();
         <a
             v-if="props.links"
             class="external-link"
-            :href="props.iri"
+            :href="props.value"
             target="_blank"
             rel="noopener noreferrer"
             v-tooltip.top="'External link'"
@@ -40,9 +40,9 @@ const props = defineProps<PrezUINodeProps>();
             <i class="pi pi-external-link"></i>
         </a>
         <span v-if="props.rdfTypes && props.showType" class="types">
-            <a v-for="t in props.rdfTypes" class="type" :href="t.iri" target="_blank" rel="noopener noreferrer">
+            <a v-for="t in props.rdfTypes" class="type" :href="t.value" target="_blank" rel="noopener noreferrer">
                 <Chip
-                    :label="t.label?.value || (t.curie || t.iri)"
+                    :label="t.label?.value || (t.curie || t.value)"
                     v-tooltip.top="t.description?.value || undefined"
                 />
             </a>
