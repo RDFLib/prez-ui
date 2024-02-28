@@ -127,8 +127,12 @@ export interface PrezItem {
     focusNode: PrezNode & {
         members?: {
             link: string;
-            label: string;
+            label?: string;
         }[];
     };
     properties: PrezProperties;
+};
+
+export type Prefixes = {
+    [namespace: string]: string;
 };
