@@ -28,8 +28,14 @@ export async function apiGet(url: string) {
 
 export async function getList(url: string, baseClass: string): Promise<PrezItem[]> {
     const { data } = await apiGet(url);
-    // console.log(data)
     const store = new RDFStore();
     store.load(data);
     return store.getList(baseClass);
+}
+
+export async function getItem(url: string, baseClass: string): Promise<PrezItem> {
+    const { data } = await apiGet(url);
+    const store = new RDFStore();
+    store.load(data);
+    return store.getItem(baseClass);
 }

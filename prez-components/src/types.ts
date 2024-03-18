@@ -25,12 +25,6 @@ export interface PrezUIObjectTableProps {
     members?: string[];
 };
 
-// used for both item & list pages
-// export interface PrezItem extends PrezNode {
-//     properties: PrezProperty[];
-//     members: PrezNode[];
-// };
-
 export interface PrezItemPage extends PrezItem { };
 
 export interface PrezListPage {

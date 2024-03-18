@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { NavItemProps } from "../types";
+import type { NavItemProps } from "../types";
 import SideNavItem from "./SideNavItem.vue";
 
 const props = defineProps<{

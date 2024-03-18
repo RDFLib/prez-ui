@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { RouterLink, useRoute } from "vue-router";
-import { NavItemProps } from "../types";
+import type { NavItemProps } from "../types";
 
 const route = useRoute();
 

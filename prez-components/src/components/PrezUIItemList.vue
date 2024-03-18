@@ -17,8 +17,16 @@ const sortedItems = ref<PrezItem[]>(props.items);
 
 // get the list of predicates that exist in item properties
 const predicates = computed<PrezNode[]>(() => {
-    const list = props.items.map(item => Object.values(item.properties).map(prop => prop.predicate));
-    return Array.from(new Set(list.flat()));
+    const list = props.items.map(item => Object.values(item.properties).map(prop => prop.predicate)).flat(1);
+    const iris: string[] = [];
+    const p: PrezNode[] = [];
+    list.forEach(item => {
+        if (!iris.includes(item.value)) {
+            p.push(item);
+            iris.push(item.value);
+        }
+    });
+    return p;
 });
 
 function handleSortClick(field: string) {

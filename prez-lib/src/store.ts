@@ -100,7 +100,7 @@ export class RDFStore {
         return this.getAnnotation(iri, "provenance");
     }
 
-    public getProperties(iri: string): PrezProperties {
+    public getProperties(term: Term): PrezProperties {
         const props: PrezProperties = {};
 
         this.store.forEach(q => {
@@ -110,7 +110,7 @@ export class RDFStore {
             };
 
             props[q.predicate.value].objects.push(this.toPrezTerm(q.object));
-        }, namedNode(iri), null, null, null);
+        }, term, null, null, null);
 
         return props;
     }
@@ -135,6 +135,17 @@ export class RDFStore {
                     n.provenance = provenance;
                 }
 
+                const links = this.getObjects(term.value, this.toIri("prez:link"));
+                if (links.length > 0) {
+                    n.links = links.map(l => {
+                        return { value: l.value }
+                    });
+                }
+
+                // types
+
+                // curie
+
                 return n;
             case "Literal":
                 const l = literal(term.value);
@@ -151,7 +162,7 @@ export class RDFStore {
             case "BlankNode":
                 const b = bnode(term.value);
 
-                b.properties = this.getProperties(term.value);
+                b.properties = this.getProperties(term);
 
                 return b;
             default:
@@ -162,7 +173,6 @@ export class RDFStore {
     /**
      * Gets an array of N3 `Quad_Objects` from a `Store` by providing a predicate or an array of predicates
      * 
-     
      * @param predicate a string or string array of predicate IRIs
      * @param object the object IRI
      * @returns the array of objects
@@ -196,7 +206,7 @@ export class RDFStore {
      * @param baseClass the object type to return
      * @returns a list of item objects
      */
-    public getList(baseClass: string) {
+    public getList(baseClass: string): PrezItem[] {
         const items: PrezItem[] = [];
         // TODO: need to check for top-level base class to determine whether to use getSubjects() or getObjects()
 
@@ -205,11 +215,26 @@ export class RDFStore {
         objs.forEach(obj => {
             const item: PrezItem = {
                 focusNode: this.toPrezTerm(obj) as PrezNode,
-                properties: this.getProperties(obj.value)
+                properties: this.getProperties(obj)
             }
 
             items.push(item);
         });
         return items;
+    }
+
+    /**
+     * Returns an item object
+     * 
+     * @param baseClass the object type to return
+     * @returns the item object
+     */
+    public getItem(baseClass: string): PrezItem {
+        const obj = this.getSubjects(this.toIri("a"), this.toIri(baseClass))[0];
+        const item: PrezItem = {
+            focusNode: this.toPrezTerm(obj) as PrezNode,
+            properties: this.getProperties(obj)
+        }
+        return item;
     }
 };

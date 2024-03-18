@@ -22,6 +22,8 @@
     "dependencies": {
         "@pinia/nuxt": "^0.5.1",
         "pinia": "^2.1.7",
-        "prez-components": "file:../prez-components"
+        "prez-components": "file:../prez-components",
+        "prez-lib": "file:../prez-lib",
+        "primeicons": "^6.0.1"
     }
 }
