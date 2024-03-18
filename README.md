@@ -7,3 +7,5 @@ Now separated into multiple projects for reusability.
 - `prez-template` - a Nuxt template for customisable Prez UI themes. Inherits the components & page routing which can be overridden by using Nuxt layers. Intended to published and used as a NPX create template
 
 ![New design diagram](design.png)
+
+NOTE: This repo now uses [`pnpm`](https://pnpm.io) - a more performant package manager to replace `npm` - and uses a root workspace to reuse dependencies and local packages.

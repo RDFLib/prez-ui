@@ -31,7 +31,8 @@
         "preview": "vite preview",
         "coverage": "vitest run --coverage",
         "bench": "vitest bench",
-        "test:unit": "vitest --environment jsdom --root src/"
+        "test:unit": "vitest --environment jsdom --root src/",
+        "preinstall": "npx only-allow pnpm"
     },
     "devDependencies": {
         "@rdfjs/types": "^1.1.0",
