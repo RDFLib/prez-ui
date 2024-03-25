@@ -1,7 +1,7 @@
 import { type Preview, setup } from "@storybook/vue3";
 import PrimeVue from "primevue/config";
-import "primevue/resources/themes/lara-dark-indigo/theme.css";
-// import "primevue/resources/themes/saga-blue/theme.css";
+//import "primevue/resources/themes/lara-dark-indigo/theme.css";
+import "primevue/resources/themes/saga-blue/theme.css";
 import "primeicons/primeicons.css";
 import Tooltip from 'primevue/tooltip';
 
