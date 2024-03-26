@@ -45,6 +45,10 @@ onMounted(() => {
     max-width: 1200px;
     margin: 0 auto;
 
+    @media (max-width: 800px) {
+        flex-direction: column;
+    }
+
     .prez-card {
         padding: 20px;
         background-color: var(--cardBg);
