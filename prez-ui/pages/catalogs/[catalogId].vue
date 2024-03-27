@@ -1,21 +1,17 @@
 <script lang="ts" setup>
-import { type PrezItem, getItem, node } from "prez-lib";
+import { type PrezItem, getItem, type ProfileHeader } from "prez-lib";
 import PrezUIObjectTable from "~/components/PrezUIObjectTable.vue"
 
 const API_BASE_URL = "https://prez-v4-single-endpoints.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com";
 const catalog = ref<PrezItem>({} as PrezItem);
-
-// const catalogs: PrezItem[] = [
-//     {
-//         focusNode: node("https://example.com"),
-//         properties: {}
-//     }
-// ]
+const profiles = ref<ProfileHeader[]>([]);
 
 const route = useRoute();
 
 onMounted(async () => {
-    catalog.value = await getItem(API_BASE_URL + "/catalogs/" + route.params.catalogId, "dcat:Catalog");
+    const { data, profiles: p } = await getItem(API_BASE_URL + "/catalogs/" + route.params.catalogId, "dcat:Catalog");
+    catalog.value = data;
+    profiles.value = p;
 })
 </script>
 

@@ -39,6 +39,7 @@
         "@types/n3": "^1.16.4",
         "@vitest/coverage-v8": "^0.34.6",
         "concurrently": "^8.2.2",
+        "sass": "^1.72.0",
         "typescript": "^5.0.2",
         "vite": "^4.4.5",
         "vitest": "^0.34.6"
