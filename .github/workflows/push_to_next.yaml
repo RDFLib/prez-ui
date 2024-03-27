@@ -25,7 +25,7 @@ jobs:
         run: CI=false pnpm build
       - name: Build Storybook
         working-directory: ./prez-components
-        run: CI=false pnpm build
+        run: CI=false pnpm build-storybook
       - name: Build prez-ui
         working-directory: ./prez-ui
         run: CI=false pnpm generate
