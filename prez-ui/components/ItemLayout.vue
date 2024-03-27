@@ -8,9 +8,9 @@ const props = defineProps<PrezItemPage>();
 <template>
     <main>
         <div class="item-header">
-            <h1>{{ props.focusNode.label?.value || props.focusNode.iri }}</h1>
+            <h1>{{ props.focusNode.label?.value || props.focusNode.value }}</h1>
             <div>Type: </div>
-            <div>IRI: {{ props.focusNode.iri }}</div>
+            <div>IRI: {{ props.focusNode.value }}</div>
         </div>
         <p v-if="props.focusNode.description" class="desc">{{ props.focusNode.description.value }}</p>
         <PrezUIObjectTable :properties="props.properties" />

@@ -1,23 +1,26 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-    // ssr: false,
+    ssr: false,
     devtools: { enabled: true },
     modules: [
-        "@pinia/nuxt",
+        // "@pinia/nuxt",
         "nuxt-primevue",
     ],
-    pinia: {
-        storesDirs: ["./stores/**"],
-    },
+    // pinia: {
+    //     storesDirs: ["./stores/**"],
+    // },
     imports: { // fixes a Nuxt bug when importing local built packages during development
         transform: {
             exclude: [
+                /\bprez\-components\b/,
                 /\bprez\-lib\b/,
-                /\bprez\-utils\b/,
             ]
         }
     },
-    css: ["primevue/resources/themes/lara-dark-indigo/theme.css"],
+    css: [
+        "primevue/resources/themes/lara-dark-indigo/theme.css",
+        "primeicons/primeicons.css"
+    ],
     nitro: {
         esbuild: {
             options: {

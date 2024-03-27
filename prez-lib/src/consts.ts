@@ -18,20 +18,22 @@ export const DEFAULT_PREFIXES: Prefixes = {
     "xsd": "http://www.w3.org/2001/XMLSchema#", 
 };
 
-// temporary for now until we figure out where annotation predicates from the API get stored
 export const ANNOTATION_PREDICATES = {
     label: [
-        "http://www.w3.org/2000/01/rdf-schema#label",
-        "http://purl.org/dc/terms/title",
-        "http://www.w3.org/2004/02/skos/core#prefLabel",
-        "https://schema.org/name"
+        // "http://www.w3.org/2000/01/rdf-schema#label",
+        // "http://purl.org/dc/terms/title",
+        // "http://www.w3.org/2004/02/skos/core#prefLabel",
+        // "https://schema.org/name",
+        "https://prez.dev/label"
     ],
     description: [
-        "http://purl.org/dc/terms/description",
-        "http://www.w3.org/2004/02/skos/core#definition",
-        "https://schema.org/description"
+        // "http://purl.org/dc/terms/description",
+        // "http://www.w3.org/2004/02/skos/core#definition",
+        // "https://schema.org/description",
+        "https://prez.dev/description"
     ],
     provenance: [
-        "http://purl.org/dc/terms/provenance"
+        // "http://purl.org/dc/terms/provenance",
+        "https://prez.dev/provenance"
     ]
 };

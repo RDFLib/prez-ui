@@ -1,4 +1,5 @@
 import "primevue/resources/themes/lara-dark-indigo/theme.css";
+import "primeicons/primeicons.css";
 import "./assets/sass/main.scss";
 import PrezUIItemList from "./components/PrezUIItemList.vue";
 import PrezUIObjectTable from "./components/PrezUIObjectTable.vue";

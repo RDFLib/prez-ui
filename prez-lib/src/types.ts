@@ -127,8 +127,31 @@ export interface PrezItem {
     focusNode: PrezNode & {
         members?: {
             link: string;
-            label: string;
+            label?: string;
         }[];
     };
     properties: PrezProperties;
+};
+
+export type Prefixes = {
+    [namespace: string]: string;
+};
+
+/**
+ * Represents a profile as retrieved from the link header from an API response
+ */
+export type ProfileHeader = {
+    default: boolean;
+    current: boolean;
+    uri: string;
+    token: string;
+    title: string;
+    description: string;
+    mediatypes: Mediatype[];
+};
+
+export type Mediatype = {
+    title: string;
+    mediatype: string;
+    default: boolean;
 };

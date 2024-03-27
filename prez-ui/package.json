@@ -7,12 +7,13 @@
         "dev": "nuxt dev",
         "generate": "nuxt generate",
         "preview": "nuxt preview",
+        "preinstall": "npx only-allow pnpm",
         "postinstall": "nuxt prepare"
     },
     "devDependencies": {
         "@nuxt/devtools": "latest",
         "nuxt": "^3.8.1",
-        "nuxt-primevue": "^0.2.1",
+        "nuxt-primevue": "^0.2.2",
         "sass": "^1.70.0",
         "typescript": "^5.2.2",
         "vue": "^3.3.8",
@@ -22,6 +23,9 @@
     "dependencies": {
         "@pinia/nuxt": "^0.5.1",
         "pinia": "^2.1.7",
-        "prez-components": "file:../prez-components"
+        "prez-components": "workspace:*",
+        "prez-lib": "workspace:*",
+        "primeicons": "^6.0.1",
+        "primevue": "^3.41.1"
     }
 }
