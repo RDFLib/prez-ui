@@ -1,9 +1,9 @@
-name: Builds & pushes Storybook & Prez UI demo site to AWS
+name: Build & push Storybook & Prez UI demo site to AWS
 
 on:
   push:
     branches:
-      - jamie/next/api-calls
+      - next
   workflow_dispatch:
 
 jobs:
