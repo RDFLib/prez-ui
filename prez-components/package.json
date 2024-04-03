@@ -30,7 +30,8 @@
     "types": "vue-tsc ",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "preinstall": "npx only-allow pnpm"
   },
   "peerDependencies": {
     "vue": "^3.3.4",
@@ -57,7 +58,7 @@
     "vue-tsc": "^1.8.4"
   },
   "dependencies": {
-    "prez-lib": "file:../prez-lib",
+    "prez-lib": "workspace:*",
     "primeicons": "^6.0.1",
     "primevue": "^3.41.1"
   }

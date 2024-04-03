@@ -1,19 +1,20 @@
 <script lang="ts" setup>
-import { literalLang, literalDatatype, literalGeom } from "../util/story-data/PrezUILiteral";
-import { node } from "../util/story-data/PrezUINode";
-import { blankNode } from "../util/story-data/PrezUIBlankNode";
+import { bnode } from "prez-lib";
+import { Default as literalDefaultData } from "../stories/PrezUILiteral.stories";
+import { Default as nodeDefaultData } from "../stories/PrezUINode.stories";
+import { Default as objectData } from "../stories/PrezUIObjectTable.stories";
 import PrezUILiteral from "../components/PrezUILiteral.vue";
 import PrezUINode from "../components/PrezUINode.vue";
 import PrezUIBlankNode from "../components/PrezUIBlankNode.vue";
+
+const bnodeData = bnode({value: "_:b0", properties: objectData.args.properties})
 </script>
 
 <template>
     <h3>Literals</h3>
-    <PrezUILiteral v-bind="literalLang" />
-    <PrezUILiteral v-bind="literalDatatype" />
-    <PrezUILiteral v-bind="literalGeom" />
+    <PrezUILiteral v-bind="literalDefaultData.args" />
     <h3>Nodes</h3>
-    <PrezUINode v-bind="node" showType showProv />
+    <PrezUINode v-bind="nodeDefaultData.args" showType showProv />
     <h3>Blank Nodes</h3>
-    <PrezUIBlankNode v-bind="blankNode" showProv showType />
+    <PrezUIBlankNode v-bind="bnodeData" showProv showType />
 </template>

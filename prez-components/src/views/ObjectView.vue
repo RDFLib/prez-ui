@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import PrezUIObjectTable from "../components/PrezUIObjectTable.vue";
-import { tableProps } from "../util/story-data/PrezUIObjectTable";
+import { Default as objectData } from "../stories/PrezUIObjectTable.stories";
 </script>
 
 <template>
     <div>
-        <PrezUIObjectTable v-bind="tableProps" />
+        <PrezUIObjectTable :properties="objectData.args.properties" />
     </div>
 </template>

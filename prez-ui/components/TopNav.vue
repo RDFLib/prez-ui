@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import Menubar from "primevue/menubar";
-import { NavItemProps } from "../types";
+import type { NavItemProps } from "../types";
 
 const props = defineProps<{
     items: NavItemProps[];

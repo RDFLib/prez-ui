@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import Sidebar from "primevue/sidebar";
 import Button from "primevue/button";
-import { NavItemProps } from "../types";
+import type { NavItemProps } from "../types";
 import SideNavContent from "./SideNavContent.vue";
 
 const props = defineProps<{
