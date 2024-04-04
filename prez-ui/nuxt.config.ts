@@ -18,7 +18,8 @@ export default defineNuxtConfig({
         }
     },
     css: [
-        "primevue/resources/themes/lara-dark-indigo/theme.css",
+        // "primevue/resources/themes/lara-dark-indigo/theme.css",
+        "primevue/resources/themes/aura-light-indigo/theme.css",
         "primeicons/primeicons.css"
     ],
     nitro: {
@@ -26,6 +27,12 @@ export default defineNuxtConfig({
             options: {
                 target: "esnext"
             }
+        }
+    },
+    runtimeConfig: {
+        public: {
+            apiUrl: "",
+            sidenav: true
         }
     }
 })

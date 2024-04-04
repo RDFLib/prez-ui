@@ -5,6 +5,7 @@ import DataView from "primevue/dataview";
 import Button from "primevue/button";
 import type { PrezNode, PrezLiteral, PrezItem } from "prez-lib"
 import { PrezUIItemListProps } from "../types";
+import { HIDDEN_PREDICATES } from "../util/consts";
 import { sortLiterals, sortNodes } from "../util/helpers";
 import PrezUINode from "./PrezUINode.vue";
 import PrezUITerm from "./PrezUITerm.vue";
@@ -21,7 +22,7 @@ const predicates = computed<PrezNode[]>(() => {
     const iris: string[] = [];
     const p: PrezNode[] = [];
     list.forEach(item => {
-        if (!iris.includes(item.value)) {
+        if (!iris.includes(item.value) && !HIDDEN_PREDICATES.includes(item.value)) {
             p.push(item);
             iris.push(item.value);
         }
@@ -69,25 +70,27 @@ function sortByTerm(a: PrezItem, b: PrezItem, predicateIri: string, direction: "
         <template #list="slotProps">
             <table>
                 <tr>
-                    <th class="label">
+                    <th class="label col-header">
                         Label
-                        <Button :icon="`pi pi-sort-alpha-${sortField === 'label' && sortOrder === 'desc' ? 'up' : 'down'}`" @click="handleSortClick('label')" :outlined="sortField !== 'label'" />
+                        <Button size="small" :icon="`pi pi-sort-alpha-${sortField === 'label' && sortOrder === 'desc' ? 'up' : 'down'}`" @click="handleSortClick('label')" :outlined="sortField !== 'label'" />
                     </th>
-                    <th v-for="predicate in predicates">
+                    <th v-for="predicate in predicates" class="col-header">
                         <PrezUINode v-bind="predicate" />
-                        <Button :icon="`pi pi-sort-alpha-${sortField === predicate.value && sortOrder === 'desc' ? 'up' : 'down'}`" @click="handleSortClick(predicate.value)" :outlined="sortField !== predicate.value" />
+                        <Button size="small" :icon="`pi pi-sort-alpha-${sortField === predicate.value && sortOrder === 'desc' ? 'up' : 'down'}`" @click="handleSortClick(predicate.value)" :outlined="sortField !== predicate.value" />
                     </th>
-                    <th></th>
+                    <th class="members-col"></th>
                 </tr>
                 <template v-for="item in (slotProps.items as PrezItem[])">
                     <tr>
-                        <td class="label"><PrezUINode v-bind="item.focusNode" /></td>
+                        <td class="label">
+                            <PrezUINode v-bind="item.focusNode" showType :showDesc="false" :showExt="false" />
+                        </td>
                         <td v-for="predicate in predicates">
                             <template v-if="predicate.value in item.properties">
                                 <PrezUITerm v-for="obj in item.properties[predicate.value].objects" v-bind="obj" />
                             </template>
                         </td>
-                        <td v-if="item.focusNode.members">
+                        <td v-if="item.focusNode.members" class="members-col">
                             <RouterLink v-for="member in item.focusNode.members" :to="member.link">
                                 <Button size="small" outlined>{{ member.label }}</Button>
                             </RouterLink>
@@ -109,7 +112,15 @@ table {
 
     & > tr {
         &:nth-child(4n - 2), &:nth-child(4n - 1) {
-            background-color: #1c2532;
+            background-color: #f8fafc;
+        }
+
+        th.col-header {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
+            padding: 6px;
         }
 
         td {
@@ -119,6 +130,10 @@ table {
                 font-style: italic;
                 font-size: 0.9em;
                 color: #b1b1b1;
+            }
+
+            &.members-col {
+                text-align: right;
             }
         }
     }

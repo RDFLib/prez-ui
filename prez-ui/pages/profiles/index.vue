@@ -6,9 +6,9 @@ import ProfileTable from "~/components/ProfileTable.vue";
 const config = useRuntimeConfig();
 const route = useRoute();
 
-const catalogs = ref<PrezItem[]>([]);
+const items = ref<PrezItem[]>([]);
 const profiles = ref<ProfileHeader[]>([]);
-const pageInfo = ref({
+    const pageInfo = ref({
     page: route.query?.page ? Number(route.query.page) - 1 : 0, // current page - 1
     totalRecords: 0, // total count
     rows: route.query?.per_page ? Number(route.query.per_page) : 20, // per_page
@@ -16,7 +16,7 @@ const pageInfo = ref({
 
 onMounted(async () => {
     const { data, profiles: p, count } = await getList(config.public.apiUrl + route.fullPath);
-    catalogs.value = data;
+    items.value = data;
     profiles.value = p;
     pageInfo.value.totalRecords = count;
 })
@@ -24,8 +24,8 @@ onMounted(async () => {
 
 <template>
     <ProfileTable v-if="route.query?._profile === 'altr-ext:alt-profile'" :profiles="profiles" :path="route.path" />
-    <ListLayout v-else :items="catalogs" :profiles="profiles" :path="route.path" :pageInfo="pageInfo">
-        <h1>Catalogs</h1>
-        <p>A list of dcat:Catalogs</p>
+    <ListLayout v-else :items="items" :profiles="profiles" :path="route.path" :pageInfo="pageInfo">
+        <h1>Profiles</h1>
+        <p>A list of prof:Profiles</p>
     </ListLayout>
 </template>

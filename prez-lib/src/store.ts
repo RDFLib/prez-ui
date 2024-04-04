@@ -1,9 +1,8 @@
-import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term } from "n3";
-import type { PrezItem, PrezLiteral, PrezNode, PrezTerm } from "./types";
+import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad } from "n3";
+import type { PrezItem, PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, Concept } from "./types";
 import { ANNOTATION_PREDICATES, DEFAULT_PREFIXES } from "./consts";
 import { defaultToIri, defaultFromIri } from "./helpers";
 import { node, literal, bnode } from "./factory";
-import { PrezProperties } from ".";
 
 const { namedNode } = DataFactory;
 
@@ -143,8 +142,17 @@ export class RDFStore {
                 }
 
                 // types
+                const types = this.getObjects(term.value, this.toIri("a"));
+                if (types.length > 0) {
+                    n.rdfTypes = types.map(t => this.toPrezTerm(t) as PrezNode)
+                }
 
                 // curie
+                Object.entries(DEFAULT_PREFIXES).forEach(([prefix, namespace]) => {
+                    if (term.value.startsWith(namespace)) {
+                        n.curie = prefix + ":" + term.value.split("#").slice(-1)[0].split("/").slice(-1)[0];
+                    }
+                });
 
                 return n;
             case "Literal":
@@ -171,13 +179,33 @@ export class RDFStore {
     }
 
     /**
+     * Creates a PrezItem object
+     * 
+     * @param obj 
+     * @returns 
+     */
+    private toPrezItem(obj: Quad_Object): PrezItem {
+        const item: PrezItem = {
+            focusNode: this.toPrezTerm(obj) as PrezNode,
+            properties: this.getProperties(obj)
+        }
+
+        const members = this.getMembers(obj.value);
+        if (members.length > 0) {
+            item.focusNode.members = members;
+        }
+
+        return item;
+    }
+
+    /**
      * Gets an array of N3 `Quad_Objects` from a `Store` by providing a predicate or an array of predicates
      * 
      * @param predicate a string or string array of predicate IRIs
      * @param object the object IRI
      * @returns the array of objects
      */
-    public getSubjects(predicate: string, object: string): Quad_Subject[] {
+    public getSubjects(predicate: string, object: string | null): Quad_Subject[] {
         return this.store.getSubjects(predicate, object, null);
     }
 
@@ -200,23 +228,116 @@ export class RDFStore {
         }
     }
 
+    public getMembers(subject: string): { link: string, label?: string }[] {
+        const objs = this.getObjects(subject, this.toIri("prez:members"));
+        const members: { link: string, label?: string }[] = [];
+        objs.forEach(o => {
+            const links = this.getObjects(o.id, this.toIri("prez:link"));
+            if (links.length === 1) {
+                members.push({
+                    link: links[0].value,
+                    label: "Members"
+                });
+            }
+        });
+        return members;
+    }
+
+    /**
+     * Returns the concept hierarchy for a vocab
+     * 
+     * @param vocab 
+     * @return the concept hierarchy
+     */
+    public getConcepts(vocab: Quad_Object): Concept[] {
+        const inScheme = this.getSubjects(this.toIri("skos:inScheme"), vocab.value);
+
+        function isInScheme(c: Quad_Object): boolean {
+            return inScheme.map(x => x.value).includes(c.value);
+        }
+
+        const hasTopConcept = this.getObjects(vocab.value, this.toIri("skos:hasTopConcept"));
+        const topConceptOf = this.getObjects(vocab.value, this.toIri("skos:topConceptOf"));
+        const index: {[iri: string]: Quad_Object[]} = {}; // an index of IRI's & their narrowers
+        const topConcepts = [...hasTopConcept, ...topConceptOf].filter(c => isInScheme(c));
+        inScheme.forEach(c => {
+            index[c.value] = [];
+        });
+
+        inScheme.forEach(c => {
+            const broader = this.getObjects(c.value, this.toIri("skos:broader"));
+            broader.forEach(b => {
+                if (isInScheme(b)) {
+                    index[b.value].push(c);
+                }
+            });
+
+            const narrower = this.getObjects(c.value, this.toIri("skos:narrower"));
+            narrower.forEach(n => {
+                if (isInScheme(n)) {
+                    index[c.value].push(n);
+                }
+            });
+        });
+
+        const concepts: Concept[] = [];
+
+        topConcepts.forEach(c => {
+            concepts.push(this.createHierarchy(c, index));
+        });
+        return concepts;
+    }
+
+    private createHierarchy(c: Quad_Object, index: {[iri: string]: Quad_Object[]}): Concept {
+        return {
+            ...this.toPrezTerm(c) as PrezNode,
+            narrowers: index[c.value].map(n => this.createHierarchy(n, index))
+        };
+    }
+
+    /**
+     * Gets a one or more subjects based on having a `dcterms:identifier"..."^^prez:identifier`
+     * 
+     * @param id optional id to match to get one subject
+     * @returns one or more subjects
+     */
+    getByPrezId(): Quad_Subject[];
+    getByPrezId(id: string): Quad_Subject;
+    public getByPrezId(id?: string): Quad_Subject | Quad_Subject[] {
+        const ids: Quad[] = [];
+        this.store.forEach(q => {
+            if (q.object.termType === "Literal" && q.object.datatype.value === this.toIri("prez:identifier")) {
+                ids.push(q);
+            }
+        }, null, namedNode(this.toIri("dcterms:identifier")), null, null);
+        if (id) {
+            return ids.find(q => q.object.value === id)!.subject;
+        } else {
+            return ids.map(q => q.subject);
+        }
+    }
+
+    public getCount(): number {
+        const count = this.store.getObjects(null, this.toIri("prez:count"), null);
+        if (count.length > 0) {
+            return Number(count[0].value);
+        } else {
+            return 0;
+        }
+    }
+
     /**
      * Returns a list of item objects
      * 
-     * @param baseClass the object type to return
      * @returns a list of item objects
      */
-    public getList(baseClass: string): PrezItem[] {
+    public getList(): PrezItem[] {
         const items: PrezItem[] = [];
-        // TODO: need to check for top-level base class to determine whether to use getSubjects() or getObjects()
-
-        // top-level objects
-        const objs = this.getSubjects(this.toIri("a"), this.toIri(baseClass));
+        
+        // assume only and all list items have dcterms:identifier - can't select by baseClass
+        const objs = this.getByPrezId();
         objs.forEach(obj => {
-            const item: PrezItem = {
-                focusNode: this.toPrezTerm(obj) as PrezNode,
-                properties: this.getProperties(obj)
-            }
+            const item = this.toPrezItem(obj);
 
             items.push(item);
         });
@@ -226,15 +347,39 @@ export class RDFStore {
     /**
      * Returns an item object
      * 
-     * @param baseClass the object type to return
+     * @param id the id of the object to return
      * @returns the item object
      */
-    public getItem(baseClass: string): PrezItem {
-        const obj = this.getSubjects(this.toIri("a"), this.toIri(baseClass))[0];
-        const item: PrezItem = {
-            focusNode: this.toPrezTerm(obj) as PrezNode,
-            properties: this.getProperties(obj)
+    public getItem(id: string): PrezItem {
+        const obj = this.getByPrezId(id);
+        const item = this.toPrezItem(obj);
+
+        // if conceptscheme
+        if (item.focusNode.rdfTypes?.map(t => t.value).includes(this.toIri("skos:ConceptScheme"))) {
+            const concepts = this.getConcepts(obj);
+            if (concepts.length > 0) {
+                item.focusNode.concepts = concepts;
+            }
         }
+        
         return item;
+    }
+
+    /**
+     * Returns search results
+     */
+    public search(): PrezSearchResult[] {
+        const resultSubjects = this.getSubjects(this.toIri("a"), this.toIri("prez:SearchResult"));
+        const results: PrezSearchResult[] = resultSubjects.map(s => {
+            const result: PrezSearchResult = {
+                hash: s.value.split("urn:hash:").slice(-1)[0],
+                weight: Number(this.getObjects(s.value, this.toIri("prez:searchResultWeight"))[0].value),
+                predicate: this.toPrezTerm(this.getObjects(s.value, this.toIri("prez:searchResultPredicate"))[0]) as PrezNode,
+                match: this.toPrezTerm(this.getObjects(s.value, this.toIri("prez:searchResultMatch"))[0]) as PrezLiteral,
+                resource: this.toPrezItem(this.getObjects(s.value, this.toIri("prez:searchResultURI"))[0])
+            };
+            return result;
+        });
+        return results;
     }
 };

@@ -28,6 +28,8 @@ jobs:
         run: CI=false pnpm build-storybook
       - name: Build prez-ui
         working-directory: ./prez-ui
+        env:
+          NUXT_PUBLIC_API_URL: ${{ secrets.NEXT_API_URL }}
         run: CI=false pnpm generate
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2

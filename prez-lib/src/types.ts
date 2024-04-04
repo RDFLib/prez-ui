@@ -129,6 +129,7 @@ export interface PrezItem {
             link: string;
             label?: string;
         }[];
+        concepts?: Concept[];
     };
     properties: PrezProperties;
 };
@@ -154,4 +155,8 @@ export type Mediatype = {
     title: string;
     mediatype: string;
     default: boolean;
+};
+
+export type Concept = PrezNode & {
+    narrowers: Concept[];
 };

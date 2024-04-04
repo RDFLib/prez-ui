@@ -1,4 +1,4 @@
-import type { PrezNode, PrezLiteral, PrezBlankNode, PrezProperties, PrezItem } from "prez-lib";
+import type { PrezNode, PrezLiteral, PrezBlankNode, PrezProperties, PrezItem, Concept } from "prez-lib";
 
 export interface PrezUILiteralProps extends PrezLiteral {
     isGeometry?: boolean;
@@ -22,7 +22,15 @@ export interface PrezUIItemListProps {
 
 export interface PrezUIObjectTableProps {
     properties: PrezProperties;
-    members?: string[];
+    members?: {
+        link: string;
+        label?: string;
+    }[];
+    concepts?: Concept[];
+    /**
+     * Hide hidden predicates for neater display, defaults to `true`
+     */
+    hideHidden?: boolean;
 };
 
 export interface PrezItemPage extends PrezItem { };

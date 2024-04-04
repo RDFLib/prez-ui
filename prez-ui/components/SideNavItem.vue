@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { ref } from "vue";
-import { RouterLink, useRoute } from "vue-router";
+import { NuxtLink } from '#components';
 import type { NavItemProps } from "../types";
 
 const route = useRoute();
@@ -16,17 +15,15 @@ function toggleopen() {
 
 <template>
     <div class="nav-item" @click="props.route ? undefined : toggleopen()">
-        <component :is="props.route ? RouterLink : 'span'" class="link-label" :to="props.route || undefined">{{ props.label }}</component>
+        <component :is="props.route ? NuxtLink : 'span'" class="link-label" :to="props.route || undefined">{{ props.label }}</component>
         <span v-if="props.items" class="children-dropdown" @click="props.route ? toggleopen() : undefined">
             <i :class="`pi pi-chevron-${open ? 'up' : 'down'}`"></i>
         </span>
     </div>
     <template v-if="props.items">
-        <!-- <Transition> -->
-            <div v-show="open" class="children-items">
-                <SideNavItem v-for="item in props.items" v-bind="item" />
-            </div>
-        <!-- </Transition> -->
+        <div v-show="open" class="children-items">
+            <SideNavItem v-for="item in props.items" v-bind="item" />
+        </div>
     </template>
 </template>
 

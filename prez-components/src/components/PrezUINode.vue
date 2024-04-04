@@ -3,7 +3,13 @@ import { RouterLink } from "vue-router";
 import Chip from "primevue/chip";
 import { PrezUINodeProps } from "../types";
 
-const props = defineProps<PrezUINodeProps>();
+const props = withDefaults(defineProps<PrezUINodeProps>(), {
+    showType: true,
+    showProv: true,
+    showDesc: true,
+    showExt: true,
+    badge: false,
+});
 </script>
 
 <template>
@@ -13,11 +19,13 @@ const props = defineProps<PrezUINodeProps>();
             :class="`value ${props.links?.length === 1 ? 'link' : ''}`"
             :href="!props.links ? props.value : undefined"
             :to="props.links?.length === 1 ? props.links[0].value : undefined"
-            v-tooltip.top="props.description?.value || undefined"
+            v-tooltip.top="props.showDesc ? props.description?.value : undefined"
         >
-            <template v-if="props.label">{{ props.label.value }}</template>
-            <template v-else-if="props.curie">{{ props.curie }}</template>
-            <template v-else>{{ props.value }}</template>
+            <component :is="props.badge ? Chip : 'slot'">
+                <template v-if="props.label">{{ props.label.value }}</template>
+                <template v-else-if="props.curie">{{ props.curie }}</template>
+                <template v-else>{{ props.value }}</template>
+            </component>
         </component>
         <span
             v-if="props.provenance && props.showProv"
@@ -30,7 +38,7 @@ const props = defineProps<PrezUINodeProps>();
             <RouterLink v-for="link in props.links" class="link" :to="link.value">{{ link.value }}</RouterLink>
         </span>
         <a
-            v-if="props.links"
+            v-if="props.links && props.showExt"
             class="external-link"
             :href="props.value"
             target="_blank"
@@ -40,12 +48,13 @@ const props = defineProps<PrezUINodeProps>();
             <i class="pi pi-external-link"></i>
         </a>
         <span v-if="props.rdfTypes && props.showType" class="types">
-            <a v-for="t in props.rdfTypes" class="type" :href="t.value" target="_blank" rel="noopener noreferrer">
+            <PrezUINode v-for="t in props.rdfTypes" v-bind="t" badge :showProv="false" :showType="false" />
+            <!-- <a v-for="t in props.rdfTypes" class="type" :href="t.value" target="_blank" rel="noopener noreferrer">
                 <Chip
                     :label="t.label?.value || (t.curie || t.value)"
                     v-tooltip.top="t.description?.value || undefined"
                 />
-            </a>
+            </a> -->
         </span>
     </div>
 </template>

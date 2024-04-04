@@ -4,7 +4,7 @@ import SideNav from "./SideNav.vue";
 import TopNav from "./TopNav.vue";
 
 const props = withDefaults(defineProps<{
-    sidenav: boolean;
+    sidenav?: boolean;
 }>(), {
     sidenav: true
 });
@@ -15,9 +15,25 @@ const items: NavItemProps[] = [
         route: "/"
     },
     {
+        label: "About",
+        route: "/about"
+    },
+    {
         label: "Catalogs",
         route: "/catalogs"
-    }
+    },
+    {
+        label: "Profiles",
+        route: "/profiles"
+    },
+    {
+        label: "Search",
+        route: "/search"
+    },
+    {
+        label: "SPARQL",
+        route: "/sparql"
+    },
 ];
 </script>
 

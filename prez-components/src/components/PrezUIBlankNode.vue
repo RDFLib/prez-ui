@@ -9,7 +9,7 @@ const props = defineProps<PrezUIBlankNodeProps>();
 <template>
     <Card>
         <template #content>
-            <PrezUIObjectTable :properties="props.properties" />
+            <PrezUIObjectTable :properties="props.properties" :hideHidden="false" />
         </template>
     </Card>
 </template>

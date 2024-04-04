@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { PrezUIObjectTable, type PrezUIObjectTableProps } from "prez-components";
 
-const props = defineProps<PrezUIObjectTableProps>();
+const props = withDefaults(defineProps<PrezUIObjectTableProps>(), {
+    hideHidden: true
+});
 </script>
 
 <template>

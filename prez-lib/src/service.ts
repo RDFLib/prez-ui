@@ -1,4 +1,4 @@
-import type { PrezItem, ProfileHeader } from "./types";
+import type { PrezItem, PrezSearchResult, ProfileHeader } from "./types";
 import { RDFStore } from "./store";
 
 type LinkObject = {
@@ -93,26 +93,38 @@ export async function apiGet(url: string) {
  * Gets a list of item objects from a listing endpoint
  * 
  * @param url 
- * @param baseClass the base class curie as a string - e.g. `"dcat:Catalog"`
  * @returns the list of item objects
  */
-export async function getList(url: string, baseClass: string): Promise<{data: PrezItem[], profiles: ProfileHeader[]}> {
+export async function getList(url: string): Promise<{data: PrezItem[], profiles: ProfileHeader[], count: number}> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);
-    return { data: store.getList(baseClass), profiles };
+    return { data: store.getList(), profiles, count: store.getCount() };
 }
 
 /**
  * Gets an item object from an item endpoint
  * 
  * @param url 
- * @param baseClass the base class curie as a string - e.g. `"dcat:Catalog"`
+ * @param id the prez:identifier of the object to get
  * @returns the item object
  */
-export async function getItem(url: string, baseClass: string): Promise<{data: PrezItem, profiles: ProfileHeader[]}> {
+export async function getItem(url: string, id: string): Promise<{data: PrezItem, profiles: ProfileHeader[]}> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);
-    return { data: store.getItem(baseClass), profiles };
+    return { data: store.getItem(id), profiles };
+}
+
+/**
+ * Runs a search query
+ * 
+ * @param url 
+ * @returns 
+ */
+export async function search(url: string): Promise<{data: PrezSearchResult[], profiles: ProfileHeader[]}> {
+    const { data, profiles } = await apiGet(url);
+    const store = new RDFStore();
+    store.load(data);
+    return { data: store.search(), profiles };
 }

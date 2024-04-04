@@ -26,11 +26,11 @@ const visible = ref(false);
 .sidenav {
     display: flex;
     flex-direction: column;
-    width: 260px;
+    min-width: 260px;
 }
 
 .sidenav-desktop {
-    background-color: #374151;
+    background-color: #f8f8f8;
     height: 100%;
 }
 
