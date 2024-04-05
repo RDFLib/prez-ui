@@ -12,7 +12,7 @@
     },
     "devDependencies": {
         "@nuxt/devtools": "latest",
-        "nuxt": "^3.8.1",
+        "nuxt": "^3.11.2",
         "nuxt-primevue": "^0.2.2",
         "sass": "^1.70.0",
         "typescript": "^5.2.2",

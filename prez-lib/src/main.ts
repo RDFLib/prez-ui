@@ -2,7 +2,8 @@ import { search, getItem, getList } from "./service";
 import "./assets/sass/main.scss";
 import { RDFStore } from "./store";
 
-const API_BASE_URL = "https://prez-v4-single-endpoints.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com";
+// const API_BASE_URL = "https://prez-v4-single-endpoints.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com";
+const API_BASE_URL = "https://api.ogc.dev.kurrawong.ai";
 
 function setupGetCatalogs() {
     document.querySelector<HTMLButtonElement>("#catalogsButton")!.addEventListener("click", async () => {

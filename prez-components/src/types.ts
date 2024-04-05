@@ -17,35 +17,29 @@ export interface PrezUIBlankNodeProps extends PrezBlankNode { };
 export type PrezUITermProps = PrezUINodeProps | PrezUILiteralProps | PrezUIBlankNodeProps;
 
 export interface PrezUIItemListProps {
-    items: PrezItem[];
+    data?: PrezItem[];
+    loading?: boolean;
 };
 
 export interface PrezUIObjectTableProps {
-    properties: PrezProperties;
-    members?: {
-        link: string;
-        label?: string;
-    }[];
-    concepts?: Concept[];
+    data?: {
+        properties: PrezProperties;
+        members?: {
+            link: string;
+            label?: string;
+        }[];
+        concepts?: Concept[];
+    }
     /**
      * Hide hidden predicates for neater display, defaults to `true`
      */
     hideHidden?: boolean;
+    loading?: boolean;
 };
 
-export interface PrezItemPage extends PrezItem { };
+// export interface PrezItemPage extends PrezItem { };
 
-export interface PrezListPage {
-    items: PrezItem[];
-    headers?: PrezNode[];
-    // childButton?: {
-    //     suffix: string;
-    //     label: string;
-    // };
-};
-
-export interface NavItemProps {
-    label: string;
-    route?: string;
-    items?: NavItemProps[];
-};
+// export interface PrezListPage {
+//     items: PrezItem[];
+//     headers?: PrezNode[];
+// };

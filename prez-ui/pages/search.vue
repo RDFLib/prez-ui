@@ -1,39 +1,45 @@
 <script lang="ts" setup>
-import { search, type PrezSearchResult } from "prez-lib"
 import Card from "primevue/card";
 import InputGroup from "primevue/inputgroup";
 import InputText from "primevue/inputtext";
-import SearchResult from "~/components/SearchResult.vue";
+import Message from "primevue/message";
 
 const config = useRuntimeConfig();
-
-const results = ref<PrezSearchResult[]>();
-
 const searchTerm = ref("");
-
-async function submit() {
-    const { data } = await search(config.public.apiUrl + "/search?q=" + searchTerm.value);
-    results.value = data;
-}
+const url = computed(() => {
+    return config.public.apiUrl + "/search?q=" + searchTerm.value;
+})
+const { data, pending, error } = await useSearch(url);
 </script>
 
 <template>
     <main>
         <h1>Search</h1>
-        <!-- <p>text</p> -->
+        <p>Search for items in Prez by using the search field below.</p>
         <Card class="search-form">
             <template #content>
                 <InputGroup>
-                    <InputText placeholder="Search..." name="search_term" type="search" v-model="searchTerm" @keyup.enter="submit" />
-                    <Button icon="pi pi-search" severity="success" @click="submit" />
+                    <InputText placeholder="Search..." name="search_term" type="search" v-model="searchTerm" />
+                    <!-- <Button icon="pi pi-search" severity="success" @click="" /> -->
                 </InputGroup>
             </template>
         </Card>
-        <h2>Results</h2>
-        <div id="results">
-            <SearchResult v-for="result in results" v-bind="result" />
-        </div>
-        <Paginator class="paginator" />
+        <template v-if="searchTerm !== ''">
+            <h2>Results</h2>
+            <div id="results">
+                <template v-if="pending">
+                    <SearchResult loading />
+                    <SearchResult loading />
+                    <SearchResult loading />
+                </template>
+                <Message v-else-if="error" severity="error" :closable="false">Error: {{ error.message }}</Message>
+                <p v-else-if="data.data.length === 0">No results found.</p>
+                <template v-else>
+                    <SearchResult v-for="result in data.data" :data="result" />
+                </template>
+            </div>
+            <Paginator class="paginator" />
+        </template>
     </main>
 </template>
 

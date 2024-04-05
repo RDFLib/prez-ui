@@ -19,7 +19,7 @@ export default defineNuxtConfig({
     },
     css: [
         // "primevue/resources/themes/lara-dark-indigo/theme.css",
-        "primevue/resources/themes/aura-light-indigo/theme.css",
+        "primevue/resources/themes/aura-light-blue/theme.css",
         "primeicons/primeicons.css"
     ],
     nitro: {

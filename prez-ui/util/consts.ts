@@ -1,0 +1,1 @@
+export const ALT_PROFILE_TOKEN = "altr-ext:alt-profile";

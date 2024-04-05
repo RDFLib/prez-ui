@@ -18,6 +18,7 @@ const props = withDefaults(defineProps<PrezUINodeProps>(), {
             :is="props.links ? (props.links.length === 1 ? RouterLink : 'span') : 'a'"
             :class="`value ${props.links?.length === 1 ? 'link' : ''}`"
             :href="!props.links ? props.value : undefined"
+            :target="!props.links ? '_blank' : undefined"
             :to="props.links?.length === 1 ? props.links[0].value : undefined"
             v-tooltip.top="props.showDesc ? props.description?.value : undefined"
         >
@@ -49,12 +50,6 @@ const props = withDefaults(defineProps<PrezUINodeProps>(), {
         </a>
         <span v-if="props.rdfTypes && props.showType" class="types">
             <PrezUINode v-for="t in props.rdfTypes" v-bind="t" badge :showProv="false" :showType="false" />
-            <!-- <a v-for="t in props.rdfTypes" class="type" :href="t.value" target="_blank" rel="noopener noreferrer">
-                <Chip
-                    :label="t.label?.value || (t.curie || t.value)"
-                    v-tooltip.top="t.description?.value || undefined"
-                />
-            </a> -->
         </span>
     </div>
 </template>
@@ -68,9 +63,15 @@ const props = withDefaults(defineProps<PrezUINodeProps>(), {
 
     .value {
         &.link {
-            color: #8c8cff;
-            text-decoration: underline;
-            cursor: pointer;
+            a {
+                color: var(--primary-color);
+                cursor: pointer;
+                text-decoration: none;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
         }
     }
 

@@ -278,7 +278,7 @@ import { Default as listData } from "../stories/PrezUIItemList.stories";
 //     }
 // ];
 
-const items: PrezItem[] = [
+const data: PrezItem[] = [
     {
         focusNode: {
             ...node({
@@ -301,7 +301,12 @@ const items: PrezItem[] = [
                 }
             ]
         },
-        properties: {}
+        properties: {
+            "https://example.com/predicate1": {
+                predicate: node("https://example.com/predicate1"),
+                objects: [literal("obj")]
+            }
+        }
     },
     {
         focusNode: {
@@ -356,6 +361,6 @@ const items: PrezItem[] = [
 
 <template>
     <div>
-        <PrezUIItemList :items="items" />
+        <PrezUIItemList :data="data" />
     </div>
 </template>

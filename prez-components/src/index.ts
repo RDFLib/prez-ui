@@ -1,5 +1,5 @@
 // import "primevue/resources/themes/lara-dark-indigo/theme.css";
-import "primevue/resources/themes/aura-light-indigo/theme.css";
+import "primevue/resources/themes/aura-light-blue/theme.css";
 import "primeicons/primeicons.css";
 import "./assets/sass/main.scss";
 import CopyButton from "./components/CopyButton.vue";

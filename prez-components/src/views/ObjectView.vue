@@ -61,11 +61,17 @@ const concepts: Concept[] = [
         ...node("https://example.com/concept5"),
         narrowers: []
     }
-]
+];
+
+const data = {
+    properties,
+    members,
+    concepts
+};
 </script>
 
 <template>
     <div>
-        <PrezUIObjectTable :properties="properties" :members="members" :concepts="concepts" />
+        <PrezUIObjectTable :data="data" />
     </div>
 </template>

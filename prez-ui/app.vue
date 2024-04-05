@@ -73,6 +73,16 @@ main {
     flex-grow: 1;
     padding: 12px;
 }
+
+a {
+    color: var(--primary-color);
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
 </style>
 
 <style lang="scss" scoped>
