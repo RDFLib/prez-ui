@@ -8,7 +8,8 @@ const meta = {
     component: PrezUIItemList,
     tags: ["autodocs"],
     argTypes: {
-        items: { description: "The list of items" },
+        data: { description: "The list of items" },
+        loading: { description: "Loading state" },
     },
 } satisfies Meta<typeof PrezUIItemList>;
 
@@ -38,7 +39,7 @@ const publisher = node({
 
 export const Default: Story = {
     args: {
-        items: [
+        data: [
             {
                 focusNode: {
                     ...node({
