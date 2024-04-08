@@ -79,10 +79,10 @@ const placeholderProperties = [
             <template #body="slotProps">
                 <Skeleton v-if="props.loading" width="30rem" class="mb-2"></Skeleton>
                 <template v-else>
-                    <template v-if="slotProps.data.predicate.value === 'https://prez.dev/concepts'">
+                    <template v-if="props.data?.concepts && slotProps.data.predicate.value === 'https://prez.dev/concepts'">
                         <PrezUIConceptHierarchy :concepts="slotProps.data.objects" />
                     </template>
-                    <template v-else-if="slotProps.data.predicate.value === 'https://prez.dev/members'">
+                    <template v-else-if="props.data?.members && slotProps.data.predicate.value === 'https://prez.dev/members'">
                         <RouterLink v-for="member in slotProps.data.objects" :to="member.value">
                             <Button size="small" outlined>Members</Button>
                         </RouterLink>

@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import type { Concept } from "prez-lib";
 import Button from "primevue/button";
+import type { PrezUIConceptProps } from "../types";
 import PrezUINode from "./PrezUINode.vue";
 
-const props = defineProps<Concept>();
+const props = defineProps<PrezUIConceptProps>();
 
 const open = ref(false);
 

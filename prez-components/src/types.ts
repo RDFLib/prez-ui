@@ -43,3 +43,5 @@ export interface PrezUIObjectTableProps {
 //     items: PrezItem[];
 //     headers?: PrezNode[];
 // };
+
+export interface PrezUIConceptProps extends Concept {};

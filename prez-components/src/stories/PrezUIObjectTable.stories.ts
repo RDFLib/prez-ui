@@ -8,8 +8,9 @@ const meta = {
     component: PrezUIObjectTable,
     tags: ["autodocs"],
     argTypes: {
-        properties: { description: "The list of properties" },
-        members: { description: "A list of member links" }
+        data: { description: "The list of properties" },
+        hideHidden: { description: "Hides hidden properties" },
+        loading: { description: "Loading state" },
     },
 } satisfies Meta<typeof PrezUIObjectTable>;
 
@@ -39,20 +40,22 @@ const publisher = node({
 
 export const Default: Story = {
     args: {
-        properties: {
-            [creator.value]: {
-                predicate: creator,
-                objects: [literal("object 1")]
-            },
-            [issued.value]: {
-                predicate: issued,
-                objects: [literal("object 2")]
-            },
-            [publisher.value]: {
-                predicate: publisher,
-                objects: [literal("object 3")]
-            },
-            // some blank node data to show nested tables
+        data: {
+            properties: {
+                [creator.value]: {
+                    predicate: creator,
+                    objects: [literal("object 1")]
+                },
+                [issued.value]: {
+                    predicate: issued,
+                    objects: [literal("object 2")]
+                },
+                [publisher.value]: {
+                    predicate: publisher,
+                    objects: [literal("object 3")]
+                },
+                // some blank node data to show nested tables
+            }
         }
     },
 }
