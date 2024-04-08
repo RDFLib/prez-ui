@@ -5,7 +5,8 @@ import StyleClass from "primevue/styleclass";
 import Ripple from "primevue/ripple";
 import router from "./router";
 import App from "./App.vue";
-import "primevue/resources/themes/lara-dark-indigo/theme.css";
+// import "primevue/resources/themes/lara-dark-indigo/theme.css";
+import "primevue/resources/themes/aura-light-blue/theme.css";
 import "primeicons/primeicons.css";
 import "./assets/sass/main.scss";
 

@@ -60,6 +60,6 @@
   "dependencies": {
     "prez-lib": "workspace:*",
     "primeicons": "^6.0.1",
-    "primevue": "^3.41.1"
+    "primevue": "^3.50.0"
   }
 }

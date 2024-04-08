@@ -1,0 +1,3 @@
+<template>
+    <ItemPage></ItemPage>
+</template>
