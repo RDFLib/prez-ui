@@ -1,5 +1,7 @@
+<script lang="ts" setup>
+import PrezUIItemList from "../components/PrezUIItemList.vue";
+</script>
+
 <template>
-    <div>
-        Welcome to the Prez UI Component Library
-    </div>
+    <PrezUIItemList />
 </template>
