@@ -9,3 +9,11 @@ Now separated into multiple projects for reusability.
 ![New design diagram](design.png)
 
 NOTE: This repo now uses [`pnpm`](https://pnpm.io) - a more performant package manager to replace `npm` - and uses a root workspace to reuse dependencies and local packages.
+
+
+# Running in local dev
+- run "pnpm i" in the root project folder
+- run "pnpm storybook" in the prez-components folder to view the storybook for prez-components
+
+
+

@@ -1,0 +1,18 @@
+{
+  "@vite/client": {
+    "prefetch": true,
+    "isEntry": true,
+    "file": "@vite/client",
+    "css": [],
+    "module": true,
+    "resourceType": "script"
+  },
+  "/Users/hjohns/workspace/kurrawong/prez-ui-data-provider/examples/01-DataProvider/node_modules/.pnpm/nuxt@3.11.2_@opentelemetry+api@1.8.0_@unocss+reset@0.60.4_floating-vue@5.2.2_unocss@0.60.4_vite@5.2.12/node_modules/nuxt/dist/app/entry.js": {
+    "resourceType": "script",
+    "module": true,
+    "prefetch": true,
+    "preload": true,
+    "isEntry": true,
+    "file": "/Users/hjohns/workspace/kurrawong/prez-ui-data-provider/examples/01-DataProvider/node_modules/.pnpm/nuxt@3.11.2_@opentelemetry+api@1.8.0_@unocss+reset@0.60.4_floating-vue@5.2.2_unocss@0.60.4_vite@5.2.12/node_modules/nuxt/dist/app/entry.js"
+  }
+}

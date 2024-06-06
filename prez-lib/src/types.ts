@@ -160,3 +160,10 @@ export type Mediatype = {
 export type Concept = PrezNode & {
     narrowers: Concept[];
 };
+
+export type PrezList = {
+    data: PrezItem[];
+    profiles: ProfileHeader[];
+    count: number;
+}
+

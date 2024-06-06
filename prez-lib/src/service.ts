@@ -1,4 +1,4 @@
-import type { PrezItem, PrezSearchResult, ProfileHeader } from "./types";
+import type { PrezItem, PrezList, PrezSearchResult, ProfileHeader } from "./types";
 import { RDFStore } from "./store";
 
 type LinkObject = {
@@ -95,7 +95,7 @@ export async function apiGet(url: string) {
  * @param url 
  * @returns the list of item objects
  */
-export async function getList(url: string): Promise<{data: PrezItem[], profiles: ProfileHeader[], count: number}> {
+export async function getList(url: string): Promise<PrezList> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);

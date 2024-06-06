@@ -47,6 +47,8 @@
     "@storybook/vue3-vite": "^7.5.3",
     "@types/node": "^20.4.1",
     "@vitejs/plugin-vue": "^4.2.3",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "sass": "^1.63.6",
     "storybook": "^7.5.3",
     "storybook-vue3-router": "^4.25.0",

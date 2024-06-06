@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
+  },
+  "dependencies": {
+    "n3": "^1.17.3",
+    "nuxt": "^3.11.2",
+    "prez-components": "../../prez-components",
+    "prez-lib": "../../prez-lib"
+  },
+  "devDependencies": {
+  }
+}
