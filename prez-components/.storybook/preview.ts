@@ -1,5 +1,15 @@
 import { type Preview, setup } from "@storybook/vue3";
 
+import PrimeVue from "primevue/config";
+import "primevue/resources/themes/aura-light-blue/theme.css";
+import "primeicons/primeicons.css";
+import Tooltip from 'primevue/tooltip';
+
+setup((app) => {
+    app.directive('tooltip', Tooltip);
+    app.use(PrimeVue);
+});
+
 const preview: Preview = {
     parameters: {
         actions: { argTypesRegex: "^on[A-Z].*" },

@@ -4,6 +4,8 @@ import { node, literal } from "prez-lib"
 import PrezUIDataList from "../components/PrezUIDataList.vue";
 import PrezUIDataItem from "../components/PrezUIDataItem.vue";
 import PrezDataProvider from "../components/PrezDataProvider.vue";
+import PrezUIObjectTable from '../components/PrezUIObjectTable.vue';
+import PrezUIBlankNode from "../components/PrezUIBlankNode.vue";
 
 const meta = {
     title: "PrezDataProviders",
@@ -66,6 +68,28 @@ CatalogItem.args = {
     objectId: 'bblck-ctlg:bblocks'
 };
 
+const TemplateItemTable = (args, { argTypes }) => ({
+    components: { PrezDataProvider, PrezUIObjectTable, PrezUIBlankNode },
+    props: Object.keys(argTypes),
+    template: `
+      <PrezDataProvider type="object" :url="args.url" :objectId="args.objectId">
+        <template v-slot="{ data, properties }">
+            <PrezUIBlankNode :data="data" :loading="!data" :properties="properties" />
+        </template>
+      </PrezDataProvider>
+    `,
+    setup() {
+        return { args };
+    }
+});
+
+export const CatalogItem2: Story = TemplateItemTable.bind({});
+CatalogItem2.args = {
+    url: 'https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com/catalogs/bblck-ctlg:bblocks',
+    objectId: 'bblck-ctlg:bblocks'
+};
+
 // Default.decorators = [
 //     vueRouter()
 // ];
+

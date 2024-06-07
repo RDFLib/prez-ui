@@ -11,6 +11,7 @@
     <ol>
       <li><NuxtLink to="/prez-object">Vanilla PrezObject</NuxtLink></li>
       <li><NuxtLink to="/custom-item">Custom item</NuxtLink></li>
+      <li><NuxtLink to="/custom-item2">Custom item2</NuxtLink></li>
     </ol>
   </main>
 </template>

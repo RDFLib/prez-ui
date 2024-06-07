@@ -1,11 +1,15 @@
 <template>
+    <h1>
+        Custom item NuxtPage
+    </h1>
+
     <PrezDataProvider
         type="object"
-        url="https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com/catalogs/bblck-ctlg:bblocks"
-        objectId="bblck-ctlg:bblocks">
+        url="https://ogc-prez-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com/catalogs/phcat:buildingblocks"
+        objectId="phcat:buildingblocks">
 
         <template v-slot="{ data, properties }">
-            <CustomTest
+            <CustomItem
                 :data="data"
                 :properties="properties"
             />

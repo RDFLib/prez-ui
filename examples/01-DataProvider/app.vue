@@ -24,6 +24,10 @@
   font-weight: bold;
 }
 
+.table th a {
+  color:white;
+}
+
 /* Table body styles */
 .table td {
   padding: 0.75rem;

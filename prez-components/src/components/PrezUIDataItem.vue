@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { PrezNode, type PrezDataItem } from "prez-lib";
 import { computed } from "vue";
+import PrezUITerm from "./PrezUITerm.vue";
 
 // export interface PrezUIItemListProps {
 //     data?: PrezItem[];
@@ -18,12 +19,20 @@ const props = defineProps<{
     </slot>
     <slot name="results">
         <table>
+            <thead>
+                <slot name="title">
+                    <tr><th :colspan="Object.values(props?.data?.data?.properties || {0:0}).length">Title</th></tr>
+                </slot>
+            </thead>
             <tbody>
                 <tr v-if="props?.data?.data?.properties" v-for="prop of Object.values(props.data.data.properties)">
                     <th>
-                        {{ prop.predicate.value }}
+                        <PrezUITerm v-bind="prop.predicate" />
                     </th>
                     <td>
+                        <!-- <div v-for="o of prop.objects">
+                            <PrezUITerm v-bind="o" />
+                        </div> -->
                         {{ prop.objects.map(o=>o.value).join(',') }}
                     </td>
                 </tr>

@@ -13,6 +13,12 @@ importers:
       prez-lib:
         specifier: workspace:*
         version: link:../prez-lib
+      primeicons:
+        specifier: ^7.0.0
+        version: 7.0.0
+      primevue:
+        specifier: ^3.52.0
+        version: 3.52.0(vue@3.4.27)
       vue:
         specifier: ^3.3.4
         version: 3.4.27(typescript@5.4.5)
@@ -61,7 +67,7 @@ importers:
         version: 7.6.19
       storybook-vue3-router:
         specifier: ^4.25.0
-        version: 4.25.0(@storybook/preview-api@8.1.6)(@storybook/vue3@7.6.19)(vue-router@4.3.2)(vue@3.4.27)
+        version: 4.25.0(@storybook/preview-api@8.1.6)(@storybook/vue3@7.6.19)(vue@3.4.27)
       typescript:
         specifier: ^5.1.6
         version: 5.4.5
@@ -3517,6 +3523,7 @@ packages:
 
   /@vue/devtools-api@6.6.3:
     resolution: {integrity: sha512-0MiMsFma/HqA6g3KLKn+AGpL1kgKhFWszC9U29NfpWK5LE7bjeXxySWJrOJ77hBz+TBrBQ7o4QJqbPbqbs8rJw==}
+    dev: false
 
   /@vue/language-core@1.8.27(typescript@5.4.5):
     resolution: {integrity: sha512-L8Kc27VdQserNaCUNiSFdDl9LWT24ly8Hpwf1ECy3aFb9m6bDhBGQYOujDm21N7EW3moKIOKEanQwe1q5BK+mA==}
@@ -6487,6 +6494,18 @@ packages:
     engines: {node: '>= 0.8'}
     dev: true
 
+  /primeicons@7.0.0:
+    resolution: {integrity: sha512-jK3Et9UzwzTsd6tzl2RmwrVY/b8raJ3QZLzoDACj+oTJ0oX7L9Hy+XnVwgo4QVKlKpnP/Ur13SXV/pVh4LzaDw==}
+    dev: false
+
+  /primevue@3.52.0(vue@3.4.27):
+    resolution: {integrity: sha512-HLOVP5YI0ArFKUhIyfZsWmTNMaBYNCBWC/3DYvdd/Po4LY5/WXf7yIYvArE2q/3OuwSXJXvjlR8UNQeJYRSQog==}
+    peerDependencies:
+      vue: ^3.0.0
+    dependencies:
+      vue: 3.4.27(typescript@5.4.5)
+    dev: false
+
   /process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
     dev: true
@@ -7223,7 +7242,7 @@ packages:
     resolution: {integrity: sha512-4QcZ+yx7nzEFiV4BMLnr/pRa5HYzNITX2ri0Zh6sT9EyQHbBHacC6YigllUPU9X3D0f/22QCgfokpKs52YRrUg==}
     dev: true
 
-  /storybook-vue3-router@4.25.0(@storybook/preview-api@8.1.6)(@storybook/vue3@7.6.19)(vue-router@4.3.2)(vue@3.4.27):
+  /storybook-vue3-router@4.25.0(@storybook/preview-api@8.1.6)(@storybook/vue3@7.6.19)(vue@3.4.27):
     resolution: {integrity: sha512-Ri/6pAu+BJ0kOSO65r/pMJmDAwGR07IXGu+XZg7JryIZqFkbuumWhq6V7LSARnssyaMKDOPOch7/cp8yrtE89g==}
     peerDependencies:
       '@storybook/preview-api': 7.x||>=7.0.0-rc.0
@@ -7239,7 +7258,6 @@ packages:
       '@storybook/preview-api': 8.1.6
       '@storybook/vue3': 7.6.19(vue@3.4.27)
       vue: 3.4.27(typescript@5.4.5)
-      vue-router: 4.3.2(vue@3.4.27)
     dev: true
 
   /storybook@7.6.19:
@@ -7906,6 +7924,7 @@ packages:
     dependencies:
       '@vue/devtools-api': 6.6.3
       vue: 3.4.27(typescript@5.4.5)
+    dev: false
 
   /vue-template-compiler@2.7.16:
     resolution: {integrity: sha512-AYbUWAJHLGGQM7+cNTELw+KsOG9nl2CnSv467WobS5Cv9uk3wFcnr1Etsz2sEIHEZvw1U+o9mRlEO6QbZvUPGQ==}

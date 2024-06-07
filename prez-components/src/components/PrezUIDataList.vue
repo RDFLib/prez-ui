@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { PrezNode, type PrezDataList } from "prez-lib";
-
+import PrezUINode from "./PrezUINode.vue";
 const props = defineProps<{
     tableClass?: string,
     data?: PrezDataList,
@@ -17,7 +17,7 @@ const props = defineProps<{
         <table :class="tableClass">
             <thead>
                 <tr>
-                    <th v-for="pred of properties">{{ pred.curie }}</th>
+                    <th v-for="pred of properties"><PrezUINode v-bind="pred"/></th>
                 </tr>
             </thead>
             <tbody>

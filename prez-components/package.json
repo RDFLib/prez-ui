@@ -58,6 +58,8 @@
     "vue-tsc": "^1.8.4"
   },
   "dependencies": {
-    "prez-lib": "workspace:*"
+    "prez-lib": "workspace:*",
+    "primeicons": "^7.0.0",
+    "primevue": "^3.52.0"
   }
 }
