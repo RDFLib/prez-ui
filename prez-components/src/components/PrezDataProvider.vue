@@ -1,22 +1,48 @@
 <script setup lang="ts">
 
 import { ref, onMounted, defineProps } from 'vue';
-import { getList, getItem, search, type PrezDataList, type PrezDataItem, type PrezDataSearch } from "prez-lib";
-import { type PrezDataProviderProps } from './PrezDataProvider.d';
+import { getList, getItem, search, type PrezDataList, type PrezDataItem, type PrezDataSearch, PrezNode } from "prez-lib";
 import PrezUILoading from './PrezUILoading.vue';
 import PrezUIMessage from './PrezUIMessage.vue';
+
+type PrezDataProviderProps = {
+    url: string;
+    type: 'list' | 'object' | 'search';
+    objectId?: string;
+};
 
 const props = defineProps<PrezDataProviderProps>();
 
 const data = ref<PrezDataList|PrezDataItem|PrezDataSearch>();
 const loading = ref(false);
 const error = ref<Error>();
+const properties = ref<PrezNode[]>([]);
+
+function getProperties():PrezNode[] {
+    if (!data.value?.data) return [];
+    
+    const list:PrezNode[] = props.type == 'search' ? (data.value! as PrezDataSearch).data.map(prop => prop.predicate).flat(1)
+        : (props.type == 'list' ? (data.value! as PrezDataList).data : [(data.value! as PrezDataItem).data])
+            .map(item => Object.values(item.properties).map(prop => prop.predicate)).flat(1)
+
+    const iris:string[] = [];
+    const p:PrezNode[] = [];
+    for(const item of list) {
+        if (!iris.includes(item.value)) {
+            p.push(item);
+            iris.push(item.value);
+        }
+    }
+
+    return p;
+}
 
 const fetchData = async () => {
 
-    error.value = undefined
-    loading.value = false
-    data.value = undefined
+    error.value = undefined;
+    loading.value = false;
+    data.value = undefined;
+    properties.value = [];
 
     if(!props.url) {
         error.value = new Error('No data URL provided')
@@ -37,6 +63,7 @@ const fetchData = async () => {
                 data.value = await search(props.url);
                 break;
         }
+        properties.value = getProperties();
     } catch (err) {
         error.value = err as Error;
         console.error('Error fetching data:', err);
@@ -51,7 +78,7 @@ onMounted(async () => {
 </script>
 <template>
     <div>
-        {{ url }}
+        <p><small>Data provider URL: {{ url }}</small></p>
         <template v-if="loading">
             <slot name="loading">
                 <PrezUILoading />
@@ -63,9 +90,8 @@ onMounted(async () => {
             </slot>
         </template>
         <template v-else>
-            <slot :data="data"></slot>
+            <slot :data="data" :properties="properties"></slot>
         </template>
 
     </div>
 </template>
-./PrezDataProvider

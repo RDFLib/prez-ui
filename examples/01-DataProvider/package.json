@@ -12,7 +12,5 @@
     "nuxt": "^3.11.2",
     "prez-components": "../../prez-components",
     "prez-lib": "../../prez-lib"
-  },
-  "devDependencies": {
   }
 }

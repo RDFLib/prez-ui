@@ -23,8 +23,8 @@ const TemplateList = (args, { argTypes }) => ({
     props: Object.keys(argTypes),
     template: `
       <PrezDataProvider type="list" :url="args.url">
-        <template v-slot="{ data }">
-            <PrezUIDataList :data="data" />
+        <template v-slot="{ data, properties }">
+            <PrezUIDataList :data="data" :properties="properties" />
         </template>
       </PrezDataProvider>
     `,
@@ -49,8 +49,8 @@ const TemplateItem = (args, { argTypes }) => ({
     props: Object.keys(argTypes),
     template: `
       <PrezDataProvider type="object" :url="args.url" :objectId="args.objectId">
-        <template v-slot="{ data }">
-            <PrezUIDataItem :data="data" />
+        <template v-slot="{ data, properties }">
+            <PrezUIDataItem :data="data" :properties="properties" />
         </template>
       </PrezDataProvider>
     `,

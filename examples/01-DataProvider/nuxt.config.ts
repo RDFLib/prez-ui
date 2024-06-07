@@ -9,4 +9,5 @@ export default defineNuxtConfig({
     // Add the path to the prez-components package
     '~/node_modules/prez-components/src/components'
   ],  
+    
 })
