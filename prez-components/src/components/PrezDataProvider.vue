@@ -1,13 +1,14 @@
 <script setup lang="ts">
 
 import { ref, onMounted, defineProps } from 'vue';
-import { getList, type PrezList } from "prez-lib";
-import { type PrezDataListProviderProps } from './PrezDataListProvider.d';
+import { getList, getItem, search, type PrezDataList, type PrezDataItem, type PrezDataSearch } from "prez-lib";
+import { type PrezDataProviderProps } from './PrezDataProvider.d';
+import PrezUILoading from './PrezUILoading.vue';
+import PrezUIMessage from './PrezUIMessage.vue';
 
+const props = defineProps<PrezDataProviderProps>();
 
-const props = defineProps<PrezDataListProviderProps>();
-
-const data = ref<PrezList>();
+const data = ref<PrezDataList|PrezDataItem|PrezDataSearch>();
 const loading = ref(false);
 const error = ref<Error>();
 
@@ -24,7 +25,18 @@ const fetchData = async () => {
 
     loading.value = true;
     try {
-        data.value = await getList(props.url);
+        switch(props.type) {
+            case 'list':
+                data.value = await getList(props.url);
+                break;
+            case 'object':
+                data.value = await getItem(props.url, props.objectId!);
+                console.log("VAL", data.value)
+                break;
+            case 'search':
+                data.value = await search(props.url);
+                break;
+        }
     } catch (err) {
         error.value = err as Error;
         console.error('Error fetching data:', err);
@@ -33,8 +45,8 @@ const fetchData = async () => {
     }
 };
 
-onMounted(() => {
-    fetchData();
+onMounted(async () => {
+    await fetchData();
 });
 </script>
 <template>
@@ -47,7 +59,7 @@ onMounted(() => {
         </template>
         <template v-else-if="error">
             <slot name="error" :error="error">
-                <PrezUIMessage severity="error">{{ error.message }}</PrezUIMessage>
+                <PrezUIMessage severity="error">{{ error }}</PrezUIMessage>
             </slot>
         </template>
         <template v-else>
@@ -56,3 +68,4 @@ onMounted(() => {
 
     </div>
 </template>
+./PrezDataProvider

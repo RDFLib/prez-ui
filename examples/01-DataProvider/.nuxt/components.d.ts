@@ -2,6 +2,7 @@
 interface _GlobalComponents {
       'CustomTest': typeof import("../components/CustomTest.vue")['default']
     'PrezDataListProvider': typeof import("../node_modules/prez-components/src/components/PrezDataListProvider.vue")['default']
+    'PrezDataProvider': typeof import("../node_modules/prez-components/src/components/PrezDataProvider.vue")['default']
     'PrezUIList': typeof import("../node_modules/prez-components/src/components/PrezUIList.vue")['default']
     'PrezUILoading': typeof import("../node_modules/prez-components/src/components/PrezUILoading.vue")['default']
     'PrezUIMessage': typeof import("../node_modules/prez-components/src/components/PrezUIMessage.vue")['default']
@@ -28,6 +29,7 @@ interface _GlobalComponents {
     'Body': typeof import("../node_modules/.pnpm/nuxt@3.11.2_@opentelemetry+api@1.8.0_@unocss+reset@0.60.4_floating-vue@5.2.2_unocss@0.60.4_vite@5.2.12/node_modules/nuxt/dist/head/runtime/components")['Body']
       'LazyCustomTest': typeof import("../components/CustomTest.vue")['default']
     'LazyPrezDataListProvider': typeof import("../node_modules/prez-components/src/components/PrezDataListProvider.vue")['default']
+    'LazyPrezDataProvider': typeof import("../node_modules/prez-components/src/components/PrezDataProvider.vue")['default']
     'LazyPrezUIList': typeof import("../node_modules/prez-components/src/components/PrezUIList.vue")['default']
     'LazyPrezUILoading': typeof import("../node_modules/prez-components/src/components/PrezUILoading.vue")['default']
     'LazyPrezUIMessage': typeof import("../node_modules/prez-components/src/components/PrezUIMessage.vue")['default']
@@ -68,6 +70,7 @@ declare module 'vue' {
 
 export const CustomTest: typeof import("../components/CustomTest.vue")['default']
 export const PrezDataListProvider: typeof import("../node_modules/prez-components/src/components/PrezDataListProvider.vue")['default']
+export const PrezDataProvider: typeof import("../node_modules/prez-components/src/components/PrezDataProvider.vue")['default']
 export const PrezUIList: typeof import("../node_modules/prez-components/src/components/PrezUIList.vue")['default']
 export const PrezUILoading: typeof import("../node_modules/prez-components/src/components/PrezUILoading.vue")['default']
 export const PrezUIMessage: typeof import("../node_modules/prez-components/src/components/PrezUIMessage.vue")['default']
@@ -94,6 +97,7 @@ export const Html: typeof import("../node_modules/.pnpm/nuxt@3.11.2_@opentelemet
 export const Body: typeof import("../node_modules/.pnpm/nuxt@3.11.2_@opentelemetry+api@1.8.0_@unocss+reset@0.60.4_floating-vue@5.2.2_unocss@0.60.4_vite@5.2.12/node_modules/nuxt/dist/head/runtime/components")['Body']
 export const LazyCustomTest: typeof import("../components/CustomTest.vue")['default']
 export const LazyPrezDataListProvider: typeof import("../node_modules/prez-components/src/components/PrezDataListProvider.vue")['default']
+export const LazyPrezDataProvider: typeof import("../node_modules/prez-components/src/components/PrezDataProvider.vue")['default']
 export const LazyPrezUIList: typeof import("../node_modules/prez-components/src/components/PrezUIList.vue")['default']
 export const LazyPrezUILoading: typeof import("../node_modules/prez-components/src/components/PrezUILoading.vue")['default']
 export const LazyPrezUIMessage: typeof import("../node_modules/prez-components/src/components/PrezUIMessage.vue")['default']

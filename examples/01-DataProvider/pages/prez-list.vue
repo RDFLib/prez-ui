@@ -3,10 +3,10 @@
 </script>
 <template>
 
-    <PrezDataListProvider url="https://api.gswa.dev.kurrawong.ai/v/vocab">
+    <PrezDataProvider url="https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com/catalogs">
         <template v-slot="{ data }">
             <PrezUIList :data="data" />
         </template>
-    </PrezDataListProvider>
+    </PrezDataProvider>
     
 </template>

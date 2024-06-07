@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { PrezNode, type PrezList } from "prez-lib";
+import { PrezNode, type PrezDataList } from "prez-lib";
 import { computed } from "vue";
 
 // export interface PrezUIItemListProps {
@@ -7,7 +7,7 @@ import { computed } from "vue";
 // };
 
 const props = defineProps<{
-    data: PrezList
+    data: PrezDataList
 }>();
 
 // get the list of predicates that exist in item properties

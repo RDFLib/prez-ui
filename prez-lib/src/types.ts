@@ -161,9 +161,18 @@ export type Concept = PrezNode & {
     narrowers: Concept[];
 };
 
-export type PrezList = {
+export type PrezDataList = {
     data: PrezItem[];
     profiles: ProfileHeader[];
     count: number;
 }
 
+export type PrezDataItem = {
+    data: PrezItem;
+    profiles: ProfileHeader[];
+}
+
+export type PrezDataSearch = {
+    data: PrezSearchResult[];
+    profiles: ProfileHeader[];
+}

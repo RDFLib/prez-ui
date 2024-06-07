@@ -1,4 +1,4 @@
-import type { PrezItem, PrezList, PrezSearchResult, ProfileHeader } from "./types";
+import type { PrezDataItem, PrezDataList, PrezDataSearch, ProfileHeader } from "./types";
 import { RDFStore } from "./store";
 
 type LinkObject = {
@@ -95,7 +95,7 @@ export async function apiGet(url: string) {
  * @param url 
  * @returns the list of item objects
  */
-export async function getList(url: string): Promise<PrezList> {
+export async function getList(url: string): Promise<PrezDataList> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);
@@ -109,7 +109,7 @@ export async function getList(url: string): Promise<PrezList> {
  * @param id the prez:identifier of the object to get
  * @returns the item object
  */
-export async function getItem(url: string, id: string): Promise<{data: PrezItem, profiles: ProfileHeader[]}> {
+export async function getItem(url: string, id: string): Promise<PrezDataItem> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);
@@ -122,7 +122,7 @@ export async function getItem(url: string, id: string): Promise<{data: PrezItem,
  * @param url 
  * @returns 
  */
-export async function search(url: string): Promise<{data: PrezSearchResult[], profiles: ProfileHeader[]}> {
+export async function search(url: string): Promise<PrezDataSearch> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);

@@ -1,16 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import { vueRouter } from "storybook-vue3-router";
 import { node, literal } from "prez-lib"
-import PrezUIList from "../components/PrezUIList.vue";
+import PrezUIDataList from "../components/PrezUIDataList.vue";
 
 const meta = {
     title: "PrezUIList",
-    component: PrezUIList,
+    component: PrezUIDataList,
     tags: ["autodocs"],
     argTypes: {
         data: { description: "The list of items" },
     },
-} satisfies Meta<typeof PrezUIList>;
+} satisfies Meta<typeof PrezUIDataList>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

@@ -1,54 +1,71 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import { vueRouter } from "storybook-vue3-router";
 import { node, literal } from "prez-lib"
-import PrezUIList from "../components/PrezUIList.vue";
-import PrezDataListProvider from "../components/PrezDataListProvider.vue";
+import PrezUIDataList from "../components/PrezUIDataList.vue";
+import PrezUIDataItem from "../components/PrezUIDataItem.vue";
+import PrezDataProvider from "../components/PrezDataProvider.vue";
 
 const meta = {
     title: "PrezDataProviders",
-    component: { PrezDataListProvider, PrezUIList },
+    component: { PrezDataProvider, PrezUIDataList, PrezUIDataItem },
     tags: ["autodocs"],
     argTypes: {
         url: { description: "The URL endpoint" },
-    }    
+        objectId: { description: "Object ID for object lookups"}
+    }
 };// satisfies Meta<typeof PrezDataListProvider>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-    args: {
-        url: 'http://test.com'
-    }
-};
-
-// const Template = (args, { argTypes }) => ({
-//     components: { PrezDataListProvider, PrezUIList },
-//     setup() {
-//       return { args };
-//     }
-// });
-
-// Fix the template to be a functional story
-const Template = (args, { argTypes }) => ({
-    components: { PrezDataListProvider, PrezUIList },
+const TemplateList = (args, { argTypes }) => ({
+    components: { PrezDataProvider, PrezUIDataList },
     props: Object.keys(argTypes),
     template: `
-      <PrezDataListProvider :url="args.url">
+      <PrezDataProvider type="list" :url="args.url">
         <template v-slot="{ data }">
-            <PrezUIList :data="data" />
+            <PrezUIDataList :data="data" />
         </template>
-      </PrezDataListProvider>
+      </PrezDataProvider>
     `,
     setup() {
         return { args };
     }
 });
 
-export const TemplateStory: Story = Template.bind({});
-TemplateStory.args = {
-    url: 'https://api.gswa.dev.kurrawong.ai/v/vocab'
+export const CatalogList: Story = TemplateList.bind({});
+CatalogList.args = {
+    url: 'https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com/catalogs'
 };
+
+export const VocabList: Story = TemplateList.bind({});
+VocabList.args = {
+    url: 'https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com/catalogs/bblck-ctlg:bblocks/collections'
+};
+
+
+const TemplateItem = (args, { argTypes }) => ({
+    components: { PrezDataProvider, PrezUIDataItem, PrezUIDataList },
+    props: Object.keys(argTypes),
+    template: `
+      <PrezDataProvider type="object" :url="args.url" :objectId="args.objectId">
+        <template v-slot="{ data }">
+            <PrezUIDataItem :data="data" />
+        </template>
+      </PrezDataProvider>
+    `,
+    setup() {
+        return { args };
+    }
+});
+
+
+export const CatalogItem: Story = TemplateItem.bind({});
+CatalogItem.args = {
+    url: 'https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com/catalogs/bblck-ctlg:bblocks',
+    objectId: 'bblck-ctlg:bblocks'
+};
+
 // Default.decorators = [
 //     vueRouter()
 // ];
