@@ -71,6 +71,12 @@ const activePrez = computed(() => {
     return enabledPrezs.value.find(prez => route.path === `/${prez.toLowerCase()[0]}` || route.path.startsWith(`/${prez.toLowerCase()[0]}/`));
 });
 
+
+const props = defineProps<{
+    sidenav: boolean;
+    version: string;
+}>();
+
 const collapse = ref(false);
 const dropdowns = ref(enabledPrezs.value.reduce<{[key: string]: boolean}>((obj, prez) => (obj[prez] = props.sidenav ? prez === activePrez.value : false, obj), {})); // { CatPrez: false, ... }
 
@@ -79,11 +85,6 @@ watch(() => route.path, (newValue) => {
         Object.keys(dropdowns.value).forEach(prez => dropdowns.value[prez] = prez === activePrez.value);
     }
 });
-
-const props = defineProps<{
-    sidenav: boolean;
-    version: string;
-}>();
 
 function closeDropdowns() {
     if (!Object.values(dropdowns.value).every(isOpen => !isOpen)) { // if any are true
