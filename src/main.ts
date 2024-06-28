@@ -4,6 +4,7 @@ import App from "@/App.vue";
 import router from "@/router";
 import config from "@/config";
 import { sidenavConfigKey, enabledPrezsConfigKey, apiBaseUrlConfigKey, mapConfigKey, perPageConfigKey, conceptPerPageConfigKey, enableScoresKey } from "@/types";
+import type { PrezFlavour } from "@/types";
 import { Tooltip } from "floating-vue";
 import VueGoogleMaps from "@fawmi/vue-google-maps";
 
@@ -14,7 +15,7 @@ import "@/assets/sass/main.scss";
 const app = createApp(App);
 
 app.provide(sidenavConfigKey, config.sidenav === "true");
-app.provide(enabledPrezsConfigKey, config.enabledPrezs.split(","));
+app.provide(enabledPrezsConfigKey, (config.enabledPrezs.split(",") as PrezFlavour[]));
 app.provide(perPageConfigKey, config.perPage);
 app.provide(conceptPerPageConfigKey, config.conceptPerPage);
 app.provide(enableScoresKey, config.enableScores === "true");
