@@ -253,23 +253,45 @@ export function useSparqlRequest() {
      * @returns data
      */
     async function sparqlGetRequest(url: string, query: string) {
+        return await sparqlRequest(url, query, "GET");
+    };
+
+    /**
+     * Perform an async SPARQL POST request
+     *
+     * @param path
+     * @returns data
+     */
+    async function sparqlPostRequest(url: string, query: string) {
+        return await sparqlRequest(url, query, "POST");
+    };
+
+    async function sparqlRequest(url: string, query: string, method: string) {
         loading.value = true;
         let data: any = "";
         let isGraphQuery = ["CONSTRUCT", "DESCRIBE"].some(e => query.includes(e));
-
+        let query_url = "";
+        let query_body = undefined;
+        let headers: any = {
+            "Accept": isGraphQuery ? "text/turtle" : "application/sparql-results+json"
+        };
         try {
-            const r = await fetch(`${url}?query=${encodeURIComponent(query)}`, {
-                method: "GET",
-                headers: {
-                    "Accept": isGraphQuery ? "text/turtle" : "application/sparql-results+json"
-                }
+            if (method === "GET") {
+                query_url =`${url}?query=${encodeURIComponent(query)}`
+            } else {
+                query_url = url;
+                query_body = `query=${encodeURIComponent(query)}`;
+                headers["Content-Type"] = "application/x-www-form-urlencoded";
+            }
+            const r = await fetch(query_url, {
+                method: method,
+                headers: headers,
+                body: query_body
             });
-        
             if (!r.ok) {
                 throw new NetworkError(`Network error - status code ${r.status}: ${r.statusText}`);
             }
-        
-        
+
             data = isGraphQuery ? await r.text() : await r.json();
         } catch (e) {
             if (e instanceof TypeError) { // TypeError - fetch error
@@ -288,6 +310,7 @@ export function useSparqlRequest() {
     return {
         loading,
         error,
-        sparqlGetRequest
+        sparqlGetRequest,
+        sparqlPostRequest
     };
 };

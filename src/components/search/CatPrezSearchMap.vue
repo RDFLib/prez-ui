@@ -41,8 +41,8 @@ type SparqlBinding = {
 const apiBaseUrl = inject(apiBaseUrlConfigKey) as string;
 
 const { loading: catalogLoading, error: catalogError, apiGetRequest: catalogApiGetRequest } = useApiRequest();
-const { loading: themesLoading, error: themesError, sparqlGetRequest: themesSparqlGetRequest } = useSparqlRequest();
-const { loading: searchLoading, error: searchError, sparqlGetRequest: searchSparqlGetRequest } = useSparqlRequest();
+const { loading: themesLoading, error: themesError, sparqlGetRequest: themesSparqlGetRequest, sparqlPostRequest: themesSparqlPostRequest } = useSparqlRequest();
+const { loading: searchLoading, error: searchError, sparqlGetRequest: searchSparqlGetRequest, sparqlPostRequest: searchSparqlPostRequest } = useSparqlRequest();
 const { store, parseIntoStore, qnameToIri } = useRdfStore();
 
 const LIVE_SEARCH = true;
@@ -135,7 +135,7 @@ async function getCatalogs() {
  * Gets a list of themes from a SPARQL query from the API & creates the list of theme options
  */
 async function getThemes() {
-    const themesData = await themesSparqlGetRequest(`${apiBaseUrl}/sparql`, getThemesQuery(selectedCatalogs.value));
+    const themesData = await themesSparqlPostRequest(`${apiBaseUrl}/sparql`, getThemesQuery(selectedCatalogs.value));
     if (themesData && !themesError.value) {
         themes.value = (themesData.results.bindings as SparqlBinding[]).map(result => {
             return {
@@ -150,7 +150,7 @@ async function getThemes() {
  * Performs search via a SPARQL query
  */
 async function doSearch() {
-    const searchData = await searchSparqlGetRequest(`${apiBaseUrl}/sparql`, query.value);
+    const searchData = await searchSparqlPostRequest(`${apiBaseUrl}/sparql`, query.value);
     if (searchData && !searchError.value) {
         results.value = (searchData.results.bindings as SparqlBinding[]).map(result => {
             return {
