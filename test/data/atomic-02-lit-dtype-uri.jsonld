@@ -4,6 +4,7 @@
         "prez": "https://prez.dev/"
     },
     "@id": "ex:subject",
+    "@type": "http://www.w3.org/ns/shacl#focusNode",
     "ex:predicate": {
         "@type": "http://www.w3.org/2001/XMLSchema#date",
         "@value": "2024-06-30"

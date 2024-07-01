@@ -6,15 +6,16 @@
     },
     "@graph": [
         {
+            "@id": "xml:date",
+            "prez:description": "A date datatype"
+        },
+        {
             "@id": "ex:subject",
+            "@type": "http://www.w3.org/ns/shacl#focusNode",
             "ex:predicate": {
                 "@type": "xml:date",
                 "@value": "2024-06-30"
             }
-        },
-        {
-            "@id": "xml:date",
-            "prez:description": "A date datatype"
         }
     ]
 }

@@ -4,5 +4,6 @@
         "prez": "https://prez.dev/"
     },
     "@id": "ex:subject",
+    "@type": "http://www.w3.org/ns/shacl#focusNode",
     "ex:predicate": "A simple literal"
 }
