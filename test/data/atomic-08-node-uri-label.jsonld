@@ -1,0 +1,16 @@
+{
+    "@context": {
+        "ex": "https://example.com/",
+        "prez": "https://prez.dev/"
+    },
+    "@graph": [
+        {
+            "@id": "ex:subject",
+            "@type": "http://www.w3.org/ns/shacl#focusNode",
+            "ex:predicate": {
+                "@id": "https://second.example.com/object",
+                "prez:label": "Example object - renders the same as atomic-09-node-curie-label.jsonld",
+            }
+        }
+    ]
+}

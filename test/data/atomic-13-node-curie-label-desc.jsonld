@@ -1,0 +1,18 @@
+{
+    "@context": {
+        "ex": "https://example.com/",
+        "prez": "https://prez.dev/",
+        "second_ex": "https://second.example.com/"
+    },
+    "@graph": [
+        {
+            "@id": "ex:subject",
+            "@type": "http://www.w3.org/ns/shacl#focusNode",
+            "ex:predicate": {
+                "@id": "second_ex:object",
+                "prez:label": "Example object - renders the same as atomic-08-node-uri-label.jsonld",
+                "prez:description": "An example object description"
+            }
+        }
+    ]
+}
