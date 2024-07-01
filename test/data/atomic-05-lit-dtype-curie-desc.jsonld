@@ -6,15 +6,15 @@
     },
     "@graph": [
         {
-            "@id": "xml:date",
-            "prez:description": "A date datatype"
-        },
-        {
             "@id": "ex:subject",
             "ex:predicate": {
                 "@type": "xml:date",
                 "@value": "2024-06-30"
             }
+        },
+        {
+            "@id": "xml:date",
+            "prez:description": "A date datatype"
         }
     ]
 }
