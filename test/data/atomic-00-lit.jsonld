@@ -1,0 +1,8 @@
+{
+    "@context": {
+        "ex": "https://example.com/",
+        "prez": "https://prez.dev/"
+    },
+    "@id": "ex:subject",
+    "ex:predicate": "A simple literal"
+}

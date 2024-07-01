@@ -1,0 +1,11 @@
+{
+    "@context": {
+        "ex": "https://example.com/",
+        "prez": "https://prez.dev/"
+    },
+    "@id": "ex:subject",
+    "ex:predicate": {
+        "@language": "es",
+        "@value": "Un literal simple"
+    }
+}

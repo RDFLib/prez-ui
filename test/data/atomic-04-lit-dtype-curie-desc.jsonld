@@ -1,0 +1,20 @@
+{
+    "@context": {
+        "ex": "https://example.com/",
+        "prez": "https://prez.dev/",
+        "xml": "http://www.w3.org/2001/XMLSchema#"
+    },
+    "@graph": [
+        {
+            "@id": "xml:date",
+            "prez:description": "A date datatype"
+        },
+        {
+            "@id": "ex:subject",
+            "ex:predicate": {
+                "@type": "xml:date",
+                "@value": "2024-06-30"
+            }
+        }
+    ]
+}
