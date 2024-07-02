@@ -1,0 +1,22 @@
+[
+    {
+        "@id": "https://obj-with-label",
+        "https://prez.dev/label": [
+            {
+                "@language": "en",
+                "@value": "Object Label"
+            }
+        ]
+    },
+    {
+        "@id": "https://focus-node",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://pred-no-label": [
+            {
+                "@id": "https://obj-with-language"
+            }
+        ]
+    }
+]

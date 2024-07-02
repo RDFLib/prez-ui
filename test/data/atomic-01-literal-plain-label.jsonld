@@ -1,9 +1,9 @@
 [
     {
-        "@id": "http://www.w3.org/2001/XMLSchema#date",
+        "@id": "https://obj-with-label",
         "https://prez.dev/label": [
             {
-                "@value": "Date"
+                "@value": "Object Label"
             }
         ]
     },
@@ -12,10 +12,9 @@
         "@type": [
             "http://www.w3.org/ns/shacl#focusNode"
         ],
-        "https://pred/datatype-label": [
+        "https://pred-no-label": [
             {
-                "@type": "http://www.w3.org/2001/XMLSchema#date",
-                "@value": "2024-06-01"
+                "@id": "https://obj-with-label"
             }
         ]
     }
