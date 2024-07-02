@@ -1,0 +1,22 @@
+[
+    {
+        "@id": "http://www.w3.org/2001/XMLSchema#date",
+        "https://prez.dev/label": [
+            {
+                "@value": "Date"
+            }
+        ]
+    },
+    {
+        "@id": "https://focus-node",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://pred/datatype-label": [
+            {
+                "@type": "http://www.w3.org/2001/XMLSchema#date",
+                "@value": "2024-06-01"
+            }
+        ]
+    }
+]

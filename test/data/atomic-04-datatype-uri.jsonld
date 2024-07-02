@@ -1,0 +1,14 @@
+[
+    {
+        "@id": "https://focus-node",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://pred/datatype-uri": [
+            {
+                "@type": "https://unlabelled-datatype-uri",
+                "@value": "Obj with datatype URI"
+            }
+        ]
+    }
+]
