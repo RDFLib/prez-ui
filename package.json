@@ -27,6 +27,7 @@
         "pinia": "^2.1.7",
         "vite-plugin-rewrite-all": "^1.0.1",
         "vue": "^3.3.0",
+        "vue-dompurify-html": "^5.1.0",
         "vue-router": "^4.2.5"
     },
     "devDependencies": {
