@@ -8,14 +8,6 @@
         ]
     },
     {
-        "@id": "https://obj-with-prov",
-        "https://prez.dev/provenance": [
-            {
-                "@value": "Provenance Obj 1"
-            }
-        ]
-    },
-    {
         "@id": "https://focus-node",
         "@type": [
             "http://www.w3.org/ns/shacl#focusNode"
@@ -28,6 +20,14 @@
         "https://prez.dev/provenance": [
             {
                 "@value": "Focus Node Provenance"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj-with-prov",
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Provenance Obj 1"
             }
         ]
     }

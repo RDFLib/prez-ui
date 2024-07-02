@@ -1,5 +1,14 @@
 [
     {
+        "@id": "https://obj-with-dtype",
+        "https://prez.dev/label": [
+            {
+                "@type": "http://www.w3.org/2001/XMLSchema#date",
+                "@value": "2024-06-30"
+            }
+        ]
+    },
+    {
         "@id": "https://focus-node",
         "@type": [
             "http://www.w3.org/ns/shacl#focusNode"
@@ -7,15 +16,6 @@
         "https://pred-no-label": [
             {
                 "@id": "https://obj-with-dtype"
-            }
-        ]
-    },
-    {
-        "@id": "https://obj-with-dtype",
-        "https://prez.dev/label": [
-            {
-                "@type": "http://www.w3.org/2001/XMLSchema#date",
-                "@value": "2024-06-30"
             }
         ]
     }

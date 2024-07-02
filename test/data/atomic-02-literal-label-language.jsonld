@@ -1,6 +1,6 @@
 [
     {
-        "@id": "https://obj-with-label",
+        "@id": "https://obj-with-language",
         "https://prez.dev/label": [
             {
                 "@language": "en",

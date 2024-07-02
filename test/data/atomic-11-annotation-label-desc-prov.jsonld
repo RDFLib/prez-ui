@@ -18,24 +18,6 @@
         ]
     },
     {
-        "@id": "https://pred-with-label-desc-prov",
-        "https://prez.dev/description": [
-            {
-                "@value": "Description Pred 1"
-            }
-        ],
-        "https://prez.dev/label": [
-            {
-                "@value": "Labeled Pred 1"
-            }
-        ],
-        "https://prez.dev/provenance": [
-            {
-                "@value": "Provenance Pred 1"
-            }
-        ]
-    },
-    {
         "@id": "https://focus-node",
         "@type": [
             "http://www.w3.org/ns/shacl#focusNode"
@@ -58,6 +40,24 @@
         "https://prez.dev/provenance": [
             {
                 "@value": "Focus Node Provenance"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred-with-label-desc-prov",
+        "https://prez.dev/description": [
+            {
+                "@value": "Description Pred 1"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Pred 1"
+            }
+        ],
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Provenance Pred 1"
             }
         ]
     }

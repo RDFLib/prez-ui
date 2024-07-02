@@ -8,18 +8,18 @@
         ]
     },
     {
-        "@id": "https://pred/1/bn1",
-        "https://prez.dev/label": [
-            {
-                "@value": "BN Pred 1"
-            }
-        ]
-    },
-    {
         "@id": "https://obj/1/bn1",
         "https://prez.dev/label": [
             {
                 "@value": "BN Object label"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred/1/bn1",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Pred 1"
             }
         ]
     },

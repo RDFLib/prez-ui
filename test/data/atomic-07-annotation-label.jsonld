@@ -1,13 +1,5 @@
 [
     {
-        "@id": "https://pred-with-label",
-        "https://prez.dev/label": [
-            {
-                "@value": "Labeled Pred 1"
-            }
-        ]
-    },
-    {
         "@id": "https://obj-with-label",
         "https://prez.dev/label": [
             {
@@ -28,6 +20,14 @@
         "https://prez.dev/label": [
             {
                 "@value": "Focus Node Label"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred-with-label",
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Pred 1"
             }
         ]
     }
