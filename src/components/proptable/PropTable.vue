@@ -35,6 +35,16 @@ function buildRows(properties: AnnotatedTriple[]): PropTableRow[] {
     return Object.values(propRows).sort((a, b) => a.order - b.order);
 }
 
+function isHTML(content: string): boolean {
+    let ret = false;
+    for (let tag of ["<h2","<h3", "<p"]) {
+        if (content.indexOf(tag) !== -1) {
+            ret = true;
+            break;
+        }
+    }
+    return ret;
+}
 onMounted(() => {
     const properties = props.properties.filter(p => !props.hiddenPredicates.includes(p.predicate.value));
     rows.value = buildRows(properties);
@@ -67,7 +77,8 @@ onMounted(() => {
         </small>
     </h1>
     <slot name="map"></slot>
-    <p v-if="!!props.item.description"><em>{{ props.item.description }}</em></p>
+    <div v-if="(!!props.item.description && isHTML(props.item.description))" v-dompurify-html="props.item.description"></div>
+    <p v-else-if="!!props.item.description"><em>{{ props.item.description }}</em></p>
     <table>
         <slot name="top"></slot>
         <PropRow v-for="row in rows" v-bind="row" />
