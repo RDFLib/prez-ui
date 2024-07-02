@@ -1,0 +1,13 @@
+[
+    {
+        "@id": "https://focus-node",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://pred-no-label": [
+            {
+                "@id": "https://example.com/known-namespace"
+            }
+        ]
+    }
+]

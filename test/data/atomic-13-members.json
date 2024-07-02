@@ -1,0 +1,21 @@
+[
+    {
+        "@id": "https://focus-node",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://prez.dev/members": [
+            {
+                "@id": "_:mbn"
+            }
+        ]
+    },
+    {
+        "@id": "_:mbn",
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalogs/link:focusnode/children"
+            }
+        ]
+    }
+]

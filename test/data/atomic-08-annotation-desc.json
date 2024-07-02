@@ -1,0 +1,34 @@
+[
+    {
+        "@id": "https://pred-with-desc",
+        "https://prez.dev/description": [
+            {
+                "@value": "Description Pred 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj-with-desc",
+        "https://prez.dev/description": [
+            {
+                "@value": "Description Obj 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://focus-node",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://pred-with-desc": [
+            {
+                "@id": "https://obj-with-desc"
+            }
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Focus Node Description"
+            }
+        ]
+    }
+]

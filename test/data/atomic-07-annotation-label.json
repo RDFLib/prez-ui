@@ -1,0 +1,34 @@
+[
+    {
+        "@id": "https://pred-with-label",
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Pred 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj-with-label",
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Obj 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://focus-node",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://pred-with-label": [
+            {
+                "@id": "https://obj-with-label"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Focus Node Label"
+            }
+        ]
+    }
+]

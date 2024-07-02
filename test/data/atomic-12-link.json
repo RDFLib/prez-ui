@@ -1,0 +1,13 @@
+[
+    {
+        "@id": "https://focus-node",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalogs/link:focusnode"
+            }
+        ]
+    }
+]
