@@ -1,0 +1,88 @@
+[
+    {
+        "@id": "https://focus-node-3",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Focus Node 3 Description"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Focus Node 3 Label"
+            }
+        ],
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalog/3"
+            }
+        ],
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Focus Node 3 Provenance"
+            }
+        ]
+    },
+    {
+        "@id": "_:ndafc92432f9943d8afc8efbd2dd7b8f9b1",
+        "https://prez.dev/count": [
+            {
+                "@value": 3
+            }
+        ]
+    },
+    {
+        "@id": "https://focus-node-1",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Focus Node 1 Description"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Focus Node 1 Label"
+            }
+        ],
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalog/1"
+            }
+        ],
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Focus Node 1 Provenance"
+            }
+        ]
+    },
+    {
+        "@id": "https://focus-node-2",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Focus Node 2 Description"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Focus Node 2 Label"
+            }
+        ],
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalog/2"
+            }
+        ],
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Focus Node 2 Provenance"
+            }
+        ]
+    }
+]

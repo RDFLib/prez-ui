@@ -1,0 +1,137 @@
+[
+    {
+        "@id": "https://focus-node",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://pred-no-label": [
+            {
+                "@id": "https://obj-no-label"
+            }
+        ],
+        "https://pred-with-label": [
+            {
+                "@id": "https://obj-with-label"
+            }
+        ],
+        "https://pred/1/bn1": [
+            {
+                "@id": "_:n76eb975da4d74bad95b17ae0e76f120db2"
+            }
+        ],
+        "https://pred/1/bn2": [
+            {
+                "@id": "_:n76eb975da4d74bad95b17ae0e76f120db3"
+            }
+        ],
+        "https://pred/datatype-label": [
+            {
+                "@type": "http://www.w3.org/2001/XMLSchema#date",
+                "@value": "2024-06-01"
+            }
+        ],
+        "https://pred/datatype-uri": [
+            {
+                "@type": "https://unlabelled-datatype-uri",
+                "@value": "Obj with datatype URI"
+            }
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Focus Node Description"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Focus Node Label"
+            }
+        ],
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalogs/link:focusnode"
+            }
+        ],
+        "https://prez.dev/members": [
+            {
+                "@id": "_:n76eb975da4d74bad95b17ae0e76f120db1"
+            }
+        ],
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Focus Node Provenance"
+            }
+        ]
+    },
+    {
+        "@id": "_:n76eb975da4d74bad95b17ae0e76f120db1",
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalogs/link:focusnode/children"
+            }
+        ]
+    },
+    {
+        "@id": "_:n76eb975da4d74bad95b17ae0e76f120db2",
+        "https://pred/2/bn1": [
+            {
+                "@id": "https://obj/1/bn1"
+            }
+        ]
+    },
+    {
+        "@id": "_:n76eb975da4d74bad95b17ae0e76f120db3",
+        "https://pred/2/bn2": [
+            {
+                "@id": "https://obj/2/bn1"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred/1/bn1",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Pred 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred-with-label",
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Pred 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj/1/bn1",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Object label"
+            }
+        ]
+    },
+    {
+        "@id": "http://www.w3.org/2001/XMLSchema#date",
+        "https://prez.dev/label": [
+            {
+                "@value": "Date"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj-with-label",
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Obj 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred/2/bn1",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Pred 2"
+            }
+        ]
+    }
+]

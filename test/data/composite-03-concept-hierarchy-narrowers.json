@@ -1,0 +1,36 @@
+[
+    {
+        "@id": "https://example.com/Concept2",
+        "@type": [
+            "http://www.w3.org/2004/02/skos/core#Concept",
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://prez.dev/hasChildren": [
+            {
+                "@value": false
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Concept without narrowers"
+            }
+        ]
+    },
+    {
+        "@id": "https://example.com/Concept1",
+        "@type": [
+            "http://www.w3.org/2004/02/skos/core#Concept",
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://prez.dev/hasChildren": [
+            {
+                "@value": true
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Concept with narrowers"
+            }
+        ]
+    }
+]

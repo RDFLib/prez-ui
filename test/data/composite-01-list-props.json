@@ -1,0 +1,130 @@
+[
+    {
+        "@id": "https://focus-node-2",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://example.com/status": [
+            {
+                "@id": "https://example.com/NotApproved"
+            }
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Focus Node 2 Description"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Focus Node 2 Label"
+            }
+        ],
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalog/2"
+            }
+        ],
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Focus Node 2 Provenance"
+            }
+        ]
+    },
+    {
+        "@id": "https://example.com/NotApproved",
+        "@type": [
+            "https://example.com/Status"
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "The item has not been approved."
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Not Approved"
+            }
+        ]
+    },
+    {
+        "@id": "https://example.com/Approved",
+        "@type": [
+            "https://example.com/Status"
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "The item has been approved."
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Approved"
+            }
+        ]
+    },
+    {
+        "@id": "_:n3129ce73efe043aabfe295c1ad5c3246b1",
+        "https://prez.dev/count": [
+            {
+                "@value": 3
+            }
+        ]
+    },
+    {
+        "@id": "https://focus-node-3",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Focus Node 3 Description"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Focus Node 3 Label"
+            }
+        ],
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalog/3"
+            }
+        ],
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Focus Node 3 Provenance"
+            }
+        ]
+    },
+    {
+        "@id": "https://focus-node-1",
+        "@type": [
+            "http://www.w3.org/ns/shacl#focusNode"
+        ],
+        "https://example.com/status": [
+            {
+                "@id": "https://example.com/Approved"
+            }
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Focus Node 1 Description"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Focus Node 1 Label"
+            }
+        ],
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalog/1"
+            }
+        ],
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Focus Node 1 Provenance"
+            }
+        ]
+    }
+]
