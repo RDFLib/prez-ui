@@ -1,35 +1,35 @@
 [
     {
-        "@id": "https://focus-node-3",
+        "@id": "_:na3fc328f5cbe4c048f5153dc9db68f81b1",
+        "https://prez.dev/count": [
+            {
+                "@value": 3
+            }
+        ]
+    },
+    {
+        "@id": "https://focus-node-2",
         "@type": [
             "http://www.w3.org/ns/shacl#focusNode"
         ],
         "https://prez.dev/description": [
             {
-                "@value": "Focus Node 3 Description"
+                "@value": "Focus Node 2 Description"
             }
         ],
         "https://prez.dev/label": [
             {
-                "@value": "Focus Node 3 Label"
+                "@value": "Focus Node 2 Label"
             }
         ],
         "https://prez.dev/link": [
             {
-                "@value": "/catalog/3"
+                "@value": "/catalog/2"
             }
         ],
         "https://prez.dev/provenance": [
             {
-                "@value": "Focus Node 3 Provenance"
-            }
-        ]
-    },
-    {
-        "@id": "_:ndafc92432f9943d8afc8efbd2dd7b8f9b1",
-        "https://prez.dev/count": [
-            {
-                "@value": 3
+                "@value": "Focus Node 2 Provenance"
             }
         ]
     },
@@ -60,28 +60,28 @@
         ]
     },
     {
-        "@id": "https://focus-node-2",
+        "@id": "https://focus-node-3",
         "@type": [
             "http://www.w3.org/ns/shacl#focusNode"
         ],
         "https://prez.dev/description": [
             {
-                "@value": "Focus Node 2 Description"
+                "@value": "Focus Node 3 Description"
             }
         ],
         "https://prez.dev/label": [
             {
-                "@value": "Focus Node 2 Label"
+                "@value": "Focus Node 3 Label"
             }
         ],
         "https://prez.dev/link": [
             {
-                "@value": "/catalog/2"
+                "@value": "/catalog/3"
             }
         ],
         "https://prez.dev/provenance": [
             {
-                "@value": "Focus Node 2 Provenance"
+                "@value": "Focus Node 3 Provenance"
             }
         ]
     }
