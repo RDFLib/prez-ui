@@ -58,6 +58,10 @@
     "vue-tsc": "^1.8.4"
   },
   "dependencies": {
+    "@types/jsonld": "^1.5.14",
+    "axios": "^1.7.2",
+    "glob": "^10.4.2",
+    "jsonld": "^8.3.2",
     "prez-lib": "workspace:*",
     "primeicons": "^7.0.0",
     "primevue": "^3.52.0"

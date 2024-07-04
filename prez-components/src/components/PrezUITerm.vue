@@ -1,14 +1,20 @@
 <script lang="ts" setup>
-import type { PrezUITermProps } from "../types";
-import PrezUINode from "./PrezUINode.vue";
-import PrezUILiteral from "./PrezUILiteral.vue";
-import PrezUIBlankNode from "./PrezUIBlankNode.vue";
+import { PrezLiteral, PrezNode } from 'prez-lib';
+import type { PrezUITermProps } from '../types';
+import PrezUILiteral from './PrezUILiteral.vue';
+import PrezUINode from './PrezUINode.vue';
+import PrezUIDebug from './PrezUIDebug.vue';
+import PrezUIPropertyTable from './PrezUIPropertyTable.vue';
 
 const props = defineProps<PrezUITermProps>();
-</script>
 
+</script>
 <template>
-    <PrezUINode v-if="props.termType === 'NamedNode'" v-bind="props" />
-    <PrezUILiteral v-else-if="props.termType === 'Literal'" v-bind="props" />
-    <PrezUIBlankNode v-else-if="props.termType === 'BlankNode'" v-bind="props" />
+    <PrezUIDebug :debug="props.debug" title="PrezUITerm" :info="props.term">    
+        <div class="prezui-term">
+            <PrezUILiteral v-if="props.term.termType=='Literal'" v-bind="props" />
+            <PrezUINode v-else-if="props.term.termType=='NamedNode'" v-bind="props" />
+            <PrezUIPropertyTable v-else-if="props.term.termType == 'BlankNode'" :debug="props.debug" :properties="props.term.properties" />
+        </div>
+    </PrezUIDebug>
 </template>

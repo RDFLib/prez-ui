@@ -1,0 +1,75 @@
+import type { Meta, StoryObj } from "@storybook/vue3";
+import PrezUIItem from "../components/PrezUIItem.vue";
+import { loadJSON } from "../util/adapter";
+import fs from 'fs';
+//import path from 'path';
+import * as path from 'path';
+//import { sync as globSync } from 'glob';
+import * as glob from 'glob';
+import { fileURLToPath } from 'url'; 
+
+const files = [
+  '/test/data/atomic-00-literal-no-label.json'
+];
+
+// Function to dynamically load all JSON files from the test/data directory
+const loadAllJsonFiles = (directory) => {
+  return [];
+  // const files = glob.sync(path.join(directory, '*.json'));
+  // return files.map((file) => ({
+  //   fileName: path.basename(file, '.json'),
+  //   data: loadJSON(JSON.parse(fs.readFileSync(file, 'utf8'))),
+  // }));
+};
+
+const __dirname = new URL('.', import.meta.url).pathname;
+
+// Load all JSON data
+const jsonDataArray = []//loadAllJsonFiles(path.resolve(__dirname, '../../../test/data'));
+
+console.log(jsonDataArray);
+
+const meta = {
+  title: "Molecules/PrezUIItem",
+  component: PrezUIItem,
+  tags: ["autodocs"],
+  argTypes: {
+      item: { description: "Item data" }
+  }
+} satisfies Meta<typeof PrezUIItem>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+// Create stories dynamically
+const stories = {};
+
+jsonDataArray.forEach((jsonData, index) => {
+  const templateName = `Template${index + 1}`;
+  const storyName = index == 0 ? 'Default' : `Story${index + 1}`;
+  const defaultStoryName = storyName;
+  const debugStoryName = `${storyName}WithDebug`;
+
+  const Template = (args, { loaded }) => ({
+    components: { PrezUIItem },
+    setup() {
+      return { args, obj: loaded[jsonData.fileName] };
+    },
+    template: '<PrezUIItem :debug="args.debug" :item="obj" />'
+  });
+
+  stories[defaultStoryName] = Template.bind({});
+  stories[defaultStoryName].args = {};
+
+  stories[debugStoryName] = Template.bind({});
+  stories[debugStoryName].args = { debug: true };
+});
+
+console.log("STORY!!")
+// Export stories dynamically
+Object.entries(stories).forEach(([storyName, storyFn]) => {
+  eval(`export const ${storyName}:Story = storyFn`);
+  console.log(`export const ${storyName}:Story = storyFn`);
+});
+
+export const Default: Story = stories[0];

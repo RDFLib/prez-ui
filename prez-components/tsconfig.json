@@ -14,7 +14,8 @@
         "allowImportingTsExtensions": true,
         "resolveJsonModule": true,
         "isolatedModules": true,
-        // "noEmit": true,
+        "esModuleInterop": true,
+        "noEmit": true,
         "jsx": "preserve",
         "outDir": "dist",
         "declaration": true,
@@ -39,7 +40,9 @@
         "src/**/*.ts",
         "src/**/*.d.ts",
         "src/**/*.tsx",
-        "src/components/**/*.vue"
+        "src/types/**/*.d.ts",
+        "src/components/**/*.vue",
+        "src/**/*.jsonld"
     ],
     "references": [
         {

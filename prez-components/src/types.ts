@@ -1,46 +1,55 @@
+import { PrezTerm, PrezLiteral, PrezNode, PrezItem, PrezProperties } from "prez-lib";
 
-export interface PrezUIItemListProps {
-    data?: PrezItem[];
-    loading?: boolean;
+export interface PrezUITermProps {
+    debug?: boolean;
+    color?: "primary" | "secondary";
+    term: PrezTerm;
+}
+
+export interface PrezUILiteralProps {
+    debug?: boolean;
+    color?: "primary" | "secondary";
+    term: PrezLiteral;
+}
+
+export interface PrezUINodeProps {
+    debug?: boolean;
+    color?: "primary" | "secondary";
+    size?: "normal" | "small";
+    term: PrezNode;
+}
+
+export interface ButtonProps {
+    color?: "primary" | "secondary";
+    size?: "sm" | "lg";
 };
 
-import type { PrezNode, PrezLiteral, PrezBlankNode, PrezProperties, PrezItem, Concept } from "prez-lib";
+export interface PrezUIItemProps {
+    debug?: boolean;
+    item: PrezItem;
+}
 
-export interface PrezUILiteralProps extends PrezLiteral {
-    isGeometry?: boolean;
-};
+export interface PrezUIHeaderProps {
+    debug?: boolean;
+    term: PrezTerm;
+}
 
-export interface PrezUINodeProps extends PrezNode {
-    showType?: boolean;
-    showProv?: boolean;
-    showDesc?: boolean;
-    showExt?: boolean;
-    badge?: boolean;
-};
+export interface PrezUIPropertyTableProps {
+    debug?: boolean;
+    properties: PrezProperties;
+}
 
-export interface PrezUIBlankNodeProps extends PrezBlankNode { };
+// export interface ListTableProps {
+//     items: ListItem[];
+//     predicates?: {
+//         label: string;
+//         uri: string;
+//     }[];
+// }
 
-export type PrezUITermProps = PrezUINodeProps | PrezUILiteralProps | PrezUIBlankNodeProps;
-
-export interface PrezUIItemListProps {
-    data?: PrezItem[];
-    loading?: boolean;
-};
-
-export interface PrezUIObjectTableProps {
-    data?: {
-        properties: PrezProperties;
-        members?: {
-            link: string;
-            label?: string;
-        }[];
-        concepts?: Concept[];
-    }
-    /**
-     * Hide hidden predicates for neater display, defaults to `true`
-     */
-    hideHidden?: boolean;
-    loading?: boolean;
-};
-
-export interface PrezUIConceptProps extends Concept {};
+// export interface ObjectTableProps {
+//     properties: {
+//         predicate: string;
+//         object: string;
+//     }[];
+// }

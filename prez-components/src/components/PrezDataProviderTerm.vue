@@ -1,28 +1,42 @@
 <script setup lang="ts">
 
-import { ref, onMounted, defineProps, watch } from 'vue';
-import { getList, getItem, search, type PrezProperties, type PrezDataList, type PrezDataItem, type PrezDataSearch, type PrezNode, PrezItem } from "prez-lib";
+import { ref, onMounted, defineProps } from 'vue';
+import { getList, getItem, search, type PrezDataList, type PrezDataItem, type PrezDataSearch, PrezNode } from "prez-lib";
 import PrezUILoading from './PrezUILoading.vue';
 import PrezUIMessage from './PrezUIMessage.vue';
-import PrezUIDebug from './PrezUIDebug.vue';
-import axios from 'axios';
-import { loadJSON } from '../util/adapter.ts';
 
 type PrezDataProviderProps = {
-    debug?: boolean;
     url?: string;
     data?: object;
-    type: 'list' | 'item' | 'search';
+    type: 'list' | 'object' | 'search' | 'term';
     objectId?: string;
 };
 
-const props = withDefaults(defineProps<PrezDataProviderProps>(), {debug: false});
+const props = defineProps<PrezDataProviderProps>();
 
-const data = ref<PrezDataList|PrezDataItem|PrezDataSearch|PrezItem>();
+const data = ref<PrezDataList|PrezDataItem|PrezDataSearch>();
 const loading = ref(false);
 const error = ref<Error>();
 const properties = ref<PrezNode[]>([]);
-const rawData = ref('');
+
+function getProperties():PrezNode[] {
+    if (!data.value?.data) return [];
+    
+    const list:PrezNode[] = props.type == 'search' ? (data.value! as PrezDataSearch).data.map(prop => prop.predicate).flat(1)
+        : (props.type == 'list' ? (data.value! as PrezDataList).data : [(data.value! as PrezDataItem).data])
+            .map(item => Object.values(item.properties).map(prop => prop.predicate)).flat(1)
+
+    const iris:string[] = [];
+    const p:PrezNode[] = [];
+    for(const item of list) {
+        if (!iris.includes(item.value)) {
+            p.push(item);
+            iris.push(item.value);
+        }
+    }
+
+    return p;
+}
 
 const fetchData = async () => {
 
@@ -42,18 +56,15 @@ const fetchData = async () => {
             case 'list':
                 data.value = await getList(props.url);
                 break;
-            case 'item':
-                console.log("LOADING ITEM")
-                const resp = await axios.get(props.url);
-                rawData.value = resp.data;
-                const prezItem = await loadJSON(resp.data);
-                data.value = prezItem;
+            case 'object':
+                data.value = await getItem(props.url, props.objectId!);
+                console.log("VAL", data.value)
                 break;
             case 'search':
                 data.value = await search(props.url);
                 break;
         }
-        //properties.value = getProperties();
+        properties.value = getProperties();
     } catch (err) {
         error.value = err as Error;
         console.error('Error fetching data:', err);
@@ -62,23 +73,13 @@ const fetchData = async () => {
     }
 };
 
-// Watch the `url` prop for changes and refetch data accordingly
-watch(
-    () => props.url,
-    async (newUrl:string, oldUrl:string) => {
-        if (newUrl !== oldUrl) {
-            await fetchData();
-        }
-    },
-    { immediate: true }
-);
-
 onMounted(async () => {
     await fetchData();
 });
 </script>
 <template>
-    <PrezUIDebug :debug="props.debug" title="PrezDataProvider" :info="`URL: ${props.url}\n\nContents:\n${JSON.stringify(rawData)}`">
+    <div>
+        <p><small>Data provider URL: {{ url }}</small></p>
         <template v-if="loading">
             <slot name="loading">
                 <PrezUILoading />
@@ -89,8 +90,9 @@ onMounted(async () => {
                 <PrezUIMessage severity="error">{{ error }}</PrezUIMessage>
             </slot>
         </template>
-        <template v-else-if="data">
-            <slot :data="data" :debug="props.debug" :properties="properties"></slot>
+        <template v-else>
+            <slot :data="data" :properties="properties"></slot>
         </template>
-    </PrezUIDebug>
+
+    </div>
 </template>
