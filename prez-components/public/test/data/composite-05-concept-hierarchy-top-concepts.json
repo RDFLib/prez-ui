@@ -3,7 +3,7 @@
         "@id": "https://example.com/TopLevelConcept1",
         "@type": [
             "http://www.w3.org/2004/02/skos/core#Concept",
-            "http://www.w3.org/ns/shacl#focusNode"
+            "https://prez.dev/FocusNode"
         ],
         "https://prez.dev/hasChildren": [
             {
@@ -20,7 +20,7 @@
         "@id": "https://example.com/TopLevelConcept2",
         "@type": [
             "http://www.w3.org/2004/02/skos/core#Concept",
-            "http://www.w3.org/ns/shacl#focusNode"
+            "https://prez.dev/FocusNode"
         ],
         "https://prez.dev/hasChildren": [
             {

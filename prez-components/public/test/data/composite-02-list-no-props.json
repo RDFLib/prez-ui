@@ -1,6 +1,6 @@
 [
     {
-        "@id": "_:na3fc328f5cbe4c048f5153dc9db68f81b1",
+        "@id": "_:n16b753f1ed854475aeee433cd48656b9b1",
         "https://prez.dev/count": [
             {
                 "@value": 3
@@ -10,7 +10,7 @@
     {
         "@id": "https://focus-node-2",
         "@type": [
-            "http://www.w3.org/ns/shacl#focusNode"
+            "https://prez.dev/FocusNode"
         ],
         "https://prez.dev/description": [
             {
@@ -36,7 +36,7 @@
     {
         "@id": "https://focus-node-1",
         "@type": [
-            "http://www.w3.org/ns/shacl#focusNode"
+            "https://prez.dev/FocusNode"
         ],
         "https://prez.dev/description": [
             {
@@ -62,7 +62,7 @@
     {
         "@id": "https://focus-node-3",
         "@type": [
-            "http://www.w3.org/ns/shacl#focusNode"
+            "https://prez.dev/FocusNode"
         ],
         "https://prez.dev/description": [
             {
