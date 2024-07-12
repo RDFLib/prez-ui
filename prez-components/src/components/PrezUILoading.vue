@@ -3,11 +3,11 @@
 </script>
 
 <template>
-    <div class="prez-loading">Loading...</div>
+    <div class="prezui-loading">Loading...</div>
 </template>
 
 <style scoped>
-.prez-loading {
+.prezui-loading {
     background-color: #eee;
 }
 </style>

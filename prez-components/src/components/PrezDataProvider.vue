@@ -2,11 +2,9 @@
 
 import { ref, onMounted, defineProps, watch } from 'vue';
 import { getList, getItem, search, type PrezProperties, type PrezDataList, type PrezDataItem, type PrezDataSearch, type PrezNode, PrezItem } from "prez-lib";
-import PrezUILoading from './PrezUILoading.vue';
-import PrezUIMessage from './PrezUIMessage.vue';
-import PrezUIDebug from './PrezUIDebug.vue';
 import axios from 'axios';
 import { loadJSON } from '../util/adapter.ts';
+import WithTheme from './WithTheme.vue';
 
 type PrezDataProviderProps = {
     debug?: boolean;
@@ -65,7 +63,7 @@ const fetchData = async () => {
 // Watch the `url` prop for changes and refetch data accordingly
 watch(
     () => props.url,
-    async (newUrl:string, oldUrl:string) => {
+    async (newUrl?:string, oldUrl?:string) => {
         if (newUrl !== oldUrl) {
             await fetchData();
         }
@@ -78,7 +76,7 @@ onMounted(async () => {
 });
 </script>
 <template>
-    <PrezUIDebug :debug="props.debug" title="PrezDataProvider" :info="`URL: ${props.url}\n\nContents:\n${JSON.stringify(rawData)}`">
+    <WithTheme component="PrezDataProvider" :info="`URL: ${props.url}\n\nContents:\n${JSON.stringify(rawData)}`">
         <template v-if="loading">
             <slot name="loading">
                 <PrezUILoading />
@@ -92,5 +90,5 @@ onMounted(async () => {
         <template v-else-if="data">
             <slot :data="data" :debug="props.debug" :properties="properties"></slot>
         </template>
-    </PrezUIDebug>
+    </WithTheme>
 </template>

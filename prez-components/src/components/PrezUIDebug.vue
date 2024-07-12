@@ -1,8 +1,10 @@
 <script lang="ts" setup>
+import { getDebug } from '../settingsManager';
+
 interface Props {
   debug?: boolean;
   title: string;
-  info: any;
+  info?: any;
 }
 
 type ReplacerFunction = (this: any, key: string, value: any) => any;
@@ -28,8 +30,9 @@ function safeStringify(
 const props = defineProps<Props>()
 </script>
 <template>
-    <fieldset v-if="debug">
-        <legend :title="typeof(info) == 'object' ? safeStringify(info) : info.toString()">{{ title }}</legend>
+
+    <fieldset v-if="getDebug()">
+        <legend :title="typeof(info) == 'object' ? safeStringify(info, null, 2) : (info === undefined ? safeStringify(props, null, 2) : info.toString())">{{ title }}</legend>
         <slot></slot>
     </fieldset>
     <slot v-else></slot>

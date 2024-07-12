@@ -12,7 +12,7 @@ const props = defineProps<PrezUIItemProps>();
                 <PrezUIHeader :debug="props.debug" :term="props.item.focusNode" />
             </div>
             <div class="prezui-properties">
-                <PrezUIPropertyTable :debug="props.debug" :properties="props.item.properties" />
+                <PrezUIPropertyTable :debug="props.debug" :term="props.item.focusNode" :properties="props.item.properties" />
             </div>
         </template>
     </PrezUIDebug>

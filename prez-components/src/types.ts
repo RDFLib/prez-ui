@@ -1,21 +1,20 @@
 import { PrezTerm, PrezLiteral, PrezNode, PrezItem, PrezProperties } from "prez-lib";
 
-export interface PrezUITermProps {
+interface PrezUIProps {
     debug?: boolean;
-    color?: "primary" | "secondary";
+    info?: any;
+    theme?: string;
+}
+
+export interface PrezUITermProps extends PrezUIProps {
     term: PrezTerm;
 }
 
-export interface PrezUILiteralProps {
-    debug?: boolean;
-    color?: "primary" | "secondary";
+export interface PrezUILiteralProps extends PrezUITermProps {
     term: PrezLiteral;
 }
 
-export interface PrezUINodeProps {
-    debug?: boolean;
-    color?: "primary" | "secondary";
-    size?: "normal" | "small";
+export interface PrezUINodeProps extends PrezUITermProps {
     term: PrezNode;
 }
 
@@ -24,18 +23,16 @@ export interface ButtonProps {
     size?: "sm" | "lg";
 };
 
-export interface PrezUIItemProps {
-    debug?: boolean;
+export interface PrezUIItemProps extends PrezUIProps {
     item: PrezItem;
 }
 
-export interface PrezUIHeaderProps {
-    debug?: boolean;
+export interface PrezUIHeaderProps extends PrezUIProps {
     term: PrezTerm;
 }
 
-export interface PrezUIPropertyTableProps {
-    debug?: boolean;
+export interface PrezUIPropertyTableProps extends PrezUIProps {
+    term: PrezTerm; // parent term
     properties: PrezProperties;
 }
 

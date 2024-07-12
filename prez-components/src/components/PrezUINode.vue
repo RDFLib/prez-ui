@@ -20,17 +20,13 @@ if(tooltip == label) {
 }
 </script>
 <template>
-    <PrezUIDebug :debug="props.debug" title="PrezUINode" :info="props.term">
-        <a class="small" v-if="props.size == 'small'" :href="props.term.value" :title="tooltip">
-            {{ label }}
-        </a>
-        <a v-else :href="props.term.value" :title="tooltip">
-            {{ label }}
-        </a>
-    </PrezUIDebug>
+    <WithTheme v-bind="props" component="PrezUINode" :info="props.term">
+        <slot :term="props.term" :link="props.term.value" :label="label" :tooltip="tooltip">
+            <a :href="props.term.value" :title="tooltip">
+                {{ label }}
+            </a>
+        </slot>
+    </WithTheme>
 </template>
 <style scoped>
-.small {
-    float:right;
-}
 </style>

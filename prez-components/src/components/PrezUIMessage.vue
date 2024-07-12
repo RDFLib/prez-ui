@@ -8,15 +8,15 @@ const props = defineProps<PrezUIErrorProps>();
 </script>
 
 <template>
-    <div :class="`prez-message${props.severity ? ' ' + props.severity : ''}`"><slot></slot></div>
+    <div :class="`prezui-message${props.severity ? ' ' + props.severity : ''}`"><slot></slot></div>
 </template>
 
 <style scoped>
-.prez-message {
+.prezui-message {
     border: 1px solid blue;
     color: blue;
 }
-.prez-message.error {
+.prezui-message.error {
     border: 1px solid red;
     color: red;
 }
