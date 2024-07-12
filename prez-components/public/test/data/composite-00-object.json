@@ -1,17 +1,41 @@
 [
     {
-        "@id": "http://www.w3.org/2001/XMLSchema#date",
+        "@id": "https://pred/4/bn4",
         "https://prez.dev/label": [
             {
-                "@value": "Date"
+                "@value": "BN Pred 4"
             }
         ]
     },
     {
-        "@id": "https://first-object",
+        "@id": "https://pred/1/bn34",
         "https://prez.dev/label": [
             {
-                "@value": "First Object"
+                "@value": "BN Pred 34"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred/1/bn1",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Pred 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred/3/bn3",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Pred 3"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj/1/bn1",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Object label"
             }
         ]
     },
@@ -32,12 +56,20 @@
         ],
         "https://pred/1/bn1": [
             {
-                "@id": "_:nf9e90ca3d9994fcda8b65e08f29c8ee2b1"
+                "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb1"
             }
         ],
         "https://pred/1/bn2": [
             {
-                "@id": "_:nf9e90ca3d9994fcda8b65e08f29c8ee2b2"
+                "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb2"
+            }
+        ],
+        "https://pred/1/bn34": [
+            {
+                "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb3"
+            },
+            {
+                "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb4"
             }
         ],
         "https://pred/datatype-label": [
@@ -87,7 +119,7 @@
         ]
     },
     {
-        "@id": "_:nf9e90ca3d9994fcda8b65e08f29c8ee2b1",
+        "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb1",
         "https://pred/2/bn1": [
             {
                 "@id": "https://obj/1/bn1"
@@ -95,7 +127,7 @@
         ]
     },
     {
-        "@id": "_:nf9e90ca3d9994fcda8b65e08f29c8ee2b2",
+        "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb2",
         "https://pred/2/bn2": [
             {
                 "@id": "https://obj/2/bn1"
@@ -103,18 +135,34 @@
         ]
     },
     {
-        "@id": "https://obj-with-label",
-        "https://prez.dev/label": [
+        "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb3",
+        "https://pred/3/bn3": [
             {
-                "@value": "Labeled Obj 1"
+                "@id": "https://obj/3/bn3"
             }
         ]
     },
     {
-        "@id": "https://pred/1/bn1",
+        "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb4",
+        "https://pred/4/bn4": [
+            {
+                "@id": "https://obj/4/bn4"
+            }
+        ]
+    },
+    {
+        "@id": "http://www.w3.org/2001/XMLSchema#date",
         "https://prez.dev/label": [
             {
-                "@value": "BN Pred 1"
+                "@value": "Date"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred-with-label",
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Pred 1"
             }
         ]
     },
@@ -127,18 +175,10 @@
         ]
     },
     {
-        "@id": "https://pred/2/bn1",
+        "@id": "https://obj/4/bn4",
         "https://prez.dev/label": [
             {
-                "@value": "BN Pred 2"
-            }
-        ]
-    },
-    {
-        "@id": "https://obj/1/bn1",
-        "https://prez.dev/label": [
-            {
-                "@value": "BN Object label"
+                "@value": "BN Object 4 label"
             }
         ]
     },
@@ -151,10 +191,34 @@
         ]
     },
     {
-        "@id": "https://pred-with-label",
+        "@id": "https://pred/2/bn1",
         "https://prez.dev/label": [
             {
-                "@value": "Labeled Pred 1"
+                "@value": "BN Pred 2"
+            }
+        ]
+    },
+    {
+        "@id": "https://first-object",
+        "https://prez.dev/label": [
+            {
+                "@value": "First Object"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj/3/bn3",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Object 3 label"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj-with-label",
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Obj 1"
             }
         ]
     }
