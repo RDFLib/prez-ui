@@ -5,6 +5,6 @@
 </template>
 <script lang="ts" setup>
 import PrezUINode from '@/components/PrezUINode.vue';
-import { PrezUINodeProps } from '@/src/types';
+import { PrezUINodeProps } from '@/types';
 const props = defineProps<PrezUINodeProps>();
 </script>

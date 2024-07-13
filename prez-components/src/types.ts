@@ -1,4 +1,4 @@
-import { PrezTerm, PrezLiteral, PrezNode, PrezItem, PrezProperties } from "prez-lib";
+import { PrezTerm, PrezItem, PrezProperties } from "prez-lib";
 
 interface PrezUIProps {
     debug?: boolean;
@@ -11,11 +11,11 @@ export interface PrezUITermProps extends PrezUIProps {
 }
 
 export interface PrezUILiteralProps extends PrezUITermProps {
-    term: PrezLiteral;
+    term: PrezTerm;
 }
 
 export interface PrezUINodeProps extends PrezUITermProps {
-    term: PrezNode;
+    term: PrezTerm;
 }
 
 export interface ButtonProps {

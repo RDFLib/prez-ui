@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { PrezUIPropertyTableProps } from '../types';
+import type { PrezUIPropertyTableProps } from '@/types';
 const props = defineProps<PrezUIPropertyTableProps>();
 
 </script>
@@ -9,7 +9,7 @@ const props = defineProps<PrezUIPropertyTableProps>();
             <tbody>
                 <tr v-for="(prop, pred) in props.properties" :key="pred">
                     <th><PrezUITerm :debug="props.debug" :term="prop.predicate"></PrezUITerm></th>
-                    <td><PrezUITerm :debug="props.debug" v-for="obj of prop.objects" :term="obj" :key="obj"></PrezUITerm></td>
+                    <td><PrezUITerm :debug="props.debug" v-for="(obj, index) in prop.objects" :term="obj" :key="index"></PrezUITerm></td>
                 </tr>
             </tbody>
         </table>

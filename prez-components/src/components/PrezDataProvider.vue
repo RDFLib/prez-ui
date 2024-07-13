@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { ref, onMounted, defineProps, watch } from 'vue';
-import { getList, getItem, search, type PrezProperties, type PrezDataList, type PrezDataItem, type PrezDataSearch, type PrezNode, PrezItem } from "prez-lib";
+import { getList, search, type PrezDataList, type PrezDataItem, type PrezDataSearch, type PrezNode, PrezItem } from "prez-lib";
 import axios from 'axios';
 import { loadJSON } from '../util/adapter.ts';
 import WithTheme from './WithTheme.vue';

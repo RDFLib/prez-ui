@@ -2,28 +2,30 @@
 // this library will move to prez-lib...
 // ---------------------------------------
 
-import { type PrezTerm, type PrezLiteral, type PrezNode, type PrezLink, literal, node, PrezItem, PrezProperties, bnode, PrezBlankNode } from "prez-lib";
-import { JsonLdDocument, NodeObject, ValueObject, ContextDefinition, expand, frame } from 'jsonld';
+import { type PrezTerm, type PrezLiteral, type PrezNode, literal, node, PrezItem, PrezProperties, bnode, PrezBlankNode } from "prez-lib";
+import { JsonLdDocument, NodeObject, ValueObject, frame } from 'jsonld';
 
-const IRI_SHACL_FOCUS_NODE = "http://www.w3.org/ns/shacl#focusNode";
-
-function isFocusNode(n: NodeObject | ValueObject) {
-    return ("@type" in n && n["@type"] == IRI_SHACL_FOCUS_NODE && "@id" in n);
-}
-
-type JSONTerm = {
+type JSONTermItem = {
     '@id'?: string;
     '@type'?: string;
     '@value'?: string;
     '@language'?: string;
     [predicate:string]: any;
-} | string
+} | string;
+
+type JSONTerm = JSONTermItem | JSONTermItem[];
+
 
 enum PrezPredicates {
     Label = 'https://prez.dev/label',
     Description = 'https://prez.dev/description',
     Provenance = 'https://prez.dev/provenance',
-    Link = 'https://prez.dev/link'
+    Link = 'https://prez.dev/link',
+    FocusNode = 'https://prez.dev/FocusNode'
+}
+
+function isFocusNode(n: NodeObject | ValueObject) {
+    return ("@type" in n && n["@type"] == PrezPredicates.FocusNode && "@id" in n);
 }
 
 /**
@@ -32,27 +34,29 @@ enum PrezPredicates {
  * @param doc The JSONTerm to proces
  * @returns A PrezLiteral, PrezNode or PrezBlankNode
  */
-function JSONtoTerm(doc:JSONTerm):PrezTerm {
-    if(typeof(doc) == 'string') {
-        return literal(doc);
-    } else {
-        if('@id' in doc) {
+function JSONtoTerm(docObjOrArray:JSONTerm):PrezTerm[] {
+    const terms:PrezTerm[] = [];
+    for(const doc of Array.isArray(docObjOrArray) ? docObjOrArray : [docObjOrArray]) {
+        if(typeof(doc) == 'string') {
+            terms.push(literal(doc));
+        } else if('@id' in doc) {
             if(doc['@id']![0] == '_') {
-                return bnode(doc['@id']!);
+                terms.push(bnode(doc['@id']!));
             } else {
                 const n = node(doc['@id']!);
                 setNodePropertiesFromJSON(n, doc);
-                return n;
+                terms.push(n);
             }
         } else if('@value' in doc) {
-            return literal({value: doc['@value']!, 
+            terms.push(literal({value: doc['@value']!, 
                 datatype: '@type' in doc ? node(doc['@type']!) : undefined,
                 language: '@language' in doc ? doc['@language'] : undefined
-            });
+            }));
         } else {
             throw new Error('Unable to convert JSON to terms')
         }
     }
+    return terms
 }
 
 /**
@@ -66,13 +70,13 @@ function setNodePropertiesFromJSON(n: PrezNode, doc:JSONTerm) {
     if(typeof(doc) == 'object') {
         if(PrezPredicates.Label in doc) {
             console.log('setting label', doc[PrezPredicates.Label])
-            n.label = JSONtoTerm(doc[PrezPredicates.Label]) as PrezLiteral;
+            n.label = JSONtoTerm(doc[PrezPredicates.Label])[0] as PrezLiteral;
         }
         if(PrezPredicates.Description in doc) {
-            n.description = JSONtoTerm(doc[PrezPredicates.Description]) as PrezLiteral;
+            n.description = JSONtoTerm(doc[PrezPredicates.Description])[0] as PrezLiteral;
         }
         if(PrezPredicates.Provenance in doc) {
-            n.provenance = JSONtoTerm(doc[PrezPredicates.Provenance]) as PrezLiteral;
+            n.provenance = JSONtoTerm(doc[PrezPredicates.Provenance])[0] as PrezLiteral;
         }
         if(PrezPredicates.Link in doc) {
             n.links = n.links || []
@@ -122,57 +126,82 @@ function setProperty(prezNode: PrezNode, properties: PrezProperties, predicate: 
  * @param lookupId 
  */
 function setAllPropertiesFromJSON(prezNode: PrezNode, properties: PrezProperties, n: NodeObject, lookupId: Record<string, NodeObject>) {
+
     // loop through each JSON property
     for(const propName of Object.keys(n)) {
-        // this property has a value that is an object
-        if(typeof(n[propName]) == 'object') {
-            // type to NodeObject
-            let propObject:NodeObject = ((n as NodeObject)[propName]) as NodeObject;
 
-            // if we have an @id, lookup the id in the other root nodes
-            if('@id' in propObject && lookupId[propObject['@id'] as string]) {
-                propObject = {...propObject, ...lookupId[propObject['@id'] as string]};
-            }
+        const prop = n[propName];
 
-            // if we're currently looking at a non-system predicate
-            if(propName[0] != '@') {
+        // Check if the property is an object or array
+        if (prop && typeof prop === 'object' && prop !== null) {
+            const nItems = Array.isArray(prop) ? prop : [prop];        
 
-                // blank node
-                if('@id' in propObject && (propObject['@id'] as string)[0] == '_') {
+            for(const nItem of nItems) {
+                // this property doesn't have a value that is an object
+                if(typeof(nItem) != 'object') continue;
 
-                    const bterm = JSONtoTerm(propObject as JSONTerm);
-                    const predNode = node(propName);
-                    if(propName in lookupId) {
-                        setNodePropertiesFromJSON(predNode, lookupId[propName] as JSONTerm);
-                    }
+                // type to NodeObject
+                let propObject:NodeObject = nItem as NodeObject;
 
-                    setProperty(prezNode, properties, propName, predNode, bterm);
-                    setAllPropertiesFromJSON(predNode, (bterm as PrezBlankNode).properties, propObject, lookupId)
+                // if we have an @id, lookup the id in the other root nodes
+                if('@id' in propObject && lookupId[propObject['@id'] as string]) {
+                    propObject = {...propObject, ...lookupId[propObject['@id'] as string]};
+                }
 
-                } else {
+                // if we're currently looking at a non-system predicate
+                if(propName[0] != '@') {
 
-                    // translate the object to a term
-                    const term = JSONtoTerm(propObject as JSONTerm);
+                    // blank node
+                    if('@id' in propObject && (propObject['@id'] as string)[0] == '_') {
 
-                    console.log(propName, propObject, term);
-                    let predNode = node(propName);
-                    
-                    // this predicate has a lookup with the same id as the pred iri
-                    // apply it to prednode
-                    if(propName in lookupId) {
-                        setNodePropertiesFromJSON(predNode, lookupId[propName] as JSONTerm);
-                    }
-                    
-                    // this predicate has a datatype defined,
-                    // so if a lookup object is found, apply it to the prednode
-                    if('@type' in propObject) {
-                        setNodePropertiesFromJSON(predNode, propObject as JSONTerm);
-                        if(lookupId[propObject['@type'] as string]) {
-                            setNodePropertiesFromJSON((term as PrezLiteral).datatype!, lookupId[propObject['@type'] as string] as JSONTerm)
+                        console.log("IS BN", propObject)
+                        const bterms = JSONtoTerm(propObject as JSONTerm);
+                        const predNode = node(propName);
+                        if(propName in lookupId) {
+                            setNodePropertiesFromJSON(predNode, lookupId[propName] as JSONTerm);
+                        }
+
+                        for(const bterm of bterms) {
+                            setProperty(prezNode, properties, propName, predNode, bterm);
+                            setAllPropertiesFromJSON(predNode, (bterm as PrezBlankNode).properties, propObject, lookupId)
+                        }
+
+                    } else {
+
+                        // translate the object to a term
+                        const terms = JSONtoTerm(propObject as JSONTerm);
+
+                        if(terms.length > 1) {
+                            console.log("MULTI TERMS")
+                        }
+
+                        // const term = terms[0];
+
+                        // console.log(propName, propObject, term);
+                        let predNode = node(propName);
+                        
+                        // this predicate has a lookup with the same id as the pred iri
+                        // apply it to prednode
+                        if(propName in lookupId) {
+                            setNodePropertiesFromJSON(predNode, lookupId[propName] as JSONTerm);
+                        }
+                        
+                        // this predicate has a datatype defined,
+                        // so if a lookup object is found, apply it to the prednode
+                        if('@type' in propObject) {
+                            setNodePropertiesFromJSON(predNode, propObject as JSONTerm);
+                        }
+
+                        for(const term of terms) {
+                            if('@type' in propObject) {
+                                if(lookupId[propObject['@type'] as string]) {
+                                    setNodePropertiesFromJSON((term as PrezLiteral).datatype!, lookupId[propObject['@type'] as string] as JSONTerm)
+                                }
+                            }
+                            
+                            setProperty(prezNode, properties, propName, predNode, term);
                         }
                     }
-                    
-                    setProperty(prezNode, properties, propName, predNode, term);
                 }
             }
         }

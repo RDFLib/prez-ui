@@ -7,8 +7,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    CompA: typeof import('./components/compA.vue')['default']
-    copy: typeof import('./components/themes/primevue/PrezUILiteral copy.vue')['default']
     PrezDataProvider: typeof import('./components/PrezDataProvider.vue')['default']
     PrezDataProviderTerm: typeof import('./components/PrezDataProviderTerm.vue')['default']
     PrezUIDebug: typeof import('./components/PrezUIDebug.vue')['default']
@@ -19,7 +17,6 @@ declare module 'vue' {
     PrezUIMessage: typeof import('./components/PrezUIMessage.vue')['default']
     PrezUINode: typeof import('./components/PrezUINode.vue')['default']
     PrezUIPropertyTable: typeof import('./components/PrezUIPropertyTable.vue')['default']
-    PrezUITableProperties: typeof import('./components/themes/primevue/PrezUITableProperties.vue')['default']
     PrezUITerm: typeof import('./components/PrezUITerm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

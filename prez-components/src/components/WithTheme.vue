@@ -3,7 +3,7 @@
       <component v-if="useTheme && dynamicComponent" :is="dynamicComponent" v-bind="$attrs">
         <slot></slot>
       </component>
-      <PrezUIDebug v-else :debug="props.debug" :title="props.component" :info="props.info || props">
+      <PrezUIDebug v-else :debug="props.debug" :title="props.component" :info="props.info || {}">
         <slot></slot>
       </PrezUIDebug>
     </template>
@@ -20,6 +20,7 @@ const props = defineProps<{
   theme?: string;
   debug?: boolean;
   info?: any;
+  [additional:string]: any;
 }>();
 
 const loaded = ref(false);
@@ -30,7 +31,7 @@ const useTheme = ref(false);
 const componentName = ref<string>(props.component);
 const theme = ref<string>(props.theme || getTheme());
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+//const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Function to load component based on theme
 const loadComponent = async (theme: string) => {
@@ -81,6 +82,7 @@ onMounted(async () => {
   } catch (ex) {
     console.log((ex as Error).message)
   }
+  console.log(componentName.value)
   loaded.value = true;
 });
 </script>

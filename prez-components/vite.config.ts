@@ -4,15 +4,10 @@ import { fileURLToPath, URL } from "node:url";
 import vue from "@vitejs/plugin-vue";
 import libCss from "vite-plugin-libcss";
 import Components from 'unplugin-vue-components/vite';
-
+ 
 
 // https://vitejs.dev/config/
 export default defineConfig(({mode})=>{
-    // let themeDir = resolve(__dirname, 'src/components');
-
-    // if (mode === 'primevue') {
-    //     themeDir = resolve(__dirname, 'src/themes/primevue/components');
-    // }
 
     return {
         plugins: [
@@ -48,6 +43,7 @@ export default defineConfig(({mode})=>{
             // }
         // },
         build: {
+            sourcemap: true,            
             lib: {
                 entry: resolve(__dirname, "src/index.ts"),
                 name: "prez-components",
@@ -59,6 +55,10 @@ export default defineConfig(({mode})=>{
                     globals: {
                         vue: "Vue",
                     },
+                    sourcemapPathTransform: (relativeSourcePath, sourcemapPath) => {
+                        // Here you can customize the sourcemap path
+                        return relativeSourcePath;
+                      }                    
                 },
             },
         }
