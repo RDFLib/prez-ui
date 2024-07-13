@@ -7,11 +7,16 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    copy: typeof import('./components/PrezUIItem copy.vue')['default']
     PrezDataProvider: typeof import('./components/PrezDataProvider.vue')['default']
     PrezDataProviderTerm: typeof import('./components/PrezDataProviderTerm.vue')['default']
+    PrezUIData: typeof import('./components/PrezUIData.vue')['default']
+    PrezUIDataItem: typeof import('./components/PrezUIDataItem.vue')['default']
+    PrezUIDataList: typeof import('./components/PrezUIDataList.vue')['default']
     PrezUIDebug: typeof import('./components/PrezUIDebug.vue')['default']
     PrezUIHeader: typeof import('./components/PrezUIHeader.vue')['default']
     PrezUIItem: typeof import('./components/PrezUIItem.vue')['default']
+    PrezUIList: typeof import('./components/PrezUIList.vue')['default']
     PrezUILiteral: typeof import('./components/PrezUILiteral.vue')['default']
     PrezUILoading: typeof import('./components/PrezUILoading.vue')['default']
     PrezUIMessage: typeof import('./components/PrezUIMessage.vue')['default']

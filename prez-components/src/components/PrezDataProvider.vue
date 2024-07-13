@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { ref, onMounted, defineProps, watch } from 'vue';
-import { getList, search, type PrezDataList, type PrezDataItem, type PrezDataSearch, type PrezNode, PrezItem } from "prez-lib";
+import { getList, search, type PrezDataList, type PrezDataItem, type PrezDataSearch, type PrezNode, PrezItem, PrezData } from "prez-lib";
 import axios from 'axios';
 import { loadJSON } from '../util/adapter.ts';
 import WithTheme from './WithTheme.vue';
@@ -16,7 +16,7 @@ type PrezDataProviderProps = {
 
 const props = withDefaults(defineProps<PrezDataProviderProps>(), {debug: false});
 
-const data = ref<PrezDataList|PrezDataItem|PrezDataSearch|PrezItem>();
+const data = ref<PrezData>();
 const loading = ref(false);
 const error = ref<Error>();
 const properties = ref<PrezNode[]>([]);
@@ -38,7 +38,12 @@ const fetchData = async () => {
     try {
         switch(props.type) {
             case 'list':
-                data.value = await getList(props.url);
+                {
+                    const resp = await axios.get(props.url);
+                    rawData.value = resp.data;
+                    data.value = await loadJSON(resp.data);
+                }
+            //                data.value = await getList(props.url);
                 break;
             case 'item':
                 console.log("LOADING ITEM")
@@ -46,6 +51,7 @@ const fetchData = async () => {
                 rawData.value = resp.data;
                 const prezItem = await loadJSON(resp.data);
                 data.value = prezItem;
+                console.log("DATA OBJ RETURNED", prezItem);
                 break;
             case 'search':
                 data.value = await search(props.url);

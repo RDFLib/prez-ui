@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { PrezUIPropertyTableProps } from '@/types';
 const props = defineProps<PrezUIPropertyTableProps>();
-
 </script>
 <template>
     <WithTheme v-bind="props" component="PrezUIPropertyTable" :info="props.properties">

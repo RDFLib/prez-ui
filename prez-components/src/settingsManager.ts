@@ -6,7 +6,8 @@ export const themes:Record <string, string> = {
 
 export const styles:Record <string, Record <string, string>> = {
     default: {
-        style1: 'Red'
+        style1: 'Default',
+        style2: 'Red'
     },
     primevue: {
         style1: 'Default'
