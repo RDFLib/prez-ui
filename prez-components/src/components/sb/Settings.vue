@@ -1,13 +1,19 @@
 <script lang="ts" setup>
-import { getDebug, getTheme, setDebug, setTheme, themes } from '../../settingsManager';
-import { ref, watch } from 'vue';
+import { getDebug, getStyle, getTheme, setDebug, setStyle, setTheme, styles, themes } from '../../settingsManager';
+import { ref } from 'vue';
 
 const currentTheme = ref(getTheme());
+const currentStyle = ref(getStyle());
 const debug = ref(getDebug());
 
 // Function to change the theme
 const changeTheme = () => {
   setTheme(currentTheme.value);
+};
+
+// Function to change the style
+const changeStyle = () => {
+  setStyle(currentStyle.value);
 };
 
 // Function to toggle debug mode
@@ -35,6 +41,14 @@ const toggleDebug = () => {
             Theme: 
             <select v-model="currentTheme" @change="changeTheme">
                 <option v-for="(label, theme) in themes" :key="theme" :value="theme">{{ label }}</option>
+            </select>
+        </label>
+        </p>
+        <p>
+        <label>
+            Style: 
+            <select v-model="currentStyle" @change="changeStyle">
+                <option v-for="(label, style) in styles[currentTheme]" :key="style" :value="style">{{ label }}</option>
             </select>
         </label>
         </p>

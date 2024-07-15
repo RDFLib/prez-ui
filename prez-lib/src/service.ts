@@ -99,7 +99,7 @@ export async function getList(url: string): Promise<PrezDataList> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);
-    return { data: store.getList(), profiles, count: store.getCount() };
+    return { type: 'list', data: store.getList(), profiles, count: store.getCount() };
 }
 
 /**
@@ -113,7 +113,7 @@ export async function getItem(url: string, id: string): Promise<PrezDataItem> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);
-    return { data: store.getItem(id), profiles };
+    return { type: 'item', data: store.getItem(id), profiles };
 }
 
 /**
@@ -126,5 +126,5 @@ export async function search(url: string): Promise<PrezDataSearch> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);
-    return { data: store.search(), profiles };
+    return { type: 'search', data: store.search(), profiles };
 }

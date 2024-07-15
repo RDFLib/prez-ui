@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "types": ["vite/client"],
         "target": "ES2020",
         "useDefineForClassFields": true,
         "module": "ESNext",
@@ -12,10 +13,10 @@
         /* Bundler mode */
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
+        "emitDeclarationOnly": true,
         "resolveJsonModule": true,
         "isolatedModules": true,
         "esModuleInterop": true,
-        "noEmit": true,
         "jsx": "preserve",
         "outDir": "dist",
         "declaration": true,
@@ -26,7 +27,7 @@
         "noFallthroughCasesInSwitch": true,
         "paths": {
             "@/*": [
-                "./*"
+                "./src/*"
             ]
         }
     },
@@ -42,7 +43,8 @@
         "src/**/*.tsx",
         "src/types/**/*.d.ts",
         "src/components/**/*.vue",
-        "src/**/*.jsonld"
+        "src/**/*.jsonld",
+        "src/vite-env.d.ts"
     ],
     "references": [
         {

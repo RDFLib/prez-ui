@@ -3,6 +3,7 @@ import remarkGfm from 'remark-gfm';
 
 const config: StorybookConfig = {
     stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
+    //previewHead: (head) => `${head}<link id="dynamic-css" rel="stylesheet" href="/globals.css">`,
     addons: [
         "@storybook/addon-links",
         "@storybook/addon-essentials",
@@ -25,6 +26,9 @@ const config: StorybookConfig = {
         name: "@storybook/vue3-vite",
         options: {},
     },
+    core: {
+        builder: '@storybook/builder-vite',
+    },    
 //    docs: {},
 };
 export default config;

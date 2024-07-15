@@ -1,0 +1,20 @@
+/* Import Roboto font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+/* Apply the Roboto font family globally */
+body, .p-component {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* custom-theme.css */
+:root {
+    --primary-color: #007bff; /* Blue color */
+}
+
+.prezui-node {
+  /* background-color: red; */
+}
+
+body {
+  /* background-color: yellow; */
+}

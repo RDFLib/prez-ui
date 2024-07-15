@@ -1,9 +1,27 @@
-export const themes = {
+export const themes:Record <string, string> = {
     default: 'Default Theme',
     primevue: 'PrimeVue Theme',
     // Add more themes as needed
 };
+
+export const styles:Record <string, Record <string, string>> = {
+    default: {
+        style1: 'Default',
+        style2: 'Red'
+    },
+    primevue: {
+        style1: 'Default'
+    }
+}
+
+export const setStyle = (style: string) => {
+    localStorage.setItem('style', style);
+};
   
+export const getStyle = () => {
+    return localStorage.getItem('style') || '';
+};
+
 export const setTheme = (theme: string) => {
     localStorage.setItem('theme', theme);
 };

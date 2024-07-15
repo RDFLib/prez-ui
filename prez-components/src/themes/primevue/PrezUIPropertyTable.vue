@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { PrezUIPropertyTableProps } from '@/src/types';
+import type { PrezUIPropertyTableProps } from '@/types';
 import DataTable from 'primevue/datatable';
 import Column from "primevue/column";
 import PrezUIDebug from '@/components/PrezUIDebug.vue';
