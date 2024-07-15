@@ -1,17 +1,89 @@
 [
     {
-        "@id": "https://example.com/NotApproved",
+        "@id": "https://focus-node-2",
         "@type": [
-            "https://example.com/Status"
+            "https://prez.dev/FocusNode"
+        ],
+        "https://example.com/status": [
+            {
+                "@id": "https://example.com/NotApproved"
+            }
         ],
         "https://prez.dev/description": [
             {
-                "@value": "The item has not been approved."
+                "@value": "Focus Node 2 Description"
             }
         ],
         "https://prez.dev/label": [
             {
-                "@value": "Not Approved"
+                "@value": "Focus Node 2 Label"
+            }
+        ],
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalog/2"
+            }
+        ],
+        "https://prez.dev/nestedPropOne": [
+            {
+                "@id": "_:ncc928fd43cf845e59caafb221449682cb2"
+            }
+        ],
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Focus Node 2 Provenance"
+            }
+        ]
+    },
+    {
+        "@id": "_:ncc928fd43cf845e59caafb221449682cb2",
+        "https://prez.dev/nestedPropTwo": [
+            {
+                "@value": "nested value focus node 2"
+            }
+        ]
+    },
+    {
+        "@id": "https://focus-node-1",
+        "@type": [
+            "https://prez.dev/FocusNode"
+        ],
+        "https://example.com/status": [
+            {
+                "@id": "https://example.com/Approved"
+            }
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Focus Node 1 Description"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Focus Node 1 Label"
+            }
+        ],
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalog/1"
+            }
+        ],
+        "https://prez.dev/nestedPropOne": [
+            {
+                "@id": "_:ncc928fd43cf845e59caafb221449682cb1"
+            }
+        ],
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Focus Node 1 Provenance"
+            }
+        ]
+    },
+    {
+        "@id": "_:ncc928fd43cf845e59caafb221449682cb1",
+        "https://prez.dev/nestedPropTwo": [
+            {
+                "@value": "nested value focus node 1"
             }
         ]
     },
@@ -42,7 +114,15 @@
         ]
     },
     {
-        "@id": "_:n78a0e3b6403347569cb143a0c2943a18b1",
+        "@id": "https://prez.dev/nestedPropTwo",
+        "https://prez.dev/label": [
+            {
+                "@value": "Nested Property Two"
+            }
+        ]
+    },
+    {
+        "@id": "_:ncc928fd43cf845e59caafb221449682cb3",
         "https://prez.dev/count": [
             {
                 "@value": 3
@@ -50,64 +130,31 @@
         ]
     },
     {
-        "@id": "https://focus-node-2",
-        "@type": [
-            "https://prez.dev/FocusNode"
-        ],
-        "https://example.com/status": [
-            {
-                "@id": "https://example.com/NotApproved"
-            }
-        ],
+        "@id": "https://prez.dev/nestedPropOne",
         "https://prez.dev/description": [
             {
-                "@value": "Focus Node 2 Description"
+                "@value": "This is the first nested property."
             }
         ],
         "https://prez.dev/label": [
             {
-                "@value": "Focus Node 2 Label"
-            }
-        ],
-        "https://prez.dev/link": [
-            {
-                "@value": "/catalog/2"
-            }
-        ],
-        "https://prez.dev/provenance": [
-            {
-                "@value": "Focus Node 2 Provenance"
+                "@value": "Nested Property One"
             }
         ]
     },
     {
-        "@id": "https://focus-node-1",
+        "@id": "https://example.com/NotApproved",
         "@type": [
-            "https://prez.dev/FocusNode"
-        ],
-        "https://example.com/status": [
-            {
-                "@id": "https://example.com/Approved"
-            }
+            "https://example.com/Status"
         ],
         "https://prez.dev/description": [
             {
-                "@value": "Focus Node 1 Description"
+                "@value": "The item has not been approved."
             }
         ],
         "https://prez.dev/label": [
             {
-                "@value": "Focus Node 1 Label"
-            }
-        ],
-        "https://prez.dev/link": [
-            {
-                "@value": "/catalog/1"
-            }
-        ],
-        "https://prez.dev/provenance": [
-            {
-                "@value": "Focus Node 1 Provenance"
+                "@value": "Not Approved"
             }
         ]
     },

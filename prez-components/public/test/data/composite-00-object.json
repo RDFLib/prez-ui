@@ -24,6 +24,54 @@
         ]
     },
     {
+        "@id": "https://obj/1/bn1",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Object label"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj-with-label",
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Obj 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://first-object",
+        "https://prez.dev/label": [
+            {
+                "@value": "First Object"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred/2/bn1",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Pred 2"
+            }
+        ]
+    },
+    {
+        "@id": "http://www.w3.org/2001/XMLSchema#date",
+        "https://prez.dev/label": [
+            {
+                "@value": "Date"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj/3/bn3",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Object 3 label"
+            }
+        ]
+    },
+    {
         "@id": "https://pred/3/bn3",
         "https://prez.dev/label": [
             {
@@ -32,10 +80,18 @@
         ]
     },
     {
-        "@id": "https://obj/1/bn1",
+        "@id": "https://second-object",
         "https://prez.dev/label": [
             {
-                "@value": "BN Object label"
+                "@value": "Second Object"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred/multiple-values",
+        "https://prez.dev/label": [
+            {
+                "@value": "Multiple Values test"
             }
         ]
     },
@@ -56,20 +112,30 @@
         ],
         "https://pred/1/bn1": [
             {
-                "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb1"
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb1"
             }
         ],
         "https://pred/1/bn2": [
             {
-                "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb2"
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb2"
             }
         ],
         "https://pred/1/bn34": [
             {
-                "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb3"
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb3"
             },
             {
-                "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb4"
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb4"
+            }
+        ],
+        "https://pred/1/newbn1": [
+            {
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb5"
+            }
+        ],
+        "https://pred/1/newbn5": [
+            {
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb9"
             }
         ],
         "https://pred/datatype-label": [
@@ -119,7 +185,7 @@
         ]
     },
     {
-        "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb1",
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb1",
         "https://pred/2/bn1": [
             {
                 "@id": "https://obj/1/bn1"
@@ -127,7 +193,7 @@
         ]
     },
     {
-        "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb2",
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb2",
         "https://pred/2/bn2": [
             {
                 "@id": "https://obj/2/bn1"
@@ -135,7 +201,7 @@
         ]
     },
     {
-        "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb3",
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb3",
         "https://pred/3/bn3": [
             {
                 "@id": "https://obj/3/bn3"
@@ -143,7 +209,7 @@
         ]
     },
     {
-        "@id": "_:nba489a6e8bac403384a6292d4efa0d8eb4",
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb4",
         "https://pred/4/bn4": [
             {
                 "@id": "https://obj/4/bn4"
@@ -151,26 +217,166 @@
         ]
     },
     {
-        "@id": "http://www.w3.org/2001/XMLSchema#date",
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb5",
+        "https://pred/2/newbn1": [
+            {
+                "@id": "https://obj/1/newbn1"
+            }
+        ],
+        "https://pred/2/newbn1-1": [
+            {
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb6"
+            }
+        ],
         "https://prez.dev/label": [
             {
-                "@value": "Date"
+                "@value": "First Level BN 1"
             }
         ]
     },
     {
-        "@id": "https://pred-with-label",
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb6",
+        "https://pred/2/newbn1-2": [
+            {
+                "@id": "https://obj/2/newbn2-2"
+            }
+        ],
+        "https://pred/3/newbn2": [
+            {
+                "@id": "https://obj/2/newbn2"
+            }
+        ],
+        "https://pred/3/newbn2-1": [
+            {
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb7"
+            }
+        ],
         "https://prez.dev/label": [
             {
-                "@value": "Labeled Pred 1"
+                "@value": "Second Level BN 1"
             }
         ]
     },
     {
-        "@id": "https://pred/multiple-values",
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb7",
+        "https://pred/4/newbn3": [
+            {
+                "@id": "https://obj/3/newbn3"
+            }
+        ],
+        "https://pred/4/newbn3-1": [
+            {
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb8"
+            }
+        ],
         "https://prez.dev/label": [
             {
-                "@value": "Multiple Values test"
+                "@value": "Third Level BN 1"
+            }
+        ]
+    },
+    {
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb8",
+        "https://pred/4/newbn3-2": [
+            {
+                "@id": "https://obj/4/newbn3-2"
+            }
+        ],
+        "https://pred/5/newbn4": [
+            {
+                "@id": "https://obj/4/newbn4"
+            }
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Fourth level with both properties and nested properties."
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Fourth Level BN 1"
+            }
+        ]
+    },
+    {
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb9",
+        "https://pred/2/newbn5": [
+            {
+                "@id": "https://obj/1/newbn5"
+            }
+        ],
+        "https://pred/2/newbn5-1": [
+            {
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb10"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "First Level BN 2"
+            }
+        ]
+    },
+    {
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb10",
+        "https://pred/2/newbn5-2": [
+            {
+                "@id": "https://obj/2/newbn6-2"
+            }
+        ],
+        "https://pred/3/newbn6": [
+            {
+                "@id": "https://obj/2/newbn6"
+            }
+        ],
+        "https://pred/3/newbn6-1": [
+            {
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb11"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Second Level BN 2"
+            }
+        ]
+    },
+    {
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb11",
+        "https://pred/4/newbn7": [
+            {
+                "@id": "https://obj/3/newbn7"
+            }
+        ],
+        "https://pred/4/newbn7-1": [
+            {
+                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb12"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Third Level BN 2"
+            }
+        ]
+    },
+    {
+        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb12",
+        "https://pred/4/newbn7-2": [
+            {
+                "@id": "https://obj/4/newbn7-2"
+            }
+        ],
+        "https://pred/5/newbn8": [
+            {
+                "@id": "https://obj/4/newbn8"
+            }
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Fourth level with both properties and nested properties."
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Fourth Level BN 2"
             }
         ]
     },
@@ -183,42 +389,10 @@
         ]
     },
     {
-        "@id": "https://second-object",
+        "@id": "https://pred-with-label",
         "https://prez.dev/label": [
             {
-                "@value": "Second Object"
-            }
-        ]
-    },
-    {
-        "@id": "https://pred/2/bn1",
-        "https://prez.dev/label": [
-            {
-                "@value": "BN Pred 2"
-            }
-        ]
-    },
-    {
-        "@id": "https://first-object",
-        "https://prez.dev/label": [
-            {
-                "@value": "First Object"
-            }
-        ]
-    },
-    {
-        "@id": "https://obj/3/bn3",
-        "https://prez.dev/label": [
-            {
-                "@value": "BN Object 3 label"
-            }
-        ]
-    },
-    {
-        "@id": "https://obj-with-label",
-        "https://prez.dev/label": [
-            {
-                "@value": "Labeled Obj 1"
+                "@value": "Labeled Pred 1"
             }
         ]
     }
