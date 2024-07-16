@@ -42,7 +42,7 @@
         ],
         "https://prez.dev/nestedPropOne": [
             {
-                "@id": "_:n87d631b49a1949c2a88b3035be86fc09b2"
+                "@id": "_:n05f62637daec4de5b203679c6a7f1300b2"
             }
         ],
         "https://prez.dev/provenance": [
@@ -52,7 +52,7 @@
         ]
     },
     {
-        "@id": "_:n87d631b49a1949c2a88b3035be86fc09b2",
+        "@id": "_:n05f62637daec4de5b203679c6a7f1300b2",
         "https://prez.dev/nestedPropTwo": [
             {
                 "@value": "nested value focus node 2"
@@ -69,14 +69,6 @@
         "https://prez.dev/label": [
             {
                 "@value": "Nested Property One"
-            }
-        ]
-    },
-    {
-        "@id": "_:n87d631b49a1949c2a88b3035be86fc09b3",
-        "https://prez.dev/count": [
-            {
-                "@value": "3"
             }
         ]
     },
@@ -123,7 +115,7 @@
         ],
         "https://prez.dev/nestedPropOne": [
             {
-                "@id": "_:n87d631b49a1949c2a88b3035be86fc09b1"
+                "@id": "_:n05f62637daec4de5b203679c6a7f1300b1"
             }
         ],
         "https://prez.dev/provenance": [
@@ -133,7 +125,7 @@
         ]
     },
     {
-        "@id": "_:n87d631b49a1949c2a88b3035be86fc09b1",
+        "@id": "_:n05f62637daec4de5b203679c6a7f1300b1",
         "https://prez.dev/nestedPropTwo": [
             {
                 "@value": "nested value focus node 1"
@@ -171,6 +163,14 @@
         "https://prez.dev/label": [
             {
                 "@value": "Nested Property Two"
+            }
+        ]
+    },
+    {
+        "@id": "_:n05f62637daec4de5b203679c6a7f1300b3",
+        "https://prez.dev/count": [
+            {
+                "@value": ">100"
             }
         ]
     }

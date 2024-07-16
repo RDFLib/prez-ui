@@ -1,49 +1,9 @@
 [
     {
-        "@id": "https://pred/4/bn4",
+        "@id": "https://obj/4/bn4",
         "https://prez.dev/label": [
             {
-                "@value": "BN Pred 4"
-            }
-        ]
-    },
-    {
-        "@id": "https://pred/1/bn34",
-        "https://prez.dev/label": [
-            {
-                "@value": "BN Pred 34"
-            }
-        ]
-    },
-    {
-        "@id": "https://pred/1/bn1",
-        "https://prez.dev/label": [
-            {
-                "@value": "BN Pred 1"
-            }
-        ]
-    },
-    {
-        "@id": "https://obj/1/bn1",
-        "https://prez.dev/label": [
-            {
-                "@value": "BN Object label"
-            }
-        ]
-    },
-    {
-        "@id": "https://obj-with-label",
-        "https://prez.dev/label": [
-            {
-                "@value": "Labeled Obj 1"
-            }
-        ]
-    },
-    {
-        "@id": "https://first-object",
-        "https://prez.dev/label": [
-            {
-                "@value": "First Object"
+                "@value": "BN Object 4 label"
             }
         ]
     },
@@ -56,10 +16,10 @@
         ]
     },
     {
-        "@id": "http://www.w3.org/2001/XMLSchema#date",
+        "@id": "https://obj/1/bn1",
         "https://prez.dev/label": [
             {
-                "@value": "Date"
+                "@value": "BN Object label"
             }
         ]
     },
@@ -72,26 +32,10 @@
         ]
     },
     {
-        "@id": "https://pred/3/bn3",
+        "@id": "https://pred/1/bn1",
         "https://prez.dev/label": [
             {
-                "@value": "BN Pred 3"
-            }
-        ]
-    },
-    {
-        "@id": "https://second-object",
-        "https://prez.dev/label": [
-            {
-                "@value": "Second Object"
-            }
-        ]
-    },
-    {
-        "@id": "https://pred/multiple-values",
-        "https://prez.dev/label": [
-            {
-                "@value": "Multiple Values test"
+                "@value": "BN Pred 1"
             }
         ]
     },
@@ -112,30 +56,30 @@
         ],
         "https://pred/1/bn1": [
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb1"
+                "@id": "_:n5102ef733bf04637816f90d623828854b1"
             }
         ],
         "https://pred/1/bn2": [
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb2"
+                "@id": "_:n5102ef733bf04637816f90d623828854b2"
             }
         ],
         "https://pred/1/bn34": [
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb3"
+                "@id": "_:n5102ef733bf04637816f90d623828854b3"
             },
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb4"
+                "@id": "_:n5102ef733bf04637816f90d623828854b4"
             }
         ],
         "https://pred/1/newbn1": [
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb5"
+                "@id": "_:n5102ef733bf04637816f90d623828854b5"
             }
         ],
         "https://pred/1/newbn5": [
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb9"
+                "@id": "_:n5102ef733bf04637816f90d623828854b9"
             }
         ],
         "https://pred/datatype-label": [
@@ -185,7 +129,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb1",
+        "@id": "_:n5102ef733bf04637816f90d623828854b1",
         "https://pred/2/bn1": [
             {
                 "@id": "https://obj/1/bn1"
@@ -193,7 +137,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb2",
+        "@id": "_:n5102ef733bf04637816f90d623828854b2",
         "https://pred/2/bn2": [
             {
                 "@id": "https://obj/2/bn1"
@@ -201,7 +145,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb3",
+        "@id": "_:n5102ef733bf04637816f90d623828854b3",
         "https://pred/3/bn3": [
             {
                 "@id": "https://obj/3/bn3"
@@ -209,7 +153,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb4",
+        "@id": "_:n5102ef733bf04637816f90d623828854b4",
         "https://pred/4/bn4": [
             {
                 "@id": "https://obj/4/bn4"
@@ -217,7 +161,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb5",
+        "@id": "_:n5102ef733bf04637816f90d623828854b5",
         "https://pred/2/newbn1": [
             {
                 "@id": "https://obj/1/newbn1"
@@ -225,7 +169,7 @@
         ],
         "https://pred/2/newbn1-1": [
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb6"
+                "@id": "_:n5102ef733bf04637816f90d623828854b6"
             }
         ],
         "https://prez.dev/label": [
@@ -235,7 +179,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb6",
+        "@id": "_:n5102ef733bf04637816f90d623828854b6",
         "https://pred/2/newbn1-2": [
             {
                 "@id": "https://obj/2/newbn2-2"
@@ -248,7 +192,7 @@
         ],
         "https://pred/3/newbn2-1": [
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb7"
+                "@id": "_:n5102ef733bf04637816f90d623828854b7"
             }
         ],
         "https://prez.dev/label": [
@@ -258,7 +202,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb7",
+        "@id": "_:n5102ef733bf04637816f90d623828854b7",
         "https://pred/4/newbn3": [
             {
                 "@id": "https://obj/3/newbn3"
@@ -266,7 +210,7 @@
         ],
         "https://pred/4/newbn3-1": [
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb8"
+                "@id": "_:n5102ef733bf04637816f90d623828854b8"
             }
         ],
         "https://prez.dev/label": [
@@ -276,7 +220,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb8",
+        "@id": "_:n5102ef733bf04637816f90d623828854b8",
         "https://pred/4/newbn3-2": [
             {
                 "@id": "https://obj/4/newbn3-2"
@@ -299,7 +243,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb9",
+        "@id": "_:n5102ef733bf04637816f90d623828854b9",
         "https://pred/2/newbn5": [
             {
                 "@id": "https://obj/1/newbn5"
@@ -307,7 +251,7 @@
         ],
         "https://pred/2/newbn5-1": [
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb10"
+                "@id": "_:n5102ef733bf04637816f90d623828854b10"
             }
         ],
         "https://prez.dev/label": [
@@ -317,7 +261,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb10",
+        "@id": "_:n5102ef733bf04637816f90d623828854b10",
         "https://pred/2/newbn5-2": [
             {
                 "@id": "https://obj/2/newbn6-2"
@@ -330,7 +274,7 @@
         ],
         "https://pred/3/newbn6-1": [
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb11"
+                "@id": "_:n5102ef733bf04637816f90d623828854b11"
             }
         ],
         "https://prez.dev/label": [
@@ -340,7 +284,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb11",
+        "@id": "_:n5102ef733bf04637816f90d623828854b11",
         "https://pred/4/newbn7": [
             {
                 "@id": "https://obj/3/newbn7"
@@ -348,7 +292,7 @@
         ],
         "https://pred/4/newbn7-1": [
             {
-                "@id": "_:nb48e5d04d4994806a34dd0942634c21fb12"
+                "@id": "_:n5102ef733bf04637816f90d623828854b12"
             }
         ],
         "https://prez.dev/label": [
@@ -358,7 +302,7 @@
         ]
     },
     {
-        "@id": "_:nb48e5d04d4994806a34dd0942634c21fb12",
+        "@id": "_:n5102ef733bf04637816f90d623828854b12",
         "https://pred/4/newbn7-2": [
             {
                 "@id": "https://obj/4/newbn7-2"
@@ -381,10 +325,42 @@
         ]
     },
     {
-        "@id": "https://obj/4/bn4",
+        "@id": "https://pred/multiple-values",
         "https://prez.dev/label": [
             {
-                "@value": "BN Object 4 label"
+                "@value": "Multiple Values test"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred/1/bn34",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Pred 34"
+            }
+        ]
+    },
+    {
+        "@id": "https://second-object",
+        "https://prez.dev/label": [
+            {
+                "@value": "Second Object"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj-with-label",
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Obj 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred/4/bn4",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Pred 4"
             }
         ]
     },
@@ -393,6 +369,30 @@
         "https://prez.dev/label": [
             {
                 "@value": "Labeled Pred 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred/3/bn3",
+        "https://prez.dev/label": [
+            {
+                "@value": "BN Pred 3"
+            }
+        ]
+    },
+    {
+        "@id": "https://first-object",
+        "https://prez.dev/label": [
+            {
+                "@value": "First Object"
+            }
+        ]
+    },
+    {
+        "@id": "http://www.w3.org/2001/XMLSchema#date",
+        "https://prez.dev/label": [
+            {
+                "@value": "Date"
             }
         ]
     }

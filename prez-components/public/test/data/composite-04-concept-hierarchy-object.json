@@ -1,21 +1,5 @@
 [
     {
-        "@id": "https://obj-with-label",
-        "https://prez.dev/label": [
-            {
-                "@value": "Labeled Obj 1"
-            }
-        ]
-    },
-    {
-        "@id": "https://pred-with-label",
-        "https://prez.dev/label": [
-            {
-                "@value": "Labeled Pred 1"
-            }
-        ]
-    },
-    {
         "@id": "https://focus-node",
         "@type": [
             "https://prez.dev/FocusNode",
@@ -39,6 +23,22 @@
         "https://prez.dev/provenance": [
             {
                 "@value": "Focus Node Provenance"
+            }
+        ]
+    },
+    {
+        "@id": "https://pred-with-label",
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Pred 1"
+            }
+        ]
+    },
+    {
+        "@id": "https://obj-with-label",
+        "https://prez.dev/label": [
+            {
+                "@value": "Labeled Obj 1"
             }
         ]
     }

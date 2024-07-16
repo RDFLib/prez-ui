@@ -1,9 +1,35 @@
 [
     {
-        "@id": "_:n16b753f1ed854475aeee433cd48656b9b1",
+        "@id": "_:n275ef73448da422db24ea41a831621c6b1",
         "https://prez.dev/count": [
             {
-                "@value": 3
+                "@value": "3"
+            }
+        ]
+    },
+    {
+        "@id": "https://focus-node-3",
+        "@type": [
+            "https://prez.dev/FocusNode"
+        ],
+        "https://prez.dev/description": [
+            {
+                "@value": "Focus Node 3 Description"
+            }
+        ],
+        "https://prez.dev/label": [
+            {
+                "@value": "Focus Node 3 Label"
+            }
+        ],
+        "https://prez.dev/link": [
+            {
+                "@value": "/catalog/3"
+            }
+        ],
+        "https://prez.dev/provenance": [
+            {
+                "@value": "Focus Node 3 Provenance"
             }
         ]
     },
@@ -56,32 +82,6 @@
         "https://prez.dev/provenance": [
             {
                 "@value": "Focus Node 1 Provenance"
-            }
-        ]
-    },
-    {
-        "@id": "https://focus-node-3",
-        "@type": [
-            "https://prez.dev/FocusNode"
-        ],
-        "https://prez.dev/description": [
-            {
-                "@value": "Focus Node 3 Description"
-            }
-        ],
-        "https://prez.dev/label": [
-            {
-                "@value": "Focus Node 3 Label"
-            }
-        ],
-        "https://prez.dev/link": [
-            {
-                "@value": "/catalog/3"
-            }
-        ],
-        "https://prez.dev/provenance": [
-            {
-                "@value": "Focus Node 3 Provenance"
             }
         ]
     }
