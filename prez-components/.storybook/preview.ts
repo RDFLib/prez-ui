@@ -2,6 +2,8 @@ import { type Preview, setup } from "@storybook/vue3";
 import { addons } from '@storybook/manager-api';
 import { watch, reactive, onUnmounted } from 'vue';
 
+import docsPage from './docsPage';
+
 import PrimeVue from "primevue/config";
 import Aura from '@primevue/themes/aura';
 import "primeicons/primeicons.css";
@@ -12,10 +14,13 @@ import { getStyle, getTheme } from "../src/settingsManager.ts";
 
 const style = getStyle();
 if(style) {
-    const theme = getTheme();
-    //const importPath = `../src/themes/${theme}/styles/${style}.css`;
 
-    import (`../src/themes/${theme}/styles/${style}.css?inline`);
+    const theme = getTheme();
+    const importPath = `../src/themes/${theme}/styles/${style}.css`;
+
+    console.log("******CSS ", importPath)
+
+    import (`../src/themes/${theme}/styles/${style}.css`);
     // const stylesMap = import.meta.glob("../src/themes/*/styles/*.css", { query: '' });
     // const importStyle = stylesMap[importPath];
     // console.log('ImportPath = ', importPath);
@@ -48,17 +53,25 @@ setup((app) => {
 
 const preview: Preview = {
     parameters: {
-    options: {
-        storySort: {
-        order: [
-            'Introduction',
-            'Base', 
-            'Composite', 
-            'Containers', 
-            'Pages'
-        ],
+        docs: {
+//            page: docsPage,
+            toc: true
         },
-    },
+        options: {
+            showPanel: false, // Optionally hide the story panel
+            storySort: {
+                order: [
+                    'Introduction',
+                    'Standard Components',
+                    'Data Components',
+                    ['PrezUILiteral', 'PrezUINode', 'PrezUIHeader'],
+                    'Containers', 
+                    'Pages',
+                    '*',
+                    'Config'
+                ],
+            },
+        },
     }
 };
 

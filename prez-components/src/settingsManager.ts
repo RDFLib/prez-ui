@@ -14,26 +14,38 @@ export const styles:Record <string, Record <string, string>> = {
     }
 }
 
-export const setStyle = (style: string) => {
-    localStorage.setItem('style', style);
+export const setStyle = (style: string|undefined) => {
+    if(typeof window !== 'undefined') {
+        localStorage.setItem('style', style || '');
+    }
 };
   
 export const getStyle = () => {
-    return localStorage.getItem('style') || '';
+    if(typeof window !== 'undefined') {
+        return localStorage.getItem('style') || '';
+    }
 };
 
-export const setTheme = (theme: string) => {
-    localStorage.setItem('theme', theme);
+export const setTheme = (theme: string|undefined) => {
+    if(typeof window !== 'undefined') {
+        localStorage.setItem('theme', theme || '');
+    }
 };
   
 export const getTheme = () => {
-    return localStorage.getItem('theme') || 'default';
+    if(typeof window !== 'undefined') {
+        return localStorage.getItem('theme') || 'default';
+    }
 };
 
-export const setDebug = (debug: boolean) => {
-    localStorage.setItem('debug', debug.toString());
+export const setDebug = (debug: boolean|undefined) => {
+    if(typeof window !== 'undefined') {
+        localStorage.setItem('debug', (debug || false).toString());
+    }
 };
   
 export const getDebug = () => {
-    return localStorage.getItem('debug') === 'true';
+    if(typeof window !== 'undefined') {
+        return localStorage.getItem('debug') === 'true';
+    }
 };

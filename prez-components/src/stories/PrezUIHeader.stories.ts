@@ -4,7 +4,7 @@ import PrezUIHeader from "../components/PrezUIHeader.vue";
 import { literal, node } from "prez-lib";
 
 const meta = {
-  title: "Composite/PrezUIHeader",
+  title: "Data Components/PrezUIHeader",
   component: PrezUIHeader,
   tags: ["autodocs"],
   argTypes: {

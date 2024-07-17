@@ -10,10 +10,10 @@ const term = props.term as PrezNode;
     <PrezUIDebug :debug="props.debug" title="PrezUIHeader" :info="term">
         <div class="prezui-header">
             <div class="prezui-header-title">
-                <PrezUITerm :debug="props.debug" :term="term"></PrezUITerm>
+                <PrezUINode :debug="props.debug" :term="term"></PrezUINode>
             </div>
             <div v-if="term.description" class="prezui-header-desc">
-                <PrezUITerm :debug="props.debug" :term="term.description"></PrezUITerm>
+                <PrezUILiteral :debug="props.debug" :term="term.description"></PrezUILiteral>
             </div>
         </div>
     </PrezUIDebug>

@@ -4,9 +4,7 @@ import Settings from '../components/sb/Settings.vue';
 
 const meta = {
   title: "Config/Settings",
-  component: Settings,
-  argTypes: {
-  },
+  component: Settings
 } satisfies Meta<typeof Settings>;
 
 export default meta;

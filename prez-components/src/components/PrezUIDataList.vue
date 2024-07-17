@@ -5,7 +5,7 @@ const props = defineProps<PrezUIDataListProps>();
 const list = props.list;
 </script>
 <template>
-    <WithTheme title="PrezUIDataList" :info="props">        
+    <WithTheme component="PrezUIDataList" :info="props">        
         <PrezUIHeader :debug="props.debug" :term="node({value: '', label: literal(`${list.count} records found`)})"></PrezUIHeader>
         <PrezUIList :debug="props.debug" :list="list.data" />
     </WithTheme>

@@ -15,18 +15,19 @@ type JSONTermItem = {
 
 type JSONTerm = JSONTermItem | JSONTermItem[];
 
-
 enum PrezPredicates {
-    Label = 'https://prez.dev/label',
+    Label       = 'https://prez.dev/label',
     Description = 'https://prez.dev/description',
-    Provenance = 'https://prez.dev/provenance',
-    Link = 'https://prez.dev/link',
-    FocusNode = 'https://prez.dev/FocusNode',
-    Count = 'https://prez.dev/count'
-}
+    Provenance  = 'https://prez.dev/provenance',
+    Link        = 'https://prez.dev/link',
+    FocusNode   = 'https://prez.dev/FocusNode',
+    Count       = 'https://prez.dev/count'
+};
 
 function isFocusNode(n: NodeObject | ValueObject) {
-    return ("@type" in n && n["@type"] == PrezPredicates.FocusNode && "@id" in n);
+    return ("@type" in n && "@id" in n &&
+        (Array.isArray(n['@type']) ? n['@type'].find(v=>v == PrezPredicates.FocusNode)
+        : n["@type"] == PrezPredicates.FocusNode));
 }
 
 /**
@@ -146,6 +147,7 @@ function setAllPropertiesFromJSON(prezNode: PrezNode, properties: PrezProperties
 
                 // if we have an @id, lookup the id in the other root nodes
                 if('@id' in propObject && lookupId[propObject['@id'] as string]) {
+                    console.log("***1", propObject['@id'])
                     propObject = {...propObject, ...lookupId[propObject['@id'] as string]};
                 }
 
@@ -154,6 +156,7 @@ function setAllPropertiesFromJSON(prezNode: PrezNode, properties: PrezProperties
 
                     // blank node
                     if('@id' in propObject && (propObject['@id'] as string)[0] == '_') {
+                        console.log("***2", propObject['@id'])
 
                         console.log("IS BN", propObject)
                         const bterms = JSONtoTerm(propObject as JSONTerm);
@@ -172,10 +175,6 @@ function setAllPropertiesFromJSON(prezNode: PrezNode, properties: PrezProperties
                         // translate the object to a term
                         const terms = JSONtoTerm(propObject as JSONTerm);
 
-                        if(terms.length > 1) {
-                            console.log("MULTI TERMS")
-                        }
-
                         // const term = terms[0];
 
                         // console.log(propName, propObject, term);
@@ -193,10 +192,14 @@ function setAllPropertiesFromJSON(prezNode: PrezNode, properties: PrezProperties
                             setNodePropertiesFromJSON(predNode, propObject as JSONTerm);
                         }
 
+                        // check if any of the terms require type expansion
                         for(const term of terms) {
                             if('@type' in propObject) {
-                                if(lookupId[propObject['@type'] as string]) {
-                                    setNodePropertiesFromJSON((term as PrezLiteral).datatype!, lookupId[propObject['@type'] as string] as JSONTerm)
+                                const types = Array.isArray(propObject['@type']) ? propObject['@type'] : [propObject['@type']];
+                                for(const type of types) {
+                                    if(lookupId[type!]) {
+                                        setNodePropertiesFromJSON((term as PrezLiteral).datatype!, lookupId[type!] as JSONTerm)
+                                    }
                                 }
                             }
                             
@@ -209,6 +212,45 @@ function setAllPropertiesFromJSON(prezNode: PrezNode, properties: PrezProperties
     }
     setNodePropertiesFromJSON(prezNode, n as JSONTerm);
 }
+/*
+export async function expandJSON(doc: JsonLdDocument):Promise<JsonLdDocument> {
+    // use json ld framing to standardise the JSON doc
+    const docFramed = await frame(doc, {});
+    const data = docFramed['@graph'];
+
+    if(Array.isArray(data)) {
+        const idNodes: Record<string, NodeObject> = {};
+        // grab all non focus nodes with an @id
+        for(const n of data.filter(n=>!isFocusNode(n as ValueObject))) {
+            if('@id' in n) {
+                const { "@id": _, ...nodeWithoutId } = n;                    
+                idNodes[n['@id'] as string] = nodeWithoutId;
+            }
+        }
+        const newData:JsonLdDocument = {'@graph': []};
+        for(const n of data.filter(n=>isFocusNode(n as ValueObject))) {
+
+            let newNode = {...n};
+
+            if('@type' in n) {
+                const types = Array.isArray(n['@type']) ? n['@type'] : [n['@type']];
+                for(const type of types) {
+                    if(idNodes[type!]) {
+                        newNode = {...newNode, ...idNodes[type!]};       
+                    }
+                }
+            }
+
+            if('@id' in n) {
+                
+            }
+
+            const properties:PrezProperties = {};
+            setAllPropertiesFromJSON(focusNode, properties, n as NodeObject, idNodes);
+        }
+    }
+
+}*/
 
 export async function loadJSON(doc: JsonLdDocument):Promise<PrezDataItem|PrezDataList> {
     // use json ld framing to standardise the JSON doc

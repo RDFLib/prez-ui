@@ -68,7 +68,7 @@ const toggleDebug = () => {
   <style scoped>
   .config-settings {
     padding: 10px;
-    font-size:x-large;
+    font-size:large;
   }
   
   .config-settings h3 {
@@ -77,7 +77,7 @@ const toggleDebug = () => {
   
   .config-settings select {
     margin-bottom: 10px;
-    font-size:x-large;
+    font-size:large;
   }
 
   .config-settings input {

@@ -305,11 +305,17 @@ export class RDFStore {
     getByPrezId(id: string): Quad_Subject;
     public getByPrezId(id?: string): Quad_Subject | Quad_Subject[] {
         const ids: Quad[] = [];
+
         this.store.forEach(q => {
-            if (q.object.termType === "Literal" && q.object.datatype.value === this.toIri("prez:identifier")) {
-                ids.push(q);
-            }
-        }, null, namedNode(this.toIri("dcterms:identifier")), null, null);
+            ids.push(q);
+        }, null, null, namedNode('https://prez.dev/FocusNode'), null);
+            
+        // this.store.forEach(q => {
+        //     console.log("LOOKUP", q)
+        //     if (q.object.termType === "Literal" && q.object.datatype.value === this.toIri("prez:identifier")) {
+        //         ids.push(q);
+        //     }
+        // }, null, namedNode(this.toIri("dcterms:identifier")), null, null);
         if (id) {
             return ids.find(q => q.object.value === id)!.subject;
         } else {
@@ -350,13 +356,17 @@ export class RDFStore {
      * @param id the id of the object to return
      * @returns the item object
      */
-    public getItem(id: string): PrezItem {
-        const obj = this.getByPrezId(id);
-        const item = this.toPrezItem(obj);
+    public getItem(): PrezItem {
+        const obj = this.getByPrezId();
+        if(obj.length == 0) throw new Error('Unable to find item');
+        const item = this.toPrezItem(obj[0]);
+
+        
+        console.log("FOCUS", obj[0]);
 
         // if conceptscheme
         if (item.focusNode.rdfTypes?.map(t => t.value).includes(this.toIri("skos:ConceptScheme"))) {
-            const concepts = this.getConcepts(obj);
+            const concepts = this.getConcepts(obj[0]);
             if (concepts.length > 0) {
                 item.focusNode.concepts = concepts;
             }

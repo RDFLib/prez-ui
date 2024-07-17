@@ -5,7 +5,7 @@ import PrezUINode from "../components/PrezUINode.vue";
 import { literal, node } from "prez-lib";
 
 const meta = {
-  title: "Base/PrezUINode",
+  title: "Data Components/PrezUINode",
   component: PrezUINode,
   tags: ["autodocs"],
   argTypes: {

@@ -12,6 +12,7 @@
         "skipLibCheck": true,
         /* Bundler mode */
         "moduleResolution": "bundler",
+        "allowJs": true,
         "allowImportingTsExtensions": true,
         "emitDeclarationOnly": true,
         "resolveJsonModule": true,
@@ -26,6 +27,10 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
         "paths": {
+            "@x/*": [
+                "./src/test2/*",
+                "./src/test/*"
+            ],
             "@/*": [
                 "./src/*"
             ]
@@ -43,6 +48,8 @@
         "src/**/*.tsx",
         "src/types/**/*.d.ts",
         "src/components/**/*.vue",
+        "src/themes/**/*.vue",
+        "src/stories/*.stories.ts",
         "src/**/*.jsonld",
         "src/vite-env.d.ts"
     ],

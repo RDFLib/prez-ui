@@ -134,6 +134,8 @@ export interface PrezItem {
     properties: PrezProperties;
 };
 
+export type PrezList = PrezItem[];
+
 export type Prefixes = {
     [namespace: string]: string;
 };
@@ -167,7 +169,7 @@ export interface PrezData {
 
 export interface PrezDataList extends PrezData {
     type: 'list';
-    data: PrezItem[];
+    data: PrezList;
     profiles: ProfileHeader[];
     count: number;
 }

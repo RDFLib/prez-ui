@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import { vueRouter } from "storybook-vue3-router";
 
-import PrezUILiteral from "@/components/PrezUILiteral.vue";
+import PrezUILiteral from "../components/PrezUILiteral.vue";
 import { literal, node } from "prez-lib";
 
 const meta = {
-  title: "Base/PrezUILiteral",
+  title: "Data Components/PrezUILiteral",
   component: PrezUILiteral,
   tags: ["autodocs"],
   argTypes: {

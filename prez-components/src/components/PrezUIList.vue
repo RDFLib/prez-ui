@@ -6,7 +6,7 @@ const properties = list?.[0]?.properties;
 const headers = properties ? Object.keys(properties).map(p=>properties[p].predicate) : undefined;
 </script>
 <template>
-    <WithTheme v-bind="props" component="PrezUIList" :info="props.properties">
+    <WithTheme v-bind="props" component="PrezUIList" :info="props.list">
         <table v-if="headers" :class="props.debug ? 'debug' : undefined">
             <thead>
                 <tr>

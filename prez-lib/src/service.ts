@@ -98,6 +98,7 @@ export async function apiGet(url: string) {
 export async function getList(url: string): Promise<PrezDataList> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
+    console.log("GETLIST")
     store.load(data);
     return { type: 'list', data: store.getList(), profiles, count: store.getCount() };
 }
@@ -109,11 +110,11 @@ export async function getList(url: string): Promise<PrezDataList> {
  * @param id the prez:identifier of the object to get
  * @returns the item object
  */
-export async function getItem(url: string, id: string): Promise<PrezDataItem> {
+export async function getItem(url: string): Promise<PrezDataItem> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);
-    return { type: 'item', data: store.getItem(id), profiles };
+    return { type: 'item', data: store.getItem(), profiles };
 }
 
 /**

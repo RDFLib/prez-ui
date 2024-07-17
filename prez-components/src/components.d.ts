@@ -7,25 +7,31 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    copy: typeof import('./components/PrezUIItem copy.vue')['default']
+    copy: typeof import('./components/PrezUILoading copy.vue')['default']
     PrezDataProvider: typeof import('./components/PrezDataProvider.vue')['default']
     PrezDataProviderTerm: typeof import('./components/PrezDataProviderTerm.vue')['default']
     PrezUIData: typeof import('./components/PrezUIData.vue')['default']
     PrezUIDataItem: typeof import('./components/PrezUIDataItem.vue')['default']
     PrezUIDataList: typeof import('./components/PrezUIDataList.vue')['default']
+    PrezUIDataProvider: typeof import('./components/PrezUIDataProvider.vue')['default']
     PrezUIDebug: typeof import('./components/PrezUIDebug.vue')['default']
     PrezUIHeader: typeof import('./components/PrezUIHeader.vue')['default']
     PrezUIItem: typeof import('./components/PrezUIItem.vue')['default']
+    PrezUILink: typeof import('./components/PrezUILink.vue')['default']
     PrezUIList: typeof import('./components/PrezUIList.vue')['default']
     PrezUILiteral: typeof import('./components/PrezUILiteral.vue')['default']
     PrezUILoading: typeof import('./components/PrezUILoading.vue')['default']
     PrezUIMessage: typeof import('./components/PrezUIMessage.vue')['default']
     PrezUINode: typeof import('./components/PrezUINode.vue')['default']
+    PrezUIPagination: typeof import('./components/PrezUIPagination.vue')['default']
+    PrezUIProfiles: typeof import('./components/PrezUIProfiles.vue')['default']
     PrezUIPropertyTable: typeof import('./components/PrezUIPropertyTable.vue')['default']
     PrezUITerm: typeof import('./components/PrezUITerm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Settings: typeof import('./components/sb/Settings.vue')['default']
+    TestA: typeof import('./components/testA.vue')['default']
+    TestABC: typeof import('./components/testABC.vue')['default']
     WithTheme: typeof import('./components/WithTheme.vue')['default']
   }
 }

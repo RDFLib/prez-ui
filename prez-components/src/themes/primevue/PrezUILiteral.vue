@@ -9,8 +9,8 @@
     </PrezUILiteral>
 </template>
 <script lang="ts" setup>
-import PrezUILiteral from '@/components/PrezUILiteral.vue';
-import { PrezUILiteralProps } from '@/types';
+import PrezUILiteral from '../../components/PrezUILiteral.vue';
+import { PrezUILiteralProps } from '../../types';
 import Tag from 'primevue/tag';
 const props = defineProps<PrezUILiteralProps>();
 </script>

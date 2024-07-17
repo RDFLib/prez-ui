@@ -4,7 +4,7 @@
     </PrezUINode>
 </template>
 <script lang="ts" setup>
-import PrezUINode from '@/components/PrezUINode.vue';
-import { PrezUINodeProps } from '@/types';
+import PrezUINode from '../../components/PrezUINode.vue';
+import { PrezUINodeProps } from '../../types';
 const props = defineProps<PrezUINodeProps>();
 </script>
