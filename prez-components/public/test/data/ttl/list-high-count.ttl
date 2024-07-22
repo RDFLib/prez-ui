@@ -1,0 +1,50 @@
+@prefix prez: <https://prez.dev/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix ex: <https://example.com/> .
+
+# Define statuses
+ex:Approved a ex:Status ;
+    prez:label "Approved" ;
+    prez:description "The item has been approved." .
+
+ex:NotApproved a ex:Status ;
+    prez:label "Not Approved" ;
+    prez:description "The item has not been approved." .
+
+# Define properties
+prez:nestedPropOne
+    prez:label "Nested Property One" ;
+    prez:description "This is the first nested property." .
+
+prez:nestedPropTwo
+    prez:label "Nested Property Two" .
+
+# Triple with labels
+<https://focus-node-1> a prez:FocusNode ;
+    prez:label "Focus Node 1 Label" ;
+    prez:description "Focus Node 1 Description" ;
+    prez:provenance "Focus Node 1 Provenance" ;
+    prez:link "/catalog/1" ;
+    ex:status ex:Approved ;
+    prez:nestedPropOne [
+        prez:nestedPropTwo "nested value focus node 1"
+    ] .
+
+<https://focus-node-2> a prez:FocusNode ;
+    prez:label "Focus Node 2 Label" ;
+    prez:description "Focus Node 2 Description" ;
+    prez:provenance "Focus Node 2 Provenance" ;
+    prez:link "/catalog/2" ;
+    ex:status ex:NotApproved ;
+    prez:nestedPropOne [
+        prez:nestedPropTwo "nested value focus node 2"
+    ] .
+
+<https://focus-node-3> a prez:FocusNode ;
+    prez:label "Focus Node 3 Label" ;
+    prez:description "Focus Node 3 Description" ;
+    prez:provenance "Focus Node 3 Provenance" ;
+    prez:link "/catalog/3" .
+
+[] prez:count ">100" .

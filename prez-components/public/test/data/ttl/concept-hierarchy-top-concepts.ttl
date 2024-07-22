@@ -1,0 +1,14 @@
+PREFIX ex: <https://example.com/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX prez: <https://prez.dev/>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+ex:TopLevelConcept1 a skos:Concept , prez:FocusNode ;
+    prez:label "Top concept with narrowers" ;
+    prez:hasChildren true ;
+.
+
+ex:TopLevelConcept2 a skos:Concept , prez:FocusNode  ;
+    prez:label "Top concept without narrowers" ;
+    prez:hasChildren false ;
+.

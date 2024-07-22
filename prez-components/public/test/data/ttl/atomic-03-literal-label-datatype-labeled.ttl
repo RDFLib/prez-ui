@@ -1,0 +1,10 @@
+@prefix ns1: <https://> .
+@prefix prez: <https://prez.dev/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ns1:focus-node a sh:focusNode ;
+    ns1:pred-no-label ns1:obj-with-dtype .
+
+ns1:obj-with-dtype prez:label "2024-06-30"^^xsd:date .
+

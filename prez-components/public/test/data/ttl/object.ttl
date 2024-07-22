@@ -1,0 +1,108 @@
+@prefix prez: <https://prez.dev/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+<https://focus-node> a prez:FocusNode .
+
+# Simple triple without labels
+<https://focus-node> <https://pred-no-label> <https://obj-no-label> .
+
+# Triple with labels
+<https://focus-node> <https://pred-with-label> <https://obj-with-label> .
+<https://focus-node> prez:label "Focus Node Label" .
+<https://focus-node> prez:description "Focus Node Description" .
+<https://focus-node> prez:provenance "Focus Node Provenance" .
+<https://pred-with-label> prez:label "Labeled Pred 1" .
+<https://obj-with-label> prez:label "Labeled Obj 1" .
+
+# Triple with multiple values
+<https://focus-node> <https://pred/multiple-values> <https://first-object> , <https://second-object> .
+<https://pred/multiple-values> prez:label "Multiple Values test" .
+<https://first-object> prez:label "First Object" .
+<https://second-object> prez:label "Second Object" .
+
+# Triple with a datatype label
+<https://focus-node> <https://pred/datatype-label> "2024-06-01"^^xsd:date .
+xsd:date prez:label "Date" .
+
+# Triple with a datatype URI
+<https://focus-node> <https://pred/datatype-uri> "Obj with datatype URI"^^<https://unlabelled-datatype-uri> .
+
+# Link
+<https://focus-node> prez:link "/catalogs/link:focusnode" .
+
+# Members
+<https://focus-node> prez:members "/catalogs/link:focusnode/children" .
+
+# Blank node with labeled predicates
+<https://focus-node> <https://pred/1/bn1> _:bnode1 .
+_:bnode1 <https://pred/2/bn1> <https://obj/1/bn1> .
+<https://pred/1/bn1> prez:label "BN Pred 1" .
+<https://pred/2/bn1> prez:label "BN Pred 2" .
+<https://obj/1/bn1> prez:label "BN Object label" .
+
+# Blank node without labeled predicates
+<https://focus-node> <https://pred/1/bn2> _:bnode2 .
+_:bnode2 <https://pred/2/bn2> <https://obj/2/bn1> .
+
+# multiple blank nodes on one predicate
+# Focus node with two blank nodes off the same predicate
+<https://focus-node> <https://pred/1/bn34> _:bnode3 .
+<https://focus-node> <https://pred/1/bn34> _:bnode4 .
+<https://pred/1/bn34> prez:label "BN Pred 34" .
+
+_:bnode3 <https://pred/3/bn3> <https://obj/3/bn3> .
+<https://pred/3/bn3> prez:label "BN Pred 3" .
+<https://obj/3/bn3> prez:label "BN Object 3 label" .
+
+_:bnode4 <https://pred/4/bn4> <https://obj/4/bn4> .
+<https://pred/4/bn4> prez:label "BN Pred 4" .
+<https://obj/4/bn4> prez:label "BN Object 4 label" .
+
+# New nested properties to depth four
+# First level
+<https://focus-node> <https://pred/1/newbn1> _:newbnode1 .
+
+_:newbnode1 <https://pred/2/newbn1> <https://obj/1/newbn1> ;
+            prez:label "First Level BN 1" .
+
+# Second level
+_:newbnode1 <https://pred/2/newbn1-1> _:newbnode2 .
+_:newbnode2 <https://pred/3/newbn2> <https://obj/2/newbn2> ;
+            prez:label "Second Level BN 1" ;
+            <https://pred/2/newbn1-2> <https://obj/2/newbn2-2> .
+
+# Third level
+_:newbnode2 <https://pred/3/newbn2-1> _:newbnode3 .
+_:newbnode3 <https://pred/4/newbn3> <https://obj/3/newbn3> ;
+            prez:label "Third Level BN 1" .
+
+# Fourth level
+_:newbnode3 <https://pred/4/newbn3-1> _:newbnode4 .
+_:newbnode4 <https://pred/5/newbn4> <https://obj/4/newbn4> ;
+            prez:label "Fourth Level BN 1" ;
+            <https://pred/4/newbn3-2> <https://obj/4/newbn3-2> ;
+            prez:description "Fourth level with both properties and nested properties." .
+
+# Second set of nested properties for additional example
+<https://focus-node> <https://pred/1/newbn5> _:newbnode5 .
+_:newbnode5 <https://pred/2/newbn5> <https://obj/1/newbn5> ;
+            prez:label "First Level BN 2" .
+
+# Second level
+_:newbnode5 <https://pred/2/newbn5-1> _:newbnode6 .
+_:newbnode6 <https://pred/3/newbn6> <https://obj/2/newbn6> ;
+            prez:label "Second Level BN 2" ;
+            <https://pred/2/newbn5-2> <https://obj/2/newbn6-2> .
+
+# Third level
+_:newbnode6 <https://pred/3/newbn6-1> _:newbnode7 .
+_:newbnode7 <https://pred/4/newbn7> <https://obj/3/newbn7> ;
+            prez:label "Third Level BN 2" .
+
+# Fourth level
+_:newbnode7 <https://pred/4/newbn7-1> _:newbnode8 .
+_:newbnode8 <https://pred/5/newbn8> <https://obj/4/newbn8> ;
+            prez:label "Fourth Level BN 2" ;
+            <https://pred/4/newbn7-2> <https://obj/4/newbn7-2> ;
+            prez:description "Fourth level with both properties and nested properties." .
