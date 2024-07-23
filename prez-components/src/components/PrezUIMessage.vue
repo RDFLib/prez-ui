@@ -1,17 +1,15 @@
 <script setup lang="ts">
 import { PrezUIMessageProps } from '@/types';
-//import TestA from '@x/testA.vue';
 const props = defineProps<PrezUIMessageProps>();
 
 </script>
 
 <template>
-    <WithTheme v-bind="props" component="PrezUIMessage">
-        <!-- <TestA></TestA> -->
+    <PrezUI v-bind="props" component="PrezUIMessage">
         <slot :severity="props.severity">
             <div :class="`prezui-message ${props.severity || 'info'}`"><slot name="text" :severity="props.severity">{{ props.text }}</slot></div>
         </slot>
-    </WithTheme>
+    </PrezUI>
 </template>
 
 <style scoped>

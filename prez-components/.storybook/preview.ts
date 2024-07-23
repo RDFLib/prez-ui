@@ -18,7 +18,7 @@ if(style) {
     const theme = getTheme();
     const importPath = `../src/themes/${theme}/styles/${style}.css`;
 
-    console.log("******CSS ", importPath)
+//    console.log("******CSS ", importPath)
 
     import (`../src/themes/${theme}/styles/${style}.css`);
     // const stylesMap = import.meta.glob("../src/themes/*/styles/*.css", { query: '' });
@@ -62,13 +62,15 @@ const preview: Preview = {
             storySort: {
                 order: [
                     'Introduction',
+                    ['Overview', 'Installation'],
                     'Standard Components',
                     'Data Components',
                     ['PrezUILiteral', 'PrezUINode', 'PrezUIHeader'],
                     'Containers', 
                     'Pages',
                     '*',
-                    'Config'
+                    'Config',
+                    'Testing'
                 ],
             },
         },

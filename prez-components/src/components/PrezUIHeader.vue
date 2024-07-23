@@ -1,22 +1,20 @@
 <script lang="ts" setup>
 import type { PrezUIHeaderProps } from '../types';
-import PrezUITerm from './PrezUITerm.vue';
-import PrezUIDebug from './PrezUIDebug.vue';
 import { PrezNode } from 'prez-lib';
 const props = defineProps<PrezUIHeaderProps>();
 const term = props.term as PrezNode;
 </script>
 <template>
-    <PrezUIDebug :debug="props.debug" title="PrezUIHeader" :info="term">
+    <PrezUI v-bind="props" title="PrezUIHeader" :info="term">
         <div class="prezui-header">
             <div class="prezui-header-title">
-                <PrezUINode :debug="props.debug" :term="term"></PrezUINode>
+                <PrezUINode :term="term"></PrezUINode>
             </div>
             <div v-if="term.description" class="prezui-header-desc">
-                <PrezUILiteral :debug="props.debug" :term="term.description"></PrezUILiteral>
+                <PrezUILiteral :term="term.description"></PrezUILiteral>
             </div>
         </div>
-    </PrezUIDebug>
+    </PrezUI>
 </template>
 <style scoped>
 .prezui-header-title {

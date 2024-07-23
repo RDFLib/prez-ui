@@ -1,8 +1,7 @@
 <script setup lang="ts">
 
 import { ref, onMounted, defineProps, watch } from 'vue';
-import { getList, search, type PrezDataList, type PrezDataItem, type PrezDataSearch, type PrezNode, PrezItem, PrezData, getItem } from "prez-lib";
-import WithTheme from './WithTheme.vue';
+import { getList, search, type PrezNode, PrezData, getItem, PrezFocusNode } from "prez-lib";
 import { PrezUIDataProviderProps } from '@/types.ts';
 
 const props = defineProps<PrezUIDataProviderProps>();
@@ -77,21 +76,28 @@ onMounted(async () => {
 });
 </script>
 <template>
-    <WithTheme component="PrezUIDataProvider" :info="`URL: ${props.url}\n\nContents:\n${JSON.stringify(rawData)}`">
+    <PrezUI v-bind="props" component="PrezUIDataProvider" :info="`URL: ${props.url}\n\nContents:\n${JSON.stringify(rawData)}`">
         <template v-if="loading">
             <slot name="loading">
-                <PrezUILoading :theme="props.theme"  />
+                <PrezUILoading />
             </slot>
         </template>
         <template v-else-if="error">
             <slot name="error" :error="error">
-                <PrezUIMessage :theme="props.theme" severity="error" :text="error.message" />
+                <PrezUIMessage severity="error" :text="error.message" />
             </slot>
         </template>
         <template v-else-if="data">
-            <slot :theme="props.theme" :data="data" :debug="props.debug" :properties="properties"></slot>
+            <slot 
+                :data="data" 
+                :item="data.data as PrezFocusNode"
+                :list="data.data as PrezFocusNode[]" 
+                :properties="properties"
+                :profiles="data.profiles"
+                :type="data.type"
+            ></slot>
         </template>
-    </WithTheme>
+    </PrezUI>
 </template>
 <!-- 
 Slots:

@@ -1,5 +1,4 @@
 <template>
-  <!--TestABC></TestABC-->
     <template v-if="loaded">
       <component v-if="!props.notheme && useTheme && dynamicComponent" :is="dynamicComponent" v-bind="$attrs">
         <slot></slot>
@@ -11,12 +10,9 @@
 </template>
 
 <script setup lang="ts">
-//import TestABC from './testABC.vue';
 import { defineAsyncComponent, defineProps, ref, computed, watch, onMounted } from 'vue';
 import { getTheme } from '../settingsManager';
 import PrezUIDebug from './PrezUIDebug.vue';
-
-//const TestABC = ref();
 
 // Define props
 const props = defineProps<{

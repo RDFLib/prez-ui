@@ -6,7 +6,7 @@ import type { NamedNode, Literal, BlankNode } from "@rdfjs/types";
  * @see PrezNode
  * @see PrezBlankNode
  */
-export type PrezTerm = PrezLiteral | PrezNode | PrezBlankNode;
+export type PrezTerm = PrezLiteral | PrezNode | PrezBlankNode | PrezFocusNode;
 
 /**
  * Represents an RDF Literal
@@ -53,9 +53,26 @@ export interface PrezNode extends Omit<NamedNode, "equals"> {
      */
     links?: PrezLink[];
     /**
+     * The members belonging to this node
+     */
+    members?: PrezLink;
+    /**
      * The node's RDF types
      */
     rdfTypes?: PrezNode[];
+
+    /**
+     * Prez system properties used to populate labels, links, members, etc.
+     * All the information here should be available through other properties,
+     * but is available as a reference.
+     */
+    systemProperties?: PrezProperties;
+
+    /**
+     * Prez identifiers provide the labels for parent identifiers that can be found in the URL
+     */
+    identifiers?: PrezTerm[];
+
     // order: number; // for predicates - new extended type?
     /**
      * @param other The term to compare with.
@@ -63,6 +80,38 @@ export interface PrezNode extends Omit<NamedNode, "equals"> {
      */
     equals(other: PrezTerm | null | undefined): boolean;
 };
+
+export interface PrezFocusNode extends PrezNode {
+    /**
+     * The predicate & terms related to this focus node
+     */
+    properties?: PrezProperties;
+}
+
+/**
+ * A FocusNode for a Concept Scheme
+ */
+export interface PrezConceptSchemeNode extends PrezFocusNode {
+    /**
+     * the top level concepts found under this concept scheme
+     */
+    topConcepts: PrezConceptNode;
+}
+
+/**
+ * A recursive list of child concept schemes
+ */
+export interface PrezConceptNode extends PrezFocusNode {
+    /**
+     * The narrowers for this concept
+     */
+    narrowers: PrezConceptNode[];
+    /**
+     * A boolean indicating if there are narrowers (children)
+     */
+    hasChildren: boolean;
+}
+
 
 /**
  * Represents an RDF Blank Node
@@ -72,6 +121,7 @@ export interface PrezBlankNode extends Omit<BlankNode, "equals"> {
      * Contains children triples within the blank node
      */
     properties: PrezProperties;
+
     /**
      * @param other The term to compare with.
      * @return True if and only if other has termType "BlankNode" and the same `value`.
@@ -90,7 +140,7 @@ export type PrezLink = {
     /**
      * An ordered array of 'parent' items - e.g. [dataset, feature collection] for a feature
      */
-    parents?: PrezNode[];
+    parents?: (PrezTerm|string)[];
     // maybe label?
 };
 
@@ -117,13 +167,13 @@ export type PrezSearchResult = {
     weight: number;
     predicate: PrezNode;
     match: PrezLiteral;
-    resource: PrezItem;
+    resource: PrezFocusNode;
 };
 
 /**
  * Represents an item in Prez that contains node info and its related properties
  */
-export interface PrezItem {
+/*export interface PrezItem {
     focusNode: PrezNode & {
         members?: {
             link: string;
@@ -135,7 +185,7 @@ export interface PrezItem {
 };
 
 export type PrezList = PrezItem[];
-
+*/
 export type Prefixes = {
     [namespace: string]: string;
 };
@@ -159,29 +209,36 @@ export type Mediatype = {
     default: boolean;
 };
 
-export type Concept = PrezNode & {
-    narrowers: Concept[];
-};
+// Moved to PrezConcept
+// export type Concept = PrezNode & {
+//     narrowers: Concept[];
+// };
+
+export type PrezDataTypes = 'item' | 'list' | 'search';
 
 export interface PrezData {
-    type: string;
+    type: PrezDataTypes;
+    data: PrezFocusNode | PrezFocusNode[] | PrezSearchResult[];
+    profiles: ProfileHeader[];
 }
 
 export interface PrezDataList extends PrezData {
     type: 'list';
-    data: PrezList;
-    profiles: ProfileHeader[];
+    data: PrezFocusNode[];
     count: number;
 }
 
 export interface PrezDataItem extends PrezData {
     type: 'item';
-    data: PrezItem;
-    profiles: ProfileHeader[];
+    data: PrezFocusNode | PrezConceptSchemeNode;
 }
 
-export interface PrezDataSearch {
+export interface PrezDataItem extends PrezData {
+    type: 'item';
+    data: PrezFocusNode | PrezConceptSchemeNode;
+}
+
+export interface PrezDataSearch extends PrezData {
     type: 'search';
     data: PrezSearchResult[];
-    profiles: ProfileHeader[];
 }

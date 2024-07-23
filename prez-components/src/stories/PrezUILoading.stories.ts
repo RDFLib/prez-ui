@@ -2,6 +2,12 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 import { vueRouter } from "storybook-vue3-router";
 import PrezUILoading from "../components/PrezUILoading.vue";
 
+/**
+ * PrezUILoading is used while waiting for a request to complete.
+ * 
+ * This component has a variant parameter that is set when used in different scenarios.
+ * 
+ */
 const meta = {
   title: "Standard Components/PrezUILoading",
   component: PrezUILoading,

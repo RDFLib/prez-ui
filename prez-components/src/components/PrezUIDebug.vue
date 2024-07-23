@@ -1,8 +1,8 @@
 <script lang="ts" setup>
+import { inject, ref } from 'vue';
 import { getDebug } from '../settingsManager';
 
 interface Props {
-  debug?: boolean;
   title: string;
   info?: any;
 }
@@ -27,25 +27,29 @@ function safeStringify(
   }, spaces);
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
+
+const debug = inject('debug', ref(false));
+
 </script>
 <template>
-
-    <fieldset v-if="getDebug()">
+    <fieldset class="pz-debug" v-if="debug">
         <legend :title="typeof(info) == 'object' ? safeStringify(info, null, 2) : (info === undefined ? safeStringify(props, null, 2) : info.toString())">{{ title }}</legend>
         <slot></slot>
     </fieldset>
     <slot v-else></slot>
 </template>
-<style scoped>
-legend:hover {
+<style lang="scss" scoped>
+.pz-debug {
+  legend:hover {
     cursor: pointer;
-}
-legend {
+  }
+  legend {
     font-size:small;
     color:#aaa;
-}
-fieldset {
+  }
+  fieldset {
     border: 1px dashed #aaa;
+  }
 }
 </style>

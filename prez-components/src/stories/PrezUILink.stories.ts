@@ -2,6 +2,12 @@ import type { Meta, StoryObj } from "@storybook/vue3";
 import { vueRouter } from "storybook-vue3-router";
 import PrezUILink from "../components/PrezUILink.vue";
 
+/**
+ * PrezUILink is used for links in the Prez application.
+ * 
+ * This component can be overwritten to change the default behavior for links.
+ * 
+ */
 const meta = {
   title: "Standard Components/PrezUILink",
   component: PrezUILink,

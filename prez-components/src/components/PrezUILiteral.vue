@@ -5,7 +5,7 @@ const props = defineProps<PrezUILiteralProps>();
 const term = props.term as PrezLiteral;
 </script>
 <template>
-    <WithTheme v-bind="props" component="PrezUILiteral" :info="term">
+    <PrezUI v-bind="props" component="PrezUILiteral" :info="term">
         <slot :term="term">
             <div class="prezui-literal" v-if="props?.term?.value">
                 <div class="prezui-text">
@@ -21,7 +21,7 @@ const term = props.term as PrezLiteral;
                 </div>
             </div>
         </slot>
-    </WithTheme>
+    </PrezUI>
 </template>
 <style scoped>
 .prezui-text {

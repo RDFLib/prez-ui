@@ -1,6 +1,11 @@
 import type { Prefixes } from "./types";
 
+// only add RDF prefix to handle a
 export const DEFAULT_PREFIXES: Prefixes = {
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"    
+};
+
+/*
     "altr-ext": "http://www.w3.org/ns/dx/conneg/altr-ext#",
     "dcat": "http://www.w3.org/ns/dcat#",
     "dcterms": "http://purl.org/dc/terms/",
@@ -16,6 +21,27 @@ export const DEFAULT_PREFIXES: Prefixes = {
     "sh": "http://www.w3.org/ns/shacl#",
     "skos": "http://www.w3.org/2004/02/skos/core#",
     "xsd": "http://www.w3.org/2001/XMLSchema#", 
+};*/
+
+export const PREZ_PREDICATES = {
+    namespace: "https://prez.dev/",
+    label: "https://prez.dev/label",
+    description: "https://prez.dev/description",
+    provenance: "https://prez.dev/provenance",
+    focusNode: "https://prez.dev/FocusNode",
+    link: "https://prez.dev/link",
+    members: "https://prez.dev/members",
+    identifier: "https://prez.dev/identifier",
+    count: "https://prez.dev/count",
+    searchResult: "https://prez.dev/SearchResult",
+    searchResultWeight: "https://prez.dev/searchResultWeight",
+    searchResultPredicate: "https://prez.dev/searchResultPredicate",
+    searchResultURI: "https://prez.dev/searchResultURI"
+};
+
+export const SYSTEM_PREDICATES = {
+    skosConceptScheme: "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+    a: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 };
 
 export const ANNOTATION_PREDICATES = {

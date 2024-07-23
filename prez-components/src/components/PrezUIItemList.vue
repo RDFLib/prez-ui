@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import type { PrezUIListProps } from '@/types';
-const props = defineProps<PrezUIListProps>();
+import type { PrezUIItemListProps } from '@/types';
+const props = defineProps<PrezUIItemListProps>();
 const list = props.list;
 const properties = list?.[0]?.properties;
 const headers = properties ? Object.keys(properties).map(p=>properties[p].predicate) : undefined;
 </script>
 <template>
-    <WithTheme v-bind="props" component="PrezUIList" :info="props.list">
-        <table v-if="headers" :class="props.debug ? 'debug' : undefined">
+    <PrezUI v-bind="props" component="PrezUIList" :info="props.list">
+        <table v-if="headers">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -18,7 +18,7 @@ const headers = properties ? Object.keys(properties).map(p=>properties[p].predic
             </thead>
             <tbody>
                 <tr v-for="(item, index) in list" :key="index">
-                    <td><PrezUITerm :debug="props.debug" :term="item.focusNode"></PrezUITerm></td>
+                    <td><PrezUITerm :term="item"></PrezUITerm></td>
                     <td v-for="header of headers">
                         <template v-if="item?.properties?.[header.value]">
                             <PrezUITerm 
@@ -30,13 +30,7 @@ const headers = properties ? Object.keys(properties).map(p=>properties[p].predic
                 </tr>
             </tbody>
         </table>
-    </WithTheme>
+    </PrezUI>
 </template>
 <style scoped>
-table.debug {
-    border-collapse: collapse;
-}
-table.debug tr {
-    border: 1px solid #33c;
-}
 </style>

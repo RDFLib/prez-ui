@@ -18,20 +18,20 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    term: literal("I'm basically literal"),
+    term: literal("This is a string literal"),
   },
 };
 
 export const WithLanguage: Story = {
   args: {
-    term: literal({ value: "I'm basically illiteral", language: "nz" }),
+    term: literal({ value: "A string literal with language", language: "nz" }),
   },
 };
 
 export const WithDatatypeURI: Story = {
   args: {
     term: literal({
-      value: "I'm basically literal",
+      value: "This is a string literal",
       datatype: node("http://www.w3.org/2001/XMLSchema#string"),
     }),
   },
@@ -40,7 +40,7 @@ export const WithDatatypeURI: Story = {
 export const WithDatatypeCurie: Story = {
   args: {
     term: literal({
-      value: "I'm basically literal",
+      value: "This is a string literal",
       datatype: node({
         value: "http://www.w3.org/2001/XMLSchema#string",
         curie: "xsd:string",
@@ -52,7 +52,7 @@ export const WithDatatypeCurie: Story = {
 export const WithDatatypeLabel: Story = {
   args: {
     term: literal({
-      value: "I'm basically literal",
+      value: "This is a string literal",
       datatype: node({
         value: "http://www.w3.org/2001/XMLSchema#string",
         label: literal("String"),
@@ -64,7 +64,7 @@ export const WithDatatypeLabel: Story = {
 export const WithDatatypeCurieLabel: Story = {
   args: {
     term: literal({
-      value: "I'm basically literal",
+      value: "This is a string literal",
       datatype: node({
         value: "http://www.w3.org/2001/XMLSchema#string",
         curie: "xsd:string",
@@ -77,7 +77,7 @@ export const WithDatatypeCurieLabel: Story = {
 export const WithDatatypeDescription: Story = {
   args: {
     term: literal({
-      value: "I'm basically literal",
+      value: "This is a string literal",
       datatype: node({
         value: "http://xsd.org/string",
         description: literal(
@@ -91,7 +91,7 @@ export const WithDatatypeDescription: Story = {
 export const WithDatatypeCurieDescription: Story = {
   args: {
     term: literal({
-      value: "I'm basically literal",
+      value: "This is a string literal",
       datatype: node({
         value: "http://xsd.org/string",
         curie: "xsd:string",
@@ -106,7 +106,7 @@ export const WithDatatypeCurieDescription: Story = {
 export const WithDatatypeLabelDescription: Story = {
   args: {
     term: literal({
-      value: "I'm basically literal",
+      value: "This is a string literal",
       datatype: node({
         value: "http://xsd.org/string",
         label: literal("String"),
@@ -121,7 +121,7 @@ export const WithDatatypeLabelDescription: Story = {
 export const WithDatatypeCurieLabelDescription: Story = {
   args: {
     term: literal({
-      value: "I'm basically literal",
+      value: "This is a string literal",
       datatype: node({
         value: "http://xsd.org/string",
         curie: "xsd:string",

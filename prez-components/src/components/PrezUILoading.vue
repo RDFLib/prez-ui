@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { PrezUILoadingProps } from '..';
-import WithTheme from './WithTheme.vue';
-
 const props = defineProps<PrezUILoadingProps>();
 const variant = props.variant || 'item';
 </script>
 
 <template>
-    <WithTheme v-bind="props" component="PrezUILoading">
+    <PrezUI v-bind="props" component="PrezUILoading">
         <slot :variant="variant">
             <div class="prezui-loading">
                 <slot v-if="variant == 'list'" name="list">Loading list...</slot>
@@ -15,7 +13,7 @@ const variant = props.variant || 'item';
                 <slot v-else name="item">Loading item...</slot>
             </div>
         </slot>
-    </WithTheme>
+    </PrezUI>
 </template>
 
 <style scoped>

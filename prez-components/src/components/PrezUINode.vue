@@ -24,7 +24,7 @@ if(tooltip == label) {
 
 </script>
 <template>
-    <WithTheme v-bind="props" component="PrezUINode" :info="props.term">
+    <PrezUI v-bind="props" component="PrezUINode" :info="props.term">
         <slot :term="term" :link="term.value" :label="label" :tooltip="tooltip">
             <div class="prezui-node">
                 <PrezUILink :href="term.value" :title="tooltip">
@@ -32,7 +32,7 @@ if(tooltip == label) {
                 </PrezUILink>
             </div>
         </slot>
-    </WithTheme>
+    </PrezUI>
 </template>
 <style scoped>
 </style>

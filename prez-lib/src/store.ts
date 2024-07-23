@@ -1,6 +1,6 @@
 import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad } from "n3";
-import type { PrezItem, PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, Concept } from "./types";
-import { ANNOTATION_PREDICATES, DEFAULT_PREFIXES } from "./consts";
+import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode } from "./types";
+import { ANNOTATION_PREDICATES, DEFAULT_PREFIXES, PREZ_PREDICATES, SYSTEM_PREDICATES } from "./consts";
 import { defaultToIri, defaultFromIri } from "./helpers";
 import { node, literal, bnode } from "./factory";
 
@@ -28,10 +28,10 @@ export class RDFStore {
     public load(s: string) {
         s = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + s; // temp fix for missing rdf: prefix from API
         const p = this.parser.parse(s, null, (prefixName, prefixNode) => {
-            // callback for each prefix parsed
-            if (!Object.values(DEFAULT_PREFIXES).includes(prefixNode.value)) {
-                this.prefixes[prefixName] = prefixNode.value;
-            }
+            // callback for each prefix parsed --> no longer using default prefixes
+            // if (!Object.values(DEFAULT_PREFIXES).includes(prefixNode.value)) {
+            // }
+            this.prefixes[prefixName] = prefixNode.value;
         });
         this.store.addQuads(p);
     }
@@ -69,6 +69,10 @@ export class RDFStore {
         return this.getObjects(iri, ANNOTATION_PREDICATES[annotation]).map(o => this.toPrezTerm(o) as PrezLiteral)[0] || undefined;
     }
 
+    private getObjectLiteral(iri: string, predicate: string): PrezLiteral | undefined {
+        return this.getObjects(iri, predicate).map(o => this.toPrezTerm(o) as PrezLiteral)[0] || undefined;
+    }
+
     /**
      * Gets the preferred label of an object
      * 
@@ -99,10 +103,14 @@ export class RDFStore {
         return this.getAnnotation(iri, "provenance");
     }
 
-    public getProperties(term: Term): PrezProperties {
+    public getProperties(term: Term, options?: {excludePrefix?: string, includePrefix?: string}): PrezProperties {
         const props: PrezProperties = {};
 
         this.store.forEach(q => {
+            // apply filter options
+            if(options?.excludePrefix && q.predicate.value.startsWith(options.excludePrefix)) return;
+            if(options?.includePrefix && !q.predicate.value.startsWith(options.includePrefix)) return;
+
             props[q.predicate.value] ??= {
                 predicate: this.toPrezTerm(q.predicate) as PrezNode,
                 objects: []
@@ -114,45 +122,61 @@ export class RDFStore {
         return props;
     }
 
+    public getParents(focusNode: PrezFocusNode, link: string) {
+        const linkParts = link.split('/');
+        const parents:(PrezTerm|string)[] = [];
+        for(const part of linkParts) {
+            if(part.includes(':')) {
+                const identifier = focusNode.identifiers ? focusNode.identifiers.find(pred=>pred.value == part) || part : part;
+                if(identifier) {
+                    parents.push(identifier);
+                }
+            }
+        }
+        return parents;
+    }
+
     private toPrezTerm(term: Term): PrezTerm {
         switch (term.termType) {
             case "NamedNode":
                 const n = node(term.value);
 
-                const label = this.getLabel(term.value);
-                if (label) {
-                    n.label = label;
+                n.label = this.getObjectLiteral(term.value, PREZ_PREDICATES.label);
+                n.description = this.getObjectLiteral(term.value, PREZ_PREDICATES.description);
+                n.provenance = this.getObjectLiteral(term.value, PREZ_PREDICATES.provenance);
+
+                const identifiers = this.getObjects(term.value, PREZ_PREDICATES.identifier);
+                if(identifiers.length > 0) {
+                    n.identifiers = identifiers.map(t => this.toPrezTerm(t));
                 }
 
-                const description = this.getDescription(term.value);
-                if (description) {
-                    n.description = description;
-                }
-
-                const provenance = this.getProvenance(term.value);
-                if (provenance) {
-                    n.provenance = provenance;
-                }
-
-                const links = this.getObjects(term.value, this.toIri("prez:link"));
+                const links = this.getObjects(term.value, PREZ_PREDICATES.link);
                 if (links.length > 0) {
                     n.links = links.map(l => {
-                        return { value: l.value }
+                        return { value: l.value, parents: this.getParents(term as PrezFocusNode, l.value) }
                     });
                 }
 
+                const members = this.getObjects(term.value, PREZ_PREDICATES.members);
+                if (members.length > 0) {
+                    n.members = { value: members[0].value, parents: this.getParents(term as PrezFocusNode, members[0].value) };
+                }
+
                 // types
-                const types = this.getObjects(term.value, this.toIri("a"));
+                const types = this.getObjects(term.value, SYSTEM_PREDICATES.a);
                 if (types.length > 0) {
                     n.rdfTypes = types.map(t => this.toPrezTerm(t) as PrezNode)
                 }
 
+                // NO LONGER AUTO GENERATE CURIE BASED OFF PASSED PREFIXES, DAVID WILL FIX BY PASSING BACK GOOD DATA
                 // curie
-                Object.entries(DEFAULT_PREFIXES).forEach(([prefix, namespace]) => {
-                    if (term.value.startsWith(namespace)) {
-                        n.curie = prefix + ":" + term.value.split("#").slice(-1)[0].split("/").slice(-1)[0];
-                    }
-                });
+//                Object.entries(DEFAULT_PREFIXES).forEach(([prefix, namespace]) => {
+                // Object.entries(this.prefixes).forEach(([prefix, namespace]) => {
+                //     //const match = term.value.match(/.*[#\/](.*)$/)
+                //     if (term.value.startsWith(namespace)) {
+                //         n.curie = prefix + ":" + term.value.split("#").slice(-1)[0].split("/").slice(-1)[0];
+                //     }
+                // });
 
                 return n;
             case "Literal":
@@ -179,23 +203,16 @@ export class RDFStore {
     }
 
     /**
-     * Creates a PrezItem object
+     * Creates a PrezFocusNode object
      * 
      * @param obj 
      * @returns 
      */
-    private toPrezItem(obj: Quad_Object): PrezItem {
-        const item: PrezItem = {
-            focusNode: this.toPrezTerm(obj) as PrezNode,
-            properties: this.getProperties(obj)
-        }
-
-        const members = this.getMembers(obj.value);
-        if (members.length > 0) {
-            item.focusNode.members = members;
-        }
-
-        return item;
+    private toPrezFocusNode(obj: Quad_Object): PrezFocusNode {
+        const focusNode: PrezFocusNode = this.toPrezTerm(obj) as PrezFocusNode;
+        focusNode.properties = this.getProperties(obj, { excludePrefix: PREZ_PREDICATES.namespace });
+        focusNode.systemProperties = this.getProperties(obj, { includePrefix: PREZ_PREDICATES.namespace })
+        return focusNode;
     }
 
     /**
@@ -228,19 +245,15 @@ export class RDFStore {
         }
     }
 
-    public getMembers(subject: string): { link: string, label?: string }[] {
+    public getMembers(subject: string): PrezLink|undefined {
         const objs = this.getObjects(subject, this.toIri("prez:members"));
-        const members: { link: string, label?: string }[] = [];
         objs.forEach(o => {
-            const links = this.getObjects(o.id, this.toIri("prez:link"));
-            if (links.length === 1) {
-                members.push({
-                    link: links[0].value,
-                    label: "Members"
-                });
+            return {
+                value: o.value,
+                parents: []
             }
         });
-        return members;
+        return undefined;
     }
 
     /**
@@ -249,7 +262,7 @@ export class RDFStore {
      * @param vocab 
      * @return the concept hierarchy
      */
-    public getConcepts(vocab: Quad_Object): Concept[] {
+    public getConcepts(vocab: Quad_Object): PrezConceptNode[] {
         const inScheme = this.getSubjects(this.toIri("skos:inScheme"), vocab.value);
 
         function isInScheme(c: Quad_Object): boolean {
@@ -280,7 +293,7 @@ export class RDFStore {
             });
         });
 
-        const concepts: Concept[] = [];
+        const concepts: PrezConceptNode[] = [];
 
         topConcepts.forEach(c => {
             concepts.push(this.createHierarchy(c, index));
@@ -288,10 +301,12 @@ export class RDFStore {
         return concepts;
     }
 
-    private createHierarchy(c: Quad_Object, index: {[iri: string]: Quad_Object[]}): Concept {
+    private createHierarchy(c: Quad_Object, index: {[iri: string]: Quad_Object[]}): PrezConceptNode {
+        const narrowers = index[c.value].map(n => this.createHierarchy(n, index));
         return {
             ...this.toPrezTerm(c) as PrezNode,
-            narrowers: index[c.value].map(n => this.createHierarchy(n, index))
+            hasChildren: narrowers.length > 0,
+            narrowers
         };
     }
 
@@ -337,15 +352,13 @@ export class RDFStore {
      * 
      * @returns a list of item objects
      */
-    public getList(): PrezItem[] {
-        const items: PrezItem[] = [];
+    public getList(): PrezFocusNode[] {
+        const items: PrezFocusNode[] = [];
         
         // assume only and all list items have dcterms:identifier - can't select by baseClass
         const objs = this.getByPrezId();
         objs.forEach(obj => {
-            const item = this.toPrezItem(obj);
-
-            items.push(item);
+            items.push(this.toPrezFocusNode(obj));
         });
         return items;
     }
@@ -356,20 +369,21 @@ export class RDFStore {
      * @param id the id of the object to return
      * @returns the item object
      */
-    public getItem(): PrezItem {
+    public getItem(): PrezFocusNode {
         const obj = this.getByPrezId();
         if(obj.length == 0) throw new Error('Unable to find item');
-        const item = this.toPrezItem(obj[0]);
-
-        
-        console.log("FOCUS", obj[0]);
+        const item = this.toPrezFocusNode(obj[0]);
 
         // if conceptscheme
-        if (item.focusNode.rdfTypes?.map(t => t.value).includes(this.toIri("skos:ConceptScheme"))) {
+        if (item.rdfTypes?.map(t => t.value).includes(this.toIri("skos:ConceptScheme"))) {
             const concepts = this.getConcepts(obj[0]);
-            if (concepts.length > 0) {
-                item.focusNode.concepts = concepts;
-            }
+            return {
+                ...item,
+                topConcepts: {
+                    narrowers: concepts,
+                    hasChildren: concepts.length > 0
+                }
+            } as PrezConceptSchemeNode;
         }
         
         return item;
@@ -386,7 +400,7 @@ export class RDFStore {
                 weight: Number(this.getObjects(s.value, this.toIri("prez:searchResultWeight"))[0].value),
                 predicate: this.toPrezTerm(this.getObjects(s.value, this.toIri("prez:searchResultPredicate"))[0]) as PrezNode,
                 match: this.toPrezTerm(this.getObjects(s.value, this.toIri("prez:searchResultMatch"))[0]) as PrezLiteral,
-                resource: this.toPrezItem(this.getObjects(s.value, this.toIri("prez:searchResultURI"))[0])
+                resource: this.toPrezFocusNode(this.getObjects(s.value, this.toIri("prez:searchResultURI"))[0])
             };
             return result;
         });

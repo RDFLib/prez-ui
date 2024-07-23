@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { PrezUIPaginationProps } from '@/types';
-import WithTheme from './WithTheme.vue';
 import { computed } from 'vue';
 
 const props = defineProps<PrezUIPaginationProps>();
@@ -12,7 +11,7 @@ const nextPage = computed(()=>{
 </script>
 
 <template>
-    <WithTheme v-bind="props" component="PrezUIPagination">
+    <PrezUI v-bind="props" component="PrezUIPagination">
         <slot :variant="variant">
             <div class="prezui-pagination">
                 [ Current Page: {{ props.page }} | 
@@ -26,7 +25,7 @@ const nextPage = computed(()=>{
                 ]
             </div>
         </slot>
-    </WithTheme>
+    </PrezUI>
 </template>
 
 <style scoped>
