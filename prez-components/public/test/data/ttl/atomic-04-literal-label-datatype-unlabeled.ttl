@@ -1,9 +1,0 @@
-@prefix ns1: <https://> .
-@prefix prez: <https://prez.dev/> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-
-ns1:focus-node a sh:focusNode ;
-    ns1:pred-no-label ns1:obj-with-dtype .
-
-ns1:obj-with-dtype prez:label "beef"^^ns1:custom-dtype .
-

@@ -1,0 +1,24 @@
+{
+  "name": "prez-ui",
+  "type": "module",
+  "version": "0.0.1",
+  "main": "./nuxt.config.ts",
+  "scripts": {
+    "dev": "nuxi dev .playground",
+    "dev:prepare": "nuxt prepare .playground",
+    "build": "nuxt build .playground",
+    "generate": "nuxt generate .playground",
+    "preview": "nuxt preview .playground",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "latest",
+    "@nuxtjs/eslint-module": "^4.1.0",
+    "eslint": "^9.8.0",
+    "eslint-plugin-nuxt": "^4.0.0",
+    "nuxt": "^3.12.4",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.3",
+    "vue": "latest"
+  }
+}

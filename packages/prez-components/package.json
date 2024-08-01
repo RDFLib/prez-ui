@@ -1,0 +1,43 @@
+{
+  "name": "prez-components",
+  "version": "0.0.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/prez-components.umd.cjs",
+  "module": "./dist/prez-components.js",
+  "exports": {
+    ".": {
+      "import": "./dist/prez-components.js",
+      "require": "./dist/prez-components.umd.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "nuxi dev .playground",
+    "dev:prepare": "nuxt prepare .playground",
+    "build": "pnpm generate-exports && nuxt build .playground && vite build && tsc --emitDeclarationOnly",
+    "generate-exports": "node generate-exports.js",
+    "generate": "nuxt generate .playground",
+    "preview": "nuxt preview .playground",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "latest",
+    "@primevue/nuxt-module": "^4.0.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "eslint": "^9.7.0",
+    "nuxt": "^3.12.4",
+    "storybook-vue3-router": "^5.0.0",
+    "typescript": "^5.5.3",
+    "vite-plugin-libcss": "^1.1.1",
+    "vue": "latest"
+  },
+  "dependencies": {
+    "@primevue/themes": "^4.0.3",
+    "prez-lib": "workspace:*",
+    "primeicons": "^7.0.0"
+  }
+}

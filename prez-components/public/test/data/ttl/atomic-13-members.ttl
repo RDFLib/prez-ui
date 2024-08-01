@@ -1,6 +1,0 @@
-@prefix prez: <https://prez.dev/> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-
-<https://focus-node> a sh:focusNode ;
-    prez:members [ prez:link "/catalogs/link:focusnode/children" ] .
-

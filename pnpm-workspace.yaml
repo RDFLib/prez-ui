@@ -1,6 +1,3 @@
 packages:
-  - prez-lib
-  - prez-components
-
-ignore:
-  - examples/*
+  - 'packages/*'
+  - 'examples/*'

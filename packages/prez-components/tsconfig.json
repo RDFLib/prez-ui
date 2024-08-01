@@ -1,0 +1,16 @@
+{
+  "extends": "./.playground/.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "rootDir": "app", 
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["app/*"]
+    }
+  },
+  "include": ["app/**/*.ts", "app/**/*.vue", "shims-vue.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}
