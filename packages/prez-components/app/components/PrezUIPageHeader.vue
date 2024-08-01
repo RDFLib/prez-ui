@@ -15,7 +15,7 @@ const variant = props.variant || 'stacked';
 <style scoped>
 .pz-page-header {
     padding:5px 0 5px 20px;
-    background-color: black;
+    background-color: #333;
     color: white;
 }
 .pz-page-header small {

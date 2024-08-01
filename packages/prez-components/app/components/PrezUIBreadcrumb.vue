@@ -21,7 +21,7 @@ const links = props.customItems ?
             <template #item="{ item }">
                 <PrezUILiteral :term="item.label || literal(item.segment || item.url)">
                         <template #text="{ text }">
-                            <PrezUILink variant="breadcrumb" :href="item.url">
+                            <PrezUILink variant="breadcrumb" :to="item.url">
                                 {{ text }}
                             </PrezUILink>
                         </template>

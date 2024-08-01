@@ -1,8 +1,4 @@
 import Aura from '@primevue/themes/aura';
-import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
-
-const currentDir = dirname(fileURLToPath(import.meta.url))
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -14,15 +10,18 @@ export default defineNuxtConfig({
   modules: [
     '@primevue/nuxt-module'
   ],
+  
   primevue: {
     options: {
         theme: {
-            preset: Aura
-        }
+            preset: Aura,
+            options: {
+              prefix: 'p',
+              darkModeSelector: 'light',
+              cssLayer: false
+          }
+      }
     }
-  },
-  alias: {
-    '@prez-components': currentDir + '/app/components'
   },
   css: [
     'primeicons/primeicons.css'

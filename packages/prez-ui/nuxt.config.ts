@@ -22,7 +22,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiEndpoint: process.env.NUXT_PUBLIC_API_ENDPOINT
+      prezApiEndpoint: process.env.NUXT_PUBLIC_PREZ_API_ENDPOINT || "https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com"
     }
   },
   extends: [

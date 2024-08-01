@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import typescript from '@rollup/plugin-typescript';
+//import typescript from '@rollup/plugin-typescript';
 import { resolve } from 'path';
 import { fileURLToPath, URL } from 'node:url';
 import Components from 'unplugin-vue-components/vite';
@@ -16,13 +16,13 @@ export default defineConfig({
       deep: true,
       dts: 'app/components.d.ts'
     }),
-    typescript({
-      tsconfig: resolve(__dirname, 'tsconfig.json'),
-      declaration: true,
-      declarationDir: resolve(__dirname, 'dist'),
-      rootDir: resolve(__dirname, 'app'),
-      exclude: ['node_modules', 'dist']
-    })
+    // typescript({
+    //   tsconfig: resolve(__dirname, 'tsconfig.json'),
+    //   declaration: true,
+    //   declarationDir: resolve(__dirname, 'dist'),
+    //   rootDir: resolve(__dirname, 'app'),
+    //   exclude: ['node_modules', 'dist']
+    // })
   ],
   resolve: {
     alias: {

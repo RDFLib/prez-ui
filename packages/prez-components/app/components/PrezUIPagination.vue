@@ -14,19 +14,19 @@ const numPages = Math.floor(((props.totalCount - 1) / props.rows) + 1);
     <slot :variant="props.variant">
         <template v-if="props.page > 1 || props.rows > 0">
             <template v-if="page > 1">
-                <PrezUILink :href="`?page=${page - 1}`" title="Previous page">Prev</PrezUILink> |
+                <PrezUILink :to="`?page=${page - 1}`" title="Previous page">Prev</PrezUILink> |
                 <span v-for="i in page - 1" :key="i">
-                    <PrezUILink :href="`?page=${i}`" :title="`Page ${i}`">{{ i }}</PrezUILink> |
+                    <PrezUILink :to="`?page=${i}`" :title="`Page ${i}`">{{ i }}</PrezUILink> |
                 </span>
             </template>
             <b>{{ page }}</b>
             <template v-if="page < numPages">
                 <span v-for="i in numPages - page" :key="i">
-                    | <PrezUILink :href="`?page=${i}`" :title="`Page ${i + page}`">{{ i + page }}</PrezUILink>
+                    | <PrezUILink :to="`?page=${i}`" :title="`Page ${i + page}`">{{ i + page }}</PrezUILink>
                 </span>
             </template>
             <span v-if="page < numPages">
-                | <PrezUILink :href="`?page=${numPages}`" title="Next page">Next</PrezUILink>
+                | <PrezUILink :to="`?page=${numPages}`" title="Next page">Next</PrezUILink>
             </span>
             {{ numPages == 1 ? ' page' : '' }}
         </template>

@@ -1,3 +1,4 @@
+<!-- NOTE THIS IS NOT CURRENTLY USED BY PrezUIItemTable -->
 <script lang="ts" setup>
 import type { PrezUIItemTablePropertyProps } from '../types';
 import PrezUITerm from './PrezUITerm.vue';

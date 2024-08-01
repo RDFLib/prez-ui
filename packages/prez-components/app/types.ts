@@ -1,4 +1,4 @@
-import type { PrezTerm, PrezData, PrezDataTypes, PrezFocusNode, PrezProperty, PrezLiteral } from "prez-lib";
+import type { PrezTerm, PrezData, PrezDataTypes, PrezFocusNode, PrezProperty, PrezLiteral, PrezNode } from "prez-lib";
 
 export interface PrezUIProps {
     pt?: object;
@@ -33,7 +33,7 @@ export interface PrezUIPaginationProps extends PrezUIProps {
 export interface PrezUILinkProps extends PrezUIProps {
     variant?: 'default' | 'breadcrumb';
     /** the link href to use, internal links may be controlled */
-    href?: string;
+    to?: string | PrezNode;
     /** optional title tooltip to use */
     title?: string;
     /** target window */

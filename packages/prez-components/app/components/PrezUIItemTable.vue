@@ -8,6 +8,13 @@ import PrezUITerm from './PrezUITerm.vue';
 
 const props = defineProps<PrezUIItemTableProps>();
 const term = props.term as PrezFocusNode;
+const router = useRouter();
+// Handle the button click event
+const navigateToMembers = () => {
+    if(term.members) {
+      router.push(term.members.value);
+    }
+};
 </script>
 <template>
     <DataTable v-if="term?.properties" striped-rows :value="Object.keys(term.properties)" table-style="min-width: 50rem">
@@ -32,5 +39,14 @@ const term = props.term as PrezFocusNode;
                 </slot>
             </template>                    
         </Column>
+        <!-- Footer slot for the additional row with the button -->
+        <template v-if="term.members" #footer>
+        <tr>
+            <td colspan="2" style="text-align: center;">
+                <Button size="small" color="secondary" label="Members" @click="()=>navigateToMembers()" />
+            </td>
+        </tr>
+        </template>
+
     </DataTable>
 </template>

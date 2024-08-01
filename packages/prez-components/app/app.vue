@@ -6,7 +6,8 @@ const baseUrl = 'https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amaz
 
 <template>
 
-  <h2>Component list</h2>
+  <h2>Sample Component list check</h2>
+  <p>View the prez-showcase package to view in storybook</p>
 
   <ul>
     <li>
@@ -41,6 +42,12 @@ const baseUrl = 'https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amaz
       <fieldset>
         <legend>PrezUILoading</legend>
         <PrezUILoading />
+      </fieldset>
+    </li>
+    <li>
+      <fieldset>
+        <legend>PrezUIPageMenu</legend>
+        <PrezUIPageMenu />
       </fieldset>
     </li>
   </ul>

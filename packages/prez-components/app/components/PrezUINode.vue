@@ -26,7 +26,7 @@ if(tooltip == label) {
 </script>
 <template>
     <slot name="wrapper" :term="term" :link="term.value" :label="label" :tooltip="tooltip">
-        <PrezUILink :href="term.value" :title="tooltip">
+        <PrezUILink :to="variant == 'list-header' ? term : term.value" :title="tooltip">
             <slot :term="term" :link="term.value" :label="label" :tooltip="tooltip">
                 {{ label }}
             </slot>

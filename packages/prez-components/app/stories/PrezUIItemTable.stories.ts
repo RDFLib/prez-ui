@@ -25,9 +25,8 @@ const tpl = {
 
 const row = (params:{uri:string, name:string, props:{name: string, val: string}[]}) => {
     const p:PrezProperties = {};
-    for(const key of Object.keys(params.props)) {
-        const prop = params.props[key];
-        p[tpl.pred(prop)] = { predicate: node({value: tpl.pred(prop), label: prop.name}), objects: [literal(prop.val)] };
+    for(const prop of params.props) {
+        p[tpl.pred(prop)] = { predicate: node({value: tpl.pred(prop), label: literal(prop.name)}), objects: [literal(prop.val)] };
     }
     return {
         ...node({value: tpl.uri(params), label: literal(params.name), description: literal(tpl.desc(params))}),
@@ -35,7 +34,7 @@ const row = (params:{uri:string, name:string, props:{name: string, val: string}[
     } as PrezFocusNode;
 }
 
-const rowi = (i) => row({uri: i.toString(), name: 'Item ' + i, 
+const rowi = (i:number) => row({uri: i.toString(), name: 'Item ' + i, 
     props: [{name: 'Publisher', val: "Fred " + i}, {name: 'Creator', val: 'Sam ' + i}]})
 
 const itemData:PrezFocusNode = rowi(1);

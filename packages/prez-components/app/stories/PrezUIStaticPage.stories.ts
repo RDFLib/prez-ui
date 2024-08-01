@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import { vueRouter } from "storybook-vue3-router";
 import { node, literal } from "prez-lib";
+import { type Component, type ComponentOptions } from "vue";
 import PrezUIStaticPage from "../components/PrezUIStaticPage.vue";
 
 /**
@@ -21,8 +22,14 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Define a type for the components parameter
+type Components = Record<string, Component | ComponentOptions>;
+
+// Infer args type from component's prop types
+type Args = Story['args'];
+
 // Story generator function
-const createStory = (args, components, templateContent: string): Story => ({
+const createStory = (args:Args, components:Components, templateContent: string): Story => ({
   args,
   render: (args) => ({
     components,

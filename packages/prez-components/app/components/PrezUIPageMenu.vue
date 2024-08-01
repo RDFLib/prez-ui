@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import menu from '../menu.json';
 import PrezUILink from './PrezUILink.vue';
+
+import menu from '../menu.json';
+
+//const appConfig = useAppConfig();
+//const menu = appConfig.menu as MenuItem[];
+
 type MenuItem = {
     label: string
     items?: MenuItem[]
@@ -17,15 +22,15 @@ const items = ref(menu as MenuItem[]);
 <template>
     <ul class="pz-page-menu">
         <li v-for="(item, index) in items" :key="index">
-            <PrezUILink :href="item.url" :target="item.target">{{ item.label }}</PrezUILink>
+            <PrezUILink :to="item.url" :target="item.target">{{ item.label }}</PrezUILink>
             <hr v-if="item.separator">
             <ul v-if="item.items">
                 <li v-for="(subItem, subIndex) in item.items" :key="subIndex">
-                    <PrezUILink :href="subItem.url" :target="subItem.target">{{ subItem.label }}</PrezUILink>
+                    <PrezUILink :to="subItem.url" :target="subItem.target">{{ subItem.label }}</PrezUILink>
                     <hr v-if="subItem.separator">
                     <ul v-if="'items' in subItem">
                         <li v-for="(subsubItem, subsubIndex) in subItem.items" :key="subsubIndex">
-                            <PrezUILink :href="subsubItem.url" :target="subsubItem.target">{{ subsubItem.label }}
+                            <PrezUILink :to="subsubItem.url" :target="subsubItem.target">{{ subsubItem.label }}
                             </PrezUILink>
                             <hr v-if="subsubItem.separator">
                         </li>

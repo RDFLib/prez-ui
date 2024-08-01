@@ -1,73 +1,15 @@
-# Nuxt Layer Starter
+# prez-components
+This is the Vue.js component library for Prez UI.
 
-Create Nuxt extendable layer with this GitHub template.
 
-## Setup
+This library contains dumb, display-only components for use in Prez UI and other Vue.js applications for presenting Linked Data, and utility components. These components are easily overridable in Prez UI themes through the use of [Nuxt layers](https://nuxt.com/docs/getting-started/layers).
 
-Make sure to install the dependencies:
+The underlying component library used is [PrimeVue](https://primevue.org/). The intention is to use tailwind css along with pass through properties for styling and theming.
 
-```bash
-pnpm install
-```
-
-## Working on your layer
-
-Your layer is at the root of this repository, it is exactly like a regular Nuxt project, except you can publish it on NPM.
-
-The `.playground` directory should help you on trying your layer during development.
-
-Running `pnpm dev` will prepare and boot `.playground` directory, which imports your layer itself.
-
-## Distributing your layer
-
-Your Nuxt layer is shaped exactly the same as any other Nuxt project, except you can publish it on NPM.
-
-To do so, you only have to check if `files` in `package.json` are valid, then run:
+## Storybook
+You can preview components by running Storybook in the prez-showcase project:
 
 ```bash
-npm publish --access public
+cd packages/prez-showcase
+npm run storybook
 ```
-
-Once done, your users will only have to run:
-
-```bash
-npm install --save your-layer
-```
-
-Then add the dependency to their `extends` in `nuxt.config`:
-
-```ts
-defineNuxtConfig({
-  extends: 'your-layer'
-})
-```
-
-## Development Server
-
-Start the development server on http://localhost:3000
-
-```bash
-pnpm dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-pnpm build
-```
-
-Or statically generate it with:
-
-```bash
-pnpm generate
-```
-
-Locally preview production build:
-
-```bash
-pnpm preview
-```
-
-Checkout the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

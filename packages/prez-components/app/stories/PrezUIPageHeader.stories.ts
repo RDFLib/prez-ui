@@ -44,7 +44,7 @@ const createStory = (variant:'stacked'|'sidebar', templateContent: string): Stor
 /**
  * Simple overide for the default header
  */
-export const Default = createStory(
+export const Default:Story = createStory(
   'stacked',
   `<h1>This is a new header</h1>`
 );
@@ -52,7 +52,7 @@ export const Default = createStory(
 /**
  * Show the variant property
  */
-export const ShowVariant = createStory(
+export const ShowVariant:Story = createStory(
   'stacked',
   `<template v-slot="{variant}"><h1>This is a new header <br>variant = {{variant}}</h1></template>`
 );
@@ -60,7 +60,7 @@ export const ShowVariant = createStory(
 /**
  * Override all header contents, don't use the header class
  */
-export const OverrideStyle = createStory(
+export const OverrideStyle:Story = createStory(
   'sidebar',
   `<template #wrapper><div><h1>Override the full style</h1></div></template>`
 );

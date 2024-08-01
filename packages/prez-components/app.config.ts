@@ -1,14 +1,23 @@
 export default defineAppConfig({
-  myLayer: {
-    name: 'Hello from Nuxt layer'
-  }
+  abc: 123,
+  menu: [
+    { "label": "XHome", "icon": "pi pi-home", "url": "/" },
+    { "label": "Catalogs", "icon": "pi pi-star", "url": "/catalogs" },
+    { "label": "Search", "icon": "pi pi-search", "url": "/search",
+      "items": [
+        { "label": "Catalogs" },
+        { "label": "Spatial" },
+        { "separator": true },
+        { "label": "Everything" }
+      ]
+    },
+    { "label": "About", "icon": "pi pi-envelope", "url": "/about" }
+  ]
 })
 
 declare module '@nuxt/schema' {
   interface AppConfigInput {
-    myLayer?: {
-      /** Project name */
-      name?: string
-    }
+    /** Menu configuration for the PrezPageMenu */
+    menu: object
   }
 }
