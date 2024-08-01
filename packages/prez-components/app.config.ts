@@ -1,5 +1,4 @@
 export default defineAppConfig({
-  abc: 123,
   menu: [
     { "label": "XHome", "icon": "pi pi-home", "url": "/" },
     { "label": "Catalogs", "icon": "pi pi-star", "url": "/catalogs" },
