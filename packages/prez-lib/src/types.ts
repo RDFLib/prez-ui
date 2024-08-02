@@ -234,6 +234,7 @@ export interface PrezData {
     type: PrezDataTypes;
     data: PrezFocusNode | PrezFocusNode[] | PrezSearchResult[];
     profiles: ProfileHeader[];
+    parents: PrezLinkParent[];
 }
 
 export interface PrezDataList extends PrezData {

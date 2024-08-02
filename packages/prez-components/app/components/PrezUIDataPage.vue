@@ -18,12 +18,12 @@ const props = defineProps<PrezUIDataPageProps>();
         <template #body>
             <div class="pz-datapage-body">
                 <PrezUIDataProvider :type="props.type" :url="props.url">
-                    <template v-slot="{ profiles, item, list }">
+                    <template #default="{ profiles, item, list, parents }">
                         <div class="pz-datapage-body-main">
 
                             <!-- main item page -->
                             <template v-if="type == 'item'">
-                                <PrezUIBreadcrumb :item="item" />
+                                <PrezUIBreadcrumb :parents="parents" />
                                 <PrezUIHeader :term="item" />
                                 <PrezUIItemTable :term="item">
                                     <template #bottom>
@@ -33,6 +33,7 @@ const props = defineProps<PrezUIDataPageProps>();
                             </template>
 
                             <template v-else-if="type == 'list'">
+                                <PrezUIBreadcrumb :parents="parents" />
                                 <PrezUIItemList :list="list" />
                             </template>
                         </div>

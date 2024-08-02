@@ -6,8 +6,7 @@ import PrezUILiteral from './PrezUILiteral.vue';
 import PrezUILink from './PrezUILink.vue';
 
 const props = defineProps<PrezUIBreadcrumbProps>();
-const itemLinks = props.item ? props.item.links : undefined
-const parents = itemLinks ? itemLinks[0]?.parents : undefined;
+const parents = props.parents;
 
 const links = props.customItems ?
     // simplify customItems' labels into a literal object for standard rendering...

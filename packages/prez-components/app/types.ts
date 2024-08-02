@@ -1,4 +1,4 @@
-import type { PrezTerm, PrezData, PrezDataTypes, PrezFocusNode, PrezProperty, PrezLiteral, PrezNode } from "prez-lib";
+import type { PrezLinkParent, PrezTerm, PrezData, PrezDataTypes, PrezFocusNode, PrezProperty, PrezLiteral, PrezNode } from "prez-lib";
 
 export interface PrezUIProps {
     pt?: object;
@@ -118,6 +118,6 @@ export type PrezUIBreadcrumbItem = {
 }
 
 export interface PrezUIBreadcrumbProps extends PrezUIProps {
-    item?: PrezFocusNode;
+    parents?: PrezLinkParent[];
     customItems?: PrezUIBreadcrumbItem[];
 }

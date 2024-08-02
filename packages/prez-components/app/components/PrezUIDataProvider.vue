@@ -95,6 +95,7 @@ onMounted(async () => {
             :item="data.data as PrezFocusNode"
             :list="data.data as PrezFocusNode[]"
             :concepts="data.data as PrezConceptNode[]"
+            :parents="data.parents"
             :properties="properties"
             :profiles="data.profiles"
             :type="data.type"

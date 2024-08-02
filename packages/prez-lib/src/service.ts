@@ -1,5 +1,6 @@
 import type { PrezDataItem, PrezDataList, PrezDataSearch, ProfileHeader } from "./types";
 import { RDFStore } from "./store";
+import { getUrlPath } from "./helpers";
 
 type LinkObject = {
     uri: string;
@@ -98,9 +99,9 @@ export async function apiGet(url: string) {
 export async function getList(url: string): Promise<PrezDataList> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
-//    console.log("GETLIST")
     store.load(data);
-    return { type: 'list', data: store.getList(), profiles, count: store.getCount() };
+    const path = getUrlPath(url);
+    return { type: 'list', data: store.getList(), profiles, count: store.getCount(), parents: store.getParents(path) };
 }
 
 
@@ -115,7 +116,8 @@ export async function getItem(url: string): Promise<PrezDataItem> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);
-    return { type: 'item', data: store.getItem(), profiles };
+    const path = getUrlPath(url);
+    return { type: 'item', data: store.getItem(), profiles, parents: store.getParents(path) };
 }
 
 /**
@@ -128,5 +130,6 @@ export async function search(url: string): Promise<PrezDataSearch> {
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.load(data);
-    return { type: 'search', data: store.search(), profiles };
+    const path = getUrlPath(url);
+    return { type: 'search', data: store.search(), profiles, parents: store.getParents(path) };
 }

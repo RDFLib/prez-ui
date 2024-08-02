@@ -50,6 +50,18 @@ export const getBaseUrl = (existingUrl:string) => {
 }
 
 /**
+ * Get the URL path (minus the protocol & host) from a full URL
+ * 
+ * 
+ * @param existingUrl existing URL to determine the base from
+ * @returns 
+ */
+export const getUrlPath = (existingUrl:string) => {
+    const url = new URL(existingUrl);
+    return url.pathname;
+}
+
+/**
  * Get the narrowers URL for a hierarchy based on an a concept and existing URL context
  * 
  * @param concept
