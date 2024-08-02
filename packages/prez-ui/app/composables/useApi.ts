@@ -1,4 +1,4 @@
-export function useApiUrl() {
+export function useApi() {
   const route = useRoute();
   const config = useRuntimeConfig();
 

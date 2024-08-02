@@ -32,6 +32,16 @@ function setupGetCollections() {
     });
 }
 
+function setupGetItems() {
+    document.querySelector<HTMLButtonElement>("#itemsButton")!.addEventListener("click", async () => {
+        const { data, profiles, count } = await getList(API_BASE_URL + "/catalogs/bblck-ctlg:bblocks/collections/bblck-vcbs:api/items");
+        document.querySelector<HTMLPreElement>("#data")!.innerText = JSON.stringify(data, null, 2);
+        document.querySelector<HTMLPreElement>("#profiles")!.innerText = JSON.stringify(profiles, null, 2);
+        document.querySelector<HTMLPreElement>("#count")!.innerText = `(${count})`;
+    });
+}
+
+
 function setupClearButton() {
     document.querySelector<HTMLButtonElement>("#clear")!.addEventListener("click", async () => {
         document.querySelector<HTMLPreElement>("#data")!.innerText = "";
@@ -130,6 +140,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
         <button id="catalogsButton">Get catalogs</button>
         <button id="catalogButton">Get catalog</button>
         <button id="collectionsButton">Get collections</button>
+        <button id="itemsButton">Get items</button>
         <button id="searchButton">Search</button>
         <!-- <button id="conceptsStaticButton">Concepts</button> -->
         <button id="topConceptsButton">Get top concepts</button>
@@ -152,6 +163,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 setupGetCatalogs();
 setupGetCatalog();
 setupGetCollections();
+setupGetItems();
 setupClearButton();
 setupSearch();
 //setupConcepts();

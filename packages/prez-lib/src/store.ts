@@ -222,10 +222,6 @@ export class RDFStore {
         focusNode.properties = this.getProperties(obj, { excludePrefix: PREZ_PREDICATES.namespace });
         focusNode.systemProperties = this.getProperties(obj, { includePrefix: PREZ_PREDICATES.namespace });
 
-        // we're looking at a concept node
-        if(focusNode.rdfTypes?.find(type=>type.value == SYSTEM_PREDICATES.skosConcept)) {
-            (focusNode as PrezConceptNode).hasChildren = focusNode.systemProperties[PREZ_PREDICATES.hasChildren].objects.find(o=>o.value == 'true') ? true : false;
-        }
         return focusNode;
     }
 
@@ -389,7 +385,7 @@ export class RDFStore {
         const item = this.toPrezFocusNode(obj[0]);
 
         // if conceptscheme
-        if (item.rdfTypes?.map(t => t.value).includes(this.toIri("skos:ConceptScheme"))) {
+        if (item.rdfTypes?.map(t => t.value).includes(SYSTEM_PREDICATES.skosConcept)) {
             const concepts = this.getConcepts(obj[0]);
             return {
                 ...item,
