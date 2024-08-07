@@ -1,3 +1,0 @@
-<template>
-    My header
-</template>

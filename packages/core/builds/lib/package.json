@@ -1,0 +1,50 @@
+{
+    "name": "@prez-ui/lib",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "files": [
+        "dist"
+    ],
+    "main": "./dist/prez-lib.umd.cjs",
+    "module": "./dist/prez-lib.js", 
+    "exports": {
+        ".": {
+            "import": "./dist/prez-lib.js",
+            "require": "./dist/prez-lib.umd.cjs",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "types": "./dist/index.d.ts",
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jamiefeiss/prez-ui-nuxt.git",
+        "directory": "prez-lib"
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build", 
+        "build:watch": "concurrently \"vite build --watch\" \"tsc --emitDeclarationOnly\"",
+        "preview": "vite preview",
+        "coverage": "vitest run --coverage",
+        "bench": "vitest bench",
+        "test:unit": "vitest --environment jsdom --root src/",
+        "preinstall": "npx only-allow pnpm"
+    },
+    "devDependencies": {
+        "@rdfjs/types": "^1.1.0",
+        "@types/n3": "^1.16.4",
+        "@vitest/coverage-v8": "^0.34.6",
+        "concurrently": "^8.2.2",
+        "sass": "^1.72.0",
+        "typescript": "^5.0.2",
+        "vite": "^4.4.5",
+        "vitest": "^0.34.6"
+    },
+    "dependencies": {
+        "n3": "^1.17.2"
+    }
+}

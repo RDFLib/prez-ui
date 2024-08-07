@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prez UI Example</title>
+    <!-- Include Bulma CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Prez UI Library Example</h1>
+            <div id="app" class="content">
+                <!-- Your content goes here -->
+                <p>This is a simple example page using Prez UI Library.</p>
+                <button id="exampleButton" class="button is-primary">Click Me</button>
+                <div id="output"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Include the Prez UI Library -->
+    <script src="./prez-lib.umd.js"></script>
+    <script>
+        // Ensure PrezUILib is available
+        if (typeof PrezUILib !== 'undefined') {
+            document.getElementById('exampleButton').addEventListener('click', async function() {
+                // Use a function from PrezUILib
+                const result = await PrezUILib.getItem('https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com/catalogs/bblck-ctlg:bblocks'); // Assuming exampleFunction is a method from your library
+                document.getElementById('output').innerText = 'Result: ' + JSON.stringify(result);
+            });
+        } else {
+            console.error('PrezUILib is not loaded.');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "@prez-ui/core",
+  "type": "module",
+  "version": "0.0.1",
+  "main": "./nuxt.config.ts",
+  "scripts": {
+    "dev": "nuxi dev .playground",
+    "dev:prepare": "nuxt prepare .playground",
+    "build": "nuxt build .playground",
+    "generate": "nuxt generate .playground",
+    "preview": "nuxt preview .playground",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "latest",
+    "@nuxtjs/tailwindcss": "^6.12.1",
+    "@rdfjs/types": "^1.1.0",
+    "@types/n3": "^1.16.4",
+    "eslint": "^9.7.0",
+    "nuxt": "^3.12.4",
+    "typescript": "^5.5.4",
+    "vue": "latest"
+  },
+  "dependencies": {
+    "n3": "^1.20.4"
+  }
+}
