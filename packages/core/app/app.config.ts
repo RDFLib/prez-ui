@@ -14,7 +14,9 @@ export default defineAppConfig({
     { label: 'Home', url: '/' }
   ],
   utilsMenu: [
-    { label: 'lib', url: '/_utils/lib' }
+    { label: 'lib', url: '/_prez/lib' },
+    { label: 'cfg', url: '/_prez/cfg' },
+    { label: 'tailwind', url: '/_tailwind/'}
   ]
 })
 

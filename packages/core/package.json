@@ -4,25 +4,29 @@
   "version": "0.0.1",
   "main": "./nuxt.config.ts",
   "scripts": {
-    "dev": "nuxi dev .playground",
-    "dev:prepare": "nuxt prepare .playground",
-    "build": "nuxt build .playground",
-    "generate": "nuxt generate .playground",
-    "preview": "nuxt preview .playground",
+    "dev": "pnpm dotenv -- nuxi dev .playground",
+    "dev:prepare": "pnpm dotenv -- nuxt prepare .playground",
+    "build": "pnpm dotenv -- nuxt build .playground",
+    "generate": "pnpm dotenv -- nuxt generate .playground",
+    "preview": "pnpm dotenv -- nuxt preview .playground",
     "lint": "eslint ."
   },
   "devDependencies": {
     "@nuxt/eslint": "latest",
     "@nuxtjs/tailwindcss": "^6.12.1",
+    "@primevue/nuxt-module": "^4.0.4",
     "@rdfjs/types": "^1.1.0",
     "@types/n3": "^1.16.4",
+    "dotenv-cli": "^7.4.2",
     "eslint": "^9.7.0",
     "nuxt": "^3.12.4",
     "typescript": "^5.5.4",
     "vue": "latest"
   },
   "dependencies": {
+    "@primevue/themes": "^4.0.4",
     "buffer": "^6.0.3",
-    "n3": "^1.20.4"
+    "n3": "^1.20.4",
+    "primeicons": "^7.0.0"
   }
 }
