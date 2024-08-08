@@ -13,8 +13,6 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "latest",
-    "@nuxtjs/tailwindcss": "^6.12.1",
-    "@primevue/nuxt-module": "^4.0.4",
     "@rdfjs/types": "^1.1.0",
     "@types/n3": "^1.16.4",
     "dotenv-cli": "^7.4.2",
@@ -25,6 +23,8 @@
   },
   "dependencies": {
     "@primevue/themes": "^4.0.4",
+    "@primevue/nuxt-module": "^4.0.4",
+    "@nuxtjs/tailwindcss": "^6.12.1",
     "buffer": "^6.0.3",
     "n3": "^1.20.4",
     "primeicons": "^7.0.0"

@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
   extends: [
-//    ['github:RDFLib/prez-ui/packages/core#hjohns/next/alpha']//, {install: true}]
-    '../../packages/core/nuxt.config.ts'
+    ['github:RDFLib/prez-ui/packages/core#hjohns/next/alpha']
+//    '../../packages/core/nuxt.config.ts'
   ]
 })

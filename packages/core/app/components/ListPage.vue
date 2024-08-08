@@ -7,7 +7,7 @@ const url = api.getRelativeApiUrl();
 const pending = ref(false);
 const error = ref<Error>();
 const data = ref<PrezDataList>();
-const lastParent = ref()
+const lastParent = ref('');
 
 onMounted(async ()=>{
     error.value = undefined;
@@ -16,6 +16,8 @@ onMounted(async ()=>{
         data.value = await getList(url);
         if(data.value.parents?.length) {
             lastParent.value = data.value.parents[data.value.parents.length-1].segment;
+        } else {
+            lastParent.value = '';
         }
     } catch (ex) {
         error.value = new Error(ex.message)
