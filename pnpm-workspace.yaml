@@ -1,4 +1,3 @@
 packages:
-  - 'examples/*'
-  - 'packages/*'
-  - 'packages/core/builds/*'
+- 'packages/*'
+- 'examples/*'

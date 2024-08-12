@@ -1,32 +1,27 @@
 {
   "name": "@prez-ui/core",
+  "private": true,
   "type": "module",
-  "version": "0.0.1",
-  "main": "./nuxt.config.ts",
   "scripts": {
-    "dev": "pnpm dotenv -- nuxi dev .playground",
-    "dev:prepare": "pnpm dotenv -- nuxt prepare .playground",
-    "build": "pnpm dotenv -- nuxt build .playground",
-    "generate": "pnpm dotenv -- nuxt generate .playground",
-    "preview": "pnpm dotenv -- nuxt preview .playground",
-    "lint": "eslint ."
-  },
-  "devDependencies": {
-    "@nuxt/eslint": "latest",
-    "@rdfjs/types": "^1.1.0",
-    "@types/n3": "^1.16.4",
-    "dotenv-cli": "^7.4.2",
-    "eslint": "^9.7.0",
-    "nuxt": "^3.12.4",
-    "typescript": "^5.5.4",
-    "vue": "latest"
+    "build": "pnpm dotenv -- nuxt build",
+    "dev": "pnpm dotenv -e .env.local -e .env nuxi dev",
+    "generate": "pnpm dotenv -- nuxt generate",
+    "preview": "pnpm dotenv -- nuxt preview",
+    "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@primevue/themes": "^4.0.4",
-    "@primevue/nuxt-module": "^4.0.4",
     "@nuxtjs/tailwindcss": "^6.12.1",
-    "buffer": "^6.0.3",
-    "n3": "^1.20.4",
-    "primeicons": "^7.0.0"
+    "@prez-ui/lib": "workspace:*",
+    "@primevue/themes": "^4.0.4",
+    "dotenv-cli": "^7.4.2",
+    "nuxt": "^3.12.4",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.0.4",
+    "vue": "latest"
+  },
+  "devDependencies": {
+    "@nuxt/kit": "^3.12.4",
+    "@primevue/nuxt-module": "^4.0.4",
+    "tailwindcss": "^3.4.9"
   }
 }

@@ -2,10 +2,10 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
-  extends: [
-    '../../packages/core'
-  ],
   future: {
     compatibilityVersion: 4
   },
+  extends: [
+    '../core'
+  ]
 })

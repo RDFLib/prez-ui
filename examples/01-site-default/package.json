@@ -1,16 +1,21 @@
 {
-  "name": "01-site-default",
+  "name": "example-01-site-default",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "nuxi dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
     "nuxt": "^3.12.4",
+    "primevue": "^4.0.4",
     "vue": "latest"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.12.1",
+    "@primevue/nuxt-module": "^4.0.4"
   }
 }
