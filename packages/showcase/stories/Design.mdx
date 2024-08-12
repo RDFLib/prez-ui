@@ -1,0 +1,173 @@
+import { Meta } from '@storybook/addon-docs';
+import Mermaid from 'react-mermaid2';
+
+<Meta title="Introduction/Component Design" />
+
+# Component grouping
+
+| Group | Description                        |
+|-----------|----------------------------------|
+| Standard | UI Widgets that are have no data or RDF data awareness     |
+| Data components    | UI components that render a Prez data object  |
+| Data fetching components    | The main PrezUIDataProvider component that manages calls to the service layer, example integration with data components are shown here  |
+| Page components     | Higher level page components and layout objects used to build a page |
+
+
+## Customising PrezUI
+Note: this is coming...
+
+PrezUI uses Nuxt layers to encapsulate UI components and gives you the control to extend and override components, without having to fork the prez-ui repo. See [Nuxt layers](https://nuxt.com/docs/getting-started/layers) and [further reading](https://nuxt.com/docs/guide/going-further/layers).
+
+Components have been split into small components that allow you to override at many different levels.
+
+
+### Customising options
+
+<Mermaid chart={`flowchart LR
+classDef special fill:#ffeb3b,stroke:#fbc02d,stroke-width:2px;
+
+components(github rdfLib/prez-ui<br/> - - - - - - - - - - - - - <br/>/prezui-components) --> proj(your project<br>extends our prez layers)
+proj --> override(Override any<br/>PrezUI component):::special
+proj --> add(Add a new<br/>page using the same layout):::special
+proj --> addw(Add a custom<br/>widget handler):::special
+
+`} />
+
+
+### Example using layers to extend PrezUI components
+ - Start by creating a new nuxt application
+```
+CLI:
+
+pnpx nuxi init my-app
+```
+
+- This example shows how you might extend directly from a branch/tag in the repo
+- Layers may also be shared as a package
+```
+EDIT: nuxt.config.ts
+
+export default defineNuxtConfig({
+  extends: [
+    'github:rdfLib/prez-ui/next/prez-components#v4.0.0' // GitHub Remote Source from v4.0.0 tag
+  ]
+})
+```
+
+### Use components on a new page
+- You may now use any of the PrezUIComponents in your nuxt application
+
+```
+NEW: pages/my-list-page.vue
+
+<PrezUIDataPage type="list" url="https://prez-api.domain/catalogs" />
+
+```
+
+### Replace a component
+
+- Override a component by simply creating a replacement component
+```
+NEW: components/PrezUILoader.vue
+
+<script lang="ts" setup>
+import { PrezUILoadingProps } from '@/types';
+import Skeleton from 'primevue/skeleton';
+const props = defineProps<PrezUILoadingProps>();
+</script>
+<template>
+    <div v-if="props.variant == 'list'">
+        <Skeleton height="2rem" width="20rem" class="mb-2" style="margin-bottom: 20px"></Skeleton>
+        <Skeleton width="50rem" class="mb-2" style="margin-bottom: 8px"></Skeleton>
+        <Skeleton width="50rem" class="mb-2" style="margin-bottom: 12px"></Skeleton>
+    </div>
+</template>
+
+```
+
+### Override a component
+- Override a component by extending the base definition and overriding a slot
+```
+NEW: components/PrezUINode.vue
+
+<template>
+    <PrezUINode v-bind="props" v-slot="slotProps">
+        <a style="color:red;" :href="slotProps.link" v-tooltip.bottom="slotProps.tooltip">{{ slotProps.label }}</a>
+    </PrezUINode>
+</template>
+<script lang="ts" setup>
+import PrezUINode from '../../components/PrezUINode.vue';
+import { PrezUINodeProps } from '../../types';
+const props = defineProps<PrezUINodeProps>();
+</script>
+
+```
+
+
+## Theming components
+
+
+
+# Prez data model
+
+Prez UI data aware components use the Prez data model when rendering RDF data.
+
+
+<Mermaid chart={`
+classDiagram
+    class PrezLiteral {
+        language?: string
+        datatype?: PrezNode
+    }
+    class PrezTerm {
+        <<Type>>
+    }
+    class PrezNode {
+        label?: PrezLiteral
+        description?: PrezLiteral
+        provenance?: PrezLiteral
+        curie?: string
+        links?: PrezLink[]
+        members?: PrezLink
+        rdfTypes?: PrezNode[]
+    }
+    class PrezFocusNode {
+        properties?: PrezProperties
+    }
+    class PrezConceptSchemeNode {
+        topConcepts: PrezConceptNode
+    }
+    class PrezConceptNode {
+        narrowers: PrezConceptNode[]
+        hasChildren: boolean
+    }
+    class PrezBlankNode {
+        properties: PrezProperties
+    }
+    class PrezProperty {
+        predicate: PrezNode
+        objects: PrezTerm[]
+    }
+    class PrezProperties {
+        [predicateIri: string]: PrezProperty
+    }
+
+    PrezTerm <|-- PrezLiteral
+    PrezTerm <|-- PrezNode
+    PrezNode <|-- PrezFocusNode
+    PrezTerm <|-- PrezBlankNode
+    PrezTerm <|-- PrezFocusNode
+    PrezFocusNode <|-- PrezConceptSchemeNode
+    PrezFocusNode <|-- PrezConceptNode
+    PrezNode <|-- PrezConceptSchemeNode
+    PrezNode <|-- PrezConceptNode
+
+`}/>
+
+
+## Example applications
+
+| Example          | Description                    |
+| ------------------ | -------------------------------- |
+|01-PrezUI         | A standard Prez UI application
+

@@ -1,4 +1,4 @@
-import type { PrezLinkParent, PrezProfileHeader, PrezTerm, PrezData, PrezDataTypes, PrezFocusNode, PrezProperty, PrezLiteral, PrezNode } from "@prez-ui/lib";
+import type { PrezLinkParent, PrezProfileHeader, PrezTerm, PrezData, PrezDataTypes, PrezFocusNode, PrezProperty, PrezLiteral, PrezNode } from "@/base/lib";
 export interface PrezUIProps {
     pt?: object;
 }

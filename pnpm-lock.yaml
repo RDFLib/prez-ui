@@ -32,9 +32,6 @@ importers:
       '@nuxtjs/tailwindcss':
         specifier: ^6.12.1
         version: 6.12.1
-      '@prez-ui/lib':
-        specifier: workspace:*
-        version: link:../lib
       '@primevue/themes':
         specifier: ^4.0.4
         version: 4.0.4

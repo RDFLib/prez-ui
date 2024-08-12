@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { getList } from "@prez-ui/lib";
-import type { PrezDataList } from "@prez-ui/lib";
+import { getList } from "@/base/lib";
+import type { PrezDataList } from "@/base/lib";
 const appConfig = useAppConfig();
 const api = useApi();
 const url = api.getRelativeApiUrl();

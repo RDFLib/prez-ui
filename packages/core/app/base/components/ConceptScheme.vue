@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { ConceptSchemeProps } from "../types";
-import { getTopConceptsUrl, SYSTEM_PREDICATES } from '@prez-ui/lib';
+import { getTopConceptsUrl, SYSTEM_PREDICATES } from '@/base/lib';
 
 const props = defineProps<ConceptSchemeProps>();
 const api = useApi();

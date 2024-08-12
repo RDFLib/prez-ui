@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type PrezLiteral, SYSTEM_PREDICATES } from '@prez-ui/lib';
+import { type PrezLiteral, SYSTEM_PREDICATES } from '@/base/lib';
 import type { LiteralProps } from '../types';
 
 const props = defineProps<LiteralProps>();

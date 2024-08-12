@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { literal } from '@prez-ui/lib';
+import { literal } from '@/base/lib';
 import type { ItemBreadcrumbProps } from '../types';
 
 const props = defineProps<ItemBreadcrumbProps>();

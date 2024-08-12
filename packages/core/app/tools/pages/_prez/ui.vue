@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { literal, node } from '@prez-ui/lib';
+import { literal, node } from '@/base/lib';
 const baseUrl = 'https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com';
 // sample list of items to render in a datatable
 const products = [

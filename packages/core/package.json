@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.12.1",
-    "@prez-ui/lib": "workspace:*",
     "@primevue/themes": "^4.0.4",
     "dotenv-cli": "^7.4.2",
     "nuxt": "^3.12.4",

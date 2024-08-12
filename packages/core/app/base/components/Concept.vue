@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import type { ConceptProps } from "../types";
-import { getNarrowersUrl } from '@prez-ui/lib';
+import { getNarrowersUrl } from '@/base/lib';
 
 const props = defineProps<ConceptProps>();
 

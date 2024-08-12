@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { ItemTableProps } from '../types';
-import { SYSTEM_PREDICATES, getTopConceptsUrl, type PrezFocusNode } from '@prez-ui/lib';
+import { SYSTEM_PREDICATES, getTopConceptsUrl, type PrezFocusNode } from '@/base/lib';
 
 const api = useApi();
 

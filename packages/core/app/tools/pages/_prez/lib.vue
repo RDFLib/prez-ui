@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { apiGet } from '@prez-ui/lib';
+import { apiGet } from '@/base/lib';
 
 const runtimeConfig = useRuntimeConfig();
 

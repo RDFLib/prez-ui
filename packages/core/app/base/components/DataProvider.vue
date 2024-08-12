@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
 import { ref, onMounted, defineProps, watch, provide } from 'vue';
-import type { PrezNode, PrezData, PrezFocusNode, PrezConceptNode } from "@prez-ui/lib";
-import { getItem, getList, search, getBaseUrl } from "@prez-ui/lib";
+import type { PrezNode, PrezData, PrezFocusNode, PrezConceptNode } from "@/base/lib";
+import { getItem, getList, search, getBaseUrl } from "@/base/lib";
 import type { DataProviderProps } from '../types';
 
 const props = defineProps<DataProviderProps>();

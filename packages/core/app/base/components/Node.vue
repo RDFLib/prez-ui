@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { NodeProps } from '../types';
-import type { PrezNode } from '@prez-ui/lib';
+import type { PrezNode } from '@/base/lib';
 
 const props = defineProps<NodeProps>();
 
