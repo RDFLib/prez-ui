@@ -13,13 +13,16 @@
     "@nuxtjs/tailwindcss": "^6.12.1",
     "@primevue/themes": "^4.0.4",
     "dotenv-cli": "^7.4.2",
-    "nuxt": "^3.12.4",
+    "nuxt": "^3.12.4",    
+    "n3": "^1.17.2",
     "primeicons": "^7.0.0",
     "primevue": "^4.0.4",
     "vue": "latest"
   },
   "devDependencies": {
     "@nuxt/kit": "^3.12.4",
+    "@rdfjs/types": "^1.1.0",
+    "@types/n3": "^1.16.4",
     "@primevue/nuxt-module": "^4.0.4",
     "tailwindcss": "^3.4.9"
   }
