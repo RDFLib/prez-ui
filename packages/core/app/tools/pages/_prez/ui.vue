@@ -28,7 +28,7 @@ const columns = [
             <li>
                 <fieldset>
                     <legend>Button</legend>
-                    <Button>Hello</Button>
+                    <Button>Press me</Button>
                 </fieldset>
             </li>
             <li>

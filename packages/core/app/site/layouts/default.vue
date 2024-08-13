@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{sidepanel?: boolean, contentonly?: boolean}>()
-const appConfig = useAppConfig();
+const appConfig = useAppConfig().prez;
 const menu = appConfig.menu;
 </script>
 <template>

@@ -7,9 +7,35 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "storybook": "storybook dev --port 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
-    "nuxt": "^3.12.4"
+    "@nuxtjs/storybook": "^8.1.5",
+    "nuxt": "^3.12.4",
+    "vue": "latest"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^1.6.1",
+    "@nuxtjs/storybook": "7.0.2",
+    "@storybook-vue/nuxt": "0.2.6",
+    "@storybook/addon-essentials": "8.0.8",
+    "@storybook/addon-interactions": "8.0.8",
+    "@storybook/addon-links": "8.0.8",
+    "@storybook/blocks": "8.0.8",
+    "@storybook/builder-vite": "8.0.8",
+    "@storybook/test": "8.0.8",
+    "@storybook/vue3": "8.0.8",
+    "@types/node": "^18.19.44",
+    "mermaid": "^10.9.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-mermaid2": "^0.1.4",
+    "remark-gfm": "^4.0.0",
+    "sass": "^1.72.0",
+    "storybook": "8.2.8",
+    "storybook-addon-vue-slots": "^0.9.29",
+    "storybook-vue3-router": "^5.0.0"
   }
 }

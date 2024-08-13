@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { getItem } from "@/base/lib";
 import type { PrezDataItem } from "@/base/lib";
-const appConfig = useAppConfig();
+const appConfig = useAppConfig().prez;
 const api = useApi();
 const url = api.getRelativeApiUrl();
 const baseUrl = api.getBaseApiUrl();
@@ -15,7 +15,7 @@ onMounted(async ()=>{
     try {
         data.value = await getItem(url);
     } catch (ex) {
-        error.value = new Error(ex.message)
+        error.value = new Error((ex as Error).message)
     } finally {
         pending.value = false;
     }

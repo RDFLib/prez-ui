@@ -351,9 +351,10 @@ export class RDFStore {
     }
 
     public getCount(): number {
-        const count = this.store.getObjects(null, this.toIri("prez:count"), null);
+        const count = this.store.getObjects(null, PREZ_PREDICATES.count, null);
         if (count.length > 0) {
-            return Number(count[0]!.value);
+            /** follow up, expected in value without the quotes */
+            return Number(count[0]!.id.replace(/"/g, ""));
         } else {
             return 0;
         }

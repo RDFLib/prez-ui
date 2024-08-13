@@ -1,7 +1,9 @@
 import { createResolver } from '@nuxt/kit'
 const { resolve } = createResolver(import.meta.url)
 
-console.log("PREZ_CORE_EXTENDS: ", process.env.PREZ_CORE_EXTENDS)
+if(process.env.PREZ_CORE_EXTENDS) {
+  console.log("PREZ_CORE_EXTENDS: ", process.env.PREZ_CORE_EXTENDS)
+}
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({

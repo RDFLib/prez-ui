@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import Skeleton from 'primevue/skeleton';
+import ProgressSpinner from 'primevue/progressspinner';
 import type { LoadingProps } from '../types';
 const props = defineProps<LoadingProps>();
 </script>

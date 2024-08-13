@@ -8,10 +8,10 @@ const properties = list?.[0]?.properties;
 //const headers = properties ? Object.keys(properties).map(p => properties[p]!.predicate) : undefined;
 
 </script>
-
 <template>
   <div v-if="list">
     <DataTable striped-rows :value="list" table-style="min-width: 50rem">
+      <!-- frozen="false" was a fix to get around issues with unstyled presets -->      
       <Column :frozen="false">
         <template #header>
           <b>Item</b>
@@ -46,6 +46,7 @@ const properties = list?.[0]?.properties;
         </template>
       </Column>
     </DataTable>
+
   </div>
 </template>
 
