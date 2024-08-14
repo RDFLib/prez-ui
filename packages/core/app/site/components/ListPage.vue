@@ -2,7 +2,7 @@
 import { getList } from "@/base/lib";
 import type { PrezDataList } from "@/base/lib";
 import type { PageState } from "primevue/paginator";
-import type { PaginationProps } from "~/base/types";
+
 
 const appConfig = useAppConfig().prez;
 const router = useRouter();
@@ -55,12 +55,13 @@ onMounted(fetchData);
 </script>
 
 <template>
-    <NuxtLayout>
+    <NuxtLayout sidepanel>
         <template #header-text>
             {{ appConfig.nameSubstitutions?.[lastParent] || lastParent || '&nbsp;' }}
         </template>
         <template #breadcrumb >
             <ItemBreadcrumb v-if="data" :prepend="appConfig.breadcrumbPrepend || []" :name-substitutions="appConfig.nameSubstitutions" :parents="data.parents" />
+            <ItemBreadcrumb v-else-if="error" :custom-items="[{url: '/', label: 'Unable to load page'}]" />
             <ItemBreadcrumb v-else :custom-items="[{url: '/', label: '...'}]" />
         </template>
         <template #default>
@@ -68,19 +69,27 @@ onMounted(fetchData);
                 <div v-if="error"><Message severity="error">{{ error }}</Message></div>
                 <div v-if="data" :key="url">
                     <ItemList :list="data.data" />
-                    <Paginator
-                        v-if="totalRecords > per_page"
-                        :first="first" 
-                        :rows="per_page" 
-                        :page="page" 
-                        :totalRecords="totalRecords" 
-                        @page="navigate" 
-                    >
-                    </Paginator>
-                    <div v-if="totalRecords > 0" class="text-sm text-gray-500 text-center">Showing {{ first }} to {{ first + per_page - 1 }} of {{ totalRecords }} items</div>
+                    <div class="pt-4">
+                        <Paginator
+                            v-if="totalRecords > per_page"
+                            :first="first" 
+                            :rows="per_page" 
+                            :page="page" 
+                            :totalRecords="totalRecords" 
+                            @page="navigate" 
+                        >
+                        </Paginator>
+                        <div v-if="totalRecords > 0" class="text-sm text-gray-500 text-center">
+                            Showing {{ first }} to {{ Math.min(first + per_page - 1, totalRecords) }} of {{ totalRecords }}{{ data.maxReached ? '+' : '' }} items
+                        </div>
+                    </div>
                 </div>
                 <Loading v-else-if="pending" />
             </div>
+        </template>
+        <template #sidepanel>
+            <ItemProfiles v-if="pending" loading />
+            <ItemProfiles v-else-if="data" :profiles="data.profiles" />
         </template>
     </NuxtLayout>
 </template>

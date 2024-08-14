@@ -101,7 +101,10 @@ export async function getList(url: string): Promise<PrezDataList> {
     const store = new RDFStore();
     store.load(data);
     const path = getUrlPath(url);
-    return { type: 'list', data: store.getList(), profiles, count: store.getCount(), parents: store.getParents(path) };
+    return { type: 'list', data: store.getList(), profiles, 
+        maxReached: store.getMaxReached(), count: store.getCount(), 
+        parents: store.getParents(path) 
+    };
 }
 
 
@@ -131,5 +134,9 @@ export async function search(url: string): Promise<PrezDataSearch> {
     const store = new RDFStore();
     store.load(data);
     const path = getUrlPath(url);
-    return { type: 'search', data: store.search(), profiles, parents: store.getParents(path) };
+    return { 
+        type: 'search', data: store.search(), profiles, 
+        maxReached: store.getMaxReached(), count: store.getCount(), 
+        parents: store.getParents(path) 
+    };
 }

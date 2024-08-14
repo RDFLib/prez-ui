@@ -1,7 +1,11 @@
 <script lang="ts" setup>
-import type { ItemHeaderProps } from '../types';
-import type { PrezNode } from '@/base/lib';
-const props = defineProps<ItemHeaderProps>();
+import type { PrezNode, PrezTerm } from '@/base/lib';
+
+interface Props {
+    term: PrezTerm;    
+}
+
+const props = defineProps<Props>();
 const term = props.term as PrezNode;
 </script>
 <template>
@@ -9,7 +13,7 @@ const term = props.term as PrezNode;
         <div class="prezui-header-title">
             <Node :term="term" variant="header" />
         </div>
-        <div v-if="term.description" class="prezui-header-desc">
+        <div v-if="term.description" class="text-base">
             <Literal :term="term.description" variant="header" />
         </div>
     </div>

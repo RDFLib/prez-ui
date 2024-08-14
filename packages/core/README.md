@@ -1,75 +1,52 @@
-# Nuxt 3 Minimal Starter
+# Prez UI v4 alpha setup
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+/packages
+  /core - main PrezUI application
+    /app - application/layers root
+      /base - lib & components
+      /tools - config, test tools (available via /_prez)
+      /site - main PrezUI website pages and layouts
+      app.config.ts - app default config
+    nuxt.config.ts - system config
 
-## Setup
+  /lib - build project for lib (source located in core/app/base/lib)
 
-Make sure to install the dependencies:
+  /showcase - storybook site (not currently active)
 
-```bash
-# npm
-npm install
 
-# pnpm
-pnpm install
 
-# yarn
-yarn install
+## BDR PrezUI layer
+- This layer application contains the customisations for BDR, that sits on top of a PrezUI core application
 
-# bun
-bun install
+
+## How to run this layer
+
+There are two ways to run this layer. 
+- a) PrezUI core extends this layer: Currently used method. (requires cloning prez-ui)
+- b) Layer extends PrezUI core: This method is not currently available yet. (extends prez-ui via a remote repo URL)
+
+### a) Dev setup for - PrezUI core extends this layer
+- create your project folder
+- clone this repo, e.g. into /prez-ui-bdr-layer
+- clone the prez-ui repo, e.g. into /prez-ui
+- switch prez-ui branch to hjohns/next/alpha
+- set the .env settings in prez-ui, as below.
+- run "pnpm i", "pnpm dev" in the prez-ui/packages/core folder
+
+.env settings (in prez-ui/packages/core)
+```
+NUXT_PUBLIC_PREZ_API_ENDPOINT=https://prez-api-endpoint
+PREZ_CORE_EXTENDS=../prez-ui/packages/core
 ```
 
-## Development Server
+### b) Dev setup for - Layer extends PrezUI core
+- __Note: this option is not ready yet__
+- clone this repo (prez-ui-bdr-layer)
+- set the .env settings
+- run "pnpm i", "pnpm dev"
 
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
+.env settings (in prez-ui-bdr-layer)
 ```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+NUXT_PUBLIC_PREZ_API_ENDPOINT=https://prez-api-endpoint
+PREZ_CORE_EXTENDS=../prez-ui/packages/core
 ```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

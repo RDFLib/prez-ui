@@ -1,8 +1,21 @@
 <script lang="ts" setup>
-import { literal } from '@/base/lib';
-import type { ItemBreadcrumbProps } from '../types';
+import { literal, type PrezLinkParent, type PrezLiteral } from '@/base/lib';
+import type { MenuItem } from 'primevue/menuitem';
 
-const props = defineProps<ItemBreadcrumbProps>();
+type ItemBreadcrumbPart = {
+    label: string | PrezLiteral;
+    segment?: string;
+    url: string;
+}
+
+interface Props {
+    prepend?: ItemBreadcrumbPart[];
+    nameSubstitutions?: Record<string, string>;
+    parents?: PrezLinkParent[];
+    customItems?: ItemBreadcrumbPart[];    
+}
+
+const props = defineProps<Props>();
 const parents = props.parents;
 
 const links = [...(props.prepend || []), ...(props.customItems ?
@@ -12,7 +25,7 @@ const links = [...(props.prepend || []), ...(props.customItems ?
 
 </script>
 <template>
-    <Breadcrumb v-if="links" :model="links" style="background-color: transparent;padding-left: 0;">
+    <Breadcrumb v-if="links" :model="links as MenuItem[]" style="background-color: transparent;padding-left: 0;">
         <template #item="{ item }">
             <Literal :term="typeof(item.label) == 'object' ? item.label : literal(item.label || item.segment || item.url)">
                 <template #text="{ text }">

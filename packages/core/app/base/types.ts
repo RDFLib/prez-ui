@@ -3,10 +3,6 @@ export interface PrezUIProps {
     pt?: object;
 }
 
-export interface ItemProfilesProps extends PrezUIProps {
-    profiles: PrezProfileHeader[];
-};
-
 export interface PaginationProps extends PrezUIProps {
     variant?: 'default' | 'endless'
     totalCount: number;

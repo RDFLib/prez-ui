@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
 import type { ItemTableProps } from '../types';
 import { SYSTEM_PREDICATES, getTopConceptsUrl, type PrezFocusNode } from '@/base/lib';
 

@@ -19,14 +19,6 @@ const properties = list?.[0]?.properties;
         <template #body="slotProps">
           <Node :term="slotProps.data" variant="list-header" />
         </template>
-      </Column :frozen="false">
-      <Column :frozen="false">
-        <template #header>
-          <b>Description</b>
-        </template>
-        <template #body="slotProps">
-          <Term v-if="slotProps.data.description" :term="slotProps.data.description" variant="list" />
-        </template>
       </Column>
       <Column
         :frozen="false"

@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import type { ConceptProps } from "../types";
 import { getNarrowersUrl } from '@/base/lib';
 
-const props = defineProps<ConceptProps>();
+interface Props {
+    url: string;
+};
+const props = defineProps<Props>();
 
 const open = ref<string[]>([]);
 
@@ -41,10 +43,13 @@ function toggleOpen(value:string) {
 .pz-concept-blank {
     width:16px;
 }
+.pz-concept i {
+    padding:4px;
+}
 .pz-concept i:hover {
     cursor: pointer;
     background-color: #eee;
-    border-radius: 8px;
+    border-radius: 14px;
 }
 .pz-concept-node {
     place-items: end;    

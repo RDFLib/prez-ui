@@ -31,6 +31,7 @@ onMounted(async ()=>{
         </template>
         <template #breadcrumb >
             <ItemBreadcrumb v-if="data" :prepend="appConfig.breadcrumbPrepend" :name-substitutions="appConfig.nameSubstitutions" :parents="data.parents" />
+            <ItemBreadcrumb v-else-if="error" :custom-items="[{url: '/', label: 'Unable to load page'}]" />
             <ItemBreadcrumb v-else :custom-items="[{url: '/', label: '...'}]" />
         </template>
         <template #default>
@@ -43,8 +44,8 @@ onMounted(async ()=>{
             <Loading v-if="pending" />
         </template>
         <template #sidepanel>
-            <ItemProfiles v-if="data" :profiles="data.profiles" />
-            <Loading v-if="pending" />
+            <ItemProfiles v-if="pending" loading />
+            <ItemProfiles v-else-if="data" :profiles="data.profiles" />
         </template>
     </NuxtLayout>
 </template>

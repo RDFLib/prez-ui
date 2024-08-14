@@ -241,6 +241,7 @@ export interface PrezDataList extends PrezData {
     type: 'list';
     data: PrezFocusNode[];
     count: number;
+    maxReached: boolean;
 }
 
 export interface PrezDataItem extends PrezData {
@@ -255,5 +256,7 @@ export interface PrezDataItem extends PrezData {
 
 export interface PrezDataSearch extends PrezData {
     type: 'search';
+    count: number;
     data: PrezSearchResult[];
+    maxReached: boolean;
 }

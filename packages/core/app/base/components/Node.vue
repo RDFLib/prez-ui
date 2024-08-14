@@ -25,10 +25,13 @@ if(tooltip == label) {
 </script>
 <template>
     <slot name="wrapper" :term="term" :link="term.value" :label="label" :tooltip="tooltip">
-        <ItemLink :to="variant == 'list-header' ? term : term.value" :title="tooltip">
+        <ItemLink v-if="variant != 'header'" :to="variant == 'list-header' ? term : term.value" :title="tooltip">
             <slot :term="term" :link="term.value" :label="label" :tooltip="tooltip">
                 {{ label }}
             </slot>
         </ItemLink>
+        <slot v-else :term="term" :link="term.value" :label="label" :tooltip="tooltip">
+                {{ label }}
+        </slot>
     </slot>
 </template>

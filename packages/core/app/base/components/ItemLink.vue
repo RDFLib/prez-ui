@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { ItemLinkProps } from '../types';
 const props = defineProps<ItemLinkProps>();
-const url = typeof(props.to) == 'string' ? props.to : props.to?.links ? props.to?.links[0]?.value : '#';
+const url = typeof(props.to) == 'string' ? props.to : props.to?.links ? (props.to?.links[0]?.value || '#') : '#';
 
 const extLink = url.startsWith('http') || url.startsWith('mailto');
 const attr = extLink ? {
@@ -24,7 +24,7 @@ const navigateToLink = (event: MouseEvent, path: string) => {
 
 <template>
     <slot name="wrapper" :url="url" :title="props.title" :target="props.target" :rel="props.rel">
-        <a :href="url" :title="props.title" :target="props.target" :rel="props.rel" v-bind="attr" @click="(e)=>navigateToLink(e, url)">
+        <a class="border-b-[2px] hover:no-underline border-transparent hover:border-orange-500" :href="url" :title="props.title" :target="props.target" :rel="props.rel" v-bind="attr" @click="(e)=>navigateToLink(e, url)">
             <slot />
             <i v-if="extLink" class="pi pi-external-link ml-1 text-xs" />            
         </a>

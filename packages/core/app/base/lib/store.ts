@@ -354,9 +354,19 @@ export class RDFStore {
         const count = this.store.getObjects(null, PREZ_PREDICATES.count, null);
         if (count.length > 0) {
             /** follow up, expected in value without the quotes */
-            return Number(count[0]!.id.replace(/"/g, ""));
+            return Number(count[0]!.value.replace('>', ''));
         } else {
             return 0;
+        }
+    }
+
+    public getMaxReached(): boolean {
+        const count = this.store.getObjects(null, PREZ_PREDICATES.count, null);
+        if (count.length > 0) {
+            /** follow up, expected in value without the quotes */
+            return count[0]!.value.includes(">");
+        } else {
+            return false;
         }
     }
 
@@ -406,14 +416,14 @@ export class RDFStore {
      * Returns search results
      */
     public search(): PrezSearchResult[] {
-        const resultSubjects = this.getSubjects(this.toIri("a"), this.toIri("prez:SearchResult"));
+        const resultSubjects = this.getSubjects(SYSTEM_PREDICATES.a, PREZ_PREDICATES.searchResult);
         const results: PrezSearchResult[] = resultSubjects.map(s => {
             const result: PrezSearchResult = {
                 hash: s.value.split("urn:hash:").slice(-1)[0]!,
-                weight: Number(this.getObjects(s.value, this.toIri("prez:searchResultWeight"))[0]!.value),
-                predicate: this.toPrezTerm(this.getObjects(s.value, this.toIri("prez:searchResultPredicate"))[0]!) as PrezNode,
-                match: this.toPrezTerm(this.getObjects(s.value, this.toIri("prez:searchResultMatch"))[0]!) as PrezLiteral,
-                resource: this.toPrezFocusNode(this.getObjects(s.value, this.toIri("prez:searchResultURI"))[0]!)
+                weight: Number(this.getObjects(s.value, PREZ_PREDICATES.searchResultWeight)[0]!.value),
+                predicate: this.toPrezTerm(this.getObjects(s.value, PREZ_PREDICATES.searchResultPredicate)[0]!) as PrezNode,
+                match: this.toPrezTerm(this.getObjects(s.value, PREZ_PREDICATES.searchResultMatch)[0]!) as PrezLiteral,
+                resource: this.toPrezFocusNode(this.getObjects(s.value, PREZ_PREDICATES.searchResultURI)[0]!)
             };
             return result;
         });

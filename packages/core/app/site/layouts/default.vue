@@ -42,8 +42,8 @@ const menu = appConfig.menu;
 
         <div class="container mx-auto flex-grow">
 
-            <div v-if="sidepanel" class="grid grid-cols-5 gap-4 px-4 py-4">
-                <div class="col-span-4 ...">
+            <div v-if="sidepanel" class="grid grid-cols-4 gap-4 px-4 py-4">
+                <div class="col-span-3 ...">
                     <slot />
                 </div>
                 <div class="...">

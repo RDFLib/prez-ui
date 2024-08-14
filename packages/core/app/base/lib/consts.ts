@@ -37,6 +37,7 @@ export const PREZ_PREDICATES = {
     searchResultWeight: "https://prez.dev/searchResultWeight",
     searchResultPredicate: "https://prez.dev/searchResultPredicate",
     searchResultURI: "https://prez.dev/searchResultURI",
+    searchResultMatch: "https://prez.dev/searchResultMatch",
     hasChildren: "https://prez.dev/hasChildren"
 };
 
