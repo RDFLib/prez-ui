@@ -37,13 +37,26 @@ const profileSelected = ref(props.profiles?.find(profile=>profile.current))
                         </div>
                     </template>
                 </SelectButton>
-                <div class="pt-4" v-if="profileSelected">
-                    <div class="mediatypes pt-2" v-for="mediatype in profileSelected.mediatypes" :key="mediatype.mediatype">
-                        <Tag class="text-xs font-normal" severity="info">
-                        <ItemLink :to="`?_profile=${profileSelected.token}&_mediatype=${mediatype.mediatype}`" target="_blank" rel="noopener noreferrer">
-                            <span class="font-normal">{{ mediatype.title || mediatype.mediatype.replace(/^.*\//, '') }}</span>
-                        </ItemLink>
-                        </Tag>
+                <div class="pt-6" v-if="profileSelected">
+                    <div class="flex text-sm">
+                        <div class="flex-grow">Formats available for {{ profileSelected.title }}</div>
+                    </div>
+                    <div class="flex flex-row flex-wrap gap-1.5 text-xs pt-2">
+                        <div class="mediatypes" v-for="mediatype in profileSelected.mediatypes" :key="mediatype.mediatype">
+                            <Tag class="text-xs font-normal" severity="info">
+                            <ItemLink :to="`?_profile=${profileSelected.token}&_mediatype=${mediatype.mediatype}`" target="_blank" rel="noopener noreferrer">
+                                <span class="font-normal">{{ mediatype.title || mediatype.mediatype.replace(/^.*\//, '') }}</span>
+                            </ItemLink>
+                            </Tag>
+                        </div>
+                    </div>
+                    <div class="pt-6">
+                        <div v-if="profileSelected.current" class="text-sm">Viewing this profile</div>
+                        <div v-else class="text-sm">
+                            <ItemLink :to="`?_profile=${profileSelected.token}`" title="Get profile representation">
+                                Switch to this profile<i class="text-xs pi pi-angle-right" />
+                            </ItemLink>
+                        </div>
                     </div>
                 </div>
             </div>

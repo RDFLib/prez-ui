@@ -4,22 +4,19 @@ const props = defineProps<TermProps>();
 
 </script>
 <template>
-    <div class="prezui-term">
+    <Literal 
+        v-if="props.term.termType=='Literal'" 
+        v-bind="props" 
+    />
 
-        <Literal 
-            v-if="props.term.termType=='Literal'" 
-            v-bind="props" 
-        />
+    <Node 
+        v-else-if="props.term.termType=='NamedNode'" 
+        v-bind="props"
+    />
 
-        <Node 
-            v-else-if="props.term.termType=='NamedNode'" 
-            v-bind="props"
-        />
-
-        <ItemTable
-            v-else-if="props.term.termType == 'BlankNode'" 
-            v-bind="props" 
-        />
-
-    </div>
+    <ItemTable
+        v-else-if="props.term.termType == 'BlankNode'" 
+        v-bind="props" 
+    />
+    
 </template>

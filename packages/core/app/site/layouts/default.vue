@@ -12,10 +12,10 @@ const menu = appConfig.menu;
             <div class="container mx-auto px-4 h-full flex justify-between items-center">
                 
                 <!-- Logo -->
-                <nuxt-link to="/" class="text-4xl">PrezUI</nuxt-link>
+                <nuxt-link to="/" class="text-4xl hidden md:block">PrezUI</nuxt-link>
 
                 <!-- Navigation -->
-                <nav class="space-x-4">
+                <nav class="space-x-4 text-right">
                     <nuxt-link to="/services" class="hover:text-gray-400 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[2px] after:bg-orange-500 after:bottom-0 after:left-0 after:transition-transform after:duration-300 after:ease-in-out hover:after:scale-x-100">Privacy</nuxt-link>
                     <nuxt-link to="/contact" class="hover:text-gray-400 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[2px] after:bg-orange-500 after:bottom-0 after:left-0 after:transition-transform after:duration-300 after:ease-in-out hover:after:scale-x-100">Contact</nuxt-link>
                 </nav>

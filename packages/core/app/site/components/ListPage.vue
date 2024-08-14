@@ -62,7 +62,7 @@ onMounted(fetchData);
         <template #breadcrumb >
             <ItemBreadcrumb v-if="data" :prepend="appConfig.breadcrumbPrepend || []" :name-substitutions="appConfig.nameSubstitutions" :parents="data.parents" />
             <ItemBreadcrumb v-else-if="error" :custom-items="[{url: '/', label: 'Unable to load page'}]" />
-            <ItemBreadcrumb v-else :custom-items="[{url: '/', label: '...'}]" />
+            <ItemBreadcrumb v-else :prepend="appConfig.breadcrumbPrepend" :custom-items="[{url: '#', label: '...'}]" />
         </template>
         <template #default>
             <div :key="url">

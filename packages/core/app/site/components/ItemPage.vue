@@ -32,7 +32,7 @@ onMounted(async ()=>{
         <template #breadcrumb >
             <ItemBreadcrumb v-if="data" :prepend="appConfig.breadcrumbPrepend" :name-substitutions="appConfig.nameSubstitutions" :parents="data.parents" />
             <ItemBreadcrumb v-else-if="error" :custom-items="[{url: '/', label: 'Unable to load page'}]" />
-            <ItemBreadcrumb v-else :custom-items="[{url: '/', label: '...'}]" />
+            <ItemBreadcrumb v-else :prepend="appConfig.breadcrumbPrepend" :custom-items="[{url: '#', label: '...'}]" />
         </template>
         <template #default>
             <div v-if="error">
@@ -40,6 +40,7 @@ onMounted(async ()=>{
             </div>
             <div v-if="data">
                 <ItemTable :base-url="baseUrl" :term="data.data" />
+                <div class="mb-12"></div>
             </div>
             <Loading v-if="pending" />
         </template>

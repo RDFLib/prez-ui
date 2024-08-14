@@ -13,7 +13,8 @@ const showDataType = [SYSTEM_PREDICATES.xmlString, SYSTEM_PREDICATES.rdfLangStri
         <div v-if="props?.term?.value" class="prezui-literal">
             <div class="prezui-text">
                 <slot name="text" :term="term" :text="term.value">
-                    <span>{{ term.value }}</span>
+                    <span class="no-tailwind" v-if="term.datatype?.value == SYSTEM_PREDICATES.w3Html" v-html="term.value"></span>
+                    <span v-else>{{ term.value }}</span>
                 </slot>
                 <slot v-if="term.language !== undefined" name="language" :term="term" :language="term.language">
                     <Tag v-if="variant == 'item'" severity="info" :value="term.language" />
@@ -33,5 +34,10 @@ const showDataType = [SYSTEM_PREDICATES.xmlString, SYSTEM_PREDICATES.rdfLangStri
 .prezui-text {
     display: flex;
     justify-content: space-between;
+}
+
+.no-tailwind * {
+  font-family: inherit;
+  font-size: inherit;
 }
 </style>

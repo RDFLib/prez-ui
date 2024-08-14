@@ -46,7 +46,8 @@ export const SYSTEM_PREDICATES = {
     skosConcept: "http://www.w3.org/2004/02/skos/core#Concept",
     a: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
     rdfLangString: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
-    xmlString: "http://www.w3.org/2001/XMLSchema#string"
+    xmlString: "http://www.w3.org/2001/XMLSchema#string",
+    w3Html: "http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML"
 };
 
 export const ANNOTATION_PREDICATES = {

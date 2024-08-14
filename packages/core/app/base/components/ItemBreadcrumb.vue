@@ -30,7 +30,7 @@ const links = [...(props.prepend || []), ...(props.customItems ?
             <Literal :term="typeof(item.label) == 'object' ? item.label : literal(item.label || item.segment || item.url)">
                 <template #text="{ text }">
                     <ItemLink variant="breadcrumb" :to="item.url">
-                        {{ props.nameSubstitutions ? props.nameSubstitutions?.[text] || text : text }}
+                        <div class="whitespace-nowrap max-w-[14rem] overflow-hidden text-ellipsis">{{ props.nameSubstitutions ? props.nameSubstitutions?.[text] || text : text }}</div>
                     </ItemLink>
                 </template>
             </Literal>

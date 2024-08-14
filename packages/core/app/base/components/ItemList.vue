@@ -29,12 +29,13 @@ const properties = list?.[0]?.properties;
           <b><Term :term="col.predicate" /></b>
         </template>
         <template #body="slotProps">
-          <Term 
-            v-for="(obj, idx) in slotProps.data.properties[col.predicate.value]?.objects"
-            :key="idx"
-            :term="obj"
-            variant="list"
-          />
+          <div v-for="(obj, idx) in slotProps.data.properties[col.predicate.value]?.objects"
+            :key="idx">
+            <Term 
+              :term="obj"
+              variant="list"
+            />
+          </div>
         </template>
       </Column>
     </DataTable>

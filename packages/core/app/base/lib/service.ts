@@ -84,7 +84,8 @@ export async function apiGet(url: string) {
     }
 
     // parse link headers for profiles
-    const profiles = r.headers.get("link") ? getProfilesFromHeaders(r.headers.get("link")!) : [];
+    const linkHeaders = r.headers.get("link") || r.headers.get("Link");
+    const profiles = linkHeaders ? getProfilesFromHeaders(linkHeaders) : [];
 
     const data = await r.text(); // always get turtle string
     return { data, profiles };

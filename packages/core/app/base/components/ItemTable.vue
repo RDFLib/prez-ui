@@ -41,7 +41,9 @@ const topConceptsUrl = isConceptScheme ? api.getBaseApiUrl() + getTopConceptsUrl
                     </slot>
                     <slot v-if="col.field == 'objects'" name="objects" :property="term.properties[predicate.value]">
 
-                        <Term v-for="(obj, index) of objects" :key="index" :term="obj" />
+                        <div v-for="(obj, index) of objects" :key="index" >
+                            <Term :term="obj" />
+                        </div>
 
                     </slot>
                 </template>                    

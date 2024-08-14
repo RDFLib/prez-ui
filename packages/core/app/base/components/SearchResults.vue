@@ -15,14 +15,21 @@ const results = props.results;
 
 <template>
   <div v-if="results.length">
-    <DataTable striped-rows :value="results.sort((a, b)=>b.weight - a.weight)" table-style="min-width: 50rem">
-      <Column header="Results">
+    <DataTable striped-rows :value="results.sort((a, b)=>b.weight - a.weight)">
+      <Column>
         <template #body="slotProps">
+          <Tag class="float-right" severity="info">
+            <div class="text-xs">
+              <Node :term="slotProps.data.predicate" variant="header" />
+            </div>
+          </Tag>
           <ItemLink :to="slotProps.data.resource">
             <b><Term :term="slotProps.data.resource" variant="header" /></b>
           </ItemLink>
           <!-- <Literal :term="slotProps.data.resource.description" /> -->
+           <div class="overflow-hidden text-ellipsis line-clamp-3">
             {{ slotProps.data.resource.description?.value }}
+          </div>
         </template>
       </Column>
       <!-- <Column header="Hash" field="hash">
