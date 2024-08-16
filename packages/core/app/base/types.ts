@@ -11,18 +11,6 @@ export interface PaginationProps extends PrezUIProps {
     maxPagesToSkip?: number;
 };
 
-export interface ItemLinkProps extends PrezUIProps {
-    variant?: 'default' | 'breadcrumb';
-    /** the link href to use, internal links may be controlled */
-    to?: string | PrezNode;
-    /** optional title tooltip to use */
-    title?: string;
-    /** target window */
-    target?: string;
-
-    rel?: string;
-};
-
 type loadingVariants = 'item' | 'list' | 'search' | 'concept';
 
 export interface DataProviderProps extends PrezUIProps {
@@ -50,10 +38,6 @@ export interface MessageProps extends PrezUIProps {
 export interface TermProps extends PrezUIProps {
     term: PrezTerm;
     variant?: 'item' | 'list' | 'item-header' | 'list-header' | 'header';
-};
-
-export interface LiteralProps extends TermProps {
-    term: PrezTerm;
 };
 
 export interface NodeProps extends TermProps {

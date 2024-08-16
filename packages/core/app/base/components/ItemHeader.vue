@@ -11,10 +11,10 @@ const term = props.term as PrezNode;
 <template>
     <div class="prezui-header">
         <div class="prezui-header-title">
-            <Node :term="term" variant="header" />
+            <Node :term="term" variant="item-header" />
         </div>
         <div v-if="term.description" class="text-base">
-            <Literal :term="term.description" variant="header" />
+            <Literal :term="term.description" variant="item-header" />
         </div>
     </div>
 </template>

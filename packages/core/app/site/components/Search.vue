@@ -92,7 +92,7 @@ onMounted(fetchData);
             </div>
             <div class="pt-4">
                 <Loading v-if="pending" variant="list" />
-                <div v-if="totalRecords == 0 && inSearchMode" class="w-full pl-4 text-sm text-gray-500">No results found</div>
+                <div v-if="!pending && totalRecords == 0 && inSearchMode" class="w-full pl-4 text-sm text-gray-500">No results found</div>
             </div>
 
         </div>
@@ -100,7 +100,7 @@ onMounted(fetchData);
         </div>
 
         <div class="flex justify-center mt-4 mb-12">
-            <div class="max-w-4xl">
+            <div class="max-w-4xl w-full">
                 <div v-if="data">
                     <div v-if="error"><Message severity="error">{{ error }}</Message></div>
                     <div v-if="data" :key="url">

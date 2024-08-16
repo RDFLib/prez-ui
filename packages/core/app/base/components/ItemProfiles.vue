@@ -10,7 +10,7 @@ const profileSelected = ref(props.profiles?.find(profile=>profile.current))
 </script>
 
 <template>
-    <div id="profile-nav">
+    <div id="profile-nav" class="ml-6 mt-4">
         <Panel>
             <template #header>
                 <div>
@@ -25,62 +25,30 @@ const profileSelected = ref(props.profiles?.find(profile=>profile.current))
                 <Skeleton class="mb-2" />
             </div>
 
-            <div v-else>
-                <SelectButton class="" v-model="profileSelected" :options="props.profiles" aria-labelledby="multiple" option-label="title">
-                    <template #option="{option}">
-                        <div class="text-xs">
-                            {{ option.title }}&nbsp;
-                            <i v-if="option.current" title="Currently viewing this profile" class="text-xs pi pi-circle-fill"></i>
-                            <ItemLink v-else :to="`?_profile=${option.token}`" title="Get profile representation">
-                                <i class="text-xs pi pi-circle hover:text-red-500"></i>
-                            </ItemLink>
-                        </div>
-                    </template>
-                </SelectButton>
-                <div class="pt-6" v-if="profileSelected">
-                    <div class="flex text-sm">
-                        <div class="flex-grow">Formats available for {{ profileSelected.title }}</div>
-                    </div>
-                    <div class="flex flex-row flex-wrap gap-1.5 text-xs pt-2">
-                        <div class="mediatypes" v-for="mediatype in profileSelected.mediatypes" :key="mediatype.mediatype">
-                            <Tag class="text-xs font-normal" severity="info">
-                            <ItemLink :to="`?_profile=${profileSelected.token}&_mediatype=${mediatype.mediatype}`" target="_blank" rel="noopener noreferrer">
-                                <span class="font-normal">{{ mediatype.title || mediatype.mediatype.replace(/^.*\//, '') }}</span>
-                            </ItemLink>
-                            </Tag>
-                        </div>
-                    </div>
-                    <div class="pt-6">
-                        <div v-if="profileSelected.current" class="text-sm">Viewing this profile</div>
-                        <div v-else class="text-sm">
-                            <ItemLink :to="`?_profile=${profileSelected.token}`" title="Get profile representation">
-                                Switch to this profile<i class="text-xs pi pi-angle-right" />
-                            </ItemLink>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- <Accordion multiple :value="profileItems">
-                <AccordionPanel :value="pidx" v-for="(profile, pidx) in props.profiles" :key="profile.token" class="profile">
-                    <AccordionHeader>
+            <div v-else-if="props.profiles">
+
+                <div v-for="profile in props.profiles.sort((a, b) => a.title.localeCompare(b.title))" :key="profile.token" class="mb-4">
+                    <component :is="profile.current ? 'fieldset' : 'div'" :class="profile.current ? 'border rounded pt-2 px-4 pb-4' : 'border-t border-gray-200 pt-2'">
+                        <legend v-if="profile.current" class="text-xs text-bold text-right text-blue-500">currently viewing</legend>
                         <div :class="profile.current ? 'text-bold' : ''">
-                            <ItemLink :to="`?_profile=${profile.token}`" title="Get profile representation">{{ profile.title }}</ItemLink>
-                            <ItemLink :to="`/profiles/${profile.token}`" title="Go to profile page"><Button size="small" text icon="pi pi-file" /></ItemLink>                        
+                            <ItemLink :to="`?_profile=${profile.token}`" title="Get profile representation" variant="item-profiles"><span class="text-sm">{{ profile.title }}</span></ItemLink>
+                            <span class="ml-3">
+                                <ItemLink :to="`/profiles/${profile.token}`" variant="item-profiles" title="Go to profile page"><i class="text-xs pi pi-file" /></ItemLink>  
+                            </span>
                         </div>
-                    </AccordionHeader>
-                    <AccordionContent>
-                        <div class="flex flex-row flex-wrap gap-1.5 text-xs">
+                        <div class="mt-2 flex flex-row flex-wrap gap-1.5 text-xs">
                             <div class="mediatypes" v-for="mediatype in profile.mediatypes" :key="mediatype.mediatype">
                                 <Tag class="text-xs font-normal">
-                                <ItemLink :to="`?_profile=${profile.token}&_mediatype=${mediatype.mediatype}`" target="_blank" rel="noopener noreferrer">
+                                <ItemLink :to="`?_profile=${profile.token}&_mediatype=${mediatype.mediatype}`" variant="item-profiles" target="_blank" rel="noopener noreferrer">
                                     <span class="font-normal">{{ mediatype.title || mediatype.mediatype.replace(/^.*\//, '') }}</span>
                                 </ItemLink>
                                 </Tag>
                             </div>
                         </div>
-                    </AccordionContent>
-                </AccordionPanel>
-            </Accordion> -->
+                    </component>
+                </div>
+
+            </div>
         </Panel>
     </div>
 </template>

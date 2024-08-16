@@ -41,6 +41,7 @@ export default defineNuxtConfig({
   },
   css: [
     'primeicons/primeicons.css',
+    resolve('./app/base/assets/css/main.css')
   ],
 
   nitro: {

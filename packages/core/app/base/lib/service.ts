@@ -83,6 +83,7 @@ export async function apiGet(url: string) {
         throw new NetworkError(`Network error - status code ${r.status}: ${r.statusText}`);
     }
 
+    console.log("HEADERS", r.headers)
     // parse link headers for profiles
     const linkHeaders = r.headers.get("link") || r.headers.get("Link");
     const profiles = linkHeaders ? getProfilesFromHeaders(linkHeaders) : [];

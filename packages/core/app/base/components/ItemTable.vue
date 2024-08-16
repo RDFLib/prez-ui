@@ -32,17 +32,17 @@ const topConceptsUrl = isConceptScheme ? api.getBaseApiUrl() + getTopConceptsUrl
             <!-- <template #body="slotProps">
                 <slot name="widget-row" :property="term.properties[slotProps.data]" />
             </template> -->
-            <Column 
+            <Column
                 v-for="col of [{field: 'predicate', header: 'Predicate', style: 'width: 1%;white-space:nowrap;'}, {field: 'objects', header: 'Objects', style: ''}]"
                 :key="col.field" body="" :style="col.style" v-bind="col" >
                 <template #body="{ data: {predicate, objects} }">
                     <slot v-if="col.field == 'predicate'" name="predicate" :property="term.properties[predicate.value]">
-                        <Node :term="predicate" />
+                        <Node :term="predicate" variant="item-table" />
                     </slot>
                     <slot v-if="col.field == 'objects'" name="objects" :property="term.properties[predicate.value]">
 
                         <div v-for="(obj, index) of objects" :key="index" >
-                            <Term :term="obj" />
+                            <Term :term="obj" variant="item-table" />
                         </div>
 
                     </slot>

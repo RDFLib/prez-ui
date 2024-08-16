@@ -17,7 +17,7 @@ const properties = list?.[0]?.properties;
           <b>Item</b>
         </template>
         <template #body="slotProps">
-          <Node :term="slotProps.data" variant="list-header" />
+          <Node :term="slotProps.data" variant="item-list" />
         </template>
       </Column>
       <Column
@@ -33,7 +33,7 @@ const properties = list?.[0]?.properties;
             :key="idx">
             <Term 
               :term="obj"
-              variant="list"
+              variant="item-list"
             />
           </div>
         </template>

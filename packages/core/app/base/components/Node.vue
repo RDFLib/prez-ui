@@ -1,8 +1,36 @@
 <script lang="ts" setup>
-import type { NodeProps } from '../types';
 import type { PrezNode } from '@/base/lib';
 
-const props = defineProps<NodeProps>();
+interface Props {
+    term: PrezNode;
+    hideTooltip?: boolean;
+    hideLink?: boolean;
+    useExternalLinkOnly?: boolean;
+    textOnly?: boolean;
+    variant?: 'item-table' | 'item-list' | 'item-header' | 'search-results' | 'item-profiles';
+}
+
+const props = defineProps<Props>();
+
+let hideTooltip = props.hideTooltip || false;
+let textOnly = props.textOnly || false;
+let hideLink = props.hideLink || false;
+let useExternalLinkOnly = props.useExternalLinkOnly || false;
+
+switch(props.variant) {
+    case 'item-table':
+        break;
+    case 'item-list':
+        //useExternalLinkOnly = true;
+        break;
+    case 'item-header':
+        hideLink = true;
+        break;
+    case 'search-results':
+        break;
+    default:
+        break;
+}
 
 const term = props.term as PrezNode;
 
@@ -24,14 +52,14 @@ if(tooltip == label) {
 
 </script>
 <template>
-    <slot name="wrapper" :term="term" :link="term.value" :label="label" :tooltip="tooltip">
-        <ItemLink v-if="variant != 'header'" :to="variant == 'list-header' ? term : term.value" :title="tooltip">
+    <slot name="wrapper" :term="term" :link="term.value" :label="label" :tooltip="tooltip" :variant="variant">
+        <slot v-if="textOnly || hideLink" :term="term" :link="term.value" :label="label" :tooltip="tooltip">
+                {{ label }}
+        </slot>
+        <ItemLink v-else :to="useExternalLinkOnly ? term.value : term" :title="hideTooltip ? undefined : tooltip" :variant="variant">
             <slot :term="term" :link="term.value" :label="label" :tooltip="tooltip">
                 {{ label }}
             </slot>
         </ItemLink>
-        <slot v-else :term="term" :link="term.value" :label="label" :tooltip="tooltip">
-                {{ label }}
-        </slot>
     </slot>
 </template>

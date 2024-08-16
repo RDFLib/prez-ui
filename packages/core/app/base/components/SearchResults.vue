@@ -20,16 +20,20 @@ const results = props.results;
         <template #body="slotProps">
           <Tag class="float-right" severity="info">
             <div class="text-xs">
-              <Node :term="slotProps.data.predicate" variant="header" />
+              <Node :term="slotProps.data.predicate" variant="search-results" />
             </div>
           </Tag>
-          <ItemLink :to="slotProps.data.resource">
-            <b><Term :term="slotProps.data.resource" variant="header" /></b>
-          </ItemLink>
-          <!-- <Literal :term="slotProps.data.resource.description" /> -->
-           <div class="overflow-hidden text-ellipsis line-clamp-3">
-            {{ slotProps.data.resource.description?.value }}
+          <b><Term :term="slotProps.data.resource" variant="search-results" /></b>
+          <!-- <ItemLink :to="slotProps.data.resource" variant="search-results">
+          </ItemLink> -->
+          <div v-if="slotProps.data.resource.description">
+            <Literal class="overflow-hidden text-ellipsis line-clamp-3" 
+              hide-language 
+              :term="slotProps.data.resource.description" />
           </div>
+           <!-- <div class="overflow-hidden text-ellipsis line-clamp-3">
+            {{ slotProps.data.resource.description?.value }}
+          </div> -->
         </template>
       </Column>
       <!-- <Column header="Hash" field="hash">

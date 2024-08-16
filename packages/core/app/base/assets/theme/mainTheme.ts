@@ -1,7 +1,7 @@
 import { definePreset } from '@primevue/themes';
 import Aura from '@primevue/themes/aura';
 import { usePassThrough } from 'primevue/passthrough';
-import '@/base/assets/css/main.css';
+//import '@/base/assets/css/main.css';
 
 export default {
     preset: Aura,
