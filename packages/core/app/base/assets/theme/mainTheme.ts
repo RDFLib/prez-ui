@@ -1,32 +1,41 @@
 import { definePreset } from '@primevue/themes';
 import Aura from '@primevue/themes/aura';
-import { usePassThrough } from 'primevue/passthrough';
-//import '@/base/assets/css/main.css';
+
+// export default {
+//     preset: Aura,
+//     options: {
+//         darkModeSelector: '.p-dark'
+//     }
+// };
+
+const MyPreset = definePreset(Aura, {
+    semantic: {
+        primary: {
+            0: '#ffffff',
+            50: '#f8fafc',
+            100: '#f1f5f9',
+            200: '#e2e8f0',
+            300: '#cbd5e1',
+            400: '#94a3b8',
+            500: '#64748b',
+            600: '#475569',
+            700: '#334155',
+            800: '#1e293b',
+            900: '#0f172a',
+            950: '#020617'
+        }
+    }
+});
 
 export default {
-    preset: Aura,
+    preset: MyPreset,
     options: {
         darkModeSelector: '.p-dark'
     }
 };
 
-// const MyPreset = definePreset(Aura, {
-//     semantic: {
-//         primary: {
-//             50: '{indigo.50}',
-//             100: '{indigo.100}',
-//             200: '{indigo.200}',
-//             300: '{indigo.300}',
-//             400: '{indigo.400}',
-//             500: '{indigo.500}',
-//             600: '{indigo.600}',
-//             700: '{indigo.700}',
-//             800: '{indigo.800}',
-//             900: '{indigo.900}',
-//             950: '{indigo.950}'
-//         }
-//     }
-// });
+//import { usePassThrough } from 'primevue/passthrough';
+//import '@/base/assets/css/base.css';
 
 // const CustomPreset = usePassThrough(
 //     MyPreset,

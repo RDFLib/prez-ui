@@ -40,8 +40,7 @@ export default defineNuxtConfig({
     importTheme: {from: resolve('./app/base/assets/theme/mainTheme.ts')},
   },
   css: [
-    'primeicons/primeicons.css',
-    resolve('./app/base/assets/css/main.css')
+    'primeicons/primeicons.css'
   ],
 
   nitro: {
