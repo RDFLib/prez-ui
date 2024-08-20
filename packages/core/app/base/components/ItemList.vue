@@ -1,7 +1,13 @@
 <script lang="ts" setup>
 import { defineProps } from 'vue';
 import type { ItemListProps } from '../types';
-const props = defineProps<ItemListProps>();
+import type { PrezFocusNode } from '../lib';
+
+interface Props {
+  list: PrezFocusNode[];
+}
+
+const props = defineProps<Props>();
 
 const list = props.list;
 const properties = list?.[0]?.properties;

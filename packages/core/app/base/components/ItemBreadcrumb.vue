@@ -23,15 +23,20 @@ const links = [...(props.prepend || []), ...(props.customItems ?
     props.customItems.map(item=>({...item, label: typeof(item.label) == 'string' ? literal(item.label) : item.label}))
     : parents || [])];
 
+const textClassLast = 'whitespace-nowrap overflow-hidden text-ellipsis block';
+const textClass = textClassLast + ' max-w-[14rem]';
+const lastUrl = links[links.length - 1]?.url;
+
 </script>
 <template>
     <Breadcrumb v-if="links" :model="links as MenuItem[]" style="background-color: transparent;padding-left: 0;">
         <template #item="{ item }">
             <Literal :term="typeof(item.label) == 'object' ? item.label : literal(item.label || item.segment || item.url)">
                 <template #text="{ text }">
-                    <ItemLink variant="breadcrumb" :to="item.url">
-                        <div class="whitespace-nowrap max-w-[14rem] overflow-hidden text-ellipsis">{{ props.nameSubstitutions ? props.nameSubstitutions?.[text] || text : text }}</div>
+                    <ItemLink v-if="item.url != lastUrl" :to="item.url" :class="textClass">
+                        {{ props.nameSubstitutions ? props.nameSubstitutions?.[text] || text : text }}
                     </ItemLink>
+                    <span v-else :class="textClassLast">{{ props.nameSubstitutions ? props.nameSubstitutions?.[text] || text : text }}</span>
                 </template>
             </Literal>
         </template>

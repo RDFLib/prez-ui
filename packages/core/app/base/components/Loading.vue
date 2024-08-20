@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 import Skeleton from 'primevue/skeleton';
 import ProgressSpinner from 'primevue/progressspinner';
-import type { LoadingProps } from '../types';
-const props = defineProps<LoadingProps>();
+interface Props {
+    variant?: 'item' | 'list' | 'search' | 'concept';
+}
+
+const props = defineProps<Props>();
 </script>
 <template>
     <div v-if="props.variant == 'list'">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref, onMounted, defineProps, watch, provide } from 'vue';
+import { ref, onMounted, defineProps, watch } from 'vue';
 import type { PrezNode, PrezData, PrezFocusNode, PrezConceptNode } from "@/base/lib";
 import { getItem, getList, search, getBaseUrl } from "@/base/lib";
 import type { DataProviderProps } from '../types';
@@ -9,25 +9,19 @@ const props = defineProps<DataProviderProps>();
 
 const data = ref<PrezData>();
 const loading = ref(false);
+const hasMore = ref(false);
 const error = ref<Error>();
 const properties = ref<PrezNode[]>([]);
-const rawData = ref('');
 const url = ref(props.url || (props.baseUrl! + props.urlPath));
-const baseUrl = props.baseUrl || getBaseUrl(url.value);
+const baseUrl = ref(props.baseUrl || getBaseUrl(url.value));
+const path = ref(props.urlPath ? props.urlPath : url.value.startsWith(baseUrl.value) ? url.value.substring(baseUrl.value.length) : url.value);
 
 const loadingVariant = props.loadingVariant || props.type;
-
-provide('data', data);
-provide('loading', loading);
-provide('error', error);
-provide('url', url);
-provide('baseUrl', baseUrl);
 
 const fetchData = async () => {
 
     error.value = undefined;
     loading.value = false;
-    data.value = undefined;
     properties.value = [];
 
     // Function to simulate a minimum loading time
@@ -35,7 +29,7 @@ const fetchData = async () => {
         return new Promise(resolve => setTimeout(resolve, 200));
     };
 
-    if(!props.url) {
+    if(!url.value) {
         error.value = new Error('No data URL provided')
         return
     }
@@ -43,24 +37,35 @@ const fetchData = async () => {
     loading.value = true;
     try {
 //        console.log("FETCHING ", props.type)
-        const func = props.type == 'list' ? getList(props.url)
-            : props.type == 'item' ? getItem(props.url)
-            : props.type == 'search' ? search(props.url)
+        const func = props.type == 'list' ? getList(baseUrl.value, path.value)
+            : props.type == 'item' ? getItem(baseUrl.value, path.value)
+            : props.type == 'search' ? search(baseUrl.value, path.value)
             : undefined;
 
         if(!func) throw new Error(`Unknown type "${props.type}"`)
+console.log("FETCHING ", props.type, props.url)
+        const response = await func;
 
-        // Simulate an async data fetch (e.g., an API call)
-        const asyncRequest = async () => {
-            const response = await func;
-            return await response;
-        };    
+        if (props.type === 'list' && Array.isArray(response.data) && (data.value === undefined || Array.isArray(data.value.data))) {
+            // Accumulate the data
+            if(data.value === undefined) {
+                data.value = response;
+            } else {
+                if(Array.isArray(data.value.data)) {
+                    const arr = [...data.value.data];
+                    arr.push(...response.data);
+                    data.value.data = arr as PrezFocusNode[];
+                } else {
+                    data.value = response;
+                }
+            }
 
-        // Wait for both the async request and the minimum loading time
-        data.value = await Promise.all([asyncRequest(), minimumLoadingTime()]).then(
-            ([result]) => result
-        );
-        rawData.value = JSON.stringify(data.value);
+        } else {
+            data.value = response;
+        }
+        hasMore.value = Array.isArray(response.data) && response.data.length > 0;
+
+//        rawData.value = JSON.stringify(data.value);
 
         //properties.value = getProperties();
     } catch (err) {
@@ -73,9 +78,9 @@ const fetchData = async () => {
 
 // Watch the `url` prop for changes and refetch data accordingly
 watch(
-    () => props.url,
-    async (newUrl?:string, oldUrl?:string) => {
-        if (newUrl !== oldUrl) {
+    [() => props.url, () => props.baseUrl, () => props.urlPath],
+    async ([newUrl, newBaseUrl, newUrlPath], [oldUrl, oldBaseUrl, oldUrlPath]) => {
+        if (newUrl !== oldUrl || newBaseUrl !== oldBaseUrl || newUrlPath !== oldUrlPath) {
             await fetchData();
         }
     },
@@ -83,10 +88,12 @@ watch(
 );
 
 onMounted(async () => {
-    await fetchData();
+    data.value = undefined;
+    //await fetchData();
 });
 </script>
 <template>
+    {{ url }} - {{ path }}
     <template v-if="loading">
         <slot name="loading">
             <Loading :variant="loadingVariant"/>
@@ -102,6 +109,7 @@ onMounted(async () => {
             :data="data" 
             :item="data.data as PrezFocusNode"
             :list="data.data as PrezFocusNode[]"
+            :has-more="hasMore"
             :concepts="data.data as PrezConceptNode[]"
             :parents="data.parents"
             :properties="properties"

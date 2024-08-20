@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{sidepanel?: boolean, contentonly?: boolean}>()
-const appConfig = useAppConfig().prez;
+const appConfig = useAppConfig();
 const menu = appConfig.menu;
 </script>
 <template>
@@ -33,7 +33,7 @@ const menu = appConfig.menu;
             <div class="bg-gray-100">
                 <div class="container px-4 py-4 mx-auto">
                     <slot name="breadcrumb" />
-                    <div class="text-2xl pb-7">
+                    <div class="text-3xl pb-7">
                         <slot name="header-text" />
                     </div>
                 </div>

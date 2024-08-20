@@ -1,94 +1,63 @@
 <script lang="ts" setup>
-import { getList } from "@/base/lib";
-import type { PrezDataList } from "@/base/lib";
-import type { PageState } from "primevue/paginator";
+const appConfig = useAppConfig();
+const runtimeConfig = useRuntimeConfig();
+const route = useRoute();
 
+const { getPageUrl, navigateToPage, pagination } = usePageInfo();
 
-const appConfig = useAppConfig().prez;
-const router = useRouter();
-const api = useApi();
-const pending = ref(false);
-const error = ref<Error>();
-const data = ref<PrezDataList>();
-const lastParent = ref('');
-const per_page = ref(10);
-const page = ref(1);
-const first = ref(1);
-const totalRecords = ref(0);
-const url = ref('');
+const urlPath = ref(getPageUrl());
+const { status, error, data } = await useGetList(runtimeConfig.public.prezApiEndpoint, urlPath);
 
-async function fetchData() {
-    error.value = undefined;
-    pending.value = true;
-    data.value = undefined;
-    try {
-        per_page.value = parseInt((router.currentRoute.value.query.per_page || appConfig.pagination.itemsPerPage || 10).toString());
-        page.value = parseInt(router.currentRoute.value.query.page as string || '1');
-        first.value = (page.value - 1) * per_page.value + 1;
-        url.value = api.getRelativeApiUrlWithQueryParams({per_page: per_page.value, page: page.value});
-        data.value = await getList(url.value);
-        totalRecords.value = data.value.count;
-        if(data.value.parents?.length > 0) {
-            lastParent.value = data.value.parents[data.value.parents.length-1]!.segment;
-        } else {
-            lastParent.value = '';
-        }
-    } catch (ex) {
-        totalRecords.value = 0;
-        error.value = new Error((ex as Error).message);
-    } finally {
-        pending.value = false;
-    }
-}
-
-async function navigate(e: PageState) {
-    page.value = e.page + 1;
-    const queryParams = router.currentRoute.value.query;
-    router.push({ query: { ...queryParams, page: page.value } });
-}
-
-watch(() => router.currentRoute.value.query.page, async (newPage) => {
-    await fetchData();
+const header = computed(()=>{
+    const lastParent = data.value && data.value.parents?.length > 0
+        ? data.value.parents[data.value.parents.length - 1]!.segment : false;
+    return lastParent ? appConfig.nameSubstitutions?.[lastParent] || lastParent : '';
 });
 
-onMounted(fetchData);
+// when a new page is navigated to
+watch(()=>route.fullPath, () => {
+    urlPath.value = getPageUrl();
+});
+
 </script>
 
 <template>
     <NuxtLayout sidepanel>
         <template #header-text>
-            {{ appConfig.nameSubstitutions?.[lastParent] || lastParent || '&nbsp;' }}
+            {{ header }}
         </template>
-        <template #breadcrumb >
-            <ItemBreadcrumb v-if="data" :prepend="appConfig.breadcrumbPrepend || []" :name-substitutions="appConfig.nameSubstitutions" :parents="data.parents" />
+        <template #breadcrumb>
+            <ItemBreadcrumb :key="data?.data?.length" v-if="data" :prepend="appConfig.breadcrumbPrepend || []" :name-substitutions="appConfig.nameSubstitutions" :parents="data.parents" />
             <ItemBreadcrumb v-else-if="error" :custom-items="[{url: '/', label: 'Unable to load page'}]" />
             <ItemBreadcrumb v-else :prepend="appConfig.breadcrumbPrepend" :custom-items="[{url: '#', label: '...'}]" />
         </template>
         <template #default>
-            <div :key="url">
+            <div>
                 <div v-if="error"><Message severity="error">{{ error }}</Message></div>
-                <div v-if="data" :key="url">
-                    <ItemList :list="data.data" />
+                <Loading v-if="status == 'pending'" />
+                <div v-else-if="data?.data">
+                    <ItemList :list="data.data" :key="urlPath" />
                     <div class="pt-4">
                         <Paginator
-                            v-if="totalRecords > per_page"
-                            :first="first" 
-                            :rows="per_page" 
-                            :page="page" 
-                            :totalRecords="totalRecords" 
-                            @page="navigate" 
+                            v-if="data.count > pagination.per_page!"
+                            :first="pagination.first" 
+                            :rows="pagination.per_page" 
+                            :page="pagination.page" 
+                            :totalRecords="data.count" 
+                            @page="navigateToPage" 
                         >
                         </Paginator>
-                        <div v-if="totalRecords > 0" class="text-sm text-gray-500 text-center">
-                            Showing {{ first }} to {{ Math.min(first + per_page - 1, totalRecords) }} of {{ totalRecords }}{{ data.maxReached ? '+' : '' }} items
+                        <div v-if="data.count > 0" class="text-sm text-gray-500 text-center">
+                            Showing {{ pagination.first }} to 
+                                {{ Math.min(pagination.first! + pagination.per_page! - 1, data.count) }} of 
+                                {{ data.count }}{{ data.maxReached ? '+' : '' }} items
                         </div>
                     </div>
                 </div>
-                <Loading v-else-if="pending" />
             </div>
         </template>
         <template #sidepanel>
-            <ItemProfiles v-if="pending" loading />
+            <ItemProfiles v-if="status == 'pending'" loading />
             <ItemProfiles v-else-if="data" :profiles="data.profiles" />
         </template>
     </NuxtLayout>

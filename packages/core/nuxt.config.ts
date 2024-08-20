@@ -27,7 +27,7 @@ export default defineNuxtConfig({
     ...(process.env.PREZ_CORE_EXTENDS ? process.env.PREZ_CORE_EXTENDS.split(",") : []),
     'app/base',
     'app/site',
-    'app/tools',
+    'app/tools'
   ],
 
   compatibilityDate: '2024-04-03',

@@ -11,6 +11,8 @@ const props = defineProps<Props>();
 </script>
 <template>
     <slot>
-        <Node :term="props.predicate" variant="item-table" />
+        <div v-for="(obj, index) of props.objects" :key="index" >
+            <Term :term="obj" variant="item-table" />
+        </div>
     </slot>
 </template>

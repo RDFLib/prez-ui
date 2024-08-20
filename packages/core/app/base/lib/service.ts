@@ -27,8 +27,8 @@ class NetworkError extends Error {
  */
 function getProfilesFromHeaders(linkHeader: string): PrezProfileHeader[] {
     let profileObj: {[uri: string]: PrezProfileHeader} = {} ;
-    const links = linkHeader.split(", ").map(l => {
-        const [, uri, attrs] = l.match(/<(.+)>; (.+)/) as [string, string, string];
+    const links = linkHeader.split(",").map(l => {
+        const [, uri, attrs] = l.trim().match(/<(.+)>; (.+)/) as [string, string, string];
         const linkObj = { uri } as LinkObject;
         attrs.split("; ").forEach(attr => {
             const [, lhs, rhs] = attr.match(/(.+)=[\"<](.+)[\">]/) as [string, keyof Omit<LinkObject, "uri">, string];
@@ -50,7 +50,9 @@ function getProfilesFromHeaders(linkHeader: string): PrezProfileHeader[] {
 
     // find current - either use rel="self" or rel="profile"
     const currentProfile = links.find(l => l.rel === "self")!;
-    profileObj[currentProfile!.profile]!.current = true;
+    if(currentProfile!.profile in profileObj) {
+        profileObj[currentProfile!.profile]!.current = true;
+    }
 
     // find default - no way to get default for now - use rel="canonical" according to https://www.w3.org/TR/dx-prof-conneg/#http-listprofiles ?
     // const defaultProfile = links.find(l => l.rel === "self")!;
@@ -83,7 +85,6 @@ export async function apiGet(url: string) {
         throw new NetworkError(`Network error - status code ${r.status}: ${r.statusText}`);
     }
 
-    console.log("HEADERS", r.headers)
     // parse link headers for profiles
     const linkHeaders = r.headers.get("link") || r.headers.get("Link");
     const profiles = linkHeaders ? getProfilesFromHeaders(linkHeaders) : [];
@@ -98,14 +99,16 @@ export async function apiGet(url: string) {
  * @param url 
  * @returns the list of item objects
  */
-export async function getList(url: string): Promise<PrezDataList> {
+export async function getList(baseUrl:string, path: string): Promise<PrezDataList> {
+    const url = baseUrl + path;
+    const pathOnly = new URL(url).pathname
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
+    store.setBaseUrl(baseUrl);
     store.load(data);
-    const path = getUrlPath(url);
     return { type: 'list', data: store.getList(), profiles, 
         maxReached: store.getMaxReached(), count: store.getCount(), 
-        parents: store.getParents(path) 
+        parents: store.getParents(pathOnly) 
     };
 }
 
@@ -117,12 +120,14 @@ export async function getList(url: string): Promise<PrezDataList> {
  * @param id the prez:identifier of the object to get
  * @returns the item object
  */
-export async function getItem(url: string): Promise<PrezDataItem> {
+export async function getItem(baseUrl: string, path: string): Promise<PrezDataItem> {
+    const url = baseUrl + path;
+    const pathOnly = new URL(url).pathname
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
+    store.setBaseUrl(baseUrl);
     store.load(data);
-    const path = getUrlPath(url);
-    return { type: 'item', data: store.getItem(), profiles, parents: store.getParents(path) };
+    return { type: 'item', data: store.getItem(), profiles, parents: store.getParents(pathOnly) };
 }
 
 /**
@@ -131,14 +136,16 @@ export async function getItem(url: string): Promise<PrezDataItem> {
  * @param url 
  * @returns 
  */
-export async function search(url: string): Promise<PrezDataSearch> {
+export async function search(baseUrl: string, path: string): Promise<PrezDataSearch> {
+    const url = baseUrl + path;
+    const pathOnly = new URL(url).pathname
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
+    store.setBaseUrl(baseUrl);
     store.load(data);
-    const path = getUrlPath(url);
     return { 
         type: 'search', data: store.search(), profiles, 
         maxReached: store.getMaxReached(), count: store.getCount(), 
-        parents: store.getParents(path) 
+        parents: store.getParents(pathOnly) 
     };
 }

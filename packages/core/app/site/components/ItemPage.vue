@@ -1,52 +1,70 @@
 <script lang="ts" setup>
-import { getItem } from "@/base/lib";
-import type { PrezDataItem } from "@/base/lib";
-const appConfig = useAppConfig().prez;
-const api = useApi();
-const url = api.getRelativeApiUrl();
-const baseUrl = api.getBaseApiUrl();
-const pending = ref(false);
-const error = ref<Error>();
-const data = ref<PrezDataItem>();
+import { getTopConceptsUrl, SYSTEM_PREDICATES } from '~/base/lib';
 
-onMounted(async ()=>{
-    error.value = undefined;
-    pending.value = true;
-    try {
-        data.value = await getItem(url);
-    } catch (ex) {
-        error.value = new Error((ex as Error).message)
-    } finally {
-        pending.value = false;
-    }
+const appConfig = useAppConfig();
+const runtimeConfig = useRuntimeConfig();
+const router = useRouter();
+const { getPageUrl } = usePageInfo();
+const urlPath = ref(getPageUrl());
+const { status, error, data } = useGetItem(runtimeConfig.public.prezApiEndpoint, urlPath);
+const isConceptScheme = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.skosConceptScheme));
+const topConceptsUrl = computed(()=>isConceptScheme ? getTopConceptsUrl(data.value!.data) : '');
 
-})
-//const { pending, data: PrezFocusNode, error } = useAsyncData<PrezFocusNode>('item', async()=>await getItem(url))
 </script>
 <template>
     <NuxtLayout sidepanel>
+
         <template #header-text>
-            <ItemHeader v-if="data?.data" :term="data.data" />
+            <Node v-if="data" :term="data.data" variant="item-header" />
             <div v-else>&nbsp;</div>
         </template>
+
         <template #breadcrumb >
             <ItemBreadcrumb v-if="data" :prepend="appConfig.breadcrumbPrepend" :name-substitutions="appConfig.nameSubstitutions" :parents="data.parents" />
             <ItemBreadcrumb v-else-if="error" :custom-items="[{url: '/', label: 'Unable to load page'}]" />
             <ItemBreadcrumb v-else :prepend="appConfig.breadcrumbPrepend" :custom-items="[{url: '#', label: '...'}]" />
         </template>
+
         <template #default>
             <div v-if="error">
                 <Message severity="error">{{ error }}</Message>
             </div>
-            <div v-if="data">
-                <ItemTable :base-url="baseUrl" :term="data.data" />
-                <div class="mb-12"></div>
+            <div v-if="data?.data">
+                <div v-if="data.data.description" class="mt-4 mb-4">
+                    <Literal :term="data.data.description" hide-language />
+                </div>
+                <div class="mb-2 mt-2">
+                    <Badge class="mr-2">IRI</Badge> <ItemLink :secondary-to="data.data.value" copy-link>{{ data.data.value }}</ItemLink>
+                </div>
+                <div class="flex" v-if="data?.data.rdfTypes">
+                    <Badge class="mr-2">Type</Badge>
+                    <div>
+                        <div class="ml-2 mr-2" v-for="rdfType in data.data.rdfTypes" ><Node :term="rdfType" /></div>
+                    </div>
+                </div>
+                <div class="mt-2 mb-12">
+                    <ItemTable :term="data.data" />
+                    <p class="mt-6" v-if="data.data.members">
+                        <Button size="small" color="secondary" label="Members" @click="()=>router.push(data!.data.members!.value)" />
+                    </p>
+                    <div class="mt-6" v-if="isConceptScheme && topConceptsUrl != ''">
+                        <p><b>Concepts</b></p>
+                        <div class="mt-4">
+                            <ConceptTree
+                                :base-url="runtimeConfig.public.prezApiEndpoint" 
+                                :url-path="topConceptsUrl"
+                            />
+                        </div>
+                    </div>
+
+                </div>
             </div>
-            <Loading v-if="pending" />
+            <Loading v-if="status == 'pending'" />
         </template>
+
         <template #sidepanel>
-            <ItemProfiles v-if="pending" loading />
-            <ItemProfiles v-else-if="data" :profiles="data.profiles" />
+            <ItemProfiles :loading="status == 'pending'" :profiles="data?.profiles" />
         </template>
+
     </NuxtLayout>
 </template>

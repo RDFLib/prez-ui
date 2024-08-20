@@ -13,9 +13,13 @@ export class RDFStore {
     public store: Store; // N3
     private parser: Parser; // N3
     public prefixes: { [namespace: string]: string };
+    private basePath: string;
+    private baseUrl: string;
 
     constructor() {
         this.store = new Store();
+        this.baseUrl = '';
+        this.basePath = '';
         this.parser = new Parser();
         this.prefixes = DEFAULT_PREFIXES;
     }
@@ -34,6 +38,16 @@ export class RDFStore {
             this.prefixes[prefixName] = prefixNode.value;
         });
         this.store.addQuads(p);
+    }
+
+    /**
+     * getParents uses the base path to remove the base path from the parent URL (for breadcrumbs)
+     * 
+     * @param url
+     */
+    public setBaseUrl(url: string) {
+        this.baseUrl = url;
+        this.basePath = new URL(url).pathname;
     }
 
     /**
@@ -123,6 +137,10 @@ export class RDFStore {
     }
 
     public getParents(link: string) {
+        // remove the base path from the link, if the prez API has a base path, e.g. /api/v1
+        if(link.startsWith(this.basePath)) {
+            link = link.substring(this.basePath.length);
+        }
         const linkParts = link.split('/');
         const parents:PrezLinkParent[] = [];
         let current = '';

@@ -14,6 +14,8 @@ interface Props {
     /** rel attribute */
     rel?: string;
 
+    class?: string;
+    copyLink?: boolean | string;
     hidePrimaryLink?: boolean;
     hideSecondaryLink?: boolean;
     hideUnderline?: boolean;
@@ -50,8 +52,6 @@ switch(props.variant) {
         break;
 }
 
-console.log("PROPS", props)
-
 /* the primary link is either the prez internal link, or the provided to string */
 const url = typeof(props.to) == 'string' ? props.to : props.to?.links ? props.to?.links[0]?.value : undefined;
 
@@ -78,8 +78,8 @@ const navigateToLink = (event: MouseEvent, path: string) => {
     if (path.startsWith('/')) {
         event.preventDefault();
         try {
-            const navigate = useNavigate();
-            navigate.to(path);
+            const router = useRouter();
+            router.push(path);
         } catch (ex) {
             console.error(ex);
         }
@@ -96,8 +96,10 @@ const navigateToLink = (event: MouseEvent, path: string) => {
 //     target: props.target,
 //     rel: props.rel, class: 'inline-flex items-center hover:underline'} : {}};
 
-const linkClass = 'border-b-[2px] hover:no-underline hover:border-orange-500 ' + 
+const defaultClasses = 'border-b-[2px] hover:no-underline hover:border-orange-500 ' + 
     (hideUnderline ? 'border-transparent' : 'border-gray-300 border-dashed hover:border-solid');
+
+const linkClass = props.class ? defaultClasses + ' ' + props.class : defaultClasses;
 
 </script>
 
@@ -109,7 +111,7 @@ const linkClass = 'border-b-[2px] hover:no-underline hover:border-orange-500 ' +
                 :class="linkClass"
                 :href="url" :title="hideTitle ? undefined : props.title" 
                 :target="isExtLink ? props.target : undefined" :rel="isExtLink ? props.rel : undefined"
-                @click="(e)=>navigateToLink(e, url!)">
+                @click="(e:Event)=>navigateToLink(e, url!)">
                 <slot />
             </a>
             <span v-else class="border-b-[2px] border-transparent">
@@ -118,13 +120,14 @@ const linkClass = 'border-b-[2px] hover:no-underline hover:border-orange-500 ' +
             <a v-if="secondaryUrl && !hideSecondaryLink"
                 :href="secondaryUrl" :title="hideTitle ? undefined : props.title"
                 :target="isSecondaryExtLink ? props.target : undefined" :rel="isSecondaryExtLink ? props.rel : undefined"
-                class="border-b-[2px] hover:no-underline border-transparent hover:border-orange-500"
-                @click="(e)=>navigateToLink(e, secondaryUrl)">
+                :class="linkClass"
+                @click="(e:Event)=>navigateToLink(e, secondaryUrl)">
 
                 <i v-if="isSecondaryExtLink" class="pi pi-external-link ml-1 text-xs" />
                 <!-- unlikely scenario, but we if our secondary link points interal show an arrow not window out -->
                 <i v-else class="pi pi-angle-right ml-1 text-xs" />
             </a>
+            <CopyButton v-if="props.copyLink" icon-only :value="typeof(copyLink) == 'string' ? copyLink : url || secondaryUrl" />
         </span>
     </slot>
 </template>

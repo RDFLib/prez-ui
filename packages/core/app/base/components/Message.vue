@@ -1,8 +1,12 @@
 <script lang="ts" setup>
-import type { MessageProps } from '../types';
 import PVMessage from 'primevue/message';
 
-const props = defineProps<MessageProps>();
+interface Props {
+    severity?: "info" | "error";
+    text?: string;
+};
+
+const props = defineProps<Props>();
 </script>
 
 <template>

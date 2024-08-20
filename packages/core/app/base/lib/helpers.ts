@@ -71,8 +71,7 @@ export const getUrlPath = (existingUrl:string) => {
  * @param existingUrl 
  * @returns 
  */
-export const getNarrowersUrl = (concept:PrezConceptNode, existingUrl?:string) => {
-    const baseUrl = existingUrl ? getBaseUrl(existingUrl) : '';
+export const getNarrowersUrl = (baseUrl:string, concept:PrezConceptNode) => {
     const id = concept.identifiers?.find(identifier=>identifier.value)?.value;
     return id ? baseUrl + `/concept-hierarchy/${id}/narrowers` : '';
 }
