@@ -7,6 +7,7 @@ const { getPageUrl, navigateToPage, pagination } = usePageInfo();
 
 const urlPath = ref(getPageUrl());
 const { status, error, data } = await useGetList(runtimeConfig.public.prezApiEndpoint, urlPath);
+const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')[0];
 
 const header = computed(()=>{
     const lastParent = data.value && data.value.parents?.length > 0
@@ -57,8 +58,7 @@ watch(()=>route.fullPath, () => {
             </div>
         </template>
         <template #sidepanel>
-            <ItemProfiles v-if="status == 'pending'" loading />
-            <ItemProfiles v-else-if="data" :profiles="data.profiles" />
+            <ItemProfiles :apiUrl="apiUrl" :loading="status == 'pending'" :profiles="data?.profiles" />
         </template>
     </NuxtLayout>
 </template>

@@ -2,6 +2,9 @@
 const props = defineProps<{sidepanel?: boolean, contentonly?: boolean}>()
 const appConfig = useAppConfig();
 const menu = appConfig.menu;
+const expanded = ref(!!localStorage.getItem('expanded'));
+watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
+
 </script>
 <template>
 
@@ -43,10 +46,14 @@ const menu = appConfig.menu;
         <div class="container mx-auto flex-grow">
 
             <div v-if="sidepanel" class="grid grid-cols-4 gap-4 px-4 py-4">
-                <div class="col-span-3 ...">
+                <div :class="!expanded ? 'col-span-3 ... relative' : 'col-span-4 relative'">
                     <slot />
+                    <div class="absolute right-0 top-[-5px] pointer-events-auto" @click="()=>{ expanded = !expanded }">
+                        <i v-if="expanded" title="Show sidepanel" class="pi pi-angle-double-left text-xs p-[4px] hover:cursor-pointer hover:bg-gray-200 hover:rounded-full" />
+                        <i v-else title="Expand and hide sidepanel" class="pi pi-angle-double-right text-xs p-[4px] hover:cursor-pointer hover:bg-gray-200 hover:rounded-full" />
+                    </div>
                 </div>
-                <div class="...">
+                <div v-if="!expanded" class="...">
                     <slot name="sidepanel"></slot>
                 </div>
             </div>

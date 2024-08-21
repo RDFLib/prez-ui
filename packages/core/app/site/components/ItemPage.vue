@@ -9,6 +9,7 @@ const urlPath = ref(getPageUrl());
 const { status, error, data } = useGetItem(runtimeConfig.public.prezApiEndpoint, urlPath);
 const isConceptScheme = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.skosConceptScheme));
 const topConceptsUrl = computed(()=>isConceptScheme ? getTopConceptsUrl(data.value!.data) : '');
+const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')[0];
 
 </script>
 <template>
@@ -63,7 +64,7 @@ const topConceptsUrl = computed(()=>isConceptScheme ? getTopConceptsUrl(data.val
         </template>
 
         <template #sidepanel>
-            <ItemProfiles :loading="status == 'pending'" :profiles="data?.profiles" />
+            <ItemProfiles :apiUrl="apiUrl" :loading="status == 'pending'" :profiles="data?.profiles" />
         </template>
 
     </NuxtLayout>

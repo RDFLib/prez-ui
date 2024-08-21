@@ -30,7 +30,7 @@ const term = props.term as PrezFocusNode;
                     <Predicate :predicate="predicate" :objects="objects" :term="term" />
                 </template>
             </Column>
-            <Column :style="'width: 1%;white-space:nowrap;'" field="objects" >
+            <Column field="objects" >
                 <template #body="{ data: {predicate, objects} }">
                     <Objects :predicate="predicate" :objects="objects" :term="term" />
                 </template>
