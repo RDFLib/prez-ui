@@ -14,20 +14,27 @@ const term = props.term as PrezFocusNode;
 </script>
 <template>
     <div v-if="term?.properties">
-        <DataTable striped-rows :value="Object.values(term.properties)">
-            <Column
-                v-for="col of [{field: 'predicate', style: 'width: 1%;white-space:nowrap;'}, {field: 'objects', style: ''}]"
-                :key="col.field" body="" :style="col.style" v-bind="col" >
-                <template #body="{ data: {predicate, objects} }">
-                    <slot v-if="col.field == 'predicate'" name="predicate" :property="term.properties[predicate.value]">
-                        <Predicate :predicate="predicate" :objects="objects" :term="term" />
-                    </slot>
-                    <slot v-if="col.field == 'objects'" name="objects" :property="term.properties[predicate.value]">
-                        <Objects :predicate="predicate" :objects="objects" :term="term" />
-                    </slot>
-                </template>                    
-            </Column>
 
+    <!-- <DataView :value="Object.values(term.properties)">
+        <template #default="items">
+            <tr v-for="p of items">
+                <th>{{ p.predicate }}</th>
+                <td>value</td>
+            </tr>
+        </template>
+    </DataView> -->
+
+        <DataTable striped-rows :value="Object.values(term.properties)">
+            <Column :style="'width: 1%;white-space:nowrap;'" field="predicate" >
+                <template #body="{ data: {predicate, objects} }">
+                    <Predicate :predicate="predicate" :objects="objects" :term="term" />
+                </template>
+            </Column>
+            <Column :style="'width: 1%;white-space:nowrap;'" field="objects" >
+                <template #body="{ data: {predicate, objects} }">
+                    <Objects :predicate="predicate" :objects="objects" :term="term" />
+                </template>
+            </Column>
         </DataTable>
     </div>
 </template>

@@ -47,7 +47,7 @@ if([SYSTEM_PREDICATES.xmlString, SYSTEM_PREDICATES.rdfLangString].indexOf(term.d
     hideDataType = true;
 }
 
-const htmlClass = 'no-tailwind' + props.class ? ' ' + props.class : '';
+const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
 
 </script>
 <template>
@@ -91,6 +91,7 @@ const htmlClass = 'no-tailwind' + props.class ? ' ' + props.class : '';
 }
 
 .no-tailwind * {
+  all: revert;
   font-family: inherit;
   font-size: inherit;
 }
