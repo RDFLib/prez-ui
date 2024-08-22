@@ -60,7 +60,7 @@ function loadMore() {
         </div>
         <div v-if="error"><Message severity="error">{{ error }}</Message></div>
         <Loading class="ml-6" v-if="status == 'pending'" variant="concept" />
-        <div v-if="hasMore" class="mt-4">
+        <div v-if="hasMore && status != 'pending'" class="mt-4">
             <Button class="ml-6" size="small" label="more" @click="loadMore" />
         </div>
     </div>

@@ -27,12 +27,12 @@ const term = props.term as PrezFocusNode;
         <DataTable striped-rows :value="Object.values(term.properties)">
             <Column :style="'width: 1%;white-space:nowrap;'" field="predicate" >
                 <template #body="{ data: {predicate, objects} }">
-                    <Predicate :predicate="predicate" :objects="objects" :term="term" />
+                    <Predicate :predicate="predicate" :objects="objects" :term="term" variant="item-table" />
                 </template>
             </Column>
             <Column field="objects" >
                 <template #body="{ data: {predicate, objects} }">
-                    <Objects :predicate="predicate" :objects="objects" :term="term" />
+                    <Objects :predicate="predicate" :objects="objects" :term="term" variant="item-table" />
                 </template>
             </Column>
         </DataTable>

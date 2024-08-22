@@ -86,8 +86,8 @@ export const useGetList = (baseUrl: string, urlPath: Ref<string>, options?:ListO
         }
     };
 
-    watch(urlPath, async (newVal, oldVal) => {
-        await execute();
+    watch(urlPath, (newVal, oldVal) => {
+        execute();
     }, { immediate: true });
 
     return {

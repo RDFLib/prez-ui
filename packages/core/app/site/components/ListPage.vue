@@ -1,12 +1,15 @@
 <script lang="ts" setup>
+
+
 const appConfig = useAppConfig();
 const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
 
-const { getPageUrl, navigateToPage, pagination } = usePageInfo();
+const urlPath = ref(useGetInitialPageUrl());
+const { status, error, data } = useGetList(runtimeConfig.public.prezApiEndpoint, urlPath);
 
-const urlPath = ref(getPageUrl());
-const { status, error, data } = await useGetList(runtimeConfig.public.prezApiEndpoint, urlPath);
+const { getPageUrl, navigateToPage, pagination } = usePageInfo(data);
+
 const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')[0];
 
 const header = computed(()=>{
@@ -43,8 +46,8 @@ watch(()=>route.fullPath, () => {
                             v-if="data.count > pagination.per_page!"
                             :first="pagination.first" 
                             :rows="pagination.per_page" 
-                            :page="pagination.page" 
-                            :totalRecords="data.count" 
+                            :page="pagination.page"
+                            :totalRecords="data.count + (data.maxReached ? 1 : 0)" 
                             @page="navigateToPage" 
                         >
                         </Paginator>
@@ -58,7 +61,8 @@ watch(()=>route.fullPath, () => {
             </div>
         </template>
         <template #sidepanel>
-            <ItemProfiles :apiUrl="apiUrl" :loading="status == 'pending'" :profiles="data?.profiles" />
+            <ItemProfiles :key="status" :apiUrl="apiUrl" :loading="status == 'pending'" :profiles="data?.profiles" />
         </template>
-    </NuxtLayout>
+
+</NuxtLayout>
 </template>

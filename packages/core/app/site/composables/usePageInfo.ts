@@ -1,11 +1,25 @@
 import type { PageState } from 'primevue/paginator';
 import { computed } from 'vue';
+import type { PrezDataList, PrezDataSearch } from '~/base/lib';
 
-export function usePageInfo() {
+export const useGetInitialPageUrl = () => {
     const route = useRoute();
+    const appConfig = useAppConfig();
+
+    return route.path + '?' + new URLSearchParams({
+        page: '1',
+        per_page: (appConfig.pagination.itemsPerPage || 10).toString(),
+        ...route.query,
+    }).toString();
+
+}
+
+export const usePageInfo = (dataRef?: Ref<PrezDataList | PrezDataSearch | undefined>) => {
+    const route = useRoute();
+    const appConfig = useAppConfig();
 
     const pagination = computed(() => {
-        const per_page = parseInt(route.query?.per_page?.toString() || '10');
+        const per_page = parseInt(route.query?.per_page?.toString() || (appConfig.pagination.itemsPerPage || 10).toString());
         const page = parseInt(route.query?.page?.toString() || '1');
         const first = (page - 1) * per_page + 1;
 

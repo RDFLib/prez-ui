@@ -40,7 +40,7 @@ const props = defineProps<Props>();
                         <div v-if="profile.current" class="text-sm text-bold text-blue-500">(currently viewing)</div>
                         <ul class="text-sm">
                             <li class="mediatypes" v-for="mediatype in profile.mediatypes" :key="mediatype.mediatype">
-                                - <ItemLink :to="`${apiUrl}?${URLSearchParams({_profile: profile.token, _mediatype: mediatype.mediatype})}`" variant="item-profiles" target="_blank" rel="noopener noreferrer">
+                                - <ItemLink :to="`${apiUrl}?_profile=${encodeURIComponent(profile.token)}&_mediatype=${encodeURIComponent(mediatype.mediatype)}`" variant="item-profiles" target="_blank" rel="noopener noreferrer">
                                     <span class="font-normal">{{ mediatype.title || mediatype.mediatype.replace(/^.*\//, '') }}</span>
                                 </ItemLink>
                             </li>

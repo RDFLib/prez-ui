@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { PrezLiteral, PrezNode, PrezTerm } from '../lib';
+import type { PrezLiteral, PrezNode, PrezTerm } from '@/base/lib';
+import ItemTable from './ItemTable.vue';
 
 interface Props {
     term: PrezTerm;
@@ -23,8 +24,13 @@ const props = defineProps<Props>();
     />
 
     <ItemTable
-        v-else-if="props.term.termType == 'BlankNode'" 
-        v-bind="props" 
+        v-else-if="props.term.termType == 'BlankNode' && props.variant == 'item-table'" 
+        :variant="props.variant"
+        :term="term"
     />
+
+    <div v-else-if="props.term.termType == 'BlankNode' && props.variant == 'item-list'">
+        <TermList :term="props.term" />
+    </div>
 
 </template>

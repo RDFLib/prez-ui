@@ -44,7 +44,7 @@ const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')
                     </div>
                 </div>
                 <div class="mt-2 mb-12">
-                    <ItemTable :term="data.data" />
+                    <ItemTable :term="data.data" :key="urlPath" />
                     <p class="mt-6" v-if="data.data.members">
                         <Button size="small" color="secondary" label="Members" @click="()=>router.push(data!.data.members!.value)" />
                     </p>
@@ -64,7 +64,7 @@ const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')
         </template>
 
         <template #sidepanel>
-            <ItemProfiles :apiUrl="apiUrl" :loading="status == 'pending'" :profiles="data?.profiles" />
+            <ItemProfiles :key="status" :apiUrl="apiUrl" :loading="status == 'pending'" :profiles="data?.profiles" />
         </template>
 
     </NuxtLayout>

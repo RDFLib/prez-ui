@@ -15,6 +15,7 @@ const properties = list?.[0]?.properties;
 
 </script>
 <template>
+
   <div v-if="list">
     <DataTable striped-rows :value="list" table-style="min-width: 50rem">
       <!-- frozen="false" was a fix to get around issues with unstyled presets -->      
@@ -35,13 +36,11 @@ const properties = list?.[0]?.properties;
           <b><Term :term="col.predicate" /></b>
         </template>
         <template #body="slotProps">
-          <div v-for="(obj, idx) in slotProps.data.properties[col.predicate.value]?.objects"
-            :key="idx">
-            <Term 
-              :term="obj"
-              variant="item-list"
-            />
-          </div>
+          <Objects v-if="slotProps.data.properties[col.predicate.value]?.objects" 
+            :term="col.predicate" 
+            :predicate="col.predicate" 
+            :objects="slotProps.data.properties[col.predicate.value]?.objects" 
+            variant="item-list" />
         </template>
       </Column>
     </DataTable>

@@ -34,7 +34,12 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4
   },
-  devtools: { enabled: true },
+  devtools: {
+    enabled: true,
+    timeline: {
+      enabled: true
+    }
+  },
   modules: ['@primevue/nuxt-module', "@nuxtjs/tailwindcss"],
   primevue: {
     importTheme: {from: resolve('./app/base/assets/theme/mainTheme.ts')},
