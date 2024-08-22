@@ -17,12 +17,6 @@ export default defineNuxtConfig({
     } 
   },
 
-  vite: {
-    optimizeDeps: {
-      exclude: ['primevue', 'n3']
-    }
-  },  
-
   runtimeConfig: {
     public: {
       prezApiEndpoint: process.env.NUXT_PUBLIC_PREZ_API_ENDPOINT

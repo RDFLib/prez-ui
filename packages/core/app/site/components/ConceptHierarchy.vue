@@ -1,4 +1,11 @@
 <script lang="ts" setup>
+/**
+ * @file ConceptHierarchy.vue
+ * 
+ * This component renders a recursive hierarchy of concepts.
+ * 
+ * This component lives under the site project as it uses the lib composable from the site project.
+ */
 import { getNarrowersUrl, type PrezConceptNode } from '@/base/lib';
 const appConfig = useAppConfig();
 const runtimeConfig = useRuntimeConfig();
@@ -12,7 +19,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), { level: 0 });
 
-const urlPath = ref(props.urlPath + '?page=1&per_page=' + appConfig.pagination.itemsPerPage.toString());
+const urlPath = ref(props.urlPath + '?page=1&per_page=' + appConfig.pagination.conceptsPerPage.toString());
 
 const { status, error, data, hasMore } = await useGetList(runtimeConfig.public.prezApiEndpoint, urlPath, { appendMode: true });
 
@@ -36,7 +43,7 @@ function loadMore() {
         urlPath.value = props.urlPath + '?' + new URLSearchParams({
             ...route.query, 
             page: page.value.toString(),
-            per_page: appConfig.pagination.itemsPerPage.toString()
+            per_page: appConfig.pagination.conceptsPerPage.toString()
         }).toString();
     }
 }
@@ -55,7 +62,7 @@ function loadMore() {
                 <Node :term="concept" />
             </div>
             <div v-if="open.includes(concept.value)" class="pz-concept-children">
-                <ConceptTree base-url="baseUrl" :url-path="getNarrowersUrl('', concept)" :level="props.level + 1" />
+                <ConceptHierarchy base-url="baseUrl" :url-path="getNarrowersUrl('', concept)" :level="props.level + 1" />
             </div>
         </div>
         <div v-if="error"><Message severity="error">{{ error }}</Message></div>

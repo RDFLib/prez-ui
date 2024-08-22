@@ -86,16 +86,6 @@ const navigateToLink = (event: MouseEvent, path: string) => {
     }
 };
 
-// const attr = isExtLink ? {
-//     target: props.target,
-//      rel: props.rel} : {};
-     //, class: 'inline-flex items-center hover:underline'} : {};
-
-// const secondaryAttr = {class: 'border-b-[2px] hover:no-underline border-transparent hover:border-orange-500', 
-//     ...isSecondaryExtLink ? {
-//     target: props.target,
-//     rel: props.rel, class: 'inline-flex items-center hover:underline'} : {}};
-
 const defaultClasses = 'border-b-[2px] hover:no-underline hover:border-orange-500 ' + 
     (hideUnderline ? 'border-transparent' : 'border-gray-300 border-dashed hover:border-solid');
 
