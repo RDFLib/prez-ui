@@ -2,7 +2,10 @@
 const props = defineProps<{sidepanel?: boolean, contentonly?: boolean}>()
 const appConfig = useAppConfig();
 const menu = appConfig.menu;
-const expanded = ref(!!localStorage.getItem('expanded'));
+const expanded = ref(false);
+onBeforeMount(() => {
+  expanded.value = !!localStorage.getItem('expanded');
+});
 watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
 
 </script>
