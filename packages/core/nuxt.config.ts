@@ -56,5 +56,5 @@ export default defineNuxtConfig({
     }
   },
 
-  ssr: false
+  ssr: !!process.env.SSR_ENABLED && ['1', 'true'].includes(process.env.SSR_ENABLED),
 })
