@@ -19,7 +19,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), { level: 0 });
 
-const urlPath = ref(props.urlPath + '?page=1&per_page=' + appConfig.pagination.conceptsPerPage.toString());
+const urlPath = ref(props.urlPath + '?page=1&limit=' + appConfig.pagination.conceptsPerPage.toString());
 
 const { status, error, data, hasMore } = await useGetList(runtimeConfig.public.prezApiEndpoint, urlPath, { appendMode: true });
 
@@ -43,7 +43,7 @@ function loadMore() {
         urlPath.value = props.urlPath + '?' + new URLSearchParams({
             ...route.query, 
             page: page.value.toString(),
-            per_page: appConfig.pagination.conceptsPerPage.toString()
+            limit: appConfig.pagination.conceptsPerPage.toString()
         }).toString();
     }
 }

@@ -38,6 +38,7 @@ function cacheSetData(key: string, data: any) {
 type ListOptions = {
     appendMode?: boolean;
 }
+
 export const useGetList = (baseUrl: string, urlPath: Ref<string>, options?:ListOptions) => {
     const data = ref<PrezDataList | undefined>(undefined);
     const status = ref<FetchStatus>('idle');

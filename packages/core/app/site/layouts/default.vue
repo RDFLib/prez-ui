@@ -14,8 +14,10 @@ watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
         <header class="bg-gray-800 text-white h-32">
             <div class="container mx-auto px-4 h-full flex justify-between items-center">
                 
-                <!-- Logo -->
-                <nuxt-link to="/" class="text-4xl hidden md:block">PrezUI</nuxt-link>
+                <!-- Logo area -->
+                <nuxt-link to="/" class="text-4xl hidden md:block">
+                    Prez Documentation
+                </nuxt-link>
 
                 <!-- Navigation -->
                 <nav class="space-x-4 text-right">
@@ -49,12 +51,14 @@ watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
                 <div :class="!expanded ? 'col-span-3 ... relative' : 'col-span-4 relative'">
                     <slot />
                     <div class="absolute right-0 top-[-5px] pointer-events-auto" @click="()=>{ expanded = !expanded }">
-                        <i v-if="expanded" title="Show sidepanel" class="pi pi-angle-double-left text-xs p-[4px] hover:cursor-pointer hover:bg-gray-200 hover:rounded-full" />
-                        <i v-else title="Expand and hide sidepanel" class="pi pi-angle-double-right text-xs p-[4px] hover:cursor-pointer hover:bg-gray-200 hover:rounded-full" />
+                        <i v-if="expanded" title="Show sidepanel" class="pi pi-angle-double-right text-xs p-[4px] hover:cursor-pointer hover:bg-gray-200 hover:rounded-full" />
                     </div>
                 </div>
-                <div v-if="!expanded" class="...">
+                <div v-if="!expanded" class="... relative">
                     <slot name="sidepanel"></slot>
+                    <div class="absolute right-0 top-[-5px] pointer-events-auto" @click="()=>{ expanded = !expanded }">
+                        <i v-if="!expanded" title="Expand and hide sidepanel" class="pi pi-angle-double-left text-xs p-[4px] hover:cursor-pointer hover:bg-gray-200 hover:rounded-full" />
+                    </div>
                 </div>
             </div>
             <div v-else class="px-4 py-4">

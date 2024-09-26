@@ -8,7 +8,7 @@ type LinkObject = {
     title: string;
     anchor: string;
     token: string;
-    profile: string;
+    format: string;
     type: string;
 };
 
@@ -27,6 +27,7 @@ class NetworkError extends Error {
  */
 function getProfilesFromHeaders(linkHeader: string): PrezProfileHeader[] {
     let profileObj: {[uri: string]: PrezProfileHeader} = {} ;
+    
     const links = linkHeader.split(",").map(l => {
         const [, uri, attrs] = l.trim().match(/<(.+)>; (.+)/) as [string, string, string];
         const linkObj = { uri } as LinkObject;
@@ -50,17 +51,17 @@ function getProfilesFromHeaders(linkHeader: string): PrezProfileHeader[] {
 
     // find current - either use rel="self" or rel="profile"
     const currentProfile = links.find(l => l.rel === "self")!;
-    if(currentProfile!.profile in profileObj) {
-        profileObj[currentProfile!.profile]!.current = true;
+    if(currentProfile!.format in profileObj) {
+        profileObj[currentProfile!.format]!.current = true;
     }
 
     // find default - no way to get default for now - use rel="canonical" according to https://www.w3.org/TR/dx-prof-conneg/#http-listprofiles ?
     // const defaultProfile = links.find(l => l.rel === "self")!;
     // profileObj[defaultProfile.profile].default = true;
 
-    links.filter(l => l.rel === "alternate").forEach(l => {
-        if (!profileObj[l.profile]!.mediatypes.map(m => m.mediatype).includes(l.type)) {
-            profileObj[l.profile]!.mediatypes.push({ title: "", mediatype: l.type, default: false });
+    links.filter(l => l.rel === "alternate" && l.format).forEach(l => {
+        if (!profileObj[l.format]!.mediatypes.map(m => m.mediatype).includes(l.type)) {
+            profileObj[l.format]!.mediatypes.push({ title: "", mediatype: l.type, default: false });
         }
     });
 

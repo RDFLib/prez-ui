@@ -3,7 +3,7 @@ import { type PrezNode, type PrezTerm } from '@/base/lib';
 
 interface Props {
     /** parent term or root focus node */
-    term: PrezTerm;
+    term?: PrezTerm;
     /** the main predicate to render */
     predicate: PrezNode;
     /** when rendering a predicate you may access the associated objects */

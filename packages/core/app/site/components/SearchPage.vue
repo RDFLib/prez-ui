@@ -59,14 +59,14 @@ const inSearchMode = computed(()=>{
                         <div v-if="data">
                             <div v-if="data" :key="urlPath">
                                 <div v-if="data.count > 0" class="pl-4 text-sm text-gray-500">
-                                    Showing {{ pagination.first }} to {{ Math.min(pagination.first + pagination.per_page - 1, data.count) }} of {{ data.count }} item{{ data.count > 1 ? 's' : ''}}
+                                    Showing {{ pagination.first }} to {{ Math.min(pagination.first + pagination.limit - 1, data.count) }} of {{ data.count }} item{{ data.count > 1 ? 's' : ''}}
                                 </div>
                                 <SearchResults :results="data.data" />
                                 <div class="pt-4">
                                     <Paginator
-                                        v-if="data.count > pagination.per_page"
+                                        v-if="data.count > pagination.limit"
                                         :first="pagination.first" 
-                                        :rows="pagination.per_page" 
+                                        :rows="pagination.limit" 
                                         :page="pagination.page" 
                                         :totalRecords="data.count" 
                                         @page="navigateToPage" 

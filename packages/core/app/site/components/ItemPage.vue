@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { getTopConceptsUrl, SYSTEM_PREDICATES } from '~/base/lib';
+import { getTopConceptsUrl, SYSTEM_PREDICATES } from '@/base/lib';
 
 const appConfig = useAppConfig();
 const runtimeConfig = useRuntimeConfig();
+const { globalProfiles } = useGlobalProfiles();
 const router = useRouter();
 const { getPageUrl } = usePageInfo();
 const urlPath = ref(getPageUrl());
@@ -10,7 +11,7 @@ const { status, error, data } = useGetItem(runtimeConfig.public.prezApiEndpoint,
 const isConceptScheme = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.skosConceptScheme));
 const topConceptsUrl = computed(()=>isConceptScheme ? getTopConceptsUrl(data.value!.data) : '');
 const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')[0];
-
+const currentProfile = computed(()=>data.value ? (data.value.profiles.find(p=>p.current) || data.value?.profiles?.[0] || undefined) : undefined);
 </script>
 <template>
     <NuxtLayout sidepanel>
@@ -46,11 +47,7 @@ const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')
                 <div v-if="data?.data" :key="data?.data.value">
                     <slot name="header-section" :data="data">
                         <slot name="header-top" :data="data"></slot>
-                        <slot name="header-description" :data="data">
-                            <div v-if="data.data.description" class="mt-4 mb-4">
-                                <Literal :term="data.data.description" hide-language />
-                            </div>
-                        </slot>
+                        <slot name="header-description" :data="data"></slot>
                         <slot name="header-middle" :data="data"></slot>
                         <slot name="header-identifiers" :data="data">
                             <div class="mb-2 mt-2">
@@ -68,8 +65,15 @@ const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')
                     <div class="mt-2 mb-12">
                         <slot name="item-section" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
                             <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
-                            <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
-                                <ItemTable :term="data.data" :key="urlPath"  :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"/>
+                            <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl" :fields="globalProfiles && currentProfile ? globalProfiles[currentProfile && currentProfile.uri] : undefined">
+                                <!-- FLD = {{ globalProfiles && currentProfile ? globalProfiles[currentProfile && currentProfile.uri] : undefined }} -->
+                                <ItemTable 
+                                    :fields="globalProfiles && currentProfile ? globalProfiles[currentProfile && currentProfile.uri] : undefined"
+                                    :term="data.data" 
+                                    :key="urlPath + globalProfiles?.length + currentProfile?.uri" 
+                                    :is-concept-scheme="isConceptScheme"
+                                    top-concepts-url="topConceptsUrl"
+                                />
                             </slot>
                             <slot name="item-middle" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
 

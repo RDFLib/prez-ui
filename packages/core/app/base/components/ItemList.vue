@@ -32,8 +32,8 @@ const properties = list?.[0]?.properties;
         v-for="col in properties"
         :key="col.predicate.value"
       >
-        <template #header>
-          <b><Term :term="col.predicate" /></b>
+        <template #header="slotProps">
+          <b><Predicate :predicate="col.predicate" :objects="col.objects" /></b>
         </template>
         <template #body="slotProps">
           <Objects v-if="slotProps.data.properties[col.predicate.value]?.objects" 

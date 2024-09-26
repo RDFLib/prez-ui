@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 
-
 const appConfig = useAppConfig();
 const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
@@ -43,9 +42,9 @@ watch(()=>route.fullPath, () => {
                     <ItemList :list="data.data" :key="urlPath" />
                     <div class="pt-4">
                         <Paginator
-                            v-if="data.count > pagination.per_page!"
+                            v-if="data.count > pagination.limit!"
                             :first="pagination.first" 
-                            :rows="pagination.per_page" 
+                            :rows="pagination.limit" 
                             :page="pagination.page"
                             :totalRecords="data.count + (data.maxReached ? 1 : 0)" 
                             @page="navigateToPage" 
@@ -53,7 +52,7 @@ watch(()=>route.fullPath, () => {
                         </Paginator>
                         <div v-if="data.count > 0" class="text-sm text-gray-500 text-center">
                             Showing {{ pagination.first }} to 
-                                {{ Math.min(pagination.first! + pagination.per_page! - 1, data.count) }} of 
+                                {{ Math.min(pagination.first! + pagination.limit! - 1, data.count) }} of 
                                 {{ data.count }}{{ data.maxReached ? '+' : '' }} items
                         </div>
                     </div>
