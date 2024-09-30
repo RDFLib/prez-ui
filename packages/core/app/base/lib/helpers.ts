@@ -1,5 +1,5 @@
 import type { PrezPrefixes, PrezConceptNode, PrezFocusNode } from "./types";
-import { DEFAULT_PREFIXES } from "./consts";
+import { DEFAULT_PREFIXES, SYSTEM_PREDICATES } from "./consts";
 
 /**
  * Interprets a predicate curie into its full IRI
@@ -89,4 +89,58 @@ export const getTopConceptsUrl = (item:PrezFocusNode, existingOrBaseUrl?:string)
     const id = identifiers ? identifiers.value : '';
     const url = id ? baseUrl + `/concept-hierarchy/${id}/top-concepts` : '';
     return url;
+}
+
+type PathElement = { "@id"?: string; "@list"?: PathElement[] };
+
+/**
+ * Process a SHACL path to get the full list of predicates
+ * 
+ * @param path 
+ * @returns 
+ */
+export const processShaclPath = (path: PathElement[]): string[] => {
+    return path.flatMap((e) => {
+        if (e["@id"]) {
+            return e["@id"];
+        }
+
+        if (e["@list"] && e["@list"].length > 0) {
+            const firstElement = e["@list"][0];
+            // Check if the first element indicates a shacl union
+            if (firstElement?.["@id"] === SYSTEM_PREDICATES.shaclUnion) {
+                // Recursively process only the union elements
+                return processShaclPath(e["@list"][1]?.["@list"] || []).filter(Boolean);
+            } else {
+                // Process non-union lists as normal
+                return processShaclPath(e["@list"]).flat();
+            }
+        }
+
+        return [];
+    }).filter((item): item is string => Boolean(item));
+}
+/**
+ * Build a profile object from a list of profiles
+ * 
+ * @param data - list of profiles in json-ld format
+ * @returns 
+ */
+export const buildProfiles = (data: any[]): Record<string, string[]> => {
+    return data.reduce((acc, profile) => {
+      // get the SHACL path for each profile
+      if (SYSTEM_PREDICATES.shaclProperty in profile) {
+        // get the SHACL path for each property
+        for (const props of profile[SYSTEM_PREDICATES.shaclProperty]) {
+          // find the profile in the data
+          const lookup = data.find((p: any) => p['@id'] === props['@id']);
+          if (lookup && SYSTEM_PREDICATES.shaclPath in lookup) {
+            acc[profile['@id']] = processShaclPath(lookup[SYSTEM_PREDICATES.shaclPath])
+              // filter #allPredicates, as it is a special case that is a placeholder to indicate all predicates, which is the same as an empty array
+              .filter(prop=>prop !== SYSTEM_PREDICATES.shaclAllPredicates);
+          }
+        }
+      }
+      return acc;
+    }, {} as Record<string, string[]>);
 }

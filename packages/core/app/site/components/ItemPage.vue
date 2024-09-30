@@ -11,7 +11,7 @@ const { status, error, data } = useGetItem(runtimeConfig.public.prezApiEndpoint,
 const isConceptScheme = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.skosConceptScheme));
 const topConceptsUrl = computed(()=>isConceptScheme ? getTopConceptsUrl(data.value!.data) : '');
 const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')[0];
-const currentProfile = computed(()=>data.value ? (data.value.profiles.find(p=>p.current) || data.value?.profiles?.[0] || undefined) : undefined);
+const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
 </script>
 <template>
     <NuxtLayout sidepanel>
@@ -66,14 +66,16 @@ const currentProfile = computed(()=>data.value ? (data.value.profiles.find(p=>p.
                         <slot name="item-section" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
                             <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
                             <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl" :fields="globalProfiles && currentProfile ? globalProfiles[currentProfile && currentProfile.uri] : undefined">
-                                <!-- FLD = {{ globalProfiles && currentProfile ? globalProfiles[currentProfile && currentProfile.uri] : undefined }} -->
-                                <ItemTable 
-                                    :fields="globalProfiles && currentProfile ? globalProfiles[currentProfile && currentProfile.uri] : undefined"
+
+                                <ItemTable
+                                    v-if="globalProfiles && currentProfile"
+                                    :fields="globalProfiles?.[currentProfile?.uri || '']"
                                     :term="data.data" 
                                     :key="urlPath + globalProfiles?.length + currentProfile?.uri" 
                                     :is-concept-scheme="isConceptScheme"
                                     top-concepts-url="topConceptsUrl"
                                 />
+                                <Loading variant="item-table" v-else />
                             </slot>
                             <slot name="item-middle" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
 

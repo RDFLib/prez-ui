@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { defineProps } from 'vue';
-import type { ItemListProps } from '../types';
-import type { PrezFocusNode } from '../lib';
+import type { PrezFocusNode, PrezProperty } from '../lib';
 
 interface Props {
+  /** optional, fields in order to display */
+  fields?: string[];
+
   list: PrezFocusNode[];
 }
 
@@ -11,7 +13,16 @@ const props = defineProps<Props>();
 
 const list = props.list;
 const properties = list?.[0]?.properties;
-//const headers = properties ? Object.keys(properties).map(p => properties[p]!.predicate) : undefined;
+
+const fieldNames = Object.keys(properties || {});
+
+const fields = computed(() =>
+  [
+    ...(props.fields || []).filter(f => fieldNames.includes(f)), // add fields from props that exist in the list
+    ...fieldNames.filter(f => !(props.fields || []).includes(f)), // add the remaining fields
+  ].map(f => properties![f] as PrezProperty)
+);
+
 
 </script>
 <template>
@@ -29,7 +40,7 @@ const properties = list?.[0]?.properties;
       </Column>
       <Column
         :frozen="false"
-        v-for="col in properties"
+        v-for="col in fields"
         :key="col.predicate.value"
       >
         <template #header="slotProps">

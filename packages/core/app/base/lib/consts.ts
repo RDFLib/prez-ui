@@ -47,8 +47,13 @@ export const SYSTEM_PREDICATES = {
     a: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
     rdfLangString: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
     xmlString: "http://www.w3.org/2001/XMLSchema#string",
-    w3Html: "http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML"
+    w3Html: "http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML",
+    shaclAllPredicates: "http://example.com/shacl-extension#allPredicateValues",
+    shaclProperty: "http://www.w3.org/ns/shacl#property",
+    shaclPath: "http://www.w3.org/ns/shacl#path",
+    shaclUnion: "http://www.w3.org/ns/shacl#union"
 };
+
 
 export const ANNOTATION_PREDICATES = {
     label: [

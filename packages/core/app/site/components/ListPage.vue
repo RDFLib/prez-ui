@@ -3,6 +3,7 @@
 const appConfig = useAppConfig();
 const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
+const { globalProfiles } = useGlobalProfiles();
 
 const urlPath = ref(useGetInitialPageUrl());
 const { status, error, data } = useGetList(runtimeConfig.public.prezApiEndpoint, urlPath);
@@ -10,6 +11,7 @@ const { status, error, data } = useGetList(runtimeConfig.public.prezApiEndpoint,
 const { getPageUrl, navigateToPage, pagination } = usePageInfo(data);
 
 const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')[0];
+const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
 
 const header = computed(()=>{
     const lastParent = data.value && data.value.parents?.length > 0
@@ -39,7 +41,13 @@ watch(()=>route.fullPath, () => {
                 <div v-if="error"><Message severity="error">{{ error }}</Message></div>
                 <Loading v-if="status == 'pending'" />
                 <div v-else-if="data?.data">
-                    <ItemList :list="data.data" :key="urlPath" />
+                    <ItemList 
+                        v-if="globalProfiles && currentProfile"
+                        :fields="globalProfiles?.[currentProfile?.uri || '']"
+                        :list="data.data" :key="urlPath" 
+                    />
+                    <Loading v-else />
+
                     <div class="pt-4">
                         <Paginator
                             v-if="data.count > pagination.limit!"
