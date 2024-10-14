@@ -2,7 +2,7 @@
 import Skeleton from 'primevue/skeleton';
 import ProgressSpinner from 'primevue/progressspinner';
 interface Props {
-    variant?: 'item' | 'list' | 'search' | 'concept';
+    variant?: 'item' | 'item-table' | 'list' | 'search' | 'concept';
 }
 
 const props = defineProps<Props>();
@@ -35,6 +35,7 @@ const props = defineProps<Props>();
             aria-label="Loading concepts" />
     </div>
     <div v-else>
+        <hr v-if="props.variant == 'item-table'" class="mb-4 mt-8" >
         <Skeleton height="2rem" width="12rem" class="mb-2" style="margin-bottom: 20px"/>
         <Skeleton width="30rem" class="mb-2" style="margin-bottom: 8px"/>
         <Skeleton width="30rem" class="mb-2" style="margin-bottom: 12px"/>

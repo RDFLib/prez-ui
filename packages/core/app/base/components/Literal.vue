@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { type PrezLiteral, SYSTEM_PREDICATES } from '@/base/lib';
+import vDompurifyHtml from 'vue-dompurify-html';
 
 interface Props {
     term: PrezLiteral;
@@ -55,7 +56,7 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
         <!-- Simple text output only -->
         <template v-if="props.textOnly">
             <slot v-if="props?.term?.value" name="text" :term="term" :text="term.value">
-                    <span :class="htmlClass" v-if="term.datatype?.value == SYSTEM_PREDICATES.w3Html" v-html="term.value"></span>
+                    <span :class="htmlClass" v-if="term.datatype?.value == SYSTEM_PREDICATES.w3Html" v-dompurify-html="term.value"></span>
                     <span v-else :class="class">{{ term.value }}</span>
             </slot>
         </template>
@@ -68,7 +69,7 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
                 </slot>
                 <slot v-if="!hideLanguage && term.language !== undefined" name="language" :term="term" :language="term.language">
                     <div class="pt-1">
-                        <Tag severity="info" :value="term.language" />
+                        <Badge :value="term.language" />
                     </div>
                 </slot>
                 <slot v-if="!hideDataType && term.datatype !== undefined" name="datatype" :term="term" :datatype="term.datatype">
@@ -94,5 +95,11 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
   all: revert;
   font-family: inherit;
   font-size: inherit;
+}
+</style>
+<style>
+.no-tailwind img {
+    max-width:100% !important;
+    height:auto;
 }
 </style>

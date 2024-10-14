@@ -9,7 +9,7 @@ const API_BASE_URL = 'https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs
 
 function setupGetCatalogs() {
     document.querySelector<HTMLButtonElement>("#catalogsButton")!.addEventListener("click", async () => {
-        const { data, profiles, count } = await getList(API_BASE_URL + "/catalogs");
+        const { data, profiles, count } = await getList(API_BASE_URL,  "/catalogs");
         document.querySelector<HTMLPreElement>("#data")!.innerText = JSON.stringify(data, null, 2);
         document.querySelector<HTMLPreElement>("#profiles")!.innerText = JSON.stringify(profiles, null, 2);
         document.querySelector<HTMLPreElement>("#count")!.innerText = `(${count})`;
@@ -18,7 +18,7 @@ function setupGetCatalogs() {
 
 function setupGetCatalog() {
     document.querySelector<HTMLButtonElement>("#catalogButton")!.addEventListener("click", async () => {
-        const { data, profiles } = await getItem(API_BASE_URL + "/catalogs/bblck-ctlg:bblocks");
+        const { data, profiles } = await getItem(API_BASE_URL, "/catalogs/bblck-ctlg:bblocks");
         document.querySelector<HTMLPreElement>("#data")!.innerText = JSON.stringify(data, null, 2);
         document.querySelector<HTMLPreElement>("#profiles")!.innerText = JSON.stringify(profiles, null, 2);
     });
@@ -26,7 +26,7 @@ function setupGetCatalog() {
 
 function setupGetCollections() {
     document.querySelector<HTMLButtonElement>("#collectionsButton")!.addEventListener("click", async () => {
-        const { data, profiles, count } = await getList(API_BASE_URL + "/catalogs/bblck-ctlg:bblocks/collections");
+        const { data, profiles, count } = await getList(API_BASE_URL, "/catalogs/bblck-ctlg:bblocks/collections");
         document.querySelector<HTMLPreElement>("#data")!.innerText = JSON.stringify(data, null, 2);
         document.querySelector<HTMLPreElement>("#profiles")!.innerText = JSON.stringify(profiles, null, 2);
         document.querySelector<HTMLPreElement>("#count")!.innerText = `(${count})`;
@@ -35,7 +35,7 @@ function setupGetCollections() {
 
 function setupGetItems() {
     document.querySelector<HTMLButtonElement>("#itemsButton")!.addEventListener("click", async () => {
-        const { data, profiles, count } = await getList(API_BASE_URL + "/catalogs/bblck-ctlg:bblocks/collections/bblck-vcbs:api/items");
+        const { data, profiles, count } = await getList(API_BASE_URL, "/catalogs/bblck-ctlg:bblocks/collections/bblck-vcbs:api/items");
         document.querySelector<HTMLPreElement>("#data")!.innerText = JSON.stringify(data, null, 2);
         document.querySelector<HTMLPreElement>("#profiles")!.innerText = JSON.stringify(profiles, null, 2);
         document.querySelector<HTMLPreElement>("#count")!.innerText = `(${count})`;
@@ -52,7 +52,7 @@ function setupClearButton() {
 
 function setupSearch() {
     document.querySelector<HTMLButtonElement>("#searchButton")!.addEventListener("click", async () => {
-        const { data, profiles } = await search(API_BASE_URL + "/search?q=block");
+        const { data, profiles } = await search(API_BASE_URL, "/search?q=block");
         document.querySelector<HTMLPreElement>("#data")!.innerText = JSON.stringify(data, null, 2);
         document.querySelector<HTMLPreElement>("#profiles")!.innerText = JSON.stringify(profiles, null, 2);
     });
@@ -60,7 +60,7 @@ function setupSearch() {
 
 function setupGetTopConcepts() {
     document.querySelector<HTMLButtonElement>("#topConceptsButton")!.addEventListener("click", async () => {
-        const { count, data, profiles } = await getList(API_BASE_URL + "/concept-hierarchy/exm:SchemingConceptScheme/top-concepts?_mediatype=text%2Fanot%2Bturtle&page=1&per_page=20");
+        const { count, data, profiles } = await getList(API_BASE_URL, "/concept-hierarchy/exm:SchemingConceptScheme/top-concepts?_mediatype=text%2Fanot%2Bturtle&page=1&limit=20");
         document.querySelector<HTMLPreElement>("#data")!.innerText = JSON.stringify(data, null, 2);
         document.querySelector<HTMLPreElement>("#profiles")!.innerText = JSON.stringify(profiles, null, 2);
         document.querySelector<HTMLPreElement>("#count")!.innerText = `(${count})`;
@@ -70,7 +70,7 @@ function setupGetTopConcepts() {
 
 function setupGetConcepts() {
     document.querySelector<HTMLButtonElement>("#conceptsButton")!.addEventListener("click", async () => {
-        const { count, data, profiles } = await getList(API_BASE_URL + "/concept-hierarchy/exm:TopLevelConcept/narrowers?_mediatype=text%2Fanot%2Bturtle&page=1&per_page=20");
+        const { count, data, profiles } = await getList(API_BASE_URL, "/concept-hierarchy/exm:TopLevelConcept/narrowers?_mediatype=text%2Fanot%2Bturtle&page=1&limit=20");
         document.querySelector<HTMLPreElement>("#data")!.innerText = JSON.stringify(data, null, 2);
         document.querySelector<HTMLPreElement>("#profiles")!.innerText = JSON.stringify(profiles, null, 2);
         document.querySelector<HTMLPreElement>("#count")!.innerText = `(${count})`;

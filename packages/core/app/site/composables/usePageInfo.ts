@@ -8,7 +8,7 @@ export const useGetInitialPageUrl = () => {
 
     return route.path + '?' + new URLSearchParams({
         page: '1',
-        per_page: (appConfig.pagination.itemsPerPage || 10).toString(),
+        limit: (appConfig.pagination.itemsPerPage || 10).toString(),
         ...route.query,
     }).toString();
 
@@ -19,12 +19,12 @@ export const usePageInfo = (dataRef?: Ref<PrezDataList | PrezDataSearch | undefi
     const appConfig = useAppConfig();
 
     const pagination = computed(() => {
-        const per_page = parseInt(route.query?.per_page?.toString() || (appConfig.pagination.itemsPerPage || 10).toString());
+        const limit = parseInt(route.query?.limit?.toString() || (appConfig.pagination.itemsPerPage || 10).toString());
         const page = parseInt(route.query?.page?.toString() || '1');
-        const first = (page - 1) * per_page + 1;
+        const first = (page - 1) * limit + 1;
 
         return {
-            per_page,
+            limit,
             page,
             first,
         };
@@ -34,7 +34,7 @@ export const usePageInfo = (dataRef?: Ref<PrezDataList | PrezDataSearch | undefi
         return route.path + '?' + new URLSearchParams({
             ...route.query, 
             page: pagination.value.page.toString(), 
-            per_page: pagination.value.per_page.toString()
+            limit: pagination.value.limit.toString()
         }).toString();
     };
 

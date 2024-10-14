@@ -74,7 +74,7 @@ const isExtLink = url ? url.startsWith('http') || url.startsWith('mailto') : fal
 const isSecondaryExtLink = secondaryUrl ? secondaryUrl.startsWith('http') || secondaryUrl.startsWith('mailto') : false;
 
 // If we have a nuxt environment, use the nuxt link
-const navigateToLink = (event: MouseEvent, path: string) => {
+const navigateToLink = (event: Event, path: string) => {
     if (path.startsWith('/')) {
         event.preventDefault();
         try {
