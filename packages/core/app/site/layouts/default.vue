@@ -8,8 +8,10 @@ const globalConfig = useGlobalConfig();
 const apiEndpoint = useGetPrezAPIEndpoint();
 const altEndpoints = useGetPrezAPIAltEndpoints();
 const menu = appConfig.menu;
-
-const expanded = ref(!!localStorage.getItem('expanded'));
+const expanded = ref(false);
+onBeforeMount(() => {
+  expanded.value = !!localStorage.getItem('expanded');
+});
 watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
 
 const debugOn = ref(runtimeConfig.public.prezDebug && !!localStorage.getItem('debug'));
