@@ -1,8 +1,9 @@
-import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad } from "n3";
-import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezLinkParent } from "./types";
+import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad, NamedNode } from "n3";
+import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezLinkParent, PrezBlankNode, PrezNodeList } from "./types";
 import { ANNOTATION_PREDICATES, DEFAULT_PREFIXES, PREZ_PREDICATES, SYSTEM_PREDICATES } from "./consts";
-import { defaultToIri, defaultFromIri } from "./helpers";
+import { defaultToIri, defaultFromIri, dumpNodeArray } from "./helpers";
 import { node, literal, bnode } from "./factory";
+import * as RDF from "@rdfjs/types";
 
 const { namedNode } = DataFactory;
 
@@ -15,6 +16,8 @@ export class RDFStore {
     public prefixes: { [namespace: string]: string };
     private basePath: string;
     private baseUrl: string;
+    private linkedLists: Record<string, RDF.Term[]>;
+    private lists: Record<string, PrezNodeList[]>;
 
     constructor() {
         this.store = new Store();
@@ -22,6 +25,8 @@ export class RDFStore {
         this.basePath = '';
         this.parser = new Parser();
         this.prefixes = DEFAULT_PREFIXES;
+        this.linkedLists = {};
+        this.lists = {};
     }
 
     /**
@@ -38,6 +43,61 @@ export class RDFStore {
             this.prefixes[prefixName] = prefixNode.value;
         });
         this.store.addQuads(p);
+        this.linkedLists = this.store.extractLists();
+        this.buildLists();
+    }
+
+    /** build sub linked lists */
+    private buildSubList(list: RDF.Term[]): PrezNodeList[] {
+        const items:PrezNodeList[] = [];
+
+        for(const n of list) {
+            if(n.termType == "BlankNode") {
+                const lid = n.value;
+                if(lid in this.linkedLists) {
+                    const subList = this.buildSubList(this.linkedLists[lid]!);
+                    let done = false;
+                    if(subList.length > 1) {
+                        // check if the first item in the subList is a node that has been seen before
+                        const existingList = items.find(i => i.node.value == subList[0]!.node.value);
+                        if(existingList) {
+                            // node has been seen before, so add the rest of the list to the existing node
+                            (existingList.list ??= []).push(...subList.slice(1));
+                        } else {
+                            // first time this node has been seen, so create a new list with the rest of the subList
+                            items.push({node: subList[0]!.node, list: subList.slice(1)});
+                        }
+                    } else {
+                        // only one item in the subList, so add it to the main list
+                        items.push(...subList);
+                    }
+                }
+            } else if(n.termType == 'NamedNode') {
+                if(n.value != SYSTEM_PREDICATES.shaclUnion) {
+                    const nn = this.toPrezTerm(new NamedNode(n.value)) as PrezNode;
+                    items.push({node: nn, list: []});
+                }
+            }
+        }     
+        return items;
+    }
+
+    /** build the top level node array from a linked list */
+    public buildLists() {
+        this.lists = {};
+        const lists = this.linkedLists;
+
+        // get top level lists
+        for(const key in lists) {
+            const list = lists[key]!;
+            const isUnion = list.find(n=>n.termType == "NamedNode" && n.value == SYSTEM_PREDICATES.shaclUnion);
+            if(isUnion) {
+                const bnList = list.find(n=>n.termType == "BlankNode");
+                if(bnList && bnList.value in this.linkedLists) {
+                    this.lists[key] = this.buildSubList(this.linkedLists[bnList.value]!);
+                }
+            }
+        }
     }
 
     /**
@@ -78,43 +138,8 @@ export class RDFStore {
 
     // public getRdfList() { }
 
-    // temporary implementation for now
-    private getAnnotation(iri: string, annotation: "label" | "description" | "provenance"): PrezLiteral | undefined {
-        return this.getObjects(iri, ANNOTATION_PREDICATES[annotation]).map(o => this.toPrezTerm(o) as PrezLiteral)[0] || undefined;
-    }
-
     private getObjectLiteral(iri: string, predicate: string): PrezLiteral | undefined {
         return this.getObjects(iri, predicate).map(o => this.toPrezTerm(o) as PrezLiteral)[0] || undefined;
-    }
-
-    /**
-     * Gets the preferred label of an object
-     * 
-     * @param iri 
-     * @returns the label
-     */
-    public getLabel(iri: string): PrezLiteral | undefined {
-        return this.getAnnotation(iri, "label");
-    }
-
-    /**
-     * Gets the preferred description of an object
-     * 
-     * @param iri 
-     * @returns the description
-     */
-    public getDescription(iri: string): PrezLiteral | undefined {
-        return this.getAnnotation(iri, "description");
-    }
-
-    /**
-     * Gets the preferred provenance of an object
-     * 
-     * @param iri 
-     * @returns the provenance
-     */
-    public getProvenance(iri: string): PrezLiteral | undefined {
-        return this.getAnnotation(iri, "provenance");
     }
 
     public getProperties(term: Term, options?: {excludePrefix?: string, includePrefix?: string}): PrezProperties {
@@ -132,6 +157,10 @@ export class RDFStore {
 
             props[q.predicate.value]!.objects.push(this.toPrezTerm(q.object));
         }, term, null, null, null);
+
+        if(term.termType === "BlankNode") {
+
+        }
 
         return props;
     }
@@ -195,16 +224,6 @@ export class RDFStore {
                     n.rdfTypes = types.map(t => this.toPrezTerm(t) as PrezNode)
                 }
 
-                // NO LONGER AUTO GENERATE CURIE BASED OFF PASSED PREFIXES, DAVID WILL FIX BY PASSING BACK GOOD DATA
-                // curie
-//                Object.entries(DEFAULT_PREFIXES).forEach(([prefix, namespace]) => {
-                // Object.entries(this.prefixes).forEach(([prefix, namespace]) => {
-                //     //const match = term.value.match(/.*[#\/](.*)$/)
-                //     if (term.value.startsWith(namespace)) {
-                //         n.curie = prefix + ":" + term.value.split("#").slice(-1)[0].split("/").slice(-1)[0];
-                //     }
-                // });
-
                 return n;
             case "Literal":
                 const l = literal(term.value);
@@ -222,6 +241,11 @@ export class RDFStore {
                 const b = bnode(term.value);
 
                 b.properties = this.getProperties(term);
+
+                // see if this blank node is a list
+                if(term.value in this.lists) {
+                    b.list = this.lists[term.value];
+                }
 
                 return b;
             default:
@@ -341,7 +365,7 @@ export class RDFStore {
     }
 
     /**
-     * Gets a one or more subjects based on having a `dcterms:identifier"..."^^prez:identifier`
+     * Gets a one or more subjects based on having a prez FocusNode identifier
      * 
      * @param id optional id to match to get one subject
      * @returns one or more subjects
@@ -354,13 +378,7 @@ export class RDFStore {
         this.store.forEach(q => {
             ids.push(q);
         }, null, null, namedNode('https://prez.dev/FocusNode'), null);
-            
-        // this.store.forEach(q => {
-        //     console.log("LOOKUP", q)
-        //     if (q.object.termType === "Literal" && q.object.datatype.value === this.toIri("prez:identifier")) {
-        //         ids.push(q);
-        //     }
-        // }, null, namedNode(this.toIri("dcterms:identifier")), null, null);
+        
         if (id) {
             return ids.find(q => q.object.value === id)!.subject;
         } else {
@@ -428,6 +446,24 @@ export class RDFStore {
         }
         
         return item;
+    }
+
+    /**
+     * Return nested subitems for a given predicate
+     * 
+     * @param predicate Predicate IRI to lookup
+     * @returns 
+     */
+    public getSubItems(predicate:string) {
+        const nodes = this.store.getQuads(null, predicate, null, null);
+        const subItems:PrezFocusNode[] = [];
+        nodes.forEach(subItem => {
+            const node = this.toPrezFocusNode(subItem.object);
+            if(node) {
+                subItems.push(node);
+            }
+        });
+        return subItems;
     }
 
     /**

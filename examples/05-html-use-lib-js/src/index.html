@@ -6,16 +6,116 @@
     <title>Prez UI Example</title>
     <!-- Include Bulma CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <style>
+        pre {
+            margin-top:10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+        }
+    </style>
+    <script>
+        //const baseUrl = 'https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com';
+        const baseUrl = 'https://prez-v4-vocabs.gentlepond-d263b5f7.australiaeast.azurecontainerapps.io';
+    </script>
 </head>
 <body>
     <section class="section">
         <div class="container">
             <h1 class="title">Prez UI Library Example</h1>
+            <p>These examples show how to use Prez UI Library to access data that is returned as an object.</p>
+            <br>
+            <p />
+            <br>
+            <p />
             <div id="app" class="content">
-                <!-- Your content goes here -->
-                <p>This is a simple example page using Prez UI Library.</p>
-                <button id="exampleButton" class="button is-primary">Click Me</button>
-                <div id="output"></div>
+
+                <h2>Example 1: Get a list of items</h2>
+                <button 
+                    class="button is-primary"
+                    onclick="setResult('get-list', PrezLib.getList(baseUrl, '/catalogs'))"
+                    >
+                    Get list
+                </button>
+                <pre id="get-list"></pre>
+                <hr>
+
+                <h2>Example 2: Get a list, render as a table</h2>
+                <button 
+                    class="button is-primary"
+                    onclick="setTable('get-list-table', PrezLib.getList(baseUrl, '/catalogs/bdr-cat:nrm/collections'), ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type', 'http://purl.org/dc/terms/publisher'])"
+                    >
+                    Get list as table
+                </button>
+                <p />
+                <div id="get-list-table"></div>
+                <hr>
+
+
+                <h2>Example 3: Get an item</h2>
+                <button 
+                    class="button is-primary"
+                    onclick="setResult('get-item', PrezLib.getItem(baseUrl, '/catalogs/bdr-cat:abis'))"
+                    >
+                    Get Item
+                </button>
+                <pre id="get-item"></pre>
+                <hr>
+
+                <h2>Example 4: Get top concepts in a vocab</h2>
+                <button 
+                    class="button is-primary"
+                    onclick="setResult('get-concepts', PrezLib.getList(baseUrl, '/concept-hierarchy/abis:vocab-themes/top-concepts?page=1&limit=20'))"
+                    >
+                    Get Top Concepts
+                </button>
+                <pre id="get-concepts"></pre>
+                <hr>
+
+                <h2>Example 5: Search with free text</h2>
+                <p>
+                    Add search text here... (?q=cat)
+                </p>
+                <button 
+                    class="button is-primary"
+                    onclick="setResult('search-text', PrezLib.search(baseUrl, '/search?q=cat'))"
+                    >
+                    Search
+                </button>
+                <pre id="search-text"></pre>
+                <hr>
+
+                <h2>Example 6: Search with CQL filtering with free text</h2>
+                <button
+                    class="button is-primary"
+                    onclick="setResult('search-text-cql', PrezLib.getList(baseUrl, '/catalogs/bdr-cat:nrm/collections/ibra7-codes:IBRA7/items?filter={%22op%22:+%22in%22,+%22args%22:+[{%22property%22:+%22http://www.w3.org/2004/02/skos/core%23notation%22},+[%22ARC02%22,+%22ARC03%22]]}&q=maningrida'))"
+                    >
+                    Search with CQL
+                </button>
+                <pre id="search-text-cql"></pre>
+                <hr>
+
+                <h2>Example 7: Search with temporal filter</h2>
+                <button
+                    class="button is-primary"
+                    onclick="setResult('search-temp', PrezLib.getList(baseUrl, '/catalogs/bdr-cat:tern-cv/collections?filter={%22op%22:+%22t_intersects%22,+%22args%22:+[{%22property%22:+%22http://purl.org/dc/terms/modified%22},+{%22interval%22:+[%222020-01-01T00:00:00Z%22,+%222020-12-31T23:59:59Z%22]}]}'))"
+                    >
+                    Search Temporal
+                </button>
+                <pre id="search-temp"></pre>
+                <hr>
+
+                                
+
+                <h2>Example 8: Querables</h2>
+
+                <p>
+                    Show's the list of query parameter options available for the given collection.
+                </p>
+                <a target="_blank" href="https://merit-api-container-app.wonderfulcliff-ceae7bf2.australiaeast.azurecontainerapps.io/catalogs/dtst:bdr/collections/syn:1ae9203f-49ba-4daa-921d-371bf0692c71/features/queryables?page=1&limit=10">Link to Querables</a>
+
+                
+
             </div>
         </div>
     </section>
@@ -23,13 +123,48 @@
     <!-- Include the Prez UI Library -->
     <script src="./prez-lib.umd.js"></script>
     <script>
+
+        async function setResult(elName, result) {
+            const data = await result;
+            console.log(elName, data)
+            document.getElementById(elName).innerText = JSON.stringify(data, true, 2);
+        }
+
+        async function get(url) {
+            const response = await fetch(url);
+            console.log(response)
+            return response.json();
+        }
+
+        async function setTable(elName, listPromise, columns) {
+            const result = await listPromise;
+            const container = document.getElementById(elName);
+
+            if (!result || result.length === 0) {
+                container.innerHTML = '<p>No data found.</p>';
+                return;
+            }
+
+            // Build table using JS template literals
+            const tableHtml = `
+                <table class="table is-bordered is-striped is-hoverable">
+                    <thead>
+                        <tr><th>Label</th>${columns.map(col => `<th>${col}</th>`).join('')}</tr>
+                    </thead>
+                    <tbody>
+                        ${result.data.map(item => `
+                            <tr><td>${item.label.value}</td>${columns.map(col => `<td>${(item.properties[col]?.objects || []).map(o=>o.label?.value || o.value).join(', ') || 'N/A'}</td>`).join('')}</tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHtml;
+        }
+
         // Ensure PrezUILib is available
-        if (typeof PrezUILib !== 'undefined') {
-            document.getElementById('exampleButton').addEventListener('click', async function() {
-                // Use a function from PrezUILib
-                const result = await PrezUILib.getItem('https://prezv4-with-fuseki.sgraljii8d3km.ap-southeast-2.cs.amazonlightsail.com/catalogs/bblck-ctlg:bblocks'); // Assuming exampleFunction is a method from your library
-                document.getElementById('output').innerText = 'Result: ' + JSON.stringify(result);
-            });
+        if (typeof PrezLib !== 'undefined') {
+            console.log("PrezLib loaded successfully.");
         } else {
             console.error('PrezUILib is not loaded.');
         }

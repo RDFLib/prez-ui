@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type PrezNode, type PrezTerm } from '@/base/lib';
+import { type PrezFocusNode, type PrezNode, type PrezTerm } from '@/base/lib';
 
 interface Props {
     /** parent term or root focus node */

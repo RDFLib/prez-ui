@@ -1,4 +1,5 @@
 import type { NamedNode, Literal, BlankNode } from "@rdfjs/types";
+import type { RDFStore } from "./store";
 
 /**
  * Contains a `PrezLiteral`, `PrezNode` or `PrezBlankNode`
@@ -112,6 +113,14 @@ export interface PrezConceptNode extends PrezFocusNode {
     hasChildren: boolean;
 }
 
+/** Represents a node and list of subnodes */
+export type PrezNodeList = {
+    node: PrezNode;
+    list?: PrezNodeList[];
+}
+
+/** Used to define a set of profiles along with a node property list structure */
+export type PrezProfiles = Record<string, PrezNodeList[]>;
 
 /**
  * Represents an RDF Blank Node
@@ -121,6 +130,12 @@ export interface PrezBlankNode extends Omit<BlankNode, "equals"> {
      * Contains children triples within the blank node
      */
     properties: PrezProperties;
+
+    /**
+     * Where this blank node represents a list of predicates
+     */
+    list?: PrezNodeList[];
+
 
     /**
      * @param other The term to compare with.
@@ -247,6 +262,7 @@ export interface PrezDataList extends PrezData {
 export interface PrezDataItem extends PrezData {
     type: 'item';
     data: PrezFocusNode | PrezConceptSchemeNode;
+    store: RDFStore;
 }
 
 export interface PrezDataItem extends PrezData {

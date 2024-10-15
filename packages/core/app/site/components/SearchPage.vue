@@ -1,12 +1,12 @@
 <script setup lang="ts">
 
 const appConfig = useAppConfig();
-const runtimeConfig = useRuntimeConfig();
+const apiEndpoint = useGetPrezAPIEndpoint();
 const { getPageUrl, navigateToPage, pagination, formSubmitToNavigate } = usePageInfo();
 const route = useRoute();
 const urlPath = ref(getPageUrl());
 
-const { status, error, data } = useSearch(runtimeConfig.public.prezApiEndpoint, urlPath);
+const { status, error, data } = useSearch(apiEndpoint, urlPath);
 
 const q = ref((route.query.q || '').toString());
 

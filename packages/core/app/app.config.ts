@@ -12,7 +12,8 @@ export default defineAppConfig({
     'catalogs': 'Catalogs',
     'items': 'Items',
     'profiles': 'Profiles',
-    'collections': 'Collections'
+    'collections': 'Collections',
+    'object': 'Object'
   } as Record<string, string>,
 
   breadcrumbPrepend: [

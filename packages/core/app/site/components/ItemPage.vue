@@ -1,17 +1,27 @@
 <script lang="ts" setup>
-import { getTopConceptsUrl, SYSTEM_PREDICATES } from '@/base/lib';
+import { dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezNode } from '@/base/lib';
 
 const appConfig = useAppConfig();
-const runtimeConfig = useRuntimeConfig();
 const { globalProfiles } = useGlobalProfiles();
 const router = useRouter();
+const route = useRoute();
 const { getPageUrl } = usePageInfo();
 const urlPath = ref(getPageUrl());
-const { status, error, data } = useGetItem(runtimeConfig.public.prezApiEndpoint, urlPath);
+const apiEndpoint = useGetPrezAPIEndpoint();
+const { status, error, data } = useGetItem(apiEndpoint, urlPath);
 const isConceptScheme = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.skosConceptScheme));
 const topConceptsUrl = computed(()=>isConceptScheme ? getTopConceptsUrl(data.value!.data) : '');
-const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')[0];
+const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
+
+
+const getSubNodes = computed(()=>{
+    const profile = globalProfiles.value?.[currentProfile.value?.uri || ''];
+    if(data.value && profile) {
+        console.log("CURRENT PROFILE", profile)
+    }
+})
+
 </script>
 <template>
     <NuxtLayout sidepanel>
@@ -21,6 +31,10 @@ const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.c
                 <Node v-if="data" :key="data?.data.value" :term="data.data" variant="item-header" />
                 <div v-else>&nbsp;</div>
             </slot>
+        </template>
+
+        <template #debug>
+            <pre class="text-xs p-2"><small><b>{{currentProfile?.title}}</b><br>{{ dumpNodeArray(globalProfiles?.[currentProfile?.uri || '']) }}</small></pre>
         </template>
 
         <template #breadcrumb>
@@ -62,7 +76,7 @@ const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.c
                         </slot>
                         <slot name="header-bottom" :data="data"></slot>
                     </slot>
-                    <div class="mt-2 mb-12">
+                    <div class="mt-2 mb-12 overflow-auto">
                         <slot name="item-section" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
                             <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
                             <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl" :fields="globalProfiles && currentProfile ? globalProfiles[currentProfile && currentProfile.uri] : undefined">
@@ -90,7 +104,7 @@ const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.c
                                     <p><b>Concepts</b></p>
                                     <div class="mt-4">
                                         <ConceptHierarchy
-                                            :base-url="runtimeConfig.public.prezApiEndpoint" 
+                                            :base-url="apiEndpoint" 
                                             :url-path="topConceptsUrl"
                                         />
                                     </div>
@@ -110,7 +124,7 @@ const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.c
 
         <template #sidepanel>
             <slot name="profiles" :data="data" :apiUrl="apiUrl" :status="status">
-                <ItemProfiles :key="status" :apiUrl="apiUrl" :loading="status == 'pending'" :profiles="data?.profiles" />
+                <ItemProfiles :key="status" :objectUri="route.query.uri" :apiUrl="apiUrl" :loading="status == 'pending'" :profiles="data?.profiles" />
             </slot>
         </template>
 

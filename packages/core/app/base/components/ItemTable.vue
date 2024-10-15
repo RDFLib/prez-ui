@@ -1,15 +1,16 @@
 <script lang="ts" setup>
 import DataTable from 'primevue/datatable';
 
+import { type PrezFocusNode, type PrezProperty, type PrezTerm, type PrezNodeList } from '@/base/lib';
+
 interface Props {
     /** optional, fields in order to display */
-    fields?: string[];
+    fields?: PrezNodeList[];
 
     /** parent term or root focus node */
     term: PrezTerm;
 }
 
-import { type PrezFocusNode, type PrezProperty, type PrezTerm } from '@/base/lib';
 
 const props = defineProps<Props>();
 const term = props.term as PrezFocusNode;
@@ -17,9 +18,9 @@ const term = props.term as PrezFocusNode;
 const fieldNames = Object.keys(term.properties || {});
 
 const fields = computed(()=>
-    [...(props.fields || []).filter(f => fieldNames.includes(f)),    // add fields that are in the list
-    ...fieldNames.filter(f => !((props.fields || []).includes(f)))   // add the rest of the fields that are not in the list
-    ].map(f=>term.properties![f] as PrezProperty)
+    [...(props.fields || []).filter(f => fieldNames.includes(f.node.value)).map(f=>f.node.value),    // add fields that are in the list
+    ...fieldNames.filter(fname => !(props.fields || []).find(f=>f.node.value == fname))              // add the rest of the fields that are not in the list
+    ].filter(f=>f in (term.properties || {})).map(f=>term.properties![f] as PrezProperty)
 );
 
 // const fields = Object.values(term.properties || {})
@@ -27,6 +28,9 @@ const fields = computed(()=>
 </script>
 <template>
     <div v-if="term?.properties">
+        <!-- Global Profile Order: {{ props.fields }}
+        <hr>
+        Result order: {{ fields }} -->
         <DataTable :value="fields" striped-rows>
             <template #default>
                 <table class="p-datatable-table">

@@ -1,16 +1,18 @@
 <script lang="ts" setup>
+import { dumpNodeArray } from '~/base/lib';
+
 
 const appConfig = useAppConfig();
-const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
 const { globalProfiles } = useGlobalProfiles();
 
 const urlPath = ref(useGetInitialPageUrl());
-const { status, error, data } = useGetList(runtimeConfig.public.prezApiEndpoint, urlPath);
+const apiEndpoint = useGetPrezAPIEndpoint();
+const { status, error, data } = useGetList(apiEndpoint, urlPath);
 
 const { getPageUrl, navigateToPage, pagination } = usePageInfo(data);
 
-const apiUrl = (runtimeConfig.public.prezApiEndpoint + urlPath.value).split('?')[0];
+const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
 
 const header = computed(()=>{
@@ -31,10 +33,15 @@ watch(()=>route.fullPath, () => {
         <template #header-text>
             {{ header }}
         </template>
+        <template #debug>
+            <pre class="text-xs p-2"><b>{{currentProfile?.title}}</b><br>{{ dumpNodeArray(globalProfiles?.[currentProfile?.uri || '']) }}</pre>
+        </template>
         <template #breadcrumb>
-            <ItemBreadcrumb :key="data?.data?.length" v-if="data" :prepend="appConfig.breadcrumbPrepend || []" :name-substitutions="appConfig.nameSubstitutions" :parents="data.parents" />
-            <ItemBreadcrumb v-else-if="error" :custom-items="[{url: '/', label: 'Unable to load page'}]" />
-            <ItemBreadcrumb v-else :prepend="appConfig.breadcrumbPrepend" :custom-items="[{url: '#', label: '...'}]" />
+            <div :key="data?.parents.join()">
+                <ItemBreadcrumb v-if="data" :prepend="appConfig.breadcrumbPrepend || []" :name-substitutions="appConfig.nameSubstitutions" :parents="data.parents" />
+                <ItemBreadcrumb v-else-if="error" :custom-items="[{url: '/', label: 'Unable to load page'}]" />
+                <ItemBreadcrumb v-else :prepend="appConfig.breadcrumbPrepend" :custom-items="[{url: '#', label: '...'}]" />
+            </div>
         </template>
         <template #default>
             <div>

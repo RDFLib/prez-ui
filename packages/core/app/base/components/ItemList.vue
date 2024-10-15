@@ -1,28 +1,15 @@
 <script lang="ts" setup>
 import { defineProps } from 'vue';
-import type { PrezFocusNode, PrezProperty } from '../lib';
+import type { PrezFocusNode, PrezNodeList } from '../lib';
 
 interface Props {
   /** optional, fields in order to display */
-  fields?: string[];
-
+  fields?: PrezNodeList[];
   list: PrezFocusNode[];
 }
 
 const props = defineProps<Props>();
-
 const list = props.list;
-const properties = list?.[0]?.properties;
-
-const fieldNames = Object.keys(properties || {});
-
-const fields = computed(() =>
-  [
-    ...(props.fields || []).filter(f => fieldNames.includes(f)), // add fields from props that exist in the list
-    ...fieldNames.filter(f => !(props.fields || []).includes(f)), // add the remaining fields
-  ].map(f => properties![f] as PrezProperty)
-);
-
 
 </script>
 <template>
@@ -39,18 +26,19 @@ const fields = computed(() =>
         </template>
       </Column>
       <Column
+        v-if="fields"
         :frozen="false"
         v-for="col in fields"
-        :key="col.predicate.value"
+        :key="col.node.value"
       >
         <template #header="slotProps">
-          <b><Predicate :predicate="col.predicate" :objects="col.objects" /></b>
+          <b><Predicate :predicate="col.node" :objects="[]" /></b>
         </template>
         <template #body="slotProps">
-          <Objects v-if="slotProps.data.properties[col.predicate.value]?.objects" 
-            :term="col.predicate" 
-            :predicate="col.predicate" 
-            :objects="slotProps.data.properties[col.predicate.value]?.objects" 
+          <Objects v-if="slotProps.data.properties[col.node.value]?.objects" 
+            :term="col.node"
+            :predicate="col.node" 
+            :objects="slotProps.data.properties[col.node.value]?.objects" 
             variant="item-list" />
         </template>
       </Column>

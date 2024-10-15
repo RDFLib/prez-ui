@@ -15,9 +15,13 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve(__dirname, pathToSrc + "/index.ts"),
-            name: "prez-lib",
-            fileName: "prez-lib",
+            name: "PrezLib",
+            fileName: (format) => `prez-lib.${format}.js`, // Define extension for UMD
+            formats: ['umd'], // Specify UMD format explicitly
         },
+        rollupOptions: {
+            external: ['@rdfjs/types'], // Mark it as external
+        }        
     },
     plugins: [
         dts({

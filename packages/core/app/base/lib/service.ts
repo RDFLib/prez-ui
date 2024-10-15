@@ -1,6 +1,7 @@
-import type { PrezDataItem, PrezDataList, PrezDataSearch, PrezProfileHeader } from "./types";
+import type { PrezBlankNode, PrezDataItem, PrezDataList, PrezDataSearch, PrezProfileHeader, PrezProfiles } from "./types";
 import { RDFStore } from "./store";
 import { getUrlPath } from "./helpers";
+import { SYSTEM_PREDICATES } from "./consts";
 
 type LinkObject = {
     uri: string;
@@ -109,13 +110,13 @@ export async function getList(baseUrl:string, path: string): Promise<PrezDataLis
     store.load(data);
     return { type: 'list', data: store.getList(), profiles, 
         maxReached: store.getMaxReached(), count: store.getCount(), 
-        parents: store.getParents(pathOnly) 
+        parents: store.getParents(pathOnly)
     };
 }
 
 
 /**
- * Gets an item object from an item endpoint
+ * Gets an item object from an item endpoint, note store is returned in order to allow for additional nested processing calls
  * 
  * @param url 
  * @param id the prez:identifier of the object to get
@@ -128,7 +129,7 @@ export async function getItem(baseUrl: string, path: string): Promise<PrezDataIt
     const store = new RDFStore();
     store.setBaseUrl(baseUrl);
     store.load(data);
-    return { type: 'item', data: store.getItem(), profiles, parents: store.getParents(pathOnly) };
+    return { type: 'item', data: store.getItem(), profiles, parents: store.getParents(pathOnly), store };
 }
 
 /**
@@ -147,6 +148,32 @@ export async function search(baseUrl: string, path: string): Promise<PrezDataSea
     return { 
         type: 'search', data: store.search(), profiles, 
         maxReached: store.getMaxReached(), count: store.getCount(), 
-        parents: store.getParents(pathOnly) 
+        parents: store.getParents(pathOnly)
     };
 }
+
+export async function getProfiles(baseUrl: string): Promise<PrezProfiles> {
+    const path = '/profiles?page=1&limit=999&_mediatype=application/anot%2Bturtle';
+    const { data } = await getList(baseUrl, path);
+    const profiles: PrezProfiles = {};
+    for(const profile of data) {
+        profiles[profile.value] = [];
+        if(profile.properties && profile.properties?.[SYSTEM_PREDICATES.shaclProperty]?.objects) {
+            const objects = profile.properties[SYSTEM_PREDICATES.shaclProperty]!.objects;
+            for(const obj of objects) {
+                const bn = obj as PrezBlankNode;
+                if(bn.properties && bn.properties[SYSTEM_PREDICATES.shaclPath]) {
+                    for(const obj2 of bn.properties[SYSTEM_PREDICATES.shaclPath]!.objects) {
+                        const list = (obj2 as PrezBlankNode).list;
+                        if(list) {
+                            profiles[profile.value] = list;
+                        }
+                    }    
+                }
+            }
+        }
+    }
+    return profiles;
+}
+
+

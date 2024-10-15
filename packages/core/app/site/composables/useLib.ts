@@ -39,6 +39,29 @@ type ListOptions = {
     appendMode?: boolean;
 }
 
+export const useSetAPIEndpoint = (endpoint: string) => {
+    localStorage.setItem('prezApi', endpoint);
+}
+
+export const useGetPrezAPIEndpoint = () => {
+    const apiOverride = localStorage.getItem('prezApi');
+    const runtimeConfig = useRuntimeConfig();
+    if(runtimeConfig.public.prezAllowApiEndpointChange && apiOverride) {
+        return apiOverride;
+    }
+    return useRuntimeConfig().public.prezApiEndpoint;
+}
+
+/** get alternate endpoints */
+export const useGetPrezAPIAltEndpoints = () => {
+    const runtimeConfig = useRuntimeConfig();
+    const alts = runtimeConfig.public.prezApiEndpointAlt.split(',').filter((endpoint:string) => endpoint.trim().length > 0);
+    const altNames = runtimeConfig.public.prezApiEndpointAltNames.split(',').filter((name:string) => name.trim().length > 0);
+    return alts.map((endpoint:string , index:number) => {
+        return {name: altNames?.[index] || `#${index}`, endpoint};
+    })
+}
+
 export const useGetList = (baseUrl: string, urlPath: Ref<string>, options?:ListOptions) => {
     const data = ref<PrezDataList | undefined>(undefined);
     const status = ref<FetchStatus>('idle');
@@ -105,6 +128,7 @@ export const useGetItem = (baseUrl: string, urlPath: Ref<string>) => {
     const data = ref<PrezDataItem | undefined>(undefined);
     const status = ref<FetchStatus>('idle');
     const error = ref<Error | undefined>(undefined);
+    const runtimeConfig = useRuntimeConfig();
 
     const execute = async (): Promise<PrezDataItem> => {
         const cacheKey = urlPath.value;
@@ -121,6 +145,9 @@ export const useGetItem = (baseUrl: string, urlPath: Ref<string>) => {
             const response = await getItem(baseUrl, urlPath.value);
             data.value = response;
             cacheSetData(cacheKey, cacheTransform(response));
+            if(runtimeConfig.public.prezDebug) {
+                console.log("Item (debug mode)", data.value);
+            }
             status.value = 'success';
             return response;
         } catch (ex) {
@@ -141,6 +168,7 @@ export const useGetItem = (baseUrl: string, urlPath: Ref<string>) => {
         execute,
     };
 };
+
 
 // Fetching search results with caching
 export const useSearch = (baseUrl: string, urlPath: Ref<string>) => {

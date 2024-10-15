@@ -1,9 +1,20 @@
 <script setup lang="ts">
+import { useGetPrezAPIAltEndpoints, useSetAPIEndpoint } from '../composables/useLib';
+
 const props = defineProps<{sidepanel?: boolean, contentonly?: boolean}>()
 const appConfig = useAppConfig();
+const runtimeConfig = useRuntimeConfig();
+const globalConfig = useGlobalConfig();
+const apiEndpoint = useGetPrezAPIEndpoint();
+const altEndpoints = useGetPrezAPIAltEndpoints();
 const menu = appConfig.menu;
+
 const expanded = ref(!!localStorage.getItem('expanded'));
 watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
+
+const debugOn = ref(runtimeConfig.public.prezDebug && !!localStorage.getItem('debug'));
+watch(debugOn, val => localStorage.setItem('debug', val && '1' || ''));
+
 
 </script>
 <template>
@@ -16,7 +27,7 @@ watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
                 
                 <!-- Logo area -->
                 <nuxt-link to="/" class="text-4xl hidden md:block">
-                    Prez Documentation
+                    <slot name="logo">Prez Documentation</slot>
                 </nuxt-link>
 
                 <!-- Navigation -->
@@ -28,22 +39,36 @@ watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
             </div>
         </header>
 
-        <div class="border-b">
+        <div class="border-b relative">
             <nav class="container font-extralight mx-auto px-4 py-4 hidden md:flex space-x-12 text-lg text-primary">
                 <nuxt-link v-for="{label, url} in menu" :to="url" class="border-b-[5px] border-transparent hover:border-orange-500">{{ label }}</nuxt-link>
+                <div v-if="runtimeConfig.public.prezDebug" class="!ml-auto">
+                    <div v-if="debugOn"><i title="Toggle debug off" class="hover:cursor-pointer hover:text-gray-500 pi pi-cog text-blue-400" @click="()=>{ debugOn = !debugOn }"></i></div>
+                    <i v-else title="Toggle debug on" class="hover:cursor-pointer hover:text-gray-500 pi pi-cog text-gray-300" @click="()=>{ debugOn = !debugOn }"></i>
+                </div>
             </nav>
         </div>
 
         <slot v-if="!contentonly" name="header">
             <div class="bg-gray-100">
-                <div class="container px-4 py-4 mx-auto">
-                    <slot name="breadcrumb" />
-                    <div class="text-3xl pb-7">
-                        <slot name="header-text" />
+                <div class="container mx-auto flex flex-row">
+                    <div class="px-4 py-4 flex-grow">
+                        <slot name="breadcrumb" />
+                        <div class="text-3xl pb-7">
+                            <slot name="header-text" />
+                        </div>
+                    </div>
+                    <div v-if="debugOn" class="m-2 bg-gray-200 rounded-lg">
+                        <slot name="debug" />
                     </div>
                 </div>
             </div>
-        </slot> 
+        </slot>
+        <div v-else-if="debugOn" class="bg-gray-100">
+            <div class="container px-4 py-4 mx-auto">
+                <slot name="debug" />
+            </div>
+        </div>
 
         <div class="container mx-auto flex-grow">
 
@@ -70,8 +95,17 @@ watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
         <footer class="bg-gray-800 text-white py-4">
             <div class="container mx-auto text-center">
                 <p>about your organisation</p>
+                <a :href="apiEndpoint" target="_new"><small v-if="globalConfig?.version">Prez Version - API {{ globalConfig?.version }}</small></a>
+                <div v-if="apiEndpoint != runtimeConfig.public.prezApiEndpoint && !altEndpoints.find(e=>e.endpoint == apiEndpoint)">
+                    <em><small>custom override API endpoint {{ apiEndpoint }}</small></em>
+                </div>
+                <ul v-if="altEndpoints" class="flex space-x-1 text-sm text-gray-400 justify-center [&>li:not(:last-child)]:after:content-['|'] [&>li:not(:last-child)]:after:mx-2">
+                    <li class="hover:cursor-pointer" v-for="({endpoint, name}) of [{name: 'Default', endpoint: runtimeConfig.public.prezApiEndpoint}, ...altEndpoints]">
+                        <a :class="apiEndpoint == endpoint ? '!text-yellow-200' : ''" :href="`/?_api=${endpoint}`">{{ name }}</a>
+                    </li>
+                </ul>
             </div>
         </footer>
 
     </div>
-  </template>
+</template>

@@ -144,3 +144,70 @@ export const buildProfiles = (data: any[]): Record<string, string[]> => {
       return acc;
     }, {} as Record<string, string[]>);
 }
+
+/** this function is used to construct a simple object to show profile info in the debug panel */
+export function simplifyNodeArray(input: any): any {
+  if (Array.isArray(input)) {
+    // Handle arrays recursively and merge objects
+    return input.reduce((acc, item) => {
+      const result = simplifyNodeArray(item);
+      if (typeof result === 'object' && !Array.isArray(result)) {
+        Object.assign(acc, result); // Merge objects instead of creating arrays of objects
+      }
+      return acc;
+    }, {});
+  } else if (typeof input === 'object' && input !== null) {
+    // Check for 'value' property and return it
+    if (input.hasOwnProperty('value')) {
+      return input.value;
+    } else if (input.hasOwnProperty('node') && input.hasOwnProperty('list')) {
+      // Custom logic for converting 'node' and 'list' structure
+      const result: any = {};
+      result[input.node.value] = input.list.length > 0 ? simplifyNodeArray(input.list) : "";
+      return result;
+    } else {
+      // Recursively handle other objects
+      const result: any = {};
+      for (const key in input) {
+        result[key] = simplifyNodeArray(input[key]);
+      }
+      return result;
+    }
+  }
+  return input; // Return item as-is if it's neither array nor object
+}
+
+/* turn a node array into a tree object, for the debug panel */
+export function nodeArrayToTree(obj:any, prefix = '') {
+    let tree = '';
+    const entries = Object.entries(obj);
+    const totalEntries = entries.length;
+  
+    entries.forEach(([key, value], index) => {
+      // Remove http(s):// and www.
+      const formattedKey = key.replace(/https?:\/\/(www\.)?/, '');
+      const [domainAndPath, fragment] = formattedKey.split('#');
+      const pathParts = domainAndPath!.split('/');
+      const lastPathPart = pathParts[pathParts.length - 1];
+      const displayKey = fragment 
+        ? `(${pathParts[0]})/${lastPathPart}#${fragment}` 
+        : `(${pathParts[0]})/${lastPathPart}`;
+  
+      const isLast = index === totalEntries - 1;
+      const branch = isLast ? '└── ' : '├── ';
+      tree += `${prefix}${branch}${displayKey}\n`;
+  
+      // If the value is an object, recurse into it
+      if (typeof value === 'object' && value !== null) {
+        const newPrefix = isLast ? '    ' : '│   ';
+        tree+= nodeArrayToTree(value, prefix + newPrefix);
+      }
+    });
+  
+    return tree;
+}
+
+/** this function is used to dump a profile node array into a simple string tree */
+export function dumpNodeArray(obj:any) {
+    return obj ? nodeArrayToTree(simplifyNodeArray(obj)) : '';
+}

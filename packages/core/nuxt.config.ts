@@ -19,9 +19,13 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       prezApiEndpoint: "http://localhost:8000",
-      prezUtilsTestPath: "/catalogs/ns:catId/collections/ns:colId/items/ns:itemId"
+      prezApiEndpointAlt: "",
+      prezApiEndpointAltNames: "",
+      prezUtilsTestPath: "/catalogs/ns:catId/collections/ns:colId/items/ns:itemId",
+      prezDebug: false,
+      prezAllowApiEndpointChange: false
     }
-  },  
+  },
 
   extends: [
     ...(process.env.PREZ_CORE_EXTENDS ? process.env.PREZ_CORE_EXTENDS.split(",") : []),

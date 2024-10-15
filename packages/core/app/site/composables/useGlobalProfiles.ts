@@ -1,16 +1,20 @@
-import { buildProfiles } from "@/base/lib";
+import { buildProfiles, dumpNodeArray, getList, getProfiles, SYSTEM_PREDICATES, type PrezBlankNode, type PrezFocusNode, type PrezNode, type PrezProfiles, type PrezProperties, type PrezProperty } from "@/base/lib";
 
 export const useGlobalProfiles = () => {
-  const profiles = useState<Record<string, string[]> | null>('globalProfiles', () => null);
-
+  const profiles = useState<PrezProfiles | null>('globalProfiles', () => null);
+  const runtimeConfig = useRuntimeConfig();
+  
   if (!profiles.value) {
-    const { public: { prezApiEndpoint } } = useRuntimeConfig();
 
     setTimeout(async () => {
       try {
-        const data: any[] = await $fetch(`${prezApiEndpoint}/profiles?page=1&limit=999&_mediatype=application/ld%2Bjson`);
-        profiles.value = buildProfiles(data);
-        if (import.meta.dev) console.log('globalProfiles (dev mode)', profiles.value);
+
+        profiles.value = await getProfiles(useGetPrezAPIEndpoint());
+
+        if(runtimeConfig.public.prezDebug) {
+            console.log("Profile Meta (debug mode)", profiles.value)
+        }
+
 
       } catch (err) {
         console.error('Failed to fetch global profiles', err);

@@ -23,10 +23,10 @@ const props = defineProps<Props>();
                     <div class="border-l pl-4 mt-2 ml-2"><Objects :predicate="predicate" :objects="objects" :term="term" variant="item-table" /></div>
                 </td>
                 <template v-else>
-                    <td class="min-w-[1%]">
+                    <td class="w-[1%] whitespace-nowrap">
                         <Predicate :predicate="predicate" :objects="objects" :term="term" variant="item-table" />
                     </td>
-                    <td>
+                    <td class="w-[100%]">
                         <Objects :predicate="predicate" :objects="objects" :term="term" variant="item-table" />
                     </td>
                 </template>

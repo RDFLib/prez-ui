@@ -8,7 +8,7 @@
  */
 import { getNarrowersUrl, type PrezConceptNode } from '@/base/lib';
 const appConfig = useAppConfig();
-const runtimeConfig = useRuntimeConfig();
+const apiEndpoint = useGetPrezAPIEndpoint();
 const route = useRoute();
 
 interface Props {
@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<Props>(), { level: 0 });
 
 const urlPath = ref(props.urlPath + '?page=1&limit=' + appConfig.pagination.conceptsPerPage.toString());
 
-const { status, error, data, hasMore } = await useGetList(runtimeConfig.public.prezApiEndpoint, urlPath, { appendMode: true });
+const { status, error, data, hasMore } = await useGetList(apiEndpoint, urlPath, { appendMode: true });
 
 const concepts = computed(() => (data?.value?.data || []) as PrezConceptNode[]);
 
