@@ -15,6 +15,7 @@ const uriComponent = props.objectUri ? `uri=${encodeURIComponent(props.objectUri
 </script>
 
 <template>
+    <!-- ItemProfiles -->
     <div id="profile-nav" class="ml-0 pt-4 border-l pl-10 pb-10">
         <div>
             <div class="text-xl">

@@ -43,7 +43,6 @@ const fetchData = async () => {
             : undefined;
 
         if(!func) throw new Error(`Unknown type "${props.type}"`)
-console.log("FETCHING ", props.type, props.url)
         const response = await func;
 
         if (props.type === 'list' && Array.isArray(response.data) && (data.value === undefined || Array.isArray(data.value.data))) {

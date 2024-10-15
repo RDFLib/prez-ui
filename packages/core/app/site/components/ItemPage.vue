@@ -34,7 +34,7 @@ const getSubNodes = computed(()=>{
         </template>
 
         <template #debug>
-            <pre class="text-xs p-2"><small><b>{{currentProfile?.title}}</b><br>{{ dumpNodeArray(globalProfiles?.[currentProfile?.uri || '']) }}</small></pre>
+            <pre class="p-2"><small><b>{{currentProfile?.title}}</b><br>{{ dumpNodeArray(globalProfiles?.[currentProfile?.uri || '']) }}</small></pre>
         </template>
 
         <template #breadcrumb>

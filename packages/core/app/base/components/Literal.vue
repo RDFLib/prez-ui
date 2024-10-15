@@ -52,6 +52,7 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
 
 </script>
 <template>
+    <!-- Literal -->
     <slot :term="term" :variant="props.variant">
         <!-- Simple text output only -->
         <template v-if="props.textOnly">

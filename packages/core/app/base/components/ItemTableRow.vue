@@ -15,6 +15,7 @@ interface Props {
 const props = defineProps<Props>();
 </script>
 <template>
+    <!-- ItemTableRow -->
     <slot name="row">
         <tr :class="index % 2 == 1 ? 'p-row-odd' : 'p-row-even'" >
             <slot name="columns">

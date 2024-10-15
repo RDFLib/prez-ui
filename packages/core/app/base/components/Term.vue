@@ -10,7 +10,7 @@ const props = defineProps<Props>();
 
 </script>
 <template>
-
+    <!-- Term -->
     <Literal 
         v-if="props.term.termType == 'Literal'" 
         :term="props.term as PrezLiteral"

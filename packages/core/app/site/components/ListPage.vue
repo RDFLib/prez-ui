@@ -34,7 +34,7 @@ watch(()=>route.fullPath, () => {
             {{ header }}
         </template>
         <template #debug>
-            <pre class="text-xs p-2"><b>{{currentProfile?.title}}</b><br>{{ dumpNodeArray(globalProfiles?.[currentProfile?.uri || '']) }}</pre>
+            <pre class="p-2"><b>{{currentProfile?.title}}</b><br>{{ dumpNodeArray(globalProfiles?.[currentProfile?.uri || '']) }}</pre>
         </template>
         <template #breadcrumb>
             <div :key="data?.parents.join()">

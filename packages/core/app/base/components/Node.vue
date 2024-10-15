@@ -52,6 +52,7 @@ if(tooltip == label) {
 
 </script>
 <template>
+    <!-- Node -->
     <slot name="wrapper" :term="term" :link="term.value" :label="label" :tooltip="tooltip" :variant="variant">
         <slot v-if="textOnly || hideLink" :term="term" :link="term.value" :label="label" :tooltip="tooltip">
                 {{ label }}

@@ -15,6 +15,7 @@ const props = defineProps<Props>();
 
 </script>
 <template>
+    <!-- Predicate -->
     <slot>
         <Node :term="props.predicate" :variant="props.variant" />
     </slot>

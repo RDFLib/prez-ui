@@ -11,6 +11,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {level: 0});
 </script>
 <template>
+    <!-- TermList -->
     <div v-if="props.level == 0">
     </div>
     <div class="pl-2" v-if="props.level < 20">

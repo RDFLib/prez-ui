@@ -10,5 +10,6 @@ const props = defineProps<Props>();
 </script>
 
 <template>
+    <!-- Message -->
     <PVMessage :severity="props.severity">{{ props.text }}</PVMessage>
 </template>

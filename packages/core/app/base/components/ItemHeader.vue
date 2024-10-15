@@ -9,6 +9,7 @@ const props = defineProps<Props>();
 const term = props.term as PrezNode;
 </script>
 <template>
+    <!-- ItemHeader -->
     <div class="prezui-header">
         <div class="prezui-header-title">
             <Node :term="term" variant="item-header" />

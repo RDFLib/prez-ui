@@ -22,6 +22,7 @@ function onClick() {
 </script>
 
 <template>
+    <!-- CopyButton -->
     <Button
         text
         :icon="`pi pi-${clicked ? 'check' : 'copy'}`"

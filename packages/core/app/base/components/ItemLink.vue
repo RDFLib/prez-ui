@@ -94,9 +94,9 @@ const linkClass = props.class ? defaultClasses + ' ' + props.class : defaultClas
 </script>
 
 <template>
+    <!-- ItemLink -->
     <slot name="wrapper" :url="url" :title="props.title" :secondaryUrl="secondaryUrl" :target="target">
         <span>
-            <!-- URL: {{ url }} - 2ND: {{ secondaryUrl }} - #2 - {{ secondaryLink }}<br> -->
             <a v-if="url && !hidePrimaryLink" 
                 :class="linkClass"
                 :href="url" :title="hideTitle ? undefined : props.title" 

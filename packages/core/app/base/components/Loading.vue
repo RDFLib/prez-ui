@@ -8,6 +8,7 @@ interface Props {
 const props = defineProps<Props>();
 </script>
 <template>
+    <!-- Loading -->
     <div v-if="props.variant == 'list'">
         <Skeleton height="2rem" width="20rem" class="mb-2" style="margin-bottom: 20px"/>
         <Skeleton width="50rem" class="mb-2" style="margin-bottom: 8px"/>

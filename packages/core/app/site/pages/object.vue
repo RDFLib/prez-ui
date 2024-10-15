@@ -1,3 +1,3 @@
 <template>
-    <ItemPage />
+    <ItemPageWrapper />
 </template>

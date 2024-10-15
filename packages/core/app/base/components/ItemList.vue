@@ -12,8 +12,8 @@ const props = defineProps<Props>();
 const list = props.list;
 
 </script>
-<template>
-
+<template>  
+  <!-- ItemList -->    
   <div v-if="list">
     <DataTable striped-rows :value="list" table-style="min-width: 50rem">
       <!-- frozen="false" was a fix to get around issues with unstyled presets -->      

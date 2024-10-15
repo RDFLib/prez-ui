@@ -9,13 +9,15 @@ const apiEndpoint = useGetPrezAPIEndpoint();
 const altEndpoints = useGetPrezAPIAltEndpoints();
 const menu = appConfig.menu;
 const expanded = ref(false);
+const showDebugPanel = ref(false);
+
 onBeforeMount(() => {
   expanded.value = !!localStorage.getItem('expanded');
+  showDebugPanel.value = runtimeConfig.public.prezDebug && !!localStorage.getItem('debug');
 });
 watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
 
-const debugOn = ref(runtimeConfig.public.prezDebug && !!localStorage.getItem('debug'));
-watch(debugOn, val => localStorage.setItem('debug', val && '1' || ''));
+watch(showDebugPanel, val => localStorage.setItem('debug', val && '1' || ''));
 
 
 </script>
@@ -29,7 +31,7 @@ watch(debugOn, val => localStorage.setItem('debug', val && '1' || ''));
                 
                 <!-- Logo area -->
                 <nuxt-link to="/" class="text-4xl hidden md:block">
-                    <slot name="logo">Prez Documentation</slot>
+                    <slot name="logo">Prez UI</slot>
                 </nuxt-link>
 
                 <!-- Navigation -->
@@ -45,8 +47,8 @@ watch(debugOn, val => localStorage.setItem('debug', val && '1' || ''));
             <nav class="container font-extralight mx-auto px-4 py-4 hidden md:flex space-x-12 text-lg text-primary">
                 <nuxt-link v-for="{label, url} in menu" :to="url" class="border-b-[5px] border-transparent hover:border-orange-500">{{ label }}</nuxt-link>
                 <div v-if="runtimeConfig.public.prezDebug" class="!ml-auto">
-                    <div v-if="debugOn"><i title="Toggle debug off" class="hover:cursor-pointer hover:text-gray-500 pi pi-cog text-blue-400" @click="()=>{ debugOn = !debugOn }"></i></div>
-                    <i v-else title="Toggle debug on" class="hover:cursor-pointer hover:text-gray-500 pi pi-cog text-gray-300" @click="()=>{ debugOn = !debugOn }"></i>
+                    <div v-if="showDebugPanel"><i title="Toggle debug off" class="hover:cursor-pointer hover:text-gray-500 pi pi-cog text-blue-400" @click="()=>{ showDebugPanel = !showDebugPanel }"></i></div>
+                    <i v-else title="Toggle debug on" class="hover:cursor-pointer hover:text-gray-500 pi pi-cog text-gray-300" @click="()=>{ showDebugPanel = !showDebugPanel }"></i>
                 </div>
             </nav>
         </div>
@@ -60,13 +62,13 @@ watch(debugOn, val => localStorage.setItem('debug', val && '1' || ''));
                             <slot name="header-text" />
                         </div>
                     </div>
-                    <div v-if="debugOn" class="m-2 bg-gray-200 rounded-lg">
+                    <div v-if="showDebugPanel" class="m-2 bg-gray-200 rounded-lg text-[12px] leading-[12px]">
                         <slot name="debug" />
                     </div>
                 </div>
             </div>
         </slot>
-        <div v-else-if="debugOn" class="bg-gray-100">
+        <div v-else-if="showDebugPanel" class="bg-gray-100">
             <div class="container px-4 py-4 mx-auto">
                 <slot name="debug" />
             </div>
@@ -94,10 +96,10 @@ watch(debugOn, val => localStorage.setItem('debug', val && '1' || ''));
 
         </div>
 
-        <footer class="bg-gray-800 text-white py-4">
+        <footer class="bg-gray-800 text-white pt-6 pb-10">
             <div class="container mx-auto text-center">
                 <p>about your organisation</p>
-                <a :href="apiEndpoint" target="_new"><small v-if="globalConfig?.version">Prez Version - API {{ globalConfig?.version }}</small></a>
+                <small v-if="globalConfig?.version">Prez Version - <a :href="apiEndpoint" target="_new">API {{ globalConfig?.version }}</a></small>
                 <div v-if="apiEndpoint != runtimeConfig.public.prezApiEndpoint && !altEndpoints.find(e=>e.endpoint == apiEndpoint)">
                     <em><small>custom override API endpoint {{ apiEndpoint }}</small></em>
                 </div>

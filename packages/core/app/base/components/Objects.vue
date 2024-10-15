@@ -15,6 +15,7 @@ const props = defineProps<Props>();
 
 </script>
 <template>
+    <!-- Objects -->
     <slot>
         <div v-for="(obj, index) of props.objects" :key="index" >
             <Term :term="obj" :variant="variant" />

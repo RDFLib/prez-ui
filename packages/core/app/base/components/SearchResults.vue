@@ -14,6 +14,7 @@ const results = props.results;
 </script>
 
 <template>
+  <!-- SearchResults -->
   <div v-if="results.length">
     <DataTable striped-rows :value="results.sort((a:PrezSearchResult, b:PrezSearchResult)=>b.weight - a.weight)">
       <Column>

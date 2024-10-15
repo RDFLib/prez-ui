@@ -29,6 +29,7 @@ const lastUrl = links[links.length - 1]?.url;
 
 </script>
 <template>
+    <!-- ItemBreadcrumb -->
     <Breadcrumb v-if="links" :model="links as MenuItem[]" style="background-color: transparent;padding-left: 0;">
         <template #item="{ item }">
             <Literal :term="typeof(item.label) == 'object' ? item.label : literal(item.label || item.segment || item.url)">

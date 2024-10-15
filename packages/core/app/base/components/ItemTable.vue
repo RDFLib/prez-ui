@@ -23,14 +23,10 @@ const fields = computed(()=>
     ].filter(f=>f in (term.properties || {})).map(f=>term.properties![f] as PrezProperty)
 );
 
-// const fields = Object.values(term.properties || {})
-
 </script>
 <template>
+    <!-- ItemTable -->
     <div v-if="term?.properties">
-        <!-- Global Profile Order: {{ props.fields }}
-        <hr>
-        Result order: {{ fields }} -->
         <DataTable :value="fields" striped-rows>
             <template #default>
                 <table class="p-datatable-table">
