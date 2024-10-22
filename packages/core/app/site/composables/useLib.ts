@@ -40,13 +40,18 @@ type ListOptions = {
 }
 
 export const useSetAPIEndpoint = (endpoint: string) => {
-    localStorage.setItem('prezApi', endpoint);
+    if (import.meta.client && typeof localStorage !== 'undefined') {
+        localStorage.setItem('prezApi', endpoint);
+    }
 }
 
 export const useGetPrezAPIEndpoint = () => {
-    const apiOverride = localStorage.getItem('prezApi');
+    let apiOverride = null;
+    if (import.meta.client && typeof localStorage !== 'undefined') {
+        apiOverride = localStorage.getItem('prezApi');
+    }
     const runtimeConfig = useRuntimeConfig();
-    if(runtimeConfig.public.prezAllowApiEndpointChange && apiOverride) {
+    if (runtimeConfig.public.prezAllowApiEndpointChange && apiOverride) {
         return apiOverride;
     }
     return useRuntimeConfig().public.prezApiEndpoint;

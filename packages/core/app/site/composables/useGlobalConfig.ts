@@ -1,4 +1,5 @@
 import { useGetPrezAPIEndpoint } from "@/site/composables/useLib";
+import {getItem} from "~/base/lib";
 
 // composables/useGlobalConfig.ts
 export const useGlobalConfig = () => {
@@ -6,7 +7,11 @@ export const useGlobalConfig = () => {
     const route = useRoute();
     const runtimeConfig = useRuntimeConfig();
     
-    if(runtimeConfig.public.prezAllowApiEndpointChange && route.query?.['_api'] && route.query['_api'] !== localStorage.getItem('prezApi')) {
+    if (import.meta.server
+      && typeof localStorage !== 'undefined'
+      && runtimeConfig.public.prezAllowApiEndpointChange
+      && route.query?.['_api']
+      && route.query['_api'] !== localStorage.getItem('prezApi')) {
         localStorage.setItem('prezApi', route.query['_api'].toString());
     }
 

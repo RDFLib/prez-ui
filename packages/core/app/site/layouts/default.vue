@@ -12,12 +12,13 @@ const expanded = ref(false);
 const showDebugPanel = ref(false);
 
 onBeforeMount(() => {
-  expanded.value = !!localStorage.getItem('expanded');
-  showDebugPanel.value = runtimeConfig.public.prezDebug && !!localStorage.getItem('debug');
+  if (typeof localStorage !== 'undefined') {
+    expanded.value = !!localStorage.getItem('expanded');
+    showDebugPanel.value = runtimeConfig.public.prezDebug && !!localStorage.getItem('debug');
+    watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
+    watch(showDebugPanel, val => localStorage.setItem('debug', val && '1' || ''));
+  }
 });
-watch(expanded, val => localStorage.setItem('expanded', val && '1' || ''));
-
-watch(showDebugPanel, val => localStorage.setItem('debug', val && '1' || ''));
 
 
 </script>
