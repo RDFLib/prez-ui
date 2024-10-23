@@ -5,36 +5,35 @@ import { type PrezFocusNode, type PrezProperty, type PrezTerm, type PrezNodeList
 
 interface Props {
     /** optional, fields in order to display */
-    fields?: PrezNodeList[];
+    // fields?: PrezNodeList[];
 
     /** parent term or root focus node */
     term: PrezTerm;
 }
 
-
 const props = defineProps<Props>();
 const term = props.term as PrezFocusNode;
 
-const fieldNames = Object.keys(term.properties || {});
+// const fieldNames = Object.keys(term.properties || {});
 
-const fields = computed(()=>
-    [...(props.fields || []).filter(f => fieldNames.includes(f.node.value)).map(f=>f.node.value),    // add fields that are in the list
-    ...fieldNames.filter(fname => !(props.fields || []).find(f=>f.node.value == fname))              // add the rest of the fields that are not in the list
-    ].filter(f=>f in (term.properties || {})).map(f=>term.properties![f] as PrezProperty)
-);
+// const fields = computed(()=>
+//     [...(props.fields || []).filter(f => fieldNames.includes(f.node.value)).map(f=>f.node.value),    // add fields that are in the list
+//     ...fieldNames.filter(fname => !(props.fields || []).find(f=>f.node.value == fname))              // add the rest of the fields that are not in the list
+//     ].filter(f=>f in (term.properties || {})).map(f=>term.properties![f] as PrezProperty)
+// );
 
 </script>
 <template>
     <!-- ItemTable -->
     <div v-if="term?.properties">
-        <DataTable :value="fields" striped-rows>
+        <DataTable :value="Object.values(term.properties)" striped-rows>
             <template #default>
                 <table class="p-datatable-table">
                     <thead class="p-datatable-thead" role="rowgroup" data-pc-section="thead" style="position: sticky">
                         <tr><th colspan="2" class="p-datatable-header-cell"></th></tr>
                     </thead>
                     <tbody class="p-datatable-tbody" role="rowgroup" data-pc-section="tbody">
-                        <ItemTableRow v-for="(fieldProp, index) in fields"
+                        <ItemTableRow v-for="(fieldProp, index) in Object.values(term.properties)"
                             :key="fieldProp?.predicate.value" 
                             :index="index"
                             :term="term" 

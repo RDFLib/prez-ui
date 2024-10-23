@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezNode } from '@/base/lib';
+import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezDataItem, type PrezNode } from '@/base/lib';
 
 const appConfig = useAppConfig();
 const { globalProfiles } = useGlobalProfiles();
@@ -14,13 +14,17 @@ const topConceptsUrl = computed(()=>isConceptScheme ? getTopConceptsUrl(data.val
 const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
 
-
-const getSubNodes = computed(()=>{
-    const profile = globalProfiles.value?.[currentProfile.value?.uri || ''];
-    if(data.value && profile) {
-        console.log("CURRENT PROFILE", profile)
+// Watch for changes in both globalProfiles and currentProfile
+// Apply profile to item uses the current profile to order properties
+// To do: use a loader to show that the profile is being applied
+watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfiles, newCurrentProfile]) => {
+  if (newGlobalProfiles && newCurrentProfile && newGlobalProfiles[newCurrentProfile.uri] ) {
+    const profile = newGlobalProfiles[newCurrentProfile.uri];
+    if (data.value && profile) {
+        applyProfileToItem(data.value as PrezDataItem, profile);
     }
-})
+  }
+});
 
 </script>
 <template>
@@ -79,17 +83,15 @@ const getSubNodes = computed(()=>{
                     <div class="mt-2 mb-12 overflow-auto">
                         <slot name="item-section" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
                             <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
-                            <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl" :fields="globalProfiles && currentProfile ? globalProfiles[currentProfile && currentProfile.uri] : undefined">
+                            <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
 
                                 <ItemTable
-                                    v-if="globalProfiles && currentProfile"
-                                    :fields="globalProfiles?.[currentProfile?.uri || '']"
                                     :term="data.data" 
                                     :key="urlPath + globalProfiles?.length + currentProfile?.uri" 
                                     :is-concept-scheme="isConceptScheme"
                                     top-concepts-url="topConceptsUrl"
                                 />
-                                <Loading variant="item-table" v-else />
+
                             </slot>
                             <slot name="item-middle" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
 

@@ -1,4 +1,4 @@
-import type { PrezBlankNode, PrezDataItem, PrezDataList, PrezDataSearch, PrezProfileHeader, PrezProfiles } from "./types";
+import type { PrezBlankNode, PrezDataItem, PrezDataList, PrezDataSearch, PrezNodeList, PrezProfileHeader, PrezProfiles, PrezProperties, PrezProperty } from "./types";
 import { RDFStore } from "./store";
 import { getUrlPath } from "./helpers";
 import { SYSTEM_PREDICATES } from "./consts";
@@ -135,7 +135,8 @@ export async function getItem(baseUrl: string, path: string): Promise<PrezDataIt
 /**
  * Runs a search query
  * 
- * @param url 
+ * @param baseUrl API base URL
+ * @param path Search path along with any query parameters
  * @returns 
  */
 export async function search(baseUrl: string, path: string): Promise<PrezDataSearch> {
@@ -152,6 +153,12 @@ export async function search(baseUrl: string, path: string): Promise<PrezDataSea
     };
 }
 
+/**
+ * Returns a list of Prez Profiles used for rendering
+ * 
+ * @param baseUrl API base URL
+ * @returns A list of Prez Profiles
+ */
 export async function getProfiles(baseUrl: string): Promise<PrezProfiles> {
     const path = '/profiles?page=1&limit=999&_mediatype=application/anot%2Bturtle';
     const { data } = await getList(baseUrl, path);
@@ -176,4 +183,42 @@ export async function getProfiles(baseUrl: string): Promise<PrezProfiles> {
     return profiles;
 }
 
+function applyProfileToProperties(properties: PrezProperties, profile: PrezNodeList[]): PrezProperties {
+    const newProperties: PrezProperties = {};
+    const fieldNames = Object.keys(properties);
+ 
+    // re-ordered fields as per the profile, then add the rest of the fields
+    const fields =
+        [...(profile || []).filter(f => fieldNames.includes(f.node.value)).map(f=>f.node.value),            // add fields that are in the list
+        ...fieldNames.filter(fname => !(profile || []).find(f=>f.node.value == fname))                      // add the rest of the fields that are not in the list
+        ].filter(f=>f in (properties || {})).map(f=>properties![f] as PrezProperty);
 
+
+    // console.log('DEFAULT FIELD ORDER', fieldNames);
+    // console.log('RE-ORDERED FIELD ORDER', fields.map(f=>f.predicate.value));
+    
+    for(const field of fields) {
+        newProperties[field.predicate.value] = properties[field.predicate.value] as PrezProperty;
+    }
+    return newProperties;
+}
+
+export function applyProfileToItem(item: PrezDataItem, profile: PrezNodeList[]):void {
+
+    const store = item.store;
+    // console.log("APPLY PROPS", profile, item.data.properties);
+    item.data.properties = applyProfileToProperties(item.data.properties || {}, profile);
+
+    // // re-order the properties in the profile order
+    // item.data.properties = fields.reduce((acc, field) => {
+    //     acc[field.predicate.value] = field;
+
+    //     const subItems = item.store.getSubItems(field.predicate.value);
+    //     if(subItems) {
+    //         console.log('SUBITEMS', field.predicate, subItems);
+    //     }
+
+    //     return acc;
+    // }   , {} as PrezProperties);
+
+}
