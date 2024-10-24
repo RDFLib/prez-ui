@@ -4,7 +4,7 @@ Prez UI is the front end of [Prez](https://github.com/RDFLib/prez) - a linked da
 
 Prez UI is a [Vue.js](https://vuejs.org/) single page application (SPA) that uses [N3.js](https://github.com/rdfjs/N3.js) to process RDF data from the Prez API.
 
-See the Prez UI demo website - https://rdflib.dev/prez-ui/
+See the Prez UI demo website - https://demo.dev.kurrawong.ai
 
 ## Environment Variables
 
