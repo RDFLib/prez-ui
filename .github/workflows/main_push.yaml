@@ -20,53 +20,6 @@ permissions:
   packages: write # to push to GHCR package
 
 jobs:
-  # Build & upload artifact for pages
-  build_pages:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: latest
-          cache: npm
-      - name: Install and build
-        run: |
-          npm ci
-          CI=false npm run build
-        env:
-          VITE_SIDENAV: ${{ secrets.VITE_SIDENAV }}
-          VITE_ENABLED_PREZS: ${{ secrets.VITE_ENABLED_PREZS }}
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-          VITE_MAP_SEARCH_PROPS_FC_LABEL: ${{ secrets.VITE_MAP_SEARCH_PROPS_FC_LABEL }}
-          VITE_MAP_SEARCH_PROPS_DS_LABEL: ${{ secrets.VITE_MAP_SEARCH_PROPS_DS_LABEL }}
-          GH_PAGES_DEMO: true
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          # Upload build directory
-          path: "dist"
-
-  # Deploy to github pages
-  deploy_pages:
-    # Add a dependency to the build job
-    needs: build_pages
-
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    # Specify runner + deployment step
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
-
   # build & push Docker image
   docker:
     runs-on: ubuntu-latest
