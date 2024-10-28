@@ -52,6 +52,8 @@ switch(props.variant) {
         break;
 }
 
+const appBaseURL = useRuntimeConfig().app.baseURL.replace(/\/$/, '');
+
 /* the primary link is either the prez internal link, or the provided to string */
 const url = typeof(props.to) == 'string' ? props.to : props.to?.links ? props.to?.links[0]?.value : undefined;
 
@@ -69,6 +71,9 @@ const secondaryUrl = props.secondaryTo !== undefined
 
 /** determine the url is an external link */
 const isExtLink = url ? url.startsWith('http') || url.startsWith('mailto') : false;
+
+/** add UI base URL **/
+const prefixedUrl = appBaseURL && url && !url.match(/^https?:\/\//) ? appBaseURL + (url.startsWith('/') ? '' : '/') + url : url;
 
 /** check the external link is really an external link */
 const isSecondaryExtLink = secondaryUrl ? secondaryUrl.startsWith('http') || secondaryUrl.startsWith('mailto') : false;
@@ -97,9 +102,9 @@ const linkClass = props.class ? defaultClasses + ' ' + props.class : defaultClas
     <!-- ItemLink -->
     <slot name="wrapper" :url="url" :title="props.title" :secondaryUrl="secondaryUrl" :target="target">
         <span>
-            <a v-if="url && !hidePrimaryLink" 
+            <a v-if="url && !hidePrimaryLink"
                 :class="linkClass"
-                :href="url" :title="hideTitle ? undefined : props.title" 
+                :href="prefixedUrl" :title="hideTitle ? undefined : props.title"
                 :target="isExtLink ? props.target : undefined" :rel="isExtLink ? props.rel : undefined"
                 @click="(e:Event)=>navigateToLink(e, url!)">
                 <slot />
