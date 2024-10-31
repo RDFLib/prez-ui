@@ -3,22 +3,25 @@ import { buildProfiles, dumpNodeArray, getList, getProfiles, SYSTEM_PREDICATES, 
 export const useGlobalProfiles = () => {
   const profiles = useState<PrezProfiles | null>('globalProfiles', () => null);
   const runtimeConfig = useRuntimeConfig();
+  const nuxtApp = useNuxtApp();
   
   if (!profiles.value) {
 
-    setTimeout(async () => {
-      try {
+    setTimeout(() => {
+      nuxtApp.runWithContext(async () => {
+        try {
 
-        profiles.value = await getProfiles(useGetPrezAPIEndpoint());
+          profiles.value = await getProfiles(useGetPrezAPIEndpoint());
 
-        if(runtimeConfig.public.prezDebug) {
+          if (runtimeConfig.public.prezDebug) {
             console.log("Profile Meta (debug mode)", profiles.value)
+          }
+
+
+        } catch (err) {
+          console.error('Failed to fetch global profiles', err);
         }
-
-
-      } catch (err) {
-        console.error('Failed to fetch global profiles', err);
-      }
+      });
     }, 0);
   }
 
