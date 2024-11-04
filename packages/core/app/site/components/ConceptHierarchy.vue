@@ -55,8 +55,8 @@ function loadMore() {
         <div v-else v-for="concept of concepts" :key="concept.value" class="pz-concept">
             <div class="pz-concept-node">
                 <template v-if="concept.hasChildren">
-                    <i v-if="!open.includes(concept.value)" class="pi pi-angle-right" @click="()=>toggleOpen(concept.value)" />
-                    <i v-else class="pi pi-angle-down" @click="()=>toggleOpen(concept.value)" />
+                    <span v-if="!open.includes(concept.value)" @click="()=>toggleOpen(concept.value)">></span>
+                    <span v-else @click="()=>toggleOpen(concept.value)">v</span>
                 </template>
                 <span v-else class="pz-concept-blank" />
                 <Node :term="concept" />
@@ -68,7 +68,7 @@ function loadMore() {
         <div v-if="error"><Message severity="error">{{ error }}</Message></div>
         <Loading class="ml-6" v-if="status == 'pending'" variant="concept" />
         <div v-if="hasMore && status != 'pending'" class="mt-4">
-            <Button class="ml-6" size="small" label="more" @click="loadMore" />
+            <button class="ml-6" @click="loadMore">more</button>
         </div>
     </div>
 </template>

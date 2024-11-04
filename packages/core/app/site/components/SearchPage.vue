@@ -35,10 +35,10 @@ const inSearchMode = computed(()=>{
                         </div>
                         <div class="flex-grow max-w-lg p-4">
                             <form method="get" @submit="formSubmitToNavigate">
-                                <InputGroup>
-                                    <InputText autofocus autocomplete="false" name="q" v-model="q" placeholder="Enter keywords..." class="flex-grow text-xl p-4 border rounded-l-lg shadow-sm" />
-                                    <Button icon="pi pi-search" type="submit" />
-                                </InputGroup>
+                                <div>
+                                    <input type="search" autofocus autocomplete="false" name="q" v-model="q" placeholder="Enter keywords..." class="flex-grow text-xl p-4 border rounded-l-lg shadow-sm" />
+                                    <button type="submit">Search icon</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -63,15 +63,7 @@ const inSearchMode = computed(()=>{
                                 </div>
                                 <SearchResults :results="data.data" />
                                 <div class="pt-4">
-                                    <Paginator
-                                        v-if="data.count > pagination.limit"
-                                        :first="pagination.first" 
-                                        :rows="pagination.limit" 
-                                        :page="pagination.page" 
-                                        :totalRecords="data.count" 
-                                        @page="navigateToPage" 
-                                    >
-                                    </Paginator>
+                                    <span>paginator</span>
                                 </div>
                             </div>
                         </div>

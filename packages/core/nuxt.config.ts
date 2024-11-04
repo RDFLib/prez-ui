@@ -44,13 +44,6 @@ export default defineNuxtConfig({
       enabled: true
     }
   },
-  modules: ['@primevue/nuxt-module', "@nuxtjs/tailwindcss"],
-  primevue: {
-    importTheme: {from: resolve('./app/base/assets/theme/mainTheme.ts')},
-  },
-  css: [
-    'primeicons/primeicons.css'
-  ],
 
   nitro: {
     esbuild: {

@@ -17,7 +17,7 @@ const props = defineProps<Props>();
 <template>
     <!-- ItemTableRow -->
     <slot name="row">
-        <tr :class="index % 2 == 1 ? 'p-row-odd' : 'p-row-even'" >
+        <tr>
             <slot name="columns">
                 <td v-if="objects.find(o=>o.termType == 'Literal' && o.datatype?.value == SYSTEM_PREDICATES.w3Html)" colspan="2">
                     <div><Predicate :predicate="predicate" :objects="objects" :term="term" variant="item-table" /></div>

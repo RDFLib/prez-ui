@@ -16,25 +16,23 @@ const results = props.results;
 <template>
   <!-- SearchResults -->
   <div v-if="results.length">
-    <DataTable striped-rows :value="results.sort((a:PrezSearchResult, b:PrezSearchResult)=>b.weight - a.weight)">
-      <Column>
-        <template #body="slotProps">
-          <Tag class="float-right" severity="info">
-            <div class="text-xs">
-              <Node :term="slotProps.data.predicate" variant="search-results" />
-            </div>
-          </Tag>
-          <b><Term :term="slotProps.data.resource" variant="search-results" /></b>
-          <div v-if="slotProps.data.resource.description">
-            <Literal class="overflow-hidden text-ellipsis line-clamp-3" 
-              hide-language 
-              :term="slotProps.data.resource.description" />
-          </div>
-        </template>
-      </Column>
-    </DataTable>
+    <table>
+        <tr v-for="result in results.sort((a:PrezSearchResult, b:PrezSearchResult)=>b.weight - a.weight)">
+            <td>
+                <span class="float-right">
+                    tag
+                    <div class="text-xs">
+                    <Node :term="result.predicate" variant="search-results" />
+                    </div>
+                </span>
+                <b><Term :term="result.resource" variant="search-results" /></b>
+                <div v-if="result.resource.description">
+                    <Literal class="overflow-hidden text-ellipsis line-clamp-3" 
+                    hide-language 
+                    :term="result.resource.description" />
+                </div>
+            </td>
+        </tr>
+    </table>
   </div>
 </template>
-
-<style scoped>
-</style>

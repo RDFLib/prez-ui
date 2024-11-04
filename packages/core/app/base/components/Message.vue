@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import PVMessage from 'primevue/message';
 
 interface Props {
     severity?: "info" | "error";
@@ -11,5 +10,5 @@ const props = defineProps<Props>();
 
 <template>
     <!-- Message -->
-    <PVMessage :severity="props.severity">{{ props.text }}</PVMessage>
+    <div>Message: {{ props.text }}</div>
 </template>

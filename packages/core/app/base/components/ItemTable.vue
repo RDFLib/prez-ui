@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import DataTable from 'primevue/datatable';
-
 import { type PrezFocusNode, type PrezProperty, type PrezTerm, type PrezNodeList } from '@/base/lib';
 
 interface Props {
@@ -26,35 +24,19 @@ const term = props.term as PrezFocusNode;
 <template>
     <!-- ItemTable -->
     <div v-if="term?.properties">
-        <DataTable :value="Object.values(term.properties)" striped-rows>
-            <template #default>
-                <table class="p-datatable-table">
-                    <thead class="p-datatable-thead" role="rowgroup" data-pc-section="thead" style="position: sticky">
-                        <tr><th colspan="2" class="p-datatable-header-cell"></th></tr>
-                    </thead>
-                    <tbody class="p-datatable-tbody" role="rowgroup" data-pc-section="tbody">
-                        <ItemTableRow v-for="(fieldProp, index) in Object.values(term.properties)"
-                            :key="fieldProp?.predicate.value" 
-                            :index="index"
-                            :term="term" 
-                            :objects="fieldProp ? fieldProp.objects : []" 
-                            :predicate="fieldProp!.predicate" 
-                        />
-                    </tbody>
-                </table>
-            </template>
-        </DataTable>
+        <table>
+            <thead role="rowgroup" style="position: sticky">
+                <tr><th colspan="2"></th></tr>
+            </thead>
+            <tbody role="rowgroup">
+                <ItemTableRow v-for="(fieldProp, index) in Object.values(term.properties)"
+                    :key="fieldProp?.predicate.value" 
+                    :index="index"
+                    :term="term" 
+                    :objects="fieldProp ? fieldProp.objects : []" 
+                    :predicate="fieldProp!.predicate" 
+                />
+            </tbody>
+        </table>
     </div>
 </template>
-<style lang="scss">
-.p-datatable-table {
-    max-width: 100%;
-}
-/* nested tables styling */
-.p-datatable-table .p-datatable-table {
-    min-width: auto;
-}
-.p-datatable-table .p-datatable-table .p-datatable-thead {
-    display:none;
-}
-</style>

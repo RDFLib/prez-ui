@@ -69,10 +69,10 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                         <slot name="header-middle" :data="data"></slot>
                         <slot name="header-identifiers" :data="data">
                             <div class="mb-2 mt-2">
-                                <Badge class="mr-2">IRI</Badge> <ItemLink :secondary-to="data.data.value" copy-link>{{ data.data.value }}</ItemLink>
+                                <span class="mr-2">badge IRI</span><ItemLink :secondary-to="data.data.value" copy-link>{{ data.data.value }}</ItemLink>
                             </div>
                             <div class="flex" v-if="data?.data.rdfTypes">
-                                <Badge class="mr-2">Type</Badge>
+                                <span class="mr-2">badge Type</span>
                                 <div>
                                     <div class="ml-2 mr-2" v-for="rdfType in data.data.rdfTypes" ><Node :term="rdfType" /></div>
                                 </div>
@@ -97,7 +97,7 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
 
                             <slot name="item-members" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
                                 <p class="mt-6" v-if="data.data.members">
-                                    <Button size="small" color="secondary" label="Members" @click="()=>router.push(data!.data.members!.value)" />
+                                    <button @click="()=>router.push(data!.data.members!.value)">Members</button>
                                 </p>
                             </slot>
 

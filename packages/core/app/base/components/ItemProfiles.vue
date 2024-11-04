@@ -26,7 +26,7 @@ const uriComponent = props.objectUri ? `uri=${encodeURIComponent(props.objectUri
             </div>
 
             <div v-if="props.loading">
-                <Skeleton class="mb-2" />
+                <span>loading</span>
             </div>
 
             <div v-else-if="props.profiles">
@@ -35,7 +35,7 @@ const uriComponent = props.objectUri ? `uri=${encodeURIComponent(props.objectUri
                     <div class="pt-2">
                         <div :class="profile.current ? 'text-bold' : ''">
                             <span class="mr-1">
-                                <ItemLink :to="`/profiles/${profile.token}`" variant="item-profiles" title="Go to profile page"><i class="text-xs pi pi-file" /></ItemLink>
+                                <ItemLink :to="`/profiles/${profile.token}`" variant="item-profiles" title="Go to profile page"><span>file icon</span></ItemLink>
                             </span>
                             <ItemLink :to="`?${uriComponent}_profile=${profile.token}`" title="Get profile representation" variant="item-profiles">
                                 <span class="text-sm">{{ profile.title }}</span>
@@ -51,7 +51,6 @@ const uriComponent = props.objectUri ? `uri=${encodeURIComponent(props.objectUri
                         </ul>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

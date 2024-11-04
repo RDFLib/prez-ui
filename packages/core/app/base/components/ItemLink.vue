@@ -113,14 +113,11 @@ const linkClass = props.class ? defaultClasses + ' ' + props.class : defaultClas
                 :class="linkClass"
                 @click="(e:Event)=>navigateToLink(e, secondaryUrl)">
 
-                <i v-if="isSecondaryExtLink" class="pi pi-external-link ml-1 text-xs" />
+                <span v-if="isSecondaryExtLink">ext link</span>
                 <!-- unlikely scenario, but we if our secondary link points interal show an arrow not window out -->
-                <i v-else class="pi pi-angle-right ml-1 text-xs" />
+                <span v-else>></span>
             </a>
             <CopyButton v-if="props.copyLink" icon-only :value="typeof(copyLink) == 'string' ? copyLink : url || secondaryUrl" />
         </span>
     </slot>
 </template>
-
-<style scoped>
-</style>

@@ -28,16 +28,24 @@ const columns = [
             <li>
                 <fieldset>
                     <legend>Button</legend>
-                    <Button>Press me</Button>
+                    <button>Press me</button>
                 </fieldset>
             </li>
             <li>
                 <fieldset>
                     <legend>DataTable</legend>
-                    
-                    <DataTable :value="products" tableStyle="min-width: 50rem">
-                        <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header"></Column>
-                    </DataTable>                    
+                    <table>
+                        <thead>
+                            <tr v-for="header in columns">
+                                <th>{{ header.header }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="product in products">
+                                <td v-for="header in columns">{{ product[header.field] }}</td>
+                            </tr>
+                        </tbody>
+                    </table>             
                 </fieldset>
             </li>
 

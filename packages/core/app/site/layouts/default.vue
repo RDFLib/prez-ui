@@ -48,8 +48,10 @@ onBeforeMount(() => {
             <nav class="container font-extralight mx-auto px-4 py-4 hidden md:flex space-x-12 text-lg text-primary">
                 <nuxt-link v-for="{label, url} in menu" :to="url" class="border-b-[5px] border-transparent hover:border-orange-500">{{ label }}</nuxt-link>
                 <div v-if="runtimeConfig.public.prezDebug" class="!ml-auto">
-                    <div v-if="showDebugPanel"><i title="Toggle debug off" class="hover:cursor-pointer hover:text-gray-500 pi pi-cog text-blue-400" @click="()=>{ showDebugPanel = !showDebugPanel }"></i></div>
-                    <i v-else title="Toggle debug on" class="hover:cursor-pointer hover:text-gray-500 pi pi-cog text-gray-300" @click="()=>{ showDebugPanel = !showDebugPanel }"></i>
+                    <div v-if="showDebugPanel">
+                        <span title="Toggle debug off" class="hover:cursor-pointer hover:text-gray-500 text-blue-400" @click="()=>{ showDebugPanel = !showDebugPanel }">cog icon</span>
+                    </div>
+                    <span v-else title="Toggle debug on" class="hover:cursor-pointer hover:text-gray-500 text-gray-300" @click="()=>{ showDebugPanel = !showDebugPanel }">cog icon</span>
                 </div>
             </nav>
         </div>
@@ -81,13 +83,13 @@ onBeforeMount(() => {
                 <div :class="!expanded ? 'col-span-3 ... relative' : 'col-span-4 relative'">
                     <slot />
                     <div class="absolute right-0 top-[-5px] pointer-events-auto" @click="()=>{ expanded = !expanded }">
-                        <i v-if="expanded" title="Show sidepanel" class="pi pi-angle-double-right text-xs p-[4px] hover:cursor-pointer hover:bg-gray-200 hover:rounded-full" />
+                        <span v-if="expanded" title="Show sidepanel" class="text-xs p-[4px] hover:cursor-pointer hover:bg-gray-200 hover:rounded-full">>></span>
                     </div>
                 </div>
                 <div v-if="!expanded" class="... relative">
                     <slot name="sidepanel"></slot>
                     <div class="absolute right-0 top-[-5px] pointer-events-auto" @click="()=>{ expanded = !expanded }">
-                        <i v-if="!expanded" title="Expand and hide sidepanel" class="pi pi-angle-double-left text-xs p-[4px] hover:cursor-pointer hover:bg-gray-200 hover:rounded-full" />
+                        <span v-if="!expanded" title="Expand and hide sidepanel" class="text-xs p-[4px] hover:cursor-pointer hover:bg-gray-200 hover:rounded-full"><<</span>
                     </div>
                 </div>
             </div>

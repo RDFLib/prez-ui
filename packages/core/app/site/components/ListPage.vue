@@ -56,15 +56,7 @@ watch(()=>route.fullPath, () => {
                     <Loading v-else />
 
                     <div class="pt-4">
-                        <Paginator
-                            v-if="data.count > pagination.limit!"
-                            :first="pagination.first" 
-                            :rows="pagination.limit" 
-                            :page="pagination.page"
-                            :totalRecords="data.count + (data.maxReached ? 1 : 0)" 
-                            @page="navigateToPage" 
-                        >
-                        </Paginator>
+                        <div>pagination</div>
                         <div v-if="data.count > 0" class="text-sm text-gray-500 text-center">
                             Showing {{ pagination.first }} to 
                                 {{ Math.min(pagination.first! + pagination.limit! - 1, data.count) }} of 

@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import Button from "primevue/button";
 
 const props = defineProps<{
     value: string;
@@ -23,17 +22,9 @@ function onClick() {
 
 <template>
     <!-- CopyButton -->
-    <Button
-        text
-        :icon="`pi pi-${clicked ? 'check' : 'copy'}`"
-        size="small"
-        v-tooltip.top="'Copy to clipboard'"
+    <button
+        title="'Copy to clipboard'"
         @click="onClick"
-        :label="!props.iconOnly ? (clicked ? 'Copied' : 'Copy') : undefined"
         aria-label="Copy"
-    />
+    >{{ !props.iconOnly ? (clicked ? 'Copied' : 'Copy') : 'copy icon' }}</button>
 </template>
-
-<style lang="scss" scoped>
-
-</style>

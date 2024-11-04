@@ -15,37 +15,29 @@ const list = props.list;
 <template>  
   <!-- ItemList -->    
   <div v-if="list">
-    <DataTable striped-rows :value="list" table-style="min-width: 50rem">
-      <!-- frozen="false" was a fix to get around issues with unstyled presets -->      
-      <Column :frozen="false">
-        <template #header>
-          <b>Item</b>
-        </template>
-        <template #body="slotProps">
-          <Node :term="slotProps.data" variant="item-list" />
-        </template>
-      </Column>
-      <Column
-        v-if="fields"
-        :frozen="false"
-        v-for="col in fields"
-        :key="col.node.value"
-      >
-        <template #header="slotProps">
-          <b><Predicate :predicate="col.node" :objects="[]" /></b>
-        </template>
-        <template #body="slotProps">
-          <Objects v-if="slotProps.data.properties[col.node.value]?.objects" 
-            :term="col.node"
-            :predicate="col.node" 
-            :objects="slotProps.data.properties[col.node.value]?.objects" 
-            variant="item-list" />
-        </template>
-      </Column>
-    </DataTable>
-
+    <table style="min-width: 50rem">
+        <thead>
+            <tr>
+                <th><b>Item</b></th>
+                <template v-if="fields">
+                    <th v-for="col in fields"><b><Predicate :predicate="col.node" :objects="[]" /></b></th>
+                </template>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="item in list">
+                <td><Node :term="item" variant="item-list" /></td>
+                <template v-if="fields">
+                    <td v-for="col in fields">
+                        <Objects v-if="item.properties?.[col.node.value]?.objects" 
+                            :term="col.node"
+                            :predicate="col.node" 
+                            :objects="item.properties[col.node.value]?.objects" 
+                            variant="item-list" />
+                    </td>
+                </template>
+            </tr>
+        </tbody>
+    </table>
   </div>
 </template>
-
-<style scoped>
-</style>

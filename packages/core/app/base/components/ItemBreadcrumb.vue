@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { literal, type PrezLinkParent, type PrezLiteral } from '@/base/lib';
-import type { MenuItem } from 'primevue/menuitem';
 
 type ItemBreadcrumbPart = {
     label: string | PrezLiteral;
@@ -30,8 +29,8 @@ const lastUrl = links[links.length - 1]?.url;
 </script>
 <template>
     <!-- ItemBreadcrumb -->
-    <Breadcrumb v-if="links" :model="links as MenuItem[]" style="background-color: transparent;padding-left: 0;">
-        <template #item="{ item }">
+    <div v-if="links" style="background-color: transparent;padding-left: 0;">
+        <template v-for="item in links">
             <Literal :term="typeof(item.label) == 'object' ? item.label : literal(item.label || item.segment || item.url)">
                 <template #text="{ text }">
                     <ItemLink v-if="item.url != lastUrl" :to="item.url" :class="textClass">
@@ -40,7 +39,7 @@ const lastUrl = links[links.length - 1]?.url;
                     <span v-else :class="textClassLast">{{ props.nameSubstitutions ? props.nameSubstitutions?.[text] || text : text }}</span>
                 </template>
             </Literal>
+            <span>/</span>
         </template>
-        <template #separator> / </template>
-    </Breadcrumb>
+    </div>
 </template>

@@ -6,6 +6,7 @@ const runtimeConfig = useRuntimeConfig();
 const url = ref(runtimeConfig.public.prezApiEndpoint + runtimeConfig.public.prezUtilsTestPath);
 
 const data = ref()
+const tab = ref("0")
 async function clk() {
 
     data.value = await apiGet(url.value);
@@ -21,29 +22,31 @@ async function clk() {
 
         <div class="flex flex-col gap-2">
             <label for="url">Test URL</label>
-            <InputText v-model="url" placeholder="Test URL" :value="url" aria-describedby="url-help"/>
+            <input type="url" v-model="url" placeholder="Test URL" aria-describedby="url-help"/>
             <small id="url-help">The test URL used to query the endpoints below</small>
         </div>
 
-        <Button>Hello</Button>
+        <button>Hello</button>
+        <div>
+            <div>
+                <span @click="tab = '0'">Catalogs</span>
+                <span @click="tab = '1'">Catalog Item</span>
+                <span @click="tab = '2'">Collections</span>
+            </div>
+            <div>
+                <div v-if="tab === '0'">
 
-        <Tabs value="0">
-            <TabList>
-                <Tab value="0">Catalogs</Tab>
-                <Tab value="1">Catalog Item</Tab>
-                <Tab value="2">Collections</Tab>
-            </TabList>
-            <TabPanels>
-                <TabPanel value="0">
-                    
-                </TabPanel>
-                <TabPanel value="1">
+                </div>
+                <div v-if="tab === '1'">
                     More Stuff
-                </TabPanel>
-            </TabPanels>
-        </Tabs>
+                </div>
+                <div v-if="tab === '2'">
 
-    <Button @click="clk">API Get</Button>
+                </div>
+            </div>
+        </div>
+
+    <button @click="clk">API Get</button>
 
     <hr>
     {{ data }}
