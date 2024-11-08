@@ -5,7 +5,8 @@ export default defineAppConfig({
     { "label": "Catalogs", "url": "/catalogs" },
     { "label": "Search", "url": "/search"},
     { "label": "Profiles", "url": "/profiles" },
-    { "label": "About", "url": "/about" }
+    { "label": "About", "url": "/about" },
+    { "label": "API Documentation", "url": "/docs" }
   ],
 
   nameSubstitutions: {

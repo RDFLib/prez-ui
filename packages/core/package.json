@@ -23,6 +23,7 @@
     "@nuxt/kit": "^3.12.4",
     "@primevue/nuxt-module": "^4.0.4",
     "@rdfjs/types": "^1.1.0",
+    "@triply/yasgui": "^4.2.28",
     "@types/n3": "^1.16.4",
     "tailwindcss": "^3.4.9",
     "vue-dompurify-html": "^5.1.0"
