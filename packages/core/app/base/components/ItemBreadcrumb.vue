@@ -4,7 +4,7 @@ import { literal, type PrezLinkParent, type PrezLiteral } from '@/base/lib';
 type ItemBreadcrumbPart = {
     label: string | PrezLiteral;
     segment?: string;
-    url: string;
+    url?: string;
 }
 
 interface Props {
@@ -33,7 +33,7 @@ const lastUrl = links[links.length - 1]?.url;
         <template v-for="item in links">
             <Literal :term="typeof(item.label) == 'object' ? item.label : literal(item.label || item.segment || item.url)">
                 <template #text="{ text }">
-                    <ItemLink v-if="item.url != lastUrl" :to="item.url" :class="textClass">
+                    <ItemLink v-if="item.url != lastUrl || !item.url" :to="item.url" :class="textClass">
                         {{ props.nameSubstitutions ? props.nameSubstitutions?.[text] || text : text }}
                     </ItemLink>
                     <span v-else :class="textClassLast">{{ props.nameSubstitutions ? props.nameSubstitutions?.[text] || text : text }}</span>
