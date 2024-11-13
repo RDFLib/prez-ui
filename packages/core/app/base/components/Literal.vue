@@ -2,7 +2,7 @@
 // Register the directive locally
 import { getCurrentInstance } from 'vue';
 import { type PrezLiteral, SYSTEM_PREDICATES, treatAsHtml, treatAsMarkdown } from '@/base/lib';
-import { buildVueDompurifyHTMLDirective } from 'vue-dompurify-html';
+import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import mermaid from 'mermaid';
 
@@ -15,13 +15,7 @@ interface Props {
     variant?: 'item-table' | 'item-list' | 'item-header' | 'search-results' | 'item-profiles';
 }
 
-// Register the directive globally
-const vdompurifyHtml = buildVueDompurifyHTMLDirective();
-const instance = getCurrentInstance();
-if (instance && instance.appContext.app) {
-    instance.appContext.app.directive('dompurify-html', vdompurifyHtml);
-}
-
+const sanitizedHtml = computed(() => DOMPurify.sanitize(props.term.value));
 const props = defineProps<Props>();
 
 // test cases
@@ -106,7 +100,7 @@ renderer.code = ({ text = '', lang = '', escaped = false }) => {
 // Process Markdown content if detected
 const renderedMarkdownContent = computed(() => {
 //    return marked(term.value, { renderer, gfm: true, breaks: true }); // Parse Markdown to HTML
-    return marked(term.value, { renderer, gfm: true, breaks: true }); // Parse Markdown to HTML
+    return DOMPurify.sanitize(marked(term.value, { async: false, renderer, gfm: true, breaks: true })); // Parse Markdown to HTML
 });
 
 // Initialize Mermaid diagrams after content is rendered
@@ -127,8 +121,8 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
         <!-- Simple text output only -->
         <template v-if="props.textOnly">
             <slot v-if="props?.term?.value" name="text" :term="term" :text="term.value">
-                <span v-if="isMarkdown" v-dom-purify-html="renderedMarkdownContent"></span>
-                <span v-else-if="isHtml" :class="htmlClass" v-dompurify-html="term.value"></span>
+                <span v-if="isMarkdown" v-html="renderedMarkdownContent"></span>
+                <span v-else-if="isHtml" :class="htmlClass" v-html="sanitizedHtml"></span>
                 <span v-else :class="class">{{ term.value }}</span>
             </slot>
         </template>
@@ -136,8 +130,8 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
         <span v-else-if="props?.term?.value" class="prezui-literal">
             <span class="prezui-text">
                 <slot name="text" :term="term" :text="term.value">
-                    <span v-if="isMarkdown" v-dompurify-html="renderedMarkdownContent"></span>
-                    <span v-else-if="isHtml" :class="htmlClass" v-dompurify-html="term.value"></span>
+                    <span v-if="isMarkdown" v-html="renderedMarkdownContent"></span>
+                    <span v-else-if="isHtml" :class="htmlClass" v-html="sanitizedHtml"></span>
                     <span v-else :class="class">{{ term.value }}</span>
                 </slot>
                 <slot v-if="!hideLanguage && term.language !== undefined" name="language" :term="term" :language="term.language">

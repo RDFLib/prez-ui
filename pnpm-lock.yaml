@@ -59,6 +59,9 @@ importers:
       '@primevue/themes':
         specifier: ^4.0.4
         version: 4.0.5
+      dompurify:
+        specifier: ^3.2.0
+        version: 3.2.0
       dotenv-cli:
         specifier: ^7.4.2
         version: 7.4.2
@@ -102,9 +105,6 @@ importers:
       tailwindcss:
         specifier: ^3.4.9
         version: 3.4.10
-      vue-dompurify-html:
-        specifier: ^5.1.0
-        version: 5.1.0(vue@3.4.38)
 
   packages/lib:
     dependencies:
@@ -12577,8 +12577,8 @@ packages:
     resolution: {integrity: sha512-kD+f8qEaa42+mjdOpKeztu9Mfx5bv9gVLO6K9jRx4uGvh6Wv06Srn4jr1wPNY2OOUGGSKHNFN+A8MA3v0E0QAQ==}
     dev: true
 
-  /dompurify@3.1.6:
-    resolution: {integrity: sha512-cTOAhc36AalkjtBpfG6O8JimdTMWNXjiePT2xQH/ppBGi/4uIpmj8eKyIkMJErXWARyINV/sB38yf8JCLF5pbQ==}
+  /dompurify@3.2.0:
+    resolution: {integrity: sha512-AMdOzK44oFWqHEi0wpOqix/fUNY707OmoeFDnbi3Q5I8uOpy21ufUA5cDJPr0bosxrflOVD/H2DMSvuGKJGfmQ==}
 
   /domutils@1.7.0:
     resolution: {integrity: sha512-Lgd2XcJ/NjEw+7tFvfKxOzCYKZsdct5lczQ2ZaQY8Djz7pfAD3Gbp8ySJWtreII/vDlMVmxwa6pHmdxIYgttDg==}
@@ -17088,7 +17088,7 @@ packages:
       d3-sankey: 0.12.3
       dagre-d3-es: 7.0.10
       dayjs: 1.11.13
-      dompurify: 3.1.6
+      dompurify: 3.2.0
       elkjs: 0.9.3
       katex: 0.16.11
       khroma: 2.1.0
@@ -24826,15 +24826,6 @@ packages:
       ts-map: 1.0.3
       vue: 3.4.38(typescript@5.6.2)
       vue-inbrowser-compiler-independent-utils: 4.71.1(vue@3.4.38)
-
-  /vue-dompurify-html@5.1.0(vue@3.4.38):
-    resolution: {integrity: sha512-616o2/PBdOLM2bwlRWLdzeEC9NerLkwiudqNgaIJ5vBQWXec+u7Kuzh+45DtQQrids67s4pHnTnJZLVfyPMxbA==}
-    peerDependencies:
-      vue: ^3.0.0
-    dependencies:
-      dompurify: 3.1.6
-      vue: 3.4.38(typescript@5.6.2)
-    dev: true
 
   /vue-inbrowser-compiler-independent-utils@4.71.1(vue@3.4.38):
     resolution: {integrity: sha512-K3wt3iVmNGaFEOUR4JIThQRWfqokxLfnPslD41FDZB2ajXp789+wCqJyGYlIFsvEQ2P61PInw6/ph5iiqg51gg==}
