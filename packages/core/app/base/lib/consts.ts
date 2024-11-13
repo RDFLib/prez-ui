@@ -48,6 +48,7 @@ export const SYSTEM_PREDICATES = {
     rdfLangString: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
     xmlString: "http://www.w3.org/2001/XMLSchema#string",
     w3Html: "http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML",
+    w3Markdown: "https://www.w3.org/ns/iana/media-types/text/markdown",
     shaclAllPredicates: "http://example.com/shacl-extension#allPredicateValues",
     shaclProperty: "http://www.w3.org/ns/shacl#property",
     shaclPath: "http://www.w3.org/ns/shacl#path",

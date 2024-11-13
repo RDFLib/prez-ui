@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { SYSTEM_PREDICATES, type PrezNode, type PrezTerm } from '@/base/lib';
+import { SYSTEM_PREDICATES, treatAsHtml, treatAsMarkdown, type PrezNode, type PrezTerm } from '@/base/lib';
 
 interface Props {
     /** parent term or root focus node */
@@ -11,15 +11,19 @@ interface Props {
     /** objects to render */
     objects: PrezTerm[];
 }
-
 const props = defineProps<Props>();
+const isFullWidth = computed(()=>
+    props.objects.find(o=>o.termType == 'Literal' && 
+        (([SYSTEM_PREDICATES.w3Html, SYSTEM_PREDICATES.w3Markdown].includes(o.datatype?.value || '') || (treatAsMarkdown(o.value) || treatAsHtml(o.value)))))
+);
+
 </script>
 <template>
     <!-- ItemTableRow -->
     <slot name="row">
         <tr :class="index % 2 == 1 ? 'p-row-odd' : 'p-row-even'" >
             <slot name="columns">
-                <td v-if="objects.find(o=>o.termType == 'Literal' && o.datatype?.value == SYSTEM_PREDICATES.w3Html)" colspan="2">
+                <td v-if="isFullWidth" colspan="2">
                     <div><Predicate :predicate="predicate" :objects="objects" :term="term" variant="item-table" /></div>
                     <div class="border-l pl-4 mt-2 ml-2"><Objects :predicate="predicate" :objects="objects" :term="term" variant="item-table" /></div>
                 </td>
