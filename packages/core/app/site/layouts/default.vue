@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useGetPrezAPIAltEndpoints, useSetAPIEndpoint } from '../composables/useLib';
 
 const props = defineProps<{sidepanel?: boolean, contentonly?: boolean}>()
 const appConfig = useAppConfig();
