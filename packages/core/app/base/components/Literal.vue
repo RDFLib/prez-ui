@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-// Register the directive locally
-import { getCurrentInstance } from 'vue';
 import { type PrezLiteral, SYSTEM_PREDICATES, treatAsHtml, treatAsMarkdown } from '@/base/lib';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
@@ -33,6 +31,7 @@ const props = defineProps<Props>();
 //     D --> B;
 // \`\`\`
 // `
+// props.term.value = `<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><msub><mi>e</mi><mi>i</mi></msub><mo>=</mo><mfenced close=\"|\" open=\"|\"><mrow><msub><mi>x</mi><mrow><mi>m</mi><mi>i</mi></mrow></msub><mo>-</mo><msub><mi>x</mi><mrow><mi>t</mi><mi>i</mi></mrow></msub></mrow></mfenced></math>`
 
 /** set flags initial values */
 let hideLanguage = props.hideLanguage || false;
