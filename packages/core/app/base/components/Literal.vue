@@ -158,7 +158,7 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
     justify-content: space-between;
 }
 
-.no-tailwind *:not(svg) {
+.no-tailwind {
   all: revert-layer;
   font-family: inherit;
   font-size: inherit;
