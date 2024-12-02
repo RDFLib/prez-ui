@@ -1,0 +1,17 @@
+<template>
+    <div>
+        <h1>app.vue</h1>
+        <div class="bg-red-500 p-4 rounded">Tailwind styling bg-red-500</div>
+        <div class="bg-primary">bg-primary theming</div>
+        <div class="bg-secondary">bg-secondary</div>
+        <div class="custom">styling from base style.css</div>
+        <div class="card">styling from extended theme.css</div>
+        <SpecialButton>from component lib</SpecialButton>
+        <GrandParent />
+        <hr>
+        <Parent />
+        <CopyButton value="prez-ui copy button value" />
+        <Message text="message" />
+        <Loading variant="concept" />
+    </div>
+</template>

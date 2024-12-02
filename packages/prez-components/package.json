@@ -1,0 +1,51 @@
+{
+    "name": "prez-components",
+    "private": true,
+    "version": "0.0.1",
+    "type": "module",
+    "files": [
+        "dist"
+    ],
+    "main": "./dist/prez-components.umd.cjs",
+    "module": "./dist/prez-components.js",
+    "exports": {
+        ".": {
+            "import": "./dist/prez-components.js",
+            "require": "./dist/prez-components.umd.cjs",
+            "types": "./dist/index.d.ts"
+        },
+        "./style.css": "./dist/style.css"
+    },
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build && vue-tsc -b --declaration --emitDeclarationOnly",
+        "build:watch": "concurrently \"vite build --watch\" \"vue-tsc -b --declaration --emitDeclarationOnly\"",
+        "types": "vue-tsc",
+        "preview": "vite preview",
+        "preinstall": "npx only-allow pnpm"
+    },
+    "dependencies": {
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "lucide-vue-next": "^0.461.0",
+        "prez-lib": "workspace:*",
+        "radix-vue": "^1.9.10",
+        "tailwind-merge": "^2.5.5",
+        "tailwindcss-animate": "^1.0.7",
+        "vite-plugin-libcss": "^1.1.1",
+        "vue": "^3.5.13",
+        "vue-router": "^4.5.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.0",
+        "@vitejs/plugin-vue": "^5.1.4",
+        "autoprefixer": "^10.4.20",
+        "concurrently": "^9.1.0",
+        "tailwindcss": "^3.4.15",
+        "typescript": "5.6.2",
+        "vite": "^5.4.10",
+        "vue-dompurify-html": "^5.2.0",
+        "vue-tsc": "2.0.29"
+    }
+}

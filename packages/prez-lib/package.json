@@ -1,0 +1,41 @@
+{
+    "name": "prez-lib",
+    "version": "0.0.0",
+    "type": "module",
+    "files": [
+        "dist"
+    ],
+    "main": "./dist/prez-lib.umd.cjs",
+    "module": "./dist/prez-lib.js",
+    "exports": {
+        ".": {
+            "import": "./dist/prez-lib.js",
+            "require": "./dist/prez-lib.umd.cjs",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "types": "./dist/index.d.ts",
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rdflib/prez-ui.git",
+        "directory": "prez-lib"
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build && tsc -b --declaration --emitDeclarationOnly",
+        "preview": "vite preview",
+        "preinstall": "npx only-allow pnpm"
+    },
+    "devDependencies": {
+        "@rdfjs/types": "^1.1.2",
+        "@types/n3": "^1.21.1",
+        "typescript": "5.6.2",
+        "vite": "^5.4.10"
+    },
+    "dependencies": {
+        "n3": "^1.23.1"
+    }
+}
