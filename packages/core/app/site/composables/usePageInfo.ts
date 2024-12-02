@@ -1,6 +1,6 @@
 import type { PageState } from 'primevue/paginator';
 import { computed } from 'vue';
-import type { PrezDataList, PrezDataSearch } from '~/base/lib';
+import type { PrezDataList, PrezDataSearch } from '@/base/lib';
 
 export const useGetInitialPageUrl = () => {
     const route = useRoute();

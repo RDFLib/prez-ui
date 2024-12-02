@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { dumpNodeArray } from '~/base/lib';
+import { dumpNodeArray } from '@/base/lib';
 
 
 const appConfig = useAppConfig();
