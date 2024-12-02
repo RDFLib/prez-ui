@@ -52,9 +52,9 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
         </template>
 
         <template #default>
-            <slot :data="data" :status="status" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
+            <slot :data="data" :status="status" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
 
-                <slot name="top" :data="data" :status="status" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
+                <slot name="top" :data="data" :status="status" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
 
                 <slot name="message">
                     <div v-if="error">
@@ -81,9 +81,9 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                         <slot name="header-bottom" :data="data"></slot>
                     </slot>
                     <div class="mt-2 mb-12 overflow-auto">
-                        <slot name="item-section" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
-                            <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
-                            <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
+                        <slot name="item-section" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
+                            <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
+                            <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
 
                                 <ItemTable
                                     :term="data.data" 
@@ -93,15 +93,15 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                                 />
 
                             </slot>
-                            <slot name="item-middle" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
+                            <slot name="item-middle" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
 
-                            <slot name="item-members" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
+                            <slot name="item-members" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
                                 <p class="mt-6" v-if="data.data.members">
                                     <Button size="small" color="secondary" label="Members" @click="()=>router.push(data!.data.members!.value)" />
                                 </p>
                             </slot>
 
-                            <slot name="item-concepts" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
+                            <slot name="item-concepts" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
                                 <div class="mt-6" v-if="isConceptScheme && topConceptsUrl != ''">
                                     <p><b>Concepts</b></p>
                                     <div class="mt-4">
@@ -113,14 +113,14 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                                 </div>
                             </slot>
 
-                            <slot name="item-bottom" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
+                            <slot name="item-bottom" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
                         </slot>
                     </div>
                 </div>
                 <slot name="loading" :status="status">
                     <Loading v-if="status == 'pending'" />
                 </slot>
-                <slot name="bottom" :data="data" :status="status" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
+                <slot name="bottom" :data="data" :status="status" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
             </slot>
         </template>
 
