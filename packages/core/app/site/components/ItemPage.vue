@@ -10,7 +10,7 @@ const urlPath = ref(getPageUrl());
 const apiEndpoint = useGetPrezAPIEndpoint();
 const { status, error, data } = useGetItem(apiEndpoint, urlPath);
 const isConceptScheme = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.skosConceptScheme));
-const topConceptsUrl = computed(()=>isConceptScheme ? getTopConceptsUrl(data.value!.data) : '');
+const topConceptsUrl = computed(()=>isConceptScheme.value ? getTopConceptsUrl(data.value!.data) : '');
 const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
 
