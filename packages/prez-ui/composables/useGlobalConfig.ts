@@ -1,10 +1,15 @@
-
 // composables/useGlobalConfig.ts
 export const useGlobalConfig = () => {
     const globalConfig = useState<{ config: any, version: string } | null>('globalConfig', () => null);
     const route = useRoute();
     const runtimeConfig = useRuntimeConfig();
     const appConfig = useAppConfig();
+
+    // set the global config for markdown and html detection
+    setConfig({
+        autoMarkdownDetection: !!runtimeConfig.public.prezAutoDetectMarkdown,
+        autoHtmlDetection: !!runtimeConfig.public.prezAutoDetectHtml
+    });
 
     if (!import.meta.server
         && typeof localStorage !== 'undefined'

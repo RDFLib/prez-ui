@@ -2,9 +2,8 @@
 export default defineNuxtConfig({
     compatibilityDate: "2024-04-03",
     devtools: { enabled: true },
-    modules: ["@nuxtjs/tailwindcss"],
+    modules: ["@nuxtjs/tailwindcss", "shadcn-nuxt"],
     extends: [
-        // "../prez-ui",
-        ["github:rdflib/prez-ui/prez-ui#jamie/next/shad-layer-fix", { install: true }]
+        "../../prez-ui",
     ],
 });

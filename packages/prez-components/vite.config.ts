@@ -4,25 +4,15 @@ import { fileURLToPath, URL } from "node:url";
 import { resolve } from "path";
 import autoprefixer from 'autoprefixer'
 import tailwind from 'tailwindcss'
-// import libCss from "vite-plugin-libcss";
-// import dts from 'vite-plugin-dts'
+import dts from 'vite-plugin-dts'
 
 // https://vite.dev/config/
 export default defineConfig({
-    plugins: [
-        vue(),
-        // dts(),
-        // libCss()
-    ],
+    plugins: [vue(), dts()],
     css: {
         postcss: {
             plugins: [tailwind(), autoprefixer()],
         },
-    },
-    resolve: {
-        alias: {
-            "@": fileURLToPath(new URL("./src", import.meta.url))
-        }
     },
     build: {
         lib: {
@@ -39,4 +29,9 @@ export default defineConfig({
             },
         },
     },
-})
+    resolve: {
+        alias: {
+            "@": fileURLToPath(new URL("./src", import.meta.url))
+        }
+    },
+});

@@ -13,6 +13,8 @@ export interface CopyButtonProps {
 export interface TermProps {
     term: PrezTerm;
     variant?: 'item-table' | 'item-list' | 'item-header' | 'search-results' | 'item-profiles';
+    renderHtml?: boolean;
+    renderMarkdown?: boolean;
     _components?: {
         literal: Component,
         node: Component,
@@ -29,6 +31,8 @@ export interface LiteralProps {
     class?: string;
     textOnly?: boolean;
     variant?: 'item-table' | 'item-list' | 'item-header' | 'search-results' | 'item-profiles';
+    renderHtml?: boolean;
+    renderMarkdown?: boolean;
     _components?: {
         term: Component;
     };
@@ -111,6 +115,8 @@ export interface ItemTableRowProps {
     predicate: PrezNode;
     /** objects to render */
     objects: PrezTerm[];
+    renderHtml?: boolean;
+    renderMarkdown?: boolean;
     _components?: {
         predicate: Component;
         objects: Component;
@@ -140,6 +146,8 @@ export interface ObjectsProps {
     objects: PrezTerm[];
     /** tells you the context these objects are being rendered in */
     variant?: 'item-table' | 'item-list' | 'item-header' | 'search-results' | 'item-profiles';
+    renderHtml?: boolean;
+    renderMarkdown?: boolean;
     _components?: {
         term: Component;
     };
@@ -151,6 +159,8 @@ export interface ItemTableProps {
 
     /** parent term or root focus node */
     term: PrezTerm;
+    renderHtml?: boolean;
+    renderMarkdown?: boolean;
     _components?: {
         itemTableRow: Component;
     };

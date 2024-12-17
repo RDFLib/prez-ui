@@ -4,6 +4,6 @@
 
 @layer base {
     :root {
-        --primary: 40 100% 50%;
+        /* define your Tailwind CSS variables (in HSL values without the hsl()) here */
     }
 }

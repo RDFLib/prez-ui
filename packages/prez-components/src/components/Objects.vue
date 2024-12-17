@@ -16,7 +16,13 @@ const props = withDefaults(defineProps<ObjectsProps>(), {
     <!-- Objects -->
     <slot>
         <div v-for="(obj, index) of props.objects" :key="index" >
-            <component :is="props._components.term" :term="obj" :variant="props.variant" />
+            <component
+                :is="props._components.term"
+                :term="obj"
+                :variant="props.variant"
+                :renderHtml="props.renderHtml"
+                :renderMarkdown="props.renderMarkdown"
+            />
         </div>
     </slot>
 </template>

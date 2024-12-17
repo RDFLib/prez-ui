@@ -1,7 +1,7 @@
 import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad, NamedNode } from "n3";
-import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezLinkParent, PrezBlankNode, PrezNodeList } from "./types";
-import { ANNOTATION_PREDICATES, DEFAULT_PREFIXES, PREZ_PREDICATES, SYSTEM_PREDICATES } from "./consts";
-import { defaultToIri, defaultFromIri, dumpNodeArray } from "./helpers";
+import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezLinkParent, PrezNodeList } from "./types";
+import { DEFAULT_PREFIXES, PREZ_PREDICATES, SYSTEM_PREDICATES } from "./consts";
+import { defaultToIri, defaultFromIri } from "./helpers";
 import { node, literal, bnode } from "./factory";
 import * as RDF from "@rdfjs/types";
 
@@ -15,6 +15,7 @@ export class RDFStore {
     private parser: Parser; // N3
     public prefixes: { [namespace: string]: string };
     private basePath: string;
+    // @ts-ignore - incorrectly warns unused
     private baseUrl: string;
     private linkedLists: Record<string, RDF.Term[]>;
     private lists: Record<string, PrezNodeList[]>;
@@ -56,7 +57,6 @@ export class RDFStore {
                 const lid = n.value;
                 if(lid in this.linkedLists) {
                     const subList = this.buildSubList(this.linkedLists[lid]!);
-                    let done = false;
                     if(subList.length > 1) {
                         // check if the first item in the subList is a node that has been seen before
                         const existingList = items.find(i => i.node.value == subList[0]!.node.value);

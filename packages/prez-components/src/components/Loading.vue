@@ -25,7 +25,7 @@ const props = defineProps<LoadingProps>();
         </div>
     </div>
     <div v-else-if="props.variant == 'concept'" class="space-y-4">
-        <Skeleton v-for="i in [...Array(6).keys()]" class="h-4 w-44" />
+        <Skeleton v-for="i in [...Array(6).keys()]" class="h-4 w-44" :key="i" />
     </div>
     <div v-else-if="props.variant == 'item'">
         <div class="space-y-4">

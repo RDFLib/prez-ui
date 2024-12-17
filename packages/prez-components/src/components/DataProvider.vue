@@ -32,9 +32,9 @@ const fetchData = async () => {
     properties.value = [];
 
     // Function to simulate a minimum loading time
-    const minimumLoadingTime = () => {
-        return new Promise(resolve => setTimeout(resolve, 200));
-    };
+    // const minimumLoadingTime = () => {
+    //     return new Promise(resolve => setTimeout(resolve, 200));
+    // };
 
     if(!url.value) {
         error.value = new Error('No data URL provided')

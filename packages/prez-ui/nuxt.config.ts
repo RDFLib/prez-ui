@@ -22,7 +22,9 @@ export default defineNuxtConfig({
             prezApiEndpointAltNames: "",
             prezUtilsTestPath: "/catalogs/ns:catId/collections/ns:colId/items/ns:itemId",
             prezDebug: false,
-            prezAllowApiEndpointChange: false
+            prezAllowApiEndpointChange: false,
+            prezAutoDetectMarkdown: false,
+            prezAutoDetectHtml: false
         }
     },
     nitro: {

@@ -1,6 +1,5 @@
 import type { PrezBlankNode, PrezDataItem, PrezDataList, PrezDataSearch, PrezNodeList, PrezProfileHeader, PrezProfiles, PrezProperties, PrezProperty } from "./types";
 import { RDFStore } from "./store";
-import { getUrlPath } from "./helpers";
 import { SYSTEM_PREDICATES } from "./consts";
 
 type LinkObject = {
@@ -211,8 +210,6 @@ function applyProfileToProperties(properties: PrezProperties, profile: PrezNodeL
 }
 
 export function applyProfileToItem(item: PrezDataItem, profile: PrezNodeList[]):void {
-
-    const store = item.store;
     // console.log("APPLY PROPS", profile, item.data.properties);
     item.data.properties = applyProfileToProperties(item.data.properties || {}, profile);
 

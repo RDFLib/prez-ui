@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Badge } from '@/components/ui/badge'
-import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from '@/components/ui/table';
+import { Table, TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { SearchResultsProps } from "@/types";
 import Node from "./Node.vue";
 import Term from "./Term.vue";

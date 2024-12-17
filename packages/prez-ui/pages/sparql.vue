@@ -9,7 +9,7 @@ onMounted(() => {
     const yasgui = new Yasgui(document.getElementById("yasgui")!, {
         requestConfig: {
             endpoint: `${apiEndpoint}/sparql`,
-            method: "GET"
+            method: "POST"
         },
         copyEndpointOnNewTab: true,
         autofocus: true

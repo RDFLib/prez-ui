@@ -1,30 +1,26 @@
 <script lang="ts" setup>
-import SpecialButton from "../components/SpecialButton.vue";
 import CopyButton from "../components/CopyButton.vue";
-import Parent from "../components/Parent.vue";
 import Node from "../components/Node.vue";
 import ItemLink from "../components/ItemLink.vue";
 import Loading from "../components/Loading.vue";
 import Message from "../components/Message.vue";
+import Literal from "../components/Literal.vue";
+import { literal, node } from "prez-lib";
 
-const term = {
-    label: {
-        termType: "Literal",
-        value: 'term',
-    },
+const term = node({
+    value: "https://example.com",
+    label: literal("term"),
     links: [
         {
             value: "/"
         }
     ],
-}
+});
 </script>
 
 <template>
     <div>
-        Componeny library
-        <SpecialButton>Slot content</SpecialButton>
-        <Parent />
+        Component library
         <CopyButton value="copybuttonvalue" />
         <Node :term="term" />
         <ItemLink to="/" copyLink>item link</ItemLink>
@@ -32,6 +28,7 @@ const term = {
             <Loading variant="concept" />
         </div>
         <Message text="error" severity="error" />
+        <Literal :term="literal('term')" textonly renderHtml renderMarkdown />
     </div>
 </template>
 

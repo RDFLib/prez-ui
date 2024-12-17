@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { type PrezFocusNode } from 'prez-lib';
-import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody } from '@/components/ui/table';
 import { ItemTableProps } from "@/types";
 import ItemTableRow from "./ItemTableRow.vue";
 
@@ -32,7 +32,9 @@ const term = props.term as PrezFocusNode;
                 :index="index"
                 :term="term" 
                 :objects="fieldProp ? fieldProp.objects : []" 
-                :predicate="fieldProp!.predicate" 
+                :predicate="fieldProp!.predicate"
+                :renderHtml="props.renderHtml"
+                :renderMarkdown="props.renderMarkdown"
             />
         </TableBody>
     </Table>

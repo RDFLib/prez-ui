@@ -26,6 +26,8 @@ const props = withDefaults(defineProps<TermProps>(), {
         v-if="props.term.termType == 'Literal'" 
         :term="(props.term as PrezLiteral)"
         :variant="props.variant"
+        :renderHtml="props.renderHtml"
+        :renderMarkdown="props.renderMarkdown"
     />
 
     <component
