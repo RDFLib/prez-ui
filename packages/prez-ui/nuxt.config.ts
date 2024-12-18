@@ -9,7 +9,7 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
     modules: ["@nuxtjs/tailwindcss", "shadcn-nuxt", "@nuxtjs/color-mode"],
     css: [
-        "prez-components/style.css",
+        "prez-components-test/style.css",
         "./assets/css/tailwind.css",
         join(currentDir, "./assets/css/style.css"),
         "./assets/css/theme.css"

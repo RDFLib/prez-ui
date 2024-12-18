@@ -17,8 +17,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve(__dirname, "src/index.ts"),
-            name: "prez-components",
-            fileName: "prez-components",
+            name: "prez-components-test",
+            fileName: "prez-components-test",
         },
         rollupOptions: {
             external: ["vue", "vue-router"],

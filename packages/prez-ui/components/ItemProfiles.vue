@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ItemProfiles, type ItemProfilesProps } from "prez-components";
+import { ItemProfiles, type ItemProfilesProps } from "prez-components-test";
 
 const props = defineProps<ItemProfilesProps>();
 const itemLink = resolveComponent("ItemLink") as Component;

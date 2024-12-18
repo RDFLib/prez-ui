@@ -1,4 +1,4 @@
-import type { PrezDataList, PrezDataSearch } from 'prez-lib';
+import type { PrezDataList, PrezDataSearch } from 'prez-lib-test';
 
 export const useGetInitialPageUrl = () => {
     const route = useRoute();

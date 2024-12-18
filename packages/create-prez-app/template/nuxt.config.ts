@@ -4,6 +4,6 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
     modules: ["@nuxtjs/tailwindcss", "shadcn-nuxt"],
     extends: [
-        "../../prez-ui",
+        ["github:jamiefeiss/prez-ui/packages/prez-ui#jamie/next/shad-layer-fix", { install: true }]
     ],
 });

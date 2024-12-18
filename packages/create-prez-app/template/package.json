@@ -1,6 +1,8 @@
 {
-    "name": "nuxt-app",
+    "name": "prez-ui-starter",
+    "version": "4.0.0",
     "private": true,
+    "license": "BSD-3-Clause",
     "type": "module",
     "scripts": {
         "build": "nuxt build",

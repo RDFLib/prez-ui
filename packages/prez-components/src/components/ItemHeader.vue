@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { PrezNode } from 'prez-lib';
+import type { PrezNode } from 'prez-lib-test';
 import { ItemHeaderProps } from "@/types";
 import Node from "./Node.vue";
 import Literal from "./Literal.vue";

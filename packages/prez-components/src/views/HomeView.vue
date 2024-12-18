@@ -5,7 +5,7 @@ import ItemLink from "../components/ItemLink.vue";
 import Loading from "../components/Loading.vue";
 import Message from "../components/Message.vue";
 import Literal from "../components/Literal.vue";
-import { literal, node } from "prez-lib";
+import { literal, node } from "prez-lib-test";
 
 const term = node({
     value: "https://example.com",

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ItemTableRow, type ItemTableRowProps } from "prez-components";
+import { ItemTableRow, type ItemTableRowProps } from "prez-components-test";
 
 const props = defineProps<ItemTableRowProps>();
 const predicate = resolveComponent("Predicate") as Component;

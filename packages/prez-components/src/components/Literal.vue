@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, onMounted, nextTick } from 'vue';
-import { type PrezLiteral, SYSTEM_PREDICATES } from "prez-lib";
+import { type PrezLiteral, SYSTEM_PREDICATES } from "prez-lib-test";
 import { Badge } from '@/components/ui/badge';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';

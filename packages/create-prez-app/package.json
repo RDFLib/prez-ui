@@ -1,20 +1,21 @@
 {
-    "name": "create-prez-app",
-    "version": "1.0.0",
-    "description": "Starter template for Prez UI",
+    "name": "create-prez-app-test",
+    "version": "4.0.0",
+    "description": "A starter template for creating your own themed Prez UI instance",
+    "license": "BSD-3-Clause",
     "bin": {
-        "create-prez-app": "./index.js"
+        "create-prez-app-test": "./index.js"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/rdflib/prez-ui.git",
+        "url": "git+https://github.com/jamiefeiss/prez-ui.git",
         "directory": "packages/create-prez-app"
     },
     "keywords": [
         "template"
     ],
     "bugs": {
-        "url": "https://github.com/rdflib/prez-ui/issues"
+        "url": "https://github.com/jamiefeiss/prez-ui/issues"
     },
-    "homepage": "https://github.com/rdflib/prez-ui#readme"
+    "homepage": "https://github.com/jamiefeiss/prez-ui/tree/jamie/next/shad-layer-fix/packages/create-prez-app#readme"
 }

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { SpecialButton } from "prez-components";
+import { SpecialButton } from "prez-components-test";
 </script>
 
 <template>

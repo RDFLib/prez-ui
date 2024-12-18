@@ -1,4 +1,4 @@
-import { getItem, getList, search, type PrezDataList, type PrezDataItem, type PrezDataSearch } from "prez-lib";
+import { getItem, getList, search, type PrezDataList, type PrezDataItem, type PrezDataSearch } from "prez-lib-test";
 
 const CACHE_EXPIRY = 10 * 60 * 1000; // 10 min (in milliseconds)
 type FetchStatus = 'idle' | 'pending' | 'success' | 'error';

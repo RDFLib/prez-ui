@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezDataItem, type PrezNode } from 'prez-lib';
+import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezDataItem, type PrezNode } from 'prez-lib-test';
 
 const appConfig = useAppConfig();
 const { globalProfiles } = useGlobalProfiles();

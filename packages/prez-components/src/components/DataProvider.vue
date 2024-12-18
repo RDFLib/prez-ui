@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { getItem, getList, search, getBaseUrl, type PrezNode, type PrezData, type PrezFocusNode, type PrezConceptNode } from "prez-lib";
+import { getItem, getList, search, getBaseUrl, type PrezNode, type PrezData, type PrezFocusNode, type PrezConceptNode } from "prez-lib-test";
 import type { DataProviderProps } from '@/types';
 import Loading from "./Loading.vue";
 import Message from "./Message.vue";

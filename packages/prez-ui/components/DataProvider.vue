@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { DataProvider, type DataProviderProps } from "prez-components";
+import { DataProvider, type DataProviderProps } from "prez-components-test";
 
 const props = defineProps<DataProviderProps>();
 const loading = resolveComponent("Loading") as Component;

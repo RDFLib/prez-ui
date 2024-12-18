@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Literal, type LiteralProps } from "prez-components";
+import { Literal, type LiteralProps } from "prez-components-test";
 
 const props = defineProps<LiteralProps>();
 const term = resolveComponent("Term") as Component;

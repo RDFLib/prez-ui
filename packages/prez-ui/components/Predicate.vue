@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Predicate, type PredicateProps } from "prez-components";
+import { Predicate, type PredicateProps } from "prez-components-test";
 
 const props = defineProps<PredicateProps>();
 const node = resolveComponent("Node") as Component;

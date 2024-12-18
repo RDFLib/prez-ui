@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Objects, type ObjectsProps } from "prez-components";
+import { Objects, type ObjectsProps } from "prez-components-test";
 
 const props = defineProps<ObjectsProps>();
 const term = resolveComponent("Term") as Component;

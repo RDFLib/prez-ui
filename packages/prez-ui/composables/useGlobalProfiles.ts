@@ -1,4 +1,4 @@
-import { getProfiles, type PrezProfiles } from "prez-lib";
+import { getProfiles, type PrezProfiles } from "prez-lib-test";
 
 export const useGlobalProfiles = () => {
     const profiles = useState<PrezProfiles | null>('globalProfiles', () => null);
