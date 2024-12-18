@@ -1,6 +1,9 @@
 name: Release
 
 on:
+  push:
+    branches:
+      - jamie/next/shad-layer-fix
   workflow_dispatch:
     inputs:
       release-type:
@@ -17,70 +20,75 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  temp:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-      - name: Install workspace
-        run: pnpm install
-      - name: Update version for all packages
-        run: |
-          cd packages/prez-lib
-          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
-          cd ../prez-components
-          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
-          cd ../prez-ui
-          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
-          cd ../create-prez-app
-          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
-          cd template
-          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
-          cd ../../..
-          echo "NEW_VERSION=$(pnpm version ${{ github.event.inputs.release-type }})" >> $GITHUB_ENV
-      # prez-lib
-      - name: Build prez-lib
-        working-directory: packages/prez-lib
-        run: pnpm build
-      - name: Publish prez-lib to NPM
-        working-directory: packages/prez-lib
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish --publish-branch jamie/next/shad-layer-fix --no-git-checks
-      # prez-components
-      - name: Build prez-components
-        working-directory: packages/prez-components
-        run: pnpm build
-      - name: Publish prez-components to NPM
-        working-directory: packages/prez-components
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish --publish-branch jamie/next/shad-layer-fix --no-git-checks
-      # prez-ui layer?
-      # create-prez-app
-      - name: Publish create-prez-app to NPM
-        working-directory: packages/create-prez-app
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish --publish-branch jamie/next/shad-layer-fix --no-git-checks
-      - name: Commit & push changes
-        uses: actions-js/push@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tags: true
-          branch: jamie/next/shad-layer-fix
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.NEW_VERSION }}
-          generate_release_notes: true
+      - name: test step
+        run: echo "release workflow registered on branch"
+  # release:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v4
+  #     - name: Install pnpm
+  #       uses: pnpm/action-setup@v4
+  #       with:
+  #         version: 9
+  #         run_install: false
+  #     - name: Install Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+  #         cache: 'pnpm'
+  #     - name: Install workspace
+  #       run: pnpm install
+  #     - name: Update version for all packages
+  #       run: |
+  #         cd packages/prez-lib
+  #         pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+  #         cd ../prez-components
+  #         pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+  #         cd ../prez-ui
+  #         pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+  #         cd ../create-prez-app
+  #         pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+  #         cd template
+  #         pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+  #         cd ../../..
+  #         echo "NEW_VERSION=$(pnpm version ${{ github.event.inputs.release-type }})" >> $GITHUB_ENV
+  #     # prez-lib
+  #     - name: Build prez-lib
+  #       working-directory: packages/prez-lib
+  #       run: pnpm build
+  #     - name: Publish prez-lib to NPM
+  #       working-directory: packages/prez-lib
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  #       run: pnpm publish --publish-branch jamie/next/shad-layer-fix --no-git-checks
+  #     # prez-components
+  #     - name: Build prez-components
+  #       working-directory: packages/prez-components
+  #       run: pnpm build
+  #     - name: Publish prez-components to NPM
+  #       working-directory: packages/prez-components
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  #       run: pnpm publish --publish-branch jamie/next/shad-layer-fix --no-git-checks
+  #     # prez-ui layer?
+  #     # create-prez-app
+  #     - name: Publish create-prez-app to NPM
+  #       working-directory: packages/create-prez-app
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  #       run: pnpm publish --publish-branch jamie/next/shad-layer-fix --no-git-checks
+  #     - name: Commit & push changes
+  #       uses: actions-js/push@master
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         tags: true
+  #         branch: jamie/next/shad-layer-fix
+  #     - name: Create GitHub release
+  #       uses: softprops/action-gh-release@v2
+  #       with:
+  #         tag_name: ${{ env.NEW_VERSION }}
+  #         generate_release_notes: true
