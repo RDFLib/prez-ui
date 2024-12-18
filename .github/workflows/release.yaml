@@ -73,6 +73,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish --publish-branch jamie/next/shad-layer-fix --no-git-checks
       # create-prez-app
+      - name: Update prez-ui dependency in template
+        working-directory: packages/create-prez-app/template
+        run: pnpm up prez-ui-test 
       - name: Publish create-prez-app to NPM
         working-directory: packages/create-prez-app
         env:
