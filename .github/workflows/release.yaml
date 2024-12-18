@@ -48,8 +48,6 @@ jobs:
           pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
           cd template
           pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
-      - name: echo new version
-        run: echo "${{ env.NEW_VERSION }}"
       # prez-lib
       - name: Build prez-lib
         working-directory: packages/prez-lib
@@ -68,7 +66,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish --publish-branch jamie/next/shad-layer-fix --no-git-checks
-      # prez-ui layer?
+      # prez-ui layer
+      - name: Publish prez-ui to NPM
+        working-directory: packages/prez-ui
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --publish-branch jamie/next/shad-layer-fix --no-git-checks
       # create-prez-app
       - name: Publish create-prez-app to NPM
         working-directory: packages/create-prez-app
