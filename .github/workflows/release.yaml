@@ -37,6 +37,7 @@ jobs:
         run: pnpm install
       - name: Update version for all packages
         run: |
+          echo "NEW_VERSION=$(pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false)" >> $GITHUB_ENV
           cd packages/prez-lib
           pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
           cd ../prez-components
@@ -47,8 +48,8 @@ jobs:
           pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
           cd template
           pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
-          cd ../../..
-          echo "NEW_VERSION=$(pnpm version ${{ github.event.inputs.release-type }})" >> $GITHUB_ENV
+      - name: echo new version
+        run: echo "${{ env.NEW_VERSION }}"
       # prez-lib
       - name: Build prez-lib
         working-directory: packages/prez-lib
@@ -74,12 +75,16 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish --publish-branch jamie/next/shad-layer-fix --no-git-checks
-      - name: Commit & push changes
-        uses: actions-js/push@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tags: true
-          branch: jamie/next/shad-layer-fix
+      - name: Git configuration
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+      - name: Commit & push changes with tag
+        run: |
+          git add -A
+          git commit -m "chore: release ${{ env.NEW_VERSION }}"
+          git tag ${{ env.NEW_VERSION }}
+          git push origin jamie/next/shad-layer-fix && git push --tags
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
