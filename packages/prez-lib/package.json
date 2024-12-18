@@ -25,6 +25,7 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
+        "types": "tsc",
         "preview": "vite preview",
         "preinstall": "npx only-allow pnpm"
     },
@@ -41,5 +42,5 @@
     "bugs": {
         "url": "https://github.com/jamiefeiss/prez-ui/issues"
     },
-    "homepage": "https://github.com/jamiefeiss/prez-ui/tree/jamie/next/shad-layer-fix/packages/prez-lib-test#readme"
+    "homepage": "https://github.com/jamiefeiss/prez-ui/tree/jamie/next/shad-layer-fix/packages/prez-lib#readme"
 }
