@@ -50,8 +50,8 @@ importers:
         version: 4.5.0(vue@3.5.13(typescript@5.7.2))
     devDependencies:
       prez-ui-test:
-        specifier: ^4.0.4
-        version: 4.0.4(@vitest/ui@2.1.8)(eslint@9.17.0(jiti@2.4.1))(magicast@0.3.5)(rollup@4.28.1)(tailwindcss@3.4.16)(typescript@5.7.2)(vitest@2.1.8)
+        specifier: ^4.0.5
+        version: 4.0.5(@vitest/ui@2.1.8)(eslint@9.17.0(jiti@2.4.1))(magicast@0.3.5)(rollup@4.28.1)(tailwindcss@3.4.16)(typescript@5.7.2)(vitest@2.1.8)
       typescript:
         specifier: ^5.6.3
         version: 5.7.2
@@ -4120,16 +4120,16 @@ packages:
     resolution: {integrity: sha512-mQUvGU6aUFQ+rNvTIAcZuWGRT9a6f6Yrg9bHs4ImKF+HZCEK+plBvnAZYSIQztknZF2qnzNtr6F8s0+IuptdlQ==}
     engines: {node: ^14.13.1 || >=16.0.0}
 
-  prez-components-test@4.0.4:
-    resolution: {integrity: sha512-5OZxREebNzkIPSsvme6FO6cODvDk02Kzz6bTUi6OYYmSj3vYyMc+wztgwI4cSsu+GMoAZpNN42viGv2WUcDSLw==}
+  prez-components-test@4.0.5:
+    resolution: {integrity: sha512-uStRzLWvT+GmJh8O0g1WHgxqjpgdiBc8PR81Fb0e6muW13JuP1J7YaUCHHs59bpx+YEL2vM7yIY51d7vX3gTcw==}
     peerDependencies:
       vue: ^3.0.0
 
-  prez-lib-test@4.0.4:
-    resolution: {integrity: sha512-SCp1Vhgm1vV7q1mgrs1TwbXn6Nnw8g5+IBcmAePUPaNtfZYLMjUvxJHFpfKniSGDWQB9hVEScP0lczbdK53aCA==}
+  prez-lib-test@4.0.5:
+    resolution: {integrity: sha512-BbTAmF4tlcIa9XsiGRu7uxuMkQpCqyUzSddxpOvVgfH6LqDCUtR26xillTTJzVl75fi8p6ga6VftlS2TugiWMA==}
 
-  prez-ui-test@4.0.4:
-    resolution: {integrity: sha512-UlYgTqpcSYSVu8xWht5wk0kRatkreBxpFWaSgdnQ4yGy+h7/NVke1kDrq9xy+GIyMR1C2PHM97ajoHzRtWDxzA==}
+  prez-ui-test@4.0.5:
+    resolution: {integrity: sha512-Z7SYwmo8x+QQ4xhJI3mli/P4AFuYIkw7u1iWOtMAFWE7XQbA596fdKB8T6Hp0TG9jffw5bF9qpZjcI4G4/QRow==}
 
   process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
@@ -9653,7 +9653,7 @@ snapshots:
 
   pretty-bytes@6.1.1: {}
 
-  prez-components-test@4.0.4(tailwindcss@3.4.16)(vue@3.5.13(typescript@5.7.2)):
+  prez-components-test@4.0.5(tailwindcss@3.4.16)(vue@3.5.13(typescript@5.7.2)):
     dependencies:
       class-variance-authority: 0.7.1
       clsx: 2.1.1
@@ -9661,7 +9661,7 @@ snapshots:
       lucide-vue-next: 0.461.0(vue@3.5.13(typescript@5.7.2))
       marked: 15.0.4
       mermaid: 11.4.1
-      prez-lib-test: 4.0.4
+      prez-lib-test: 4.0.5
       radix-vue: 1.9.11(vue@3.5.13(typescript@5.7.2))
       tailwind-merge: 2.5.5
       tailwindcss-animate: 1.0.7(tailwindcss@3.4.16)
@@ -9672,11 +9672,11 @@ snapshots:
       - supports-color
       - tailwindcss
 
-  prez-lib-test@4.0.4:
+  prez-lib-test@4.0.5:
     dependencies:
       n3: 1.23.1
 
-  prez-ui-test@4.0.4(@vitest/ui@2.1.8)(eslint@9.17.0(jiti@2.4.1))(magicast@0.3.5)(rollup@4.28.1)(tailwindcss@3.4.16)(typescript@5.7.2)(vitest@2.1.8):
+  prez-ui-test@4.0.5(@vitest/ui@2.1.8)(eslint@9.17.0(jiti@2.4.1))(magicast@0.3.5)(rollup@4.28.1)(tailwindcss@3.4.16)(typescript@5.7.2)(vitest@2.1.8):
     dependencies:
       '@nuxtjs/color-mode': 3.5.2(magicast@0.3.5)(rollup@4.28.1)
       '@nuxtjs/tailwindcss': 6.12.2(magicast@0.3.5)(rollup@4.28.1)
@@ -9689,8 +9689,8 @@ snapshots:
       lucide-vue-next: 0.461.0(vue@3.5.13(typescript@5.7.2))
       marked: 15.0.4
       mermaid: 11.4.1
-      prez-components-test: 4.0.4(tailwindcss@3.4.16)(vue@3.5.13(typescript@5.7.2))
-      prez-lib-test: 4.0.4
+      prez-components-test: 4.0.5(tailwindcss@3.4.16)(vue@3.5.13(typescript@5.7.2))
+      prez-lib-test: 4.0.5
       radix-vue: 1.9.11(vue@3.5.13(typescript@5.7.2))
       shadcn-nuxt: 0.11.3(magicast@0.3.5)(rollup@4.28.1)
       shadcn-vue: 0.11.3(@vitest/ui@2.1.8)(eslint@9.17.0(jiti@2.4.1))(magicast@0.3.5)(vitest@2.1.8)(vue@3.5.13(typescript@5.7.2))

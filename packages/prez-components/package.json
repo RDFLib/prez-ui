@@ -1,6 +1,6 @@
 {
     "name": "prez-components-test",
-    "version": "4.0.4",
+    "version": "4.0.5",
     "description": "A Vue.js component library for rendering RDF data for use with Prez UI",
     "type": "module",
     "license": "BSD-3-Clause",
