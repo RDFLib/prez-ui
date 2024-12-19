@@ -24,8 +24,16 @@ fs.cpSync(templateDir, projectDir, { recursive: true });
 // the dotfiles after we have copied them over to the
 // new project directory.
 fs.renameSync(
-  path.join(projectDir, 'gitignore'),
-  path.join(projectDir, '.gitignore')
+    path.join(projectDir, 'gitignore'),
+    path.join(projectDir, '.gitignore')
+);
+fs.renameSync(
+    path.join(projectDir, 'env.example'),
+    path.join(projectDir, '.env.example')
+);
+fs.renameSync(
+    path.join(projectDir, 'vscode'),
+    path.join(projectDir, '.vscode')
 );
 
 const projectPackageJson = require(path.join(projectDir, 'package.json'));
@@ -34,8 +42,8 @@ const projectPackageJson = require(path.join(projectDir, 'package.json'));
 projectPackageJson.name = projectName;
 
 fs.writeFileSync(
-  path.join(projectDir, 'package.json'),
-  JSON.stringify(projectPackageJson, null, 2)
+    path.join(projectDir, 'package.json'),
+    JSON.stringify(projectPackageJson, null, 2)
 );
 
 // Run `npm install` in the project directory to install

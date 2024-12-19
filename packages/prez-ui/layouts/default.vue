@@ -34,7 +34,6 @@ onBeforeMount(() => {
                     <slot name="logo">Prez UI</slot>
                 </NuxtLink>
 
-                <!-- Navigation -->
                 <nav class="space-x-4 text-right">
                     <NuxtLink to="/services" class="hover:text-gray-400 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[2px] after:bg-primary after:bottom-0 after:left-0 after:transition-transform after:duration-300 after:ease-in-out hover:after:scale-x-100">Privacy</NuxtLink>
                     <NuxtLink to="/contact" class="hover:text-gray-400 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[2px] after:bg-primary after:bottom-0 after:left-0 after:transition-transform after:duration-300 after:ease-in-out hover:after:scale-x-100">Contact</NuxtLink>
@@ -43,6 +42,7 @@ onBeforeMount(() => {
             </div>
         </header>
 
+        <!-- Navigation -->
         <div class="border-b relative">
             <nav class="container font-extralight mx-auto px-4 py-4 hidden md:flex space-x-12 text-lg">
                 <NuxtLink
@@ -100,6 +100,7 @@ onBeforeMount(() => {
             </div>
         </div>
 
+        <!-- Footer -->
         <footer class="bg-gray-800 text-white pt-6 pb-10">
             <div class="container mx-auto text-center">
                 <p>about your organisation</p>

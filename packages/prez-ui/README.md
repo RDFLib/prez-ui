@@ -20,3 +20,5 @@ export default defineNuxtConfig({
     ...
 });
 ```
+
+See the [theming documentation](https://github.com/jamiefeiss/prez-ui/blob/jamie/next/shad-layer-fix/docs/theming.md) on how to customise your Prez UI theme.
