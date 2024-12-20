@@ -3,7 +3,7 @@ import { Search } from "lucide-vue-next";
 
 const appConfig = useAppConfig();
 const apiEndpoint = useGetPrezAPIEndpoint();
-const { getPageUrl, navigateToPage, pagination, formSubmitToNavigate } = usePageInfo();
+const { getPageUrl, pagination, formSubmitToNavigate } = usePageInfo();
 const route = useRoute();
 const urlPath = ref(getPageUrl());
 

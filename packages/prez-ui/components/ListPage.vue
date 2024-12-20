@@ -9,7 +9,7 @@ const urlPath = ref(useGetInitialPageUrl());
 const apiEndpoint = useGetPrezAPIEndpoint();
 const { status, error, data } = useGetList(apiEndpoint, urlPath);
 
-const { getPageUrl, navigateToPage, pagination } = usePageInfo(data);
+const { getPageUrl, pagination } = usePageInfo(data);
 
 const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);

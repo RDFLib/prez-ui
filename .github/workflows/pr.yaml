@@ -26,9 +26,15 @@ jobs:
       - name: prez-lib type check
         working-directory: packages/prez-lib
         run: pnpm types
+      - name: Build prez-lib
+        working-directory: packages/prez-lib
+        run: pnpm build
       - name: prez-components type check
         working-directory: packages/prez-components
         run: pnpm types
+      - name: Build prez-components
+        working-directory: packages/prez-components
+        run: pnpm build
       - name: prez-ui type check
         working-directory: packages/prez-ui
         run: pnpm types

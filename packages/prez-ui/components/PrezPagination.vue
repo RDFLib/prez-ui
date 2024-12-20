@@ -13,11 +13,11 @@ const props = defineProps<{
     maxReached: boolean;
 }>();
 
-function navigateToPage(e) {
-    const page = e.page + 1;
-    const queryParams = route.query;
-    navigateTo({ query: { ...queryParams, page: page.toString() } });
-}
+// function navigateToPage(e) {
+//     const page = e.page + 1;
+//     const queryParams = route.query;
+//     navigateTo({ query: { ...queryParams, page: page.toString() } });
+// }
 </script>
 
 <template>
@@ -33,7 +33,7 @@ function navigateToPage(e) {
                 </PaginationFirst>
                 <PaginationPrev as-child>
                     <Button class="w-10 h-10 p-0" variant="outline" as-child>
-                        <NuxtLink :to="{...route, query: { ...route.query, page: (parseInt(route.query.page) - 1).toString() }}">
+                        <NuxtLink :to="{...route, query: { ...route.query, page: (parseInt(route.query.page as string) - 1).toString() }}">
                             <ChevronLeft class="size-4" />
                         </NuxtLink>
                     </Button>
@@ -50,7 +50,7 @@ function navigateToPage(e) {
 
                 <PaginationNext as-child>
                     <Button class="w-10 h-10 p-0" variant="outline" as-child>
-                        <NuxtLink :to="{...route, query: { ...route.query, page: (parseInt(route.query.page) + 1).toString() }}">
+                        <NuxtLink :to="{...route, query: { ...route.query, page: (parseInt(route.query.page as string) + 1).toString() }}">
                             <ChevronRight class="size-4" />
                         </NuxtLink>
                     </Button>

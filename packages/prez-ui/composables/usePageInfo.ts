@@ -36,11 +36,11 @@ export const usePageInfo = (dataRef?: Ref<PrezDataList | PrezDataSearch | undefi
         }).toString();
     };
 
-    function navigateToPage(e) {
-        const page = e.page + 1;
-        const queryParams = route.query;
-        navigateTo({ query: { ...queryParams, page: page.toString() } });
-    }
+    // function navigateToPage(e) {
+    //     const page = e.page + 1;
+    //     const queryParams = route.query;
+    //     navigateTo({ query: { ...queryParams, page: page.toString() } });
+    // }
 
     const formSubmitToNavigate = (event: Event) => {
         const formElement = event.target as HTMLFormElement;
@@ -59,7 +59,7 @@ export const usePageInfo = (dataRef?: Ref<PrezDataList | PrezDataSearch | undefi
     return {
         pagination,
         getPageUrl,
-        navigateToPage,
+        // navigateToPage,
         formSubmitToNavigate
     };
 }
