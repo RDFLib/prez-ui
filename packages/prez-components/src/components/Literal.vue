@@ -40,6 +40,7 @@ const sanitizedHtml = computed(() => DOMPurify.sanitize(props.term.value));
 /** set flags initial values */
 let hideLanguage = props.hideLanguage || false;
 let hideDataType = props.hideDataType || false;
+// @ts-ignore variable is being used despite TS saying it's not
 let textOnly = props.textOnly || false;
 
 /** 
@@ -79,7 +80,11 @@ const isHtml = computed(()=>term.datatype?.value == SYSTEM_PREDICATES.w3Html || 
 const renderer = new marked.Renderer();
 
 // Custom renderer for Mermaid code blocks
-renderer.code = ({ text = '', lang = '', escaped = false }) => {
+renderer.code = ({
+    text = '',
+    lang = '',
+    // escaped = false
+}) => {
     if (lang === 'mermaid') {
         return `
             <div class="mermaid-container mb-4 mt-4">

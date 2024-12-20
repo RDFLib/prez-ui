@@ -34,7 +34,7 @@ export default defineAppConfig({
         conceptsPerPage: 20
     }
 
-})
+});
 
 declare module '@nuxt/schema' {
     interface AppConfigInput {

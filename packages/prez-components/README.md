@@ -1,5 +1,53 @@
-# Vue 3 + TypeScript + Vite
+# Prez Components
+A Vue.js component library for rendering RDF data for use with Prez UI. Uses [`prez-lib`](https://github.com/rdflib/prez-ui/tree/main/packages/prez-lib) for RDF/JS types and processing RDF.
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Based on the [shadcn-vue](https://www.shadcn-vue.com) component library.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Install
+
+```bash
+npm install prez-components
+```
+
+## Usage
+
+```vue
+<script lang="ts" setup>
+import { literal, node } from "prez-lib";
+import { Node } from "prez-components";
+
+const term = node({
+    value: "https://example.com",
+    label: literal("term"),
+    links: [
+        {
+            value: "/"
+        }
+    ],
+});
+</script>
+
+<template>
+    <div>
+        <Node :term="term" />
+    </div>
+</template>
+```
+
+Make sure to import the `prez-components` stylesheet:
+
+```typescript
+// main.ts
+import "prez-components/style.css";
+```
+
+For Nuxt:
+
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+    ...
+    css: ["prez-components/style.css"],
+    ...
+});
+```

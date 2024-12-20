@@ -1,75 +1,24 @@
-# Nuxt Minimal Starter
+# Prez UI base layer
+This is the Nuxt application of Prez UI as a base layer for theme extension.
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
-
-## Setup
-
-Make sure to install dependencies:
+## Install
+To install this layer for extending your own Prez UI theme, run:
 
 ```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
+npm install -D prez-ui
 ```
 
-## Development Server
+and add the base layer to `extends` in your Nuxt config:
 
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+    ...
+    extends: [
+        "prez-ui"
+    ]
+    ...
+});
 ```
 
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+See the [theming documentation](https://github.com/rdflib/prez-ui/blob/main/docs/theming.md) on how to customise your Prez UI theme.

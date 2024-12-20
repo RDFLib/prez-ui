@@ -5,7 +5,6 @@ module.exports = {
     darkMode: ["class"],
     safelist: ["dark"],
     prefix: "",
-
     theme: {
         extend: {
             colors: {

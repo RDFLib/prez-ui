@@ -1,11 +1,20 @@
 {
-    "name": "nuxt-app",
-    "private": true,
+    "name": "prez-ui",
+    "version": "4.0.0",
+    "description": "A Nuxt base layer application for Prez UI",
+    "license": "BSD-3-Clause",
     "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rdflib/prez-ui.git",
+        "directory": "packages/prez-ui"
+    },
+    "main": "./nuxt.config.ts",
     "scripts": {
         "build": "nuxt build",
         "dev": "nuxt dev",
         "generate": "nuxt generate",
+        "types": "nuxt typecheck",
         "preview": "nuxt preview",
         "postinstall": "nuxt prepare"
     },
@@ -21,7 +30,6 @@
         "lucide-vue-next": "^0.461.0",
         "marked": "^15.0.4",
         "mermaid": "^11.4.1",
-        "nuxt": "^3.14.159",
         "prez-components": "workspace:*",
         "prez-lib": "workspace:*",
         "radix-vue": "^1.9.10",
@@ -33,6 +41,11 @@
         "vue-router": "latest"
     },
     "devDependencies": {
+        "nuxt": "^3.14.159",
         "typescript": "^5.6.3"
-    }
+    },
+    "bugs": {
+        "url": "https://github.com/rdflib/prez-ui/issues"
+    },
+    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui#readme"
 }

@@ -4,6 +4,6 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
     modules: ["@nuxtjs/tailwindcss", "shadcn-nuxt"],
     extends: [
-        "../../prez-ui",
+        "prez-ui"
     ],
 });
