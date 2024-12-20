@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { PrezNode } from 'prez-lib-test';
+import type { PrezNode } from 'prez-lib';
 import { NodeProps } from "@/types";
 import ItemLink from "./ItemLink.vue";
 

@@ -1,20 +1,20 @@
 # Prez Components
-A Vue.js component library for rendering RDF data for use with Prez UI. Uses [`prez-lib`](https://github.com/jamiefeiss/prez-ui/tree/jamie/next/shad-layer-fix/packages/prez-lib) for RDF/JS types and processing RDF.
+A Vue.js component library for rendering RDF data for use with Prez UI. Uses [`prez-lib`](https://github.com/rdflib/prez-ui/tree/main/packages/prez-lib) for RDF/JS types and processing RDF.
 
 Based on the [shadcn-vue](https://www.shadcn-vue.com) component library.
 
 ## Install
 
 ```bash
-npm install prez-components-test
+npm install prez-components
 ```
 
 ## Usage
 
 ```vue
 <script lang="ts" setup>
-import { literal, node } from "prez-lib-test";
-import { Node } from "prez-components-test";
+import { literal, node } from "prez-lib";
+import { Node } from "prez-components";
 
 const term = node({
     value: "https://example.com",
@@ -38,7 +38,7 @@ Make sure to import the `prez-components` stylesheet:
 
 ```typescript
 // main.ts
-import "prez-components-test/style.css";
+import "prez-components/style.css";
 ```
 
 For Nuxt:
@@ -47,7 +47,7 @@ For Nuxt:
 // nuxt.config.ts
 export default defineNuxtConfig({
     ...
-    css: ["prez-components-test/style.css"],
+    css: ["prez-components/style.css"],
     ...
 });
 ```

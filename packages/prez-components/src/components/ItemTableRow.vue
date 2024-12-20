@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue";
-import { SYSTEM_PREDICATES } from 'prez-lib-test';
+import { SYSTEM_PREDICATES } from 'prez-lib';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { ItemTableRowProps } from "@/types";
 import Predicate from "./Predicate.vue";

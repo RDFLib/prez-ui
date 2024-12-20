@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ItemList, type ItemListProps } from "prez-components-test";
+import { ItemList, type ItemListProps } from "prez-components";
 
 const props = defineProps<ItemListProps>();
 const predicate = resolveComponent("Predicate") as Component;

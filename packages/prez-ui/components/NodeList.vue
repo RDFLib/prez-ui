@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { NodeList, type NodeListProps } from "prez-components-test";
+import { NodeList, type NodeListProps } from "prez-components";
 
 const props = defineProps<NodeListProps>();
 const node = resolveComponent("Node") as Component;

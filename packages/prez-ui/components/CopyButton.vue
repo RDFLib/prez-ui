@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { CopyButton, type CopyButtonProps } from "prez-components-test";
+import { CopyButton, type CopyButtonProps } from "prez-components";
 
 const props = defineProps<CopyButtonProps>();
 </script>

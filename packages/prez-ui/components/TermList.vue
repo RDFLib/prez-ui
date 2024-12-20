@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { TermList, type TermListProps } from "prez-components-test";
+import { TermList, type TermListProps } from "prez-components";
 
 const props = defineProps<TermListProps>();
 const node = resolveComponent("Node") as Component;

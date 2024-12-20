@@ -1,5 +1,5 @@
 import { type HTMLAttributes, type Component } from "vue";
-import type { PrezTerm, PrezLiteral, PrezNodeList, PrezNode, PrezSearchResult, PrezLinkParent, PrezFocusNode, PrezProfileHeader, PrezDataTypes } from "prez-lib-test";
+import type { PrezTerm, PrezLiteral, PrezNodeList, PrezNode, PrezSearchResult, PrezLinkParent, PrezFocusNode, PrezProfileHeader, PrezDataTypes } from "prez-lib";
 import type { ButtonVariants } from "./components/ui/button";
 
 export interface CopyButtonProps {

@@ -49,9 +49,9 @@ importers:
         specifier: latest
         version: 4.5.0(vue@3.5.13(typescript@5.7.2))
     devDependencies:
-      prez-ui-test:
-        specifier: ^4.0.5
-        version: 4.0.5(@vitest/ui@2.1.8)(eslint@9.17.0(jiti@2.4.1))(magicast@0.3.5)(rollup@4.28.1)(tailwindcss@3.4.16)(typescript@5.7.2)(vitest@2.1.8)
+      prez-ui:
+        specifier: workspace:*
+        version: link:../../prez-ui
       typescript:
         specifier: ^5.6.3
         version: 5.7.2
@@ -76,7 +76,7 @@ importers:
       mermaid:
         specifier: ^11.4.1
         version: 11.4.1
-      prez-lib-test:
+      prez-lib:
         specifier: workspace:*
         version: link:../prez-lib
       radix-vue:
@@ -180,10 +180,10 @@ importers:
       mermaid:
         specifier: ^11.4.1
         version: 11.4.1
-      prez-components-test:
+      prez-components:
         specifier: workspace:*
         version: link:../prez-components
-      prez-lib-test:
+      prez-lib:
         specifier: workspace:*
         version: link:../prez-lib
       radix-vue:
@@ -4120,17 +4120,6 @@ packages:
     resolution: {integrity: sha512-mQUvGU6aUFQ+rNvTIAcZuWGRT9a6f6Yrg9bHs4ImKF+HZCEK+plBvnAZYSIQztknZF2qnzNtr6F8s0+IuptdlQ==}
     engines: {node: ^14.13.1 || >=16.0.0}
 
-  prez-components-test@4.0.5:
-    resolution: {integrity: sha512-uStRzLWvT+GmJh8O0g1WHgxqjpgdiBc8PR81Fb0e6muW13JuP1J7YaUCHHs59bpx+YEL2vM7yIY51d7vX3gTcw==}
-    peerDependencies:
-      vue: ^3.0.0
-
-  prez-lib-test@4.0.5:
-    resolution: {integrity: sha512-BbTAmF4tlcIa9XsiGRu7uxuMkQpCqyUzSddxpOvVgfH6LqDCUtR26xillTTJzVl75fi8p6ga6VftlS2TugiWMA==}
-
-  prez-ui-test@4.0.5:
-    resolution: {integrity: sha512-Z7SYwmo8x+QQ4xhJI3mli/P4AFuYIkw7u1iWOtMAFWE7XQbA596fdKB8T6Hp0TG9jffw5bF9qpZjcI4G4/QRow==}
-
   process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
 
@@ -4580,7 +4569,7 @@ packages:
   superagent@5.3.1:
     resolution: {integrity: sha512-wjJ/MoTid2/RuGCOFtlacyGNxN9QLMgcpYLDQlWFIhhdJ93kNscFonGvrpAHSCVjRVj++DGCglocF7Aej1KHvQ==}
     engines: {node: '>= 7.0.0'}
-    deprecated: Please upgrade to v9.0.0+ as we have fixed a public vulnerability with formidable dependency. Note that v9.0.0+ requires Node.js v14.18.0+. See https://github.com/ladjs/superagent/pull/1800 for insight. This project is supported and maintained by the team at Forward Email @ https://forwardemail.net
+    deprecated: Please upgrade to v7.0.2+ of superagent.  We have fixed numerous issues with streams, form-data, attach(), filesystem errors not bubbling up (ENOENT on attach()), and all tests are now passing.  See the releases tab for more information at <https://github.com/visionmedia/superagent/releases>.
 
   superjson@2.2.2:
     resolution: {integrity: sha512-5JRxVqC8I8NuOUjzBbvVJAKNM8qoVuH0O77h4WInc/qC2q5IreqKxYwgkga3PfA22OayK2ikceb/B26dztPl+Q==}
@@ -9652,63 +9641,6 @@ snapshots:
   prettier@3.4.2: {}
 
   pretty-bytes@6.1.1: {}
-
-  prez-components-test@4.0.5(tailwindcss@3.4.16)(vue@3.5.13(typescript@5.7.2)):
-    dependencies:
-      class-variance-authority: 0.7.1
-      clsx: 2.1.1
-      dompurify: 3.2.3
-      lucide-vue-next: 0.461.0(vue@3.5.13(typescript@5.7.2))
-      marked: 15.0.4
-      mermaid: 11.4.1
-      prez-lib-test: 4.0.5
-      radix-vue: 1.9.11(vue@3.5.13(typescript@5.7.2))
-      tailwind-merge: 2.5.5
-      tailwindcss-animate: 1.0.7(tailwindcss@3.4.16)
-      vue: 3.5.13(typescript@5.7.2)
-      vue-router: 4.5.0(vue@3.5.13(typescript@5.7.2))
-    transitivePeerDependencies:
-      - '@vue/composition-api'
-      - supports-color
-      - tailwindcss
-
-  prez-lib-test@4.0.5:
-    dependencies:
-      n3: 1.23.1
-
-  prez-ui-test@4.0.5(@vitest/ui@2.1.8)(eslint@9.17.0(jiti@2.4.1))(magicast@0.3.5)(rollup@4.28.1)(tailwindcss@3.4.16)(typescript@5.7.2)(vitest@2.1.8):
-    dependencies:
-      '@nuxtjs/color-mode': 3.5.2(magicast@0.3.5)(rollup@4.28.1)
-      '@nuxtjs/tailwindcss': 6.12.2(magicast@0.3.5)(rollup@4.28.1)
-      '@triply/yasgui': 4.2.28
-      '@vueuse/core': 12.0.0(typescript@5.7.2)
-      add: 2.0.6
-      class-variance-authority: 0.7.1
-      clsx: 2.1.1
-      input: 1.0.1
-      lucide-vue-next: 0.461.0(vue@3.5.13(typescript@5.7.2))
-      marked: 15.0.4
-      mermaid: 11.4.1
-      prez-components-test: 4.0.5(tailwindcss@3.4.16)(vue@3.5.13(typescript@5.7.2))
-      prez-lib-test: 4.0.5
-      radix-vue: 1.9.11(vue@3.5.13(typescript@5.7.2))
-      shadcn-nuxt: 0.11.3(magicast@0.3.5)(rollup@4.28.1)
-      shadcn-vue: 0.11.3(@vitest/ui@2.1.8)(eslint@9.17.0(jiti@2.4.1))(magicast@0.3.5)(vitest@2.1.8)(vue@3.5.13(typescript@5.7.2))
-      tailwind-merge: 2.5.5
-      tailwindcss-animate: 1.0.7(tailwindcss@3.4.16)
-      vue: 3.5.13(typescript@5.7.2)
-      vue-router: 4.5.0(vue@3.5.13(typescript@5.7.2))
-    transitivePeerDependencies:
-      - '@vitest/ui'
-      - '@vue/composition-api'
-      - eslint
-      - magicast
-      - rollup
-      - supports-color
-      - tailwindcss
-      - ts-node
-      - typescript
-      - vitest
 
   process-nextick-args@2.0.1: {}
 

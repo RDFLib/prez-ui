@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { SearchResults, type SearchResultsProps } from "prez-components-test";
+import { SearchResults, type SearchResultsProps } from "prez-components";
 
 const props = defineProps<SearchResultsProps>();
 const node = resolveComponent("Node") as Component;

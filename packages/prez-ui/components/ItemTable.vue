@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ItemTable, type ItemTableProps } from "prez-components-test";
+import { ItemTable, type ItemTableProps } from "prez-components";
 
 const runtimeConfig = useRuntimeConfig();
 

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Term, type TermProps } from "prez-components-test";
+import { Term, type TermProps } from "prez-components";
 
 const props = defineProps<TermProps>();
 const literal = resolveComponent("Literal") as Component;

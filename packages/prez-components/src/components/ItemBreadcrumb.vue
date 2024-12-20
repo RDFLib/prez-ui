@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { literal } from 'prez-lib-test';
+import { literal } from 'prez-lib';
 import {
     Breadcrumb,
     BreadcrumbItem,

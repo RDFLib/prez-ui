@@ -1,12 +1,12 @@
 {
-    "name": "prez-ui-test",
-    "version": "4.0.5",
+    "name": "prez-ui",
+    "version": "4.0.0",
     "description": "A Nuxt base layer application for Prez UI",
     "license": "BSD-3-Clause",
     "type": "module",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/jamiefeiss/prez-ui.git",
+        "url": "git+https://github.com/rdflib/prez-ui.git",
         "directory": "packages/prez-ui"
     },
     "main": "./nuxt.config.ts",
@@ -30,8 +30,8 @@
         "lucide-vue-next": "^0.461.0",
         "marked": "^15.0.4",
         "mermaid": "^11.4.1",
-        "prez-components-test": "workspace:*",
-        "prez-lib-test": "workspace:*",
+        "prez-components": "workspace:*",
+        "prez-lib": "workspace:*",
         "radix-vue": "^1.9.10",
         "shadcn-nuxt": "^0.11.3",
         "shadcn-vue": "^0.11.3",
@@ -45,7 +45,7 @@
         "typescript": "^5.6.3"
     },
     "bugs": {
-        "url": "https://github.com/jamiefeiss/prez-ui/issues"
+        "url": "https://github.com/rdflib/prez-ui/issues"
     },
-    "homepage": "https://github.com/jamiefeiss/prez-ui/tree/jamie/next/shad-layer-fix/packages/prez-ui#readme"
+    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui#readme"
 }

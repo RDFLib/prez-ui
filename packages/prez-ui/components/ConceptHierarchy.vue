@@ -7,7 +7,7 @@
  * This component lives under the site project as it uses the lib composable from the site project.
  */
 import { ChevronRight, ChevronDown } from "lucide-vue-next";
-import { getNarrowersUrl, type PrezConceptNode } from 'prez-lib-test';
+import { getNarrowersUrl, type PrezConceptNode } from 'prez-lib';
 const appConfig = useAppConfig();
 const apiEndpoint = useGetPrezAPIEndpoint();
 const route = useRoute();

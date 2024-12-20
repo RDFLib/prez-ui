@@ -4,17 +4,17 @@
 To get started running your own Prez UI instance, simply run the following to get the starter template, replacing `<project_name>` with your project name (requires NPM installed, (we recommend [pnpm](https://pnpm.io))):
 
 ```bash
-npx create-prez-app-test@latest <project_name>
+npx create-prez-app@latest <project_name>
 ```
 *(Note: for pnpm, run `pnpm dlx` instead of `npx`)*
 
 or
 
 ```bash
-npm create prez-app-test@latest <project_name>
+npm create prez-app@latest <project_name>
 ```
 
-This will download a starter template [Nuxt](https://nuxt.com) project extending Prez UI's [base layer](https://github.com/jamiefeiss/prez-ui/tree/jamie/next/shad-layer-fix/packages/prez-ui).
+This will download a starter template [Nuxt](https://nuxt.com) project extending Prez UI's [base layer](https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui).
 
 In the project root directory, install with your NPM package manager of choice:
 
@@ -86,7 +86,7 @@ The layers system automatically replaces files of the same name with the same di
 - `nuxt.config.ts` - Extend the default nuxt config
 - `app.config.ts` - Extend the default app config
 
-Refer to Prez UI's base layer [source code](https://github.com/jamiefeiss/prez-ui/tree/jamie/next/shad-layer-fix/packages/prez-ui) to help you override files.
+Refer to Prez UI's base layer [source code](https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui) to help you override files.
 
 The most common case of theming Prez UI is adding a header and footer to every page. This can easily be done by copying & overriding `layouts/default.vue` from the base layer and replacing the `<header>` & `<footer>` elements with your own content.
 
@@ -111,7 +111,7 @@ The most common case of theming Prez UI is adding a header and footer to every p
 The main navigation can be customised as well in the same file.
 
 ## Shadcn Components
-Prez UI uses the [prez-components](https://github.com/jamiefeiss/prez-ui/tree/jamie/next/shad-layer-fix/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template (`badge`, `button`, `input` & `pagination` are included as the base layer requires them), but if you need to add more shadcn components in your theme, run a command like the following to add the component:
+Prez UI uses the [prez-components](https://github.com/rdflib/prez-ui/tree/main/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template (`badge`, `button`, `input` & `pagination` are included as the base layer requires them), but if you need to add more shadcn components in your theme, run a command like the following to add the component:
 
 ```bash
 npx shadcn-vue@latest add button

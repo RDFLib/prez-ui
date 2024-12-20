@@ -1,24 +1,24 @@
 {
-    "name": "prez-components-test",
-    "version": "4.0.5",
+    "name": "prez-components",
+    "version": "4.0.0",
     "description": "A Vue.js component library for rendering RDF data for use with Prez UI",
     "type": "module",
     "license": "BSD-3-Clause",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/jamiefeiss/prez-ui.git",
+        "url": "git+https://github.com/rdflib/prez-ui.git",
         "directory": "packages/prez-components"
     },
     "files": [
         "dist"
     ],
-    "main": "./dist/prez-components-test.umd.cjs",
-    "module": "./dist/prez-components-test.js",
+    "main": "./dist/prez-components.umd.cjs",
+    "module": "./dist/prez-components.js",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
-            "import": "./dist/prez-components-test.js",
-            "require": "./dist/prez-components-test.umd.cjs"
+            "import": "./dist/prez-components.js",
+            "require": "./dist/prez-components.umd.cjs"
         },
         "./style.css": {
             "import": "./dist/style.css",
@@ -44,7 +44,7 @@
         "marked": "^15.0.4",
         "mermaid": "^11.4.1",
         "radix-vue": "^1.9.10",
-        "prez-lib-test": "workspace:*",
+        "prez-lib": "workspace:*",
         "tailwind-merge": "^2.5.5",
         "tailwindcss-animate": "^1.0.7",
         "vue-router": "^4.5.0"
@@ -61,7 +61,7 @@
         "vue-tsc": "2.0.29"
     },
     "bugs": {
-        "url": "https://github.com/jamiefeiss/prez-ui/issues"
+        "url": "https://github.com/rdflib/prez-ui/issues"
     },
-    "homepage": "https://github.com/jamiefeiss/prez-ui/tree/jamie/next/shad-layer-fix/packages/prez-components#readme"
+    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/prez-components#readme"
 }

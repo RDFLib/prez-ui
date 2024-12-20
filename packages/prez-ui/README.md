@@ -5,7 +5,7 @@ This is the Nuxt application of Prez UI as a base layer for theme extension.
 To install this layer for extending your own Prez UI theme, run:
 
 ```bash
-npm install -D prez-ui-test
+npm install -D prez-ui
 ```
 
 and add the base layer to `extends` in your Nuxt config:
@@ -15,10 +15,10 @@ and add the base layer to `extends` in your Nuxt config:
 export default defineNuxtConfig({
     ...
     extends: [
-        "prez-ui-test"
+        "prez-ui"
     ]
     ...
 });
 ```
 
-See the [theming documentation](https://github.com/jamiefeiss/prez-ui/blob/jamie/next/shad-layer-fix/docs/theming.md) on how to customise your Prez UI theme.
+See the [theming documentation](https://github.com/rdflib/prez-ui/blob/main/docs/theming.md) on how to customise your Prez UI theme.

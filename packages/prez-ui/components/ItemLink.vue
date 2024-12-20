@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ItemLink, type ItemLinkProps } from "prez-components-test";
+import { ItemLink, type ItemLinkProps } from "prez-components";
 
 const props = defineProps<ItemLinkProps>();
 const copyButton = resolveComponent("CopyButton") as Component;

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { PrezLiteral, PrezNode } from 'prez-lib-test';
+import type { PrezLiteral, PrezNode } from 'prez-lib';
 import { TermProps } from "@/types";
 import Literal from "./Literal.vue";
 import NodeList from "./NodeList.vue";

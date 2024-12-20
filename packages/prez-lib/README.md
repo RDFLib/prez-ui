@@ -4,13 +4,13 @@ A JS library for processing RDF data for use with Prez UI, implementing [RDF/JS 
 ## Installing
 
 ```bash
-npm install prez-lib-test
+npm install prez-lib
 ```
 
 ## Example Usage
 Using the factory functions:
 ```typescript
-import { literal, node } from "prez-lib-test";
+import { literal, node } from "prez-lib";
 
 const term = node({
     value: "https://example.com",
@@ -25,7 +25,7 @@ const term = node({
 
 Using the store class:
 ```typescript
-import { RDFStore } from "prez-lib-test";
+import { RDFStore } from "prez-lib";
 
 const data = "<https://example.com/subject> <https://example.com/predicate> <https://example.com/object> .";
 const store = new RDFStore();

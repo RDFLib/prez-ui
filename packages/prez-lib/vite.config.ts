@@ -9,8 +9,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve(__dirname, "src/index.ts"),
-            name: "prez-lib-test",
-            fileName: "prez-lib-test",
+            name: "prez-lib",
+            fileName: "prez-lib",
         },
     },
     resolve: {

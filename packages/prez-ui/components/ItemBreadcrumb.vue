@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ItemBreadcrumb, type ItemBreadcrumbProps } from "prez-components-test";
+import { ItemBreadcrumb, type ItemBreadcrumbProps } from "prez-components";
 
 const props = defineProps<ItemBreadcrumbProps>();
 const literal = resolveComponent("Literal") as Component;

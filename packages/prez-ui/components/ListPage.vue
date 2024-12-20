@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { dumpNodeArray } from 'prez-lib-test';
+import { dumpNodeArray } from 'prez-lib';
 
 const appConfig = useAppConfig();
 const route = useRoute();

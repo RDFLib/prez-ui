@@ -27,19 +27,19 @@ Variable|Description|Type|Default
 You can create an `.env` file in the project root to set these environment variable. See `.env.example` for all environment variable options and defaults. See [Nuxt Environment Variables](https://nuxt.com/docs/guide/going-further/runtime-config#environment-variables) for more info on environment variables in Nuxt.
 
 ### Nuxt Config
-The `nuxt.config.ts` file contains your configuration for Nuxt, which extends upon Prez UI's [base layer Nuxt config](https://github.com/jamiefeiss/prez-ui/blob/jamie/next/shad-layer-fix/packages/prez-ui/nuxt.config.ts). This is also where you can customise things like the HTML `<head>` content, such as setting the document title, adding extra CSS files, etc. This is also where you can set Vite config.
+The `nuxt.config.ts` file contains your configuration for Nuxt, which extends upon Prez UI's [base layer Nuxt config](https://github.com/rdflib/prez-ui/blob/main/packages/prez-ui/nuxt.config.ts). This is also where you can customise things like the HTML `<head>` content, such as setting the document title, adding extra CSS files, etc. This is also where you can set Vite config.
 
 See the [Nuxt config docs](https://nuxt.com/docs/getting-started/configuration) for more info on how to configure Nuxt.
 
 ### App Config
-The `app.config.ts` file contains your app-level config, where you can customise the navigation items, renaming items throughout the application, customising prepended items in the breadcrumbs, and pagination config. This app config extends upon Prez UI's [base layer app config](https://github.com/jamiefeiss/prez-ui/blob/jamie/next/shad-layer-fix/packages/prez-ui/app.config.ts).
+The `app.config.ts` file contains your app-level config, where you can customise the navigation items, renaming items throughout the application, customising prepended items in the breadcrumbs, and pagination config. This app config extends upon Prez UI's [base layer app config](https://github.com/rdflib/prez-ui/blob/main/packages/prez-ui/app.config.ts).
 
 ## Extending your theme
 This starter template uses [Nuxt](https://nuxt.com) [layers](https://nuxt.com/docs/getting-started/layers) to extend upon the base Prez UI layer application, so you only need to customise what you need.
 
-Overriding pages, components, layouts, composables and utils can be done by simply creating a file of the same name in the same directory structure for Nuxt to automatically replace it with your version in the application. Refer to Prez UI's base layer [source code](https://github.com/jamiefeiss/prez-ui/tree/jamie/next/shad-layer-fix/packages/prez-ui) to help you override files.
+Overriding pages, components, layouts, composables and utils can be done by simply creating a file of the same name in the same directory structure for Nuxt to automatically replace it with your version in the application. Refer to Prez UI's base layer [source code](https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui) to help you override files.
 
-See our [theming documentation](https://github.com/jamiefeiss/prez-ui/blob/jamie/next/shad-layer-fix/docs/theming.md) for a more in-depth guide on customising Prez UI.
+See our [theming documentation](https://github.com/rdflib/prez-ui/blob/main/docs/theming.md) for a more in-depth guide on customising Prez UI.
 
 ### Tailwind & CSS
 Prez UI uses [Tailwind](https://tailwindcss.com) for most of its styling, which you can use in this starter template to easily style using classes.
@@ -68,7 +68,7 @@ module.exports = {
 You can also style your Prez UI theme using normal CSS by adding your styles to `assets/css/theme.css`.
 
 ### Shadcn Components
-Prez UI uses the [prez-components](https://github.com/jamiefeiss/prez-ui/tree/jamie/next/shad-layer-fix/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template, but if you need to add shadcn components in your theme, run a command like the following:
+Prez UI uses the [prez-components](https://github.com/rdflib/prez-ui/tree/main/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template, but if you need to add shadcn components in your theme, run a command like the following:
 
 ```bash
 npx shadcn-vue@latest add button
