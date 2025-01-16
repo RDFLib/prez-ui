@@ -15,11 +15,11 @@ class NetworkError extends Error {
  * @returns 
  */
 function parseLinkHeader(link: string): LinkObject {
-    const [, uriRef, attrs] = link.match(/<(.+)>; (.+)/)!;
+    const [, uriRef, attrs] = link.match(/<(.+)>;\s?(.+)/)!;
     let linkObj: Partial<LinkObject> = { uriRef };
 
-    attrs.split("; ").forEach(l => {
-        const [, lhs, rhs] = l.match(/(.+)=[\"<](.+)[\">]/) as [string, keyof Omit<LinkObject, "uriRef">, string];
+    attrs.split(";").forEach(l => {
+        const [, lhs, rhs] = l.trim().match(/(.+)=[\"<](.+)[\">]/) as [string, keyof Omit<LinkObject, "uriRef">, string];
         linkObj[lhs] = rhs;
     });
 
@@ -60,7 +60,7 @@ async function individualApiRequest(url: string) {
 function getProfilesFromHeaders(link: string): ProfileHeader[] {
     let profileObj: {[uri: string]: ProfileHeader} = {} ;
 
-    const links = link.split(", ").map(l => parseLinkHeader(l));
+    const links = link.split(",").map(l => parseLinkHeader(l.trim()));
 
     links.filter(l => l.rel === "type").forEach(l => {
         profileObj[l.anchor] = {
