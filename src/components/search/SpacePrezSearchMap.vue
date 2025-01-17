@@ -35,7 +35,7 @@ const mapConfig = inject(mapConfigKey) as MapConfig;
 
 const { loading: datasetLoading, error: datasetError, apiGetRequest: datasetApiGetRequest } = useApiRequest(); // list of datasets
 const { loading: fcLoading, hasError: fcError, concurrentApiRequests: fcConcurrentApiRequests } = useConcurrentApiRequests(); // concurrent lists of feature collections
-const { loading: searchLoading, error: searchError, sparqlGetRequest: searchSparqlGetRequest } = useSparqlRequest(); // spatial search SPARQL query
+const { loading: searchLoading, error: searchError, sparqlGetRequest: searchSparqlGetRequest, sparqlPostRequest: searchSparqlPostRequest } = useSparqlRequest(); // spatial search SPARQL query
 const { store, parseIntoStore, qnameToIri } = useRdfStore();
 
 const LIVE_SEARCH = true;
@@ -208,7 +208,7 @@ async function getDatasets() {
 
 async function doSearch() {
     if (shape.value.coords.length > 0) {
-        const searchData = await searchSparqlGetRequest(`${apiBaseUrl}/sparql`, query.value);
+        const searchData = await searchSparqlPostRequest(`${apiBaseUrl}/sparql`, query.value);
         if (searchData && !searchError.value) {
             results.value = (searchData.results.bindings as SparqlBinding[]).map(result => {
                 return {
