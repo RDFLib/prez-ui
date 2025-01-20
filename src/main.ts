@@ -6,6 +6,7 @@ import config from "@/config";
 import { sidenavConfigKey, enabledPrezsConfigKey, apiBaseUrlConfigKey, mapConfigKey, perPageConfigKey, conceptPerPageConfigKey, enableScoresKey } from "@/types";
 import type { PrezFlavour } from "@/types";
 import { Tooltip } from "floating-vue";
+import VueDOMPurifyHTML from 'vue-dompurify-html';
 import VueGoogleMaps from "@fawmi/vue-google-maps";
 
 import "floating-vue/dist/style.css";
@@ -30,6 +31,7 @@ app.use(VueGoogleMaps, {
         libraries: "drawing"
     },
 })
+app.use(VueDOMPurifyHTML);
 app.component("Tooltip", Tooltip);
 // disable warnings for TreeSelect
 app.component("transition", Transition);
