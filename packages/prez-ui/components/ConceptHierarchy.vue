@@ -18,7 +18,7 @@ interface Props {
     level?: number;
 };
 
-const props = withDefaults(defineProps<Props>(), { level: 0 });
+const props = withDefaults(defineProps<Props>(), { level: 0 });
 
 const urlPath = ref(props.urlPath + '?page=1&limit=' + appConfig.pagination.conceptsPerPage.toString());
 

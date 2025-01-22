@@ -86,7 +86,7 @@ const linkClass = props.class ? defaultClasses + ' ' + props.class : defaultClas
     <!-- ItemLink -->
     <slot name="wrapper" :url="url" :title="props.title" :secondaryUrl="secondaryUrl" :target="target">
         <span class="inline-flex gap-1 items-center">
-            <template v-if="url && !hidePrimaryLink">
+            <template v-if="url && !props.hidePrimaryLink">
                 <a v-if="isExtLink"
                     :class="linkClass"
                     :href="url" :title="hideTitle ? undefined : props.title" 

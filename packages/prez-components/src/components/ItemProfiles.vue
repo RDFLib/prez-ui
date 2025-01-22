@@ -45,7 +45,13 @@ const uriComponent = props.objectUri ? `uri=${encodeURIComponent(props.objectUri
                         <div v-if="profile.current" class="text-sm text-bold text-primary">(currently viewing)</div>
                         <ul class="text-sm">
                             <li class="mediatypes" v-for="mediatype in profile.mediatypes" :key="mediatype.mediatype">
-                                - <component :is="props._components.itemLink" :to="`${apiUrl}?${uriComponent}_profile=${encodeURIComponent(profile.token)}&_mediatype=${encodeURIComponent(mediatype.mediatype)}`" variant="item-profiles" target="_blank" rel="noopener noreferrer">
+                                - <component
+                                    :is="props._components.itemLink"
+                                    :to="`${apiUrl}?${uriComponent}_profile=${encodeURIComponent(profile.token)}&_mediatype=${encodeURIComponent(mediatype.mediatype)}`"
+                                    variant="item-profiles"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
                                     <span class="font-normal">{{ mediatype.title || mediatype.mediatype.replace(/^.*\//, '') }}</span>
                                 </component>
                             </li>

@@ -22,7 +22,7 @@ const props = defineProps<{
 
 <template>
     <div class="flex flex-col gap-2 mt-4">
-        <Pagination v-if="props.totalItems > props.pagination.limit" v-slot="{ page }" :total="props.totalItems" :sibling-count="1" show-edges :page="props.pagination.page">
+        <Pagination v-if="props.totalItems > props.pagination.limit" v-slot="{ page }" :total="props.totalItems" :itemsPerPage="props.pagination.limit" :sibling-count="1" show-edges :page="props.pagination.page">
             <PaginationList v-slot="{ items }" class="flex items-center gap-1 justify-center">
                 <PaginationFirst as-child>
                     <Button class="w-10 h-10 p-0" variant="outline" as-child>

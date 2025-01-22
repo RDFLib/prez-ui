@@ -196,12 +196,12 @@ function applyProfileToProperties(properties: PrezProperties, profile: PrezNodeL
     // console.log('DEFAULT FIELD ORDER', fieldNames);
     // console.log('RE-ORDERED FIELD ORDER', fields.map(f=>f.predicate.value));
 
-    console.log("USING PROFILE", profile);
+    // console.log("USING PROFILE", profile);
     
     for(const field of fields) {
         const p = profile.find(f=>f.node.value == field.predicate.value && f.list && f.list.length > 0)
         if(p) {
-            console.log("SET LIST FOR FIELD", field.predicate.value, p);
+            // console.log("SET LIST FOR FIELD", field.predicate.value, p);
         }
         newProperties[field.predicate.value] = properties[field.predicate.value] as PrezProperty;
         //console.log("SET PROP FOR FIELD", field.predicate.value, newProperties[field.predicate.value]);

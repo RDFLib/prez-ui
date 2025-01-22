@@ -28,7 +28,7 @@ const term = node({
             <Loading variant="concept" />
         </div>
         <Message text="error" severity="error" />
-        <Literal :term="literal('term')" textonly renderHtml renderMarkdown />
+        <Literal :term="literal('term')" textOnly renderHtml renderMarkdown />
     </div>
 </template>
 

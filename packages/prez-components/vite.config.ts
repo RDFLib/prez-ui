@@ -26,6 +26,7 @@ export default defineConfig({
                 globals: {
                     vue: "Vue",
                 },
+                inlineDynamicImports: true, // turn off chunking
             },
         },
     },

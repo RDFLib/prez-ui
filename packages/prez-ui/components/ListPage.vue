@@ -29,34 +29,56 @@ watch(() => route.fullPath, () => {
 <template>
     <NuxtLayout sidepanel>
         <template #header-text>
-            {{ header }}
+            <slot name="header-text" :data="data">
+                {{ header }}
+            </slot>
         </template>
         <template #debug>
             <pre class="p-2"><b>{{currentProfile?.title}}</b><br>{{ dumpNodeArray(globalProfiles?.[currentProfile?.uri || '']) }}</pre>
         </template>
         <template #breadcrumb>
-            <div :key="data?.parents.join()">
-                <ItemBreadcrumb v-if="data" :prepend="appConfig.breadcrumbPrepend || []" :name-substitutions="appConfig.nameSubstitutions" :parents="data.parents" />
-                <ItemBreadcrumb v-else-if="error" :custom-items="[{url: '/', label: 'Unable to load page'}]" />
-                <ItemBreadcrumb v-else :prepend="appConfig.breadcrumbPrepend" :custom-items="[{url: '#', label: '...'}]" />
-            </div>
+            <slot name="breadcrumb" :data="data">
+                <div :key="data?.parents.join()">
+                    <ItemBreadcrumb v-if="data" :prepend="appConfig.breadcrumbPrepend || []" :name-substitutions="appConfig.nameSubstitutions" :parents="data.parents" />
+                    <ItemBreadcrumb v-else-if="error" :custom-items="[{url: '/', label: 'Unable to load page'}]" />
+                    <ItemBreadcrumb v-else :prepend="appConfig.breadcrumbPrepend" :custom-items="[{url: '#', label: '...'}]" />
+                </div>
+            </slot>
         </template>
+
         <template #default>
-            <div>
-                <div v-if="error"><Message severity="error">{{ error }}</Message></div>
-                <Loading v-if="status == 'pending'" variant="list" />
+            <slot :data="data" :status="status">
+
+                <slot name="top" :data="data" :status="status"></slot>
+
+                <slot v-if="error" name="message">
+                    <Message severity="error">{{ error }}</Message>
+                </slot>
+
+                <slot v-else-if="status == 'pending'" name="loading" :status="status">
+                    <Loading  />
+                </slot>
+
                 <div v-else-if="data?.data">
+                    <slot name="list-top" :data="data"></slot>
                     <ItemList 
                         v-if="globalProfiles && currentProfile"
                         :fields="globalProfiles?.[currentProfile?.uri || '']"
                         :list="data.data" :key="urlPath" 
                     />
-                    <Loading v-else variant="list" />
 
-                    <PrezPagination :totalItems="data.count" :pagination="pagination" :maxReached="data.maxReached" />
+                    <slot name="pagination" :data="data" :pagination="pagination">
+                        <PrezPagination :totalItems="data.count" :pagination="pagination" :maxReached="data.maxReached" />
+                    </slot>
+
+                    <slot name="list-bottom" :data="data"></slot>
                 </div>
-            </div>
+
+            </slot>
+
+            <slot name="bottom" :data="data" :status="status"></slot>
         </template>
+
         <template #sidepanel>
             <ItemProfiles :key="status" :apiUrl="apiUrl" :loading="status == 'pending'" :profiles="data?.profiles" />
         </template>

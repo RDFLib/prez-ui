@@ -10,7 +10,7 @@ const urlPath = ref(getPageUrl());
 const apiEndpoint = useGetPrezAPIEndpoint();
 const { status, error, data } = useGetItem(apiEndpoint, urlPath);
 const isConceptScheme = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.skosConceptScheme));
-const topConceptsUrl = computed(()=>isConceptScheme ? getTopConceptsUrl(data.value!.data) : '');
+const topConceptsUrl = computed(()=>isConceptScheme.value ? getTopConceptsUrl(data.value!.data) : '');
 const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
 
@@ -51,17 +51,19 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
         </template>
 
         <template #default>
-            <slot :data="data" :status="status" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
+            <slot :data="data" :status="status" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
 
-                <slot name="top" :data="data" :status="status" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
+                <slot name="top" :data="data" :status="status" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
 
-                <slot name="message">
-                    <div v-if="error">
-                        <Message severity="error">{{ error }}</Message>
-                    </div>
+                <slot v-if="error" name="message">
+                    <Message severity="error">{{ error }}</Message>
                 </slot>
 
-                <div v-if="data?.data" :key="data?.data.value">
+                <slot v-else-if="status == 'pending'" name="loading" :status="status">
+                    <Loading variant="item" />
+                </slot>
+
+                <div v-else-if="data?.data" :key="data?.data.value">
                     <slot name="header-section" :data="data">
                         <slot name="header-top" :data="data"></slot>
                         <slot name="header-description" :data="data"></slot>
@@ -80,21 +82,21 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                         <slot name="header-bottom" :data="data"></slot>
                     </slot>
                     <div class="mt-4 mb-12 overflow-auto">
-                        <slot name="item-section" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
-                            <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
-                            <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
+                        <slot name="item-section" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
+                            <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
+                            <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
 
                                 <ItemTable
                                     :term="data.data" 
                                     :key="urlPath + globalProfiles?.length + currentProfile?.uri" 
                                     :is-concept-scheme="isConceptScheme"
-                                    top-concepts-url="topConceptsUrl"
+                                    :top-concepts-url="topConceptsUrl"
                                 />
 
                             </slot>
-                            <slot name="item-middle" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
+                            <slot name="item-middle" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
 
-                            <slot name="item-members" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
+                            <slot name="item-members" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
                                 <p class="mt-6" v-if="data.data.members">
                                     <Button as-child>
                                         <NuxtLink :to="data!.data.members!.value">Members</NuxtLink>
@@ -102,7 +104,7 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                                 </p>
                             </slot>
 
-                            <slot name="item-concepts" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl">
+                            <slot name="item-concepts" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
                                 <div class="mt-6" v-if="isConceptScheme && topConceptsUrl != ''">
                                     <p><b>Concepts</b></p>
                                     <div class="mt-4">
@@ -114,14 +116,12 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                                 </div>
                             </slot>
 
-                            <slot name="item-bottom" :data="data" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
+                            <slot name="item-bottom" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
                         </slot>
                     </div>
                 </div>
-                <slot name="loading" :status="status">
-                    <Loading v-if="status == 'pending'" variant="item" />
-                </slot>
-                <slot name="bottom" :data="data" :status="status" :is-concept-scheme="isConceptScheme" top-concepts-url="topConceptsUrl"></slot>
+                
+                <slot name="bottom" :data="data" :status="status" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
             </slot>
         </template>
 

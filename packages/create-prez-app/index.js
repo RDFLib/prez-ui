@@ -23,18 +23,18 @@ fs.cpSync(templateDir, projectDir, { recursive: true });
 // up by the starter template repository). We can rename
 // the dotfiles after we have copied them over to the
 // new project directory.
-fs.renameSync(
-    path.join(projectDir, 'gitignore'),
-    path.join(projectDir, '.gitignore')
-);
-fs.renameSync(
-    path.join(projectDir, 'env.example'),
-    path.join(projectDir, '.env.example')
-);
-fs.renameSync(
-    path.join(projectDir, 'vscode'),
-    path.join(projectDir, '.vscode')
-);
+const dotFiles = [
+    "gitignore",
+    "env.example",
+    "vscode",
+];
+
+dotFiles.forEach(file => {
+    fs.renameSync(
+        path.join(projectDir, file),
+        path.join(projectDir, `.${file}`)
+    );
+});
 
 const projectPackageJson = require(path.join(projectDir, 'package.json'));
 
