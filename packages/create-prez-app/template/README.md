@@ -29,6 +29,9 @@ You can create an `.env` file in the project root to set these environment varia
 ### Nuxt Config
 The `nuxt.config.ts` file contains your configuration for Nuxt, which extends upon Prez UI's [base layer Nuxt config](https://github.com/rdflib/prez-ui/blob/main/packages/prez-ui/nuxt.config.ts). This is also where you can customise things like the HTML `<head>` content, such as setting the document title, adding extra CSS files, etc. This is also where you can set Vite config.
 
+> [!NOTE]  
+> Server-side rendering (SSR) is currently not supported, but will be implemented in the near future.
+
 See the [Nuxt config docs](https://nuxt.com/docs/getting-started/configuration) for more info on how to configure Nuxt.
 
 ### App Config
@@ -38,6 +41,9 @@ The `app.config.ts` file contains your app-level config, where you can customise
 This starter template uses [Nuxt](https://nuxt.com) [layers](https://nuxt.com/docs/getting-started/layers) to extend upon the base Prez UI layer application, so you only need to customise what you need.
 
 Overriding pages, components, layouts, composables and utils can be done by simply creating a file of the same name in the same directory structure for Nuxt to automatically replace it with your version in the application. Refer to Prez UI's base layer [source code](https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui) to help you override files.
+
+> [!NOTE]  
+> When updating to a newer version of `prez-ui`, ensure any overridden files that contain core logic are kept up-to-date.
 
 See our [theming documentation](https://github.com/rdflib/prez-ui/blob/main/docs/theming.md) for a more in-depth guide on customising Prez UI.
 
