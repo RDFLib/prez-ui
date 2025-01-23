@@ -34,10 +34,7 @@ onBeforeMount(() => {
                     <slot name="logo">Prez UI</slot>
                 </NuxtLink>
 
-                <nav class="space-x-4 text-right">
-                    <NuxtLink to="/services" class="hover:text-gray-400 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[2px] after:bg-primary after:bottom-0 after:left-0 after:transition-transform after:duration-300 after:ease-in-out hover:after:scale-x-100">Privacy</NuxtLink>
-                    <NuxtLink to="/contact" class="hover:text-gray-400 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[2px] after:bg-primary after:bottom-0 after:left-0 after:transition-transform after:duration-300 after:ease-in-out hover:after:scale-x-100">Contact</NuxtLink>
-                </nav>
+                <!-- nav -->
 
             </div>
         </header>
@@ -104,11 +101,11 @@ onBeforeMount(() => {
         <footer class="bg-gray-800 text-white pt-6 pb-10">
             <div class="container mx-auto text-center">
                 <p>about your organisation</p>
-                <small v-if="globalConfig?.version">Prez Version - <a :href="apiEndpoint" target="_new">API {{ globalConfig?.version }}</a></small>
+                <small>Prez Version - UI {{ runtimeConfig.app.version }}, <a v-if="globalConfig?.version" :href="apiEndpoint" target="_new">API {{ globalConfig?.version }}</a></small>
                 <div v-if="apiEndpoint != runtimeConfig.public.prezApiEndpoint && !altEndpoints.find(e=>e.endpoint == apiEndpoint)">
                     <em><small>custom override API endpoint {{ apiEndpoint }}</small></em>
                 </div>
-                <ul v-if="altEndpoints" class="flex space-x-1 text-sm text-gray-400 justify-center [&>li:not(:last-child)]:after:content-['|'] [&>li:not(:last-child)]:after:mx-2">
+                <ul v-if="altEndpoints.length > 0" class="flex space-x-1 text-sm text-gray-400 justify-center [&>li:not(:last-child)]:after:content-['|'] [&>li:not(:last-child)]:after:mx-2">
                     <li class="hover:cursor-pointer" v-for="({endpoint, name}) of [{name: 'Default', endpoint: runtimeConfig.public.prezApiEndpoint}, ...altEndpoints]">
                         <a :class="apiEndpoint == endpoint ? '!text-yellow-200' : ''" :href="`/?_api=${endpoint}`">{{ name }}</a>
                     </li>

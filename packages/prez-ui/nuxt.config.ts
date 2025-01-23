@@ -1,5 +1,6 @@
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import pkg from './package.json'
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 
@@ -16,6 +17,9 @@ export default defineNuxtConfig({
     ],
     ssr: false,
     runtimeConfig: {
+        app: {
+            version: pkg.version,
+        },
         public: {
             prezApiEndpoint: "http://localhost:8000",
             prezApiEndpointAlt: "",
