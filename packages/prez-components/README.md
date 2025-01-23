@@ -51,3 +51,51 @@ export default defineNuxtConfig({
     ...
 });
 ```
+
+## Developing `prez-components`
+### Install & Run
+
+Run in the project root:
+```bash
+pnpm install
+```
+
+and to run:
+```bash
+pnpm dev
+```
+
+### Writing Components for Overriding
+To support deep overriding of components in Nuxt layers, components in this library need their prop type declared in `types.ts`, and any child component dependencies in the component library need to be declared in a `components` object in the props:
+
+```typescript
+// types.ts
+export interface MyComponentProps {
+    // your prop types here
+    _components?: {
+        childComponent: Component,
+    };
+};
+```
+
+Using these child components must be done dynamically with defaults:
+
+```vue
+// src/components/MyComponent.vue
+<script lang="ts" setup>
+import { MyComponentProps } from "@/types";
+import childComponent from "./ChildComponent.vue";
+
+const props = withDefaults(defineProps<MyComponentProps>(), {
+    _components: () => {
+        return {
+            childComponent: ChildComponent,
+        }
+    }
+});
+</script>
+
+<template>
+    <component :is="props._components.childComponent" />
+</template>
+```

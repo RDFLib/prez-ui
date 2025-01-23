@@ -116,7 +116,7 @@ const linkClass = props.class ? defaultClasses + ' ' + props.class : defaultClas
                     :to="secondaryUrl" :title="hideTitle ? undefined : props.title"
                     :class="linkClass"
                 >
-                    <!-- unlikely scenario, but we if our secondary link points interal show an arrow not window out -->
+                    <!-- unlikely scenario, but we if our secondary link points internal show an arrow not window out -->
                     <MoveRight class="w-4 h-4" />
                 </RouterLink>
             </template>
