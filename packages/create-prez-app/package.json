@@ -1,0 +1,21 @@
+{
+    "name": "create-prez-app",
+    "version": "3.8.4",
+    "description": "A starter template for creating your own themed Prez UI instance",
+    "license": "BSD-3-Clause",
+    "bin": {
+        "create-prez-app": "./index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rdflib/prez-ui.git",
+        "directory": "packages/create-prez-app"
+    },
+    "keywords": [
+        "template"
+    ],
+    "bugs": {
+        "url": "https://github.com/rdflib/prez-ui/issues"
+    },
+    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/create-prez-app#readme"
+}

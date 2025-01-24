@@ -1,0 +1,67 @@
+{
+    "name": "prez-components",
+    "version": "3.8.4",
+    "description": "A Vue.js component library for rendering RDF data for use with Prez UI",
+    "type": "module",
+    "license": "BSD-3-Clause",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rdflib/prez-ui.git",
+        "directory": "packages/prez-components"
+    },
+    "files": [
+        "dist"
+    ],
+    "main": "./dist/prez-components.umd.cjs",
+    "module": "./dist/prez-components.js",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/prez-components.js",
+            "require": "./dist/prez-components.umd.cjs"
+        },
+        "./style.css": {
+            "import": "./dist/style.css",
+            "require": "./dist/style.css"
+        }
+    },
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "dev": "vite",
+        "build": "vue-tsc && vite build",
+        "types": "vue-tsc",
+        "preview": "vite preview",
+        "preinstall": "npx only-allow pnpm"
+    },
+    "peerDependencies": {
+        "vue": "^3.0.0"
+    },
+    "dependencies": {
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "dompurify": "^3.2.3",
+        "lucide-vue-next": "^0.461.0",
+        "marked": "^15.0.4",
+        "mermaid": "^11.4.1",
+        "radix-vue": "^1.9.10",
+        "prez-lib": "workspace:*",
+        "tailwind-merge": "^2.5.5",
+        "tailwindcss-animate": "^1.0.7",
+        "vue-router": "^4.5.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.0",
+        "@vitejs/plugin-vue": "^5.1.4",
+        "autoprefixer": "^10.4.20",
+        "concurrently": "^9.1.0",
+        "tailwindcss": "^3.4.15",
+        "typescript": "5.6.2",
+        "vite": "^5.4.10",
+        "vite-plugin-dts": "^4.3.0",
+        "vue-tsc": "2.0.29"
+    },
+    "bugs": {
+        "url": "https://github.com/rdflib/prez-ui/issues"
+    },
+    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/prez-components#readme"
+}

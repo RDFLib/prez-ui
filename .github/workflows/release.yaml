@@ -1,98 +1,98 @@
 name: Release
 
 on:
-  # Runs on tagged releases
-  release:
-    types:
-      - published
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      release-type:
+        type: choice
+        required: true
+        description: 'Release type:'
+        default: 'patch'
+        options:
+          - 'patch'
+          - 'minor'
+          - 'major'
 
-env:
-  IMAGE_NAME: ghcr.io/rdflib/prez-ui
-  NODE_VERSION: latest
-
-# Grants permissions for GITHUB_TOKEN
 permissions:
-  contents: write # to upload release asset
-  id-token: write # to verify the deployment originates from an appropriate source
-  packages: write # to push to GHCR package
+  contents: write
 
 jobs:
-  # build & push Docker image
-  build-container-image:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Docker metadata
-        id: metadata
-        uses: docker/metadata-action@v3
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          images: ${{ env.IMAGE_NAME }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-
-      - name: Set up and use Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Set up Node
+          version: 9
+          run_install: false
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Get release version
-        id: version
-        run: echo "VALUE=$(npx --yes semver ${{ github.event.release.tag_name }})" >> "$GITHUB_OUTPUT"
-
-      - name: Update project version
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+          cache: 'pnpm'
+      - name: Install workspace
+        run: pnpm install
+      - name: Update version for all packages
         run: |
-          npm version ${{ steps.version.outputs.VALUE }} --no-git-tag-version
-
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          push: true
-          tags: ${{ steps.metadata.outputs.tags }}
-          # Set provenance to false due to issue documented here: https://github.com/docker/build-push-action/issues/778
-          provenance: false
-          platforms: linux/amd64,linux/arm64
-
-  upload:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Get release version
-        id: version
-        run: echo "VALUE=$(npx --yes semver ${{ github.event.release.tag_name }})" >> "$GITHUB_OUTPUT"
-
-      - name: Update project version and zip file
+          echo "NEW_VERSION=$(pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false)" >> $GITHUB_ENV
+          cd packages/prez-lib
+          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+          cd ../prez-components
+          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+          cd ../prez-ui
+          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+          cd ../create-prez-app
+          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+          cd template
+          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+      # prez-lib
+      - name: Build prez-lib
+        working-directory: packages/prez-lib
+        run: pnpm build
+      - name: Publish prez-lib to NPM
+        working-directory: packages/prez-lib
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --no-git-checks
+      # prez-components
+      - name: Build prez-components
+        working-directory: packages/prez-components
+        run: pnpm build
+      - name: Publish prez-components to NPM
+        working-directory: packages/prez-components
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --no-git-checks
+      # prez-ui layer
+      - name: Publish prez-ui to NPM
+        working-directory: packages/prez-ui
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --no-git-checks
+      # create-prez-app
+      - name: Update prez-ui dependency in template
+        working-directory: packages/create-prez-app/template
+        run: pnpm up prez-ui
+      - name: Publish create-prez-app to NPM
+        working-directory: packages/create-prez-app
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --no-git-checks
+      - name: Git configuration
         run: |
-          npm version ${{ steps.version.outputs.VALUE }} --no-git-tag-version
-          cd .. && zip -r prez-ui/prez-ui-${{ steps.version.outputs.VALUE }}.zip prez-ui
-
-      - name: Upload release asset
-        uses: softprops/action-gh-release@v1
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+      - name: Commit & push changes with tag
+        run: |
+          git add -A
+          git commit -m "chore: release ${{ env.NEW_VERSION }}"
+          git tag ${{ env.NEW_VERSION }}
+          git push origin && git push --tags
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
         with:
-          files: prez-ui-${{ steps.version.outputs.VALUE }}.zip
+          tag_name: ${{ env.NEW_VERSION }}
+          generate_release_notes: true
