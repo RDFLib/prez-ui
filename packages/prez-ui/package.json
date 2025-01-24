@@ -1,6 +1,6 @@
 {
     "name": "prez-ui",
-    "version": "3.8.4",
+    "version": "4.0.0",
     "description": "A Nuxt base layer application for Prez UI",
     "license": "BSD-3-Clause",
     "type": "module",
