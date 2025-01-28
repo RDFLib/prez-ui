@@ -28,11 +28,11 @@ Prez UI is comprised of 4 NPM packages:
 ### How do I decide what to use?
 
 ```mermaid
-flowchart TD
-    A{I want a web UI} -->|No| B(prez-lib)
-    A --> |Yes| C{I want to use Vue}
+flowchart LR
+    A{I want a<br> web UI} -->|No| B(prez-lib)
+    A --> |Yes| C{I want to<br> use Vue}
     C -->|No| B
-    C -->|Yes| D{I want to run Prez UI}
+    C -->|Yes| D{I want to<br> run Prez UI}
     D -->|No| E(prez-components)
     D -->|Yes| F(create-prez-app)
 ```
