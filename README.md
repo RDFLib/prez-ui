@@ -16,6 +16,11 @@ _(Note: for pnpm, run `pnpm dlx` instead of `npx`)_
 
 See the included README in the starter template from the above command, or the [theming documentation](./docs/theming.md) for more information on how to get started.
 
+> [!IMPORTANT]  
+> For v4.0.0, a few small changes need to be made to the starter template until we release a new version:
+> - the `prez-ui` dependency version should be set to `^4.0.0` ***before*** insstalling
+> - if you're enabling the SPARQL page, please copy the `sparql.vue` page from the prez-ui source code into your template
+
 For other use cases, see the below packages that are available.
 
 ## Packages
