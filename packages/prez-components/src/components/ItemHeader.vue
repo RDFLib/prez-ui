@@ -18,7 +18,7 @@ const term = props.term as PrezNode;
 <template>
     <!-- ItemHeader -->
     <div class="prezui-header">
-        <div class="prezui-header-title">
+        <div class="text-xl">
             <component :is="props._components.node" :term="term" variant="item-header" />
         </div>
         <div v-if="term.description" class="text-base">
@@ -26,9 +26,3 @@ const term = props.term as PrezNode;
         </div>
     </div>
 </template>
-
-<style scoped>
-.prezui-header-title {
-    font-size: x-large;
-}
-</style>

@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<ItemLinkProps>(), {
 });
 
 let hideSecondaryLink = props.hideSecondaryLink || false;
-let hideUnderline = props.hideUnderline || false;
+// let hideUnderline = props.hideUnderline || false;
 let hideTitle = props.hideTitle || false;
 let target = props.target;
 
@@ -35,7 +35,7 @@ switch (props.variant) {
         hideTitle = true;
         break;
     case 'item-profiles':
-        hideUnderline = true;
+        // hideUnderline = true;
         break;
     default:
         break;
@@ -75,8 +75,10 @@ const isSecondaryExtLink = secondaryUrl ? secondaryUrl.startsWith('http') || sec
 //     }
 // };
 
-const defaultClasses = 'border-b-[2px] hover:no-underline hover:border-primary ' + 
-    (hideUnderline ? 'border-transparent' : 'border-gray-300 border-dashed hover:border-solid');
+// const defaultClasses = 'border-b-[2px] hover:no-underline hover:border-primary ' + 
+//     (hideUnderline ? 'border-transparent' : 'border-gray-300 border-dashed hover:border-solid');
+
+const defaultClasses = "item-link";
 
 const linkClass = props.class ? defaultClasses + ' ' + props.class : defaultClasses;
 

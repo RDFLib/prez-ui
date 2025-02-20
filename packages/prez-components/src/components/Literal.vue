@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import { computed, onMounted, nextTick } from 'vue';
+import { computed, onMounted, nextTick } from "vue";
+import DOMPurify from "dompurify";
+import { marked } from "marked";
+import mermaid from "mermaid";
 import { type PrezLiteral, SYSTEM_PREDICATES } from "prez-lib";
-import { Badge } from '@/components/ui/badge';
-import DOMPurify from 'dompurify';
-import { marked } from 'marked';
-import mermaid from 'mermaid';
 import { LiteralProps } from "@/types";
-import Term from "./Term.vue";
 import { isHtmlDetected, isMarkdownDetected } from "@/utils/helpers";
+import { Badge } from "@/components/ui/badge";
+import Term from "@/components/Term.vue";
 
 const props = withDefaults(defineProps<LiteralProps>(), {
     _components: () => {
@@ -73,8 +73,8 @@ if ([SYSTEM_PREDICATES.xmlString, SYSTEM_PREDICATES.rdfLangString].indexOf(term.
     hideDataType = true;
 }
 
-const isMarkdown = computed(()=>term.datatype?.value == SYSTEM_PREDICATES.w3Markdown || (props.renderMarkdown && isMarkdownDetected(term.value)));
-const isHtml = computed(()=>term.datatype?.value == SYSTEM_PREDICATES.w3Html || (props.renderHtml && isHtmlDetected(term.value)));
+const isMarkdown = computed(() => term.datatype?.value == SYSTEM_PREDICATES.w3Markdown || (props.renderMarkdown && isMarkdownDetected(term.value)));
+const isHtml = computed(() => term.datatype?.value == SYSTEM_PREDICATES.w3Html || (props.renderHtml && isHtmlDetected(term.value)));
 
 // Custom renderer for Mermaid code blocks
 const renderer = new marked.Renderer();
@@ -166,15 +166,15 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
 }
 
 .no-tailwind {
-  all: revert-layer;
-  font-family: inherit;
-  font-size: inherit;
+    all: revert-layer;
+    font-family: inherit;
+    font-size: inherit;
 }
 </style>
 
 <style>
 .no-tailwind img {
-    max-width:100% !important;
-    height:auto;
+    max-width: 100% !important;
+    height: auto;
 }
 </style>

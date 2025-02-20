@@ -27,7 +27,7 @@
         "vue-router": "latest"
     },
     "devDependencies": {
-        "prez-ui": "workspace:*",
+        "prez-ui": "^4.0.0",
         "typescript": "^5.6.3"
     }
 }

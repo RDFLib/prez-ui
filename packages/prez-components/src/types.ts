@@ -76,7 +76,7 @@ export interface ItemLinkProps {
     copyLink?: boolean | string;
     hidePrimaryLink?: boolean;
     hideSecondaryLink?: boolean;
-    hideUnderline?: boolean;
+    // hideUnderline?: boolean;
     hideTitle?: boolean;
     useSecondaryLinkOnly?: boolean;
     _components?: {
