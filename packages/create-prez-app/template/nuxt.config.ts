@@ -6,4 +6,9 @@ export default defineNuxtConfig({
     extends: [
         "prez-ui"
     ],
+    vite: {
+        optimizeDeps: {
+            include: ["@triply/yasgui"]
+        }
+    },
 });
