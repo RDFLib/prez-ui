@@ -88,6 +88,9 @@ The layers system automatically replaces files of the same name with the same di
 
 Refer to Prez UI's base layer [source code](https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui) to help you override files.
 
+> [!WARNING]
+> Override files at your own risk, as copying code means that future updates to overridden components must be done manually
+
 The most common case of theming Prez UI is adding a header and footer to every page. This can easily be done by copying & overriding `layouts/default.vue` from the base layer and replacing the `<header>` & `<footer>` elements with your own content.
 
 ```HTML

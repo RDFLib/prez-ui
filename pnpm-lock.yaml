@@ -12,6 +12,9 @@ importers:
 
   packages/create-prez-app/template:
     dependencies:
+      '@nuxtjs/color-mode':
+        specifier: 3.5.2
+        version: 3.5.2(magicast@0.3.5)
       '@nuxtjs/tailwindcss':
         specifier: ^6.12.2
         version: 6.13.1(magicast@0.3.5)
@@ -54,7 +57,7 @@ importers:
     devDependencies:
       prez-ui:
         specifier: ^4.0.0
-        version: 4.0.0(@vitest/ui@3.0.7)(eslint@9.21.0(jiti@2.4.2))(magicast@0.3.5)(tailwindcss@3.4.17)(typescript@5.8.2)(vitest@3.0.7)
+        version: 4.0.0(@vitest/ui@3.0.7(vitest@3.0.7))(eslint@9.21.0(jiti@2.4.2))(magicast@0.3.5)(tailwindcss@3.4.17)(typescript@5.8.2)(vitest@3.0.7(@types/node@22.13.9)(@vitest/ui@3.0.7)(stylus@0.57.0)(terser@5.39.0))
       typescript:
         specifier: ^5.6.3
         version: 5.8.2
@@ -197,7 +200,7 @@ importers:
         version: 0.11.3(magicast@0.3.5)
       shadcn-vue:
         specifier: ^0.11.3
-        version: 0.11.4(@vitest/ui@3.0.7)(eslint@9.21.0(jiti@2.4.2))(magicast@0.3.5)(vitest@3.0.7)(vue@3.5.13(typescript@5.8.2))
+        version: 0.11.4(@vitest/ui@3.0.7(vitest@3.0.7))(eslint@9.21.0(jiti@2.4.2))(magicast@0.3.5)(vitest@3.0.7(@types/node@22.13.9)(@vitest/ui@3.0.7)(stylus@0.57.0)(terser@5.39.0))(vue@3.5.13(typescript@5.8.2))
       tailwind-merge:
         specifier: ^2.5.5
         version: 2.6.0
@@ -10237,7 +10240,7 @@ snapshots:
     dependencies:
       n3: 1.24.0
 
-  prez-ui@4.0.0(@vitest/ui@3.0.7)(eslint@9.21.0(jiti@2.4.2))(magicast@0.3.5)(tailwindcss@3.4.17)(typescript@5.8.2)(vitest@3.0.7):
+  prez-ui@4.0.0(@vitest/ui@3.0.7(vitest@3.0.7))(eslint@9.21.0(jiti@2.4.2))(magicast@0.3.5)(tailwindcss@3.4.17)(typescript@5.8.2)(vitest@3.0.7(@types/node@22.13.9)(@vitest/ui@3.0.7)(stylus@0.57.0)(terser@5.39.0)):
     dependencies:
       '@nuxtjs/color-mode': 3.5.2(magicast@0.3.5)
       '@nuxtjs/tailwindcss': 6.13.1(magicast@0.3.5)
@@ -10254,7 +10257,7 @@ snapshots:
       prez-lib: 4.0.0
       radix-vue: 1.9.17(vue@3.5.13(typescript@5.8.2))
       shadcn-nuxt: 0.11.3(magicast@0.3.5)
-      shadcn-vue: 0.11.4(@vitest/ui@3.0.7)(eslint@9.21.0(jiti@2.4.2))(magicast@0.3.5)(vitest@3.0.7)(vue@3.5.13(typescript@5.8.2))
+      shadcn-vue: 0.11.4(@vitest/ui@3.0.7(vitest@3.0.7))(eslint@9.21.0(jiti@2.4.2))(magicast@0.3.5)(vitest@3.0.7(@types/node@22.13.9)(@vitest/ui@3.0.7)(stylus@0.57.0)(terser@5.39.0))(vue@3.5.13(typescript@5.8.2))
       tailwind-merge: 2.6.0
       tailwindcss-animate: 1.0.7(tailwindcss@3.4.17)
       vue: 3.5.13(typescript@5.8.2)
@@ -10589,7 +10592,7 @@ snapshots:
       - magicast
       - supports-color
 
-  shadcn-vue@0.11.4(@vitest/ui@3.0.7)(eslint@9.21.0(jiti@2.4.2))(magicast@0.3.5)(vitest@3.0.7)(vue@3.5.13(typescript@5.8.2)):
+  shadcn-vue@0.11.4(@vitest/ui@3.0.7(vitest@3.0.7))(eslint@9.21.0(jiti@2.4.2))(magicast@0.3.5)(vitest@3.0.7(@types/node@22.13.9)(@vitest/ui@3.0.7)(stylus@0.57.0)(terser@5.39.0))(vue@3.5.13(typescript@5.8.2)):
     dependencies:
       '@unovue/detypes': 0.8.4
       '@vitest/ui': 3.0.7(vitest@3.0.7)

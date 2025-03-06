@@ -21,9 +21,9 @@ onBeforeMount(() => {
 
 <template>
     <div class="flex flex-col min-h-screen">
-        <PrezHeader />
+        <LayoutHeader />
 
-        <PrezNav v-model="showDebugPanel" />
+        <LayoutNav v-model="showDebugPanel" />
 
         <!-- page heading -->
         <slot v-if="!contentonly" name="header">
@@ -82,6 +82,6 @@ onBeforeMount(() => {
             </div>
         </div>
 
-        <PrezFooter />
+        <LayoutFooter />
     </div>
 </template>
