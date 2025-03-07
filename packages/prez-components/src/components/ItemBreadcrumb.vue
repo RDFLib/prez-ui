@@ -35,7 +35,7 @@ const lastUrl = links[links.length - 1]?.url;
 <template>
     <!-- ItemBreadcrumb -->
     <Breadcrumb v-if="links">
-        <BreadcrumbList class="text-foreground/70">
+        <BreadcrumbList class="text-muted-foreground">
             <template v-for="item in links">
                 <BreadcrumbItem>
                     <component :is="item.url != lastUrl ? BreadcrumbLink : BreadcrumbPage" as-child>

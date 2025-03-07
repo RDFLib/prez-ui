@@ -22,7 +22,7 @@ function onClick() {
 </script>
 
 <template>
-    <Button title="Copy to clipboard" @click="onClick" :class="cn('', props.class)" aria-label="Copy" :variant="props.variant" :size="props.size">
+    <Button title="Copy to clipboard" @click="onClick" :class="cn('copy-btn', props.class)" aria-label="Copy" :variant="props.variant" :size="props.size">
         <Copy class="w-4 h-4" />
         <template v-if="!props.iconOnly">{{ clicked ? 'Copied!' : 'Copy' }}</template>
     </Button>

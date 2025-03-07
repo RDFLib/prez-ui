@@ -25,7 +25,7 @@ const term = props.term as PrezFocusNode;
 
 <template>
     <!-- ItemTable -->
-    <Table v-if="term?.properties">
+    <Table v-if="term?.properties" class="item-table">
         <TableBody role="rowgroup">
             <component :is="props._components.itemTableRow" v-for="(fieldProp, index) in Object.values(term.properties)"
                 :key="fieldProp?.predicate.value" 

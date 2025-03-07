@@ -19,36 +19,34 @@ const list = props.list;
 
 <template>
     <!-- ItemList -->
-    <div v-if="list">
-        <Table style="min-width: 50rem">
-            <TableHeader>
-                <TableRow>
-                    <TableHead><b>Item</b></TableHead>
-                    <template v-if="fields">
-                        <TableHead v-for="col in fields">
-                            <b><component :is="props._components.predicate" :predicate="col.node" :objects="[]" /></b>
-                        </TableHead>
-                    </template>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                <TableRow v-for="item in list" class="hover:bg-unset odd:bg-muted/50">
-                    <TableCell>
-                        <component :is="props._components.node" :term="item" variant="item-list" />
+    <Table v-if="list" class="item-list min-w-[50rem]">
+        <TableHeader>
+            <TableRow>
+                <TableHead><b>Item</b></TableHead>
+                <template v-if="fields">
+                    <TableHead v-for="col in fields">
+                        <b><component :is="props._components.predicate" :predicate="col.node" :objects="[]" /></b>
+                    </TableHead>
+                </template>
+            </TableRow>
+        </TableHeader>
+        <TableBody>
+            <TableRow v-for="item in list" class="hover:bg-unset odd:bg-muted/50">
+                <TableCell>
+                    <component :is="props._components.node" :term="item" variant="item-list" />
+                </TableCell>
+                <template v-if="fields">
+                    <TableCell v-for="col in fields">
+                        <component :is="props._components.objects"
+                            v-if="item.properties?.[col.node.value]?.objects"
+                            :term="col.node"
+                            :predicate="col.node"
+                            :objects="item.properties[col.node.value]?.objects"
+                            variant="item-list"
+                        />
                     </TableCell>
-                    <template v-if="fields">
-                        <TableCell v-for="col in fields">
-                            <component :is="props._components.objects"
-                                v-if="item.properties?.[col.node.value]?.objects"
-                                :term="col.node"
-                                :predicate="col.node"
-                                :objects="item.properties[col.node.value]?.objects"
-                                variant="item-list"
-                            />
-                        </TableCell>
-                    </template>
-                </TableRow>
-            </TableBody>
-        </Table>
-    </div>
+                </template>
+            </TableRow>
+        </TableBody>
+    </Table>
 </template>
