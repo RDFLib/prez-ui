@@ -24,7 +24,7 @@ const term = node({
 
         <h2 class="text-2xl mb-3">Colours</h2>
         <p class="mb-2">The available Tailwind variables to override and use in classes. Note that "link" and "foreground" illustrate the colour of the text, not the background.</p>
-        <div class="grid grid-cols-4 gap-3">
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             <div class="flex flex-col">
                 <div class="grid grid-cols-2">
                     <div class="bg-primary text-primary-foreground p-2">primary</div>

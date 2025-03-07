@@ -42,7 +42,7 @@ This starter template uses [Nuxt](https://nuxt.com) [layers](https://nuxt.com/do
 
 Overriding pages, components, layouts, composables and utils can be done by simply creating a file of the same name in the same directory structure for Nuxt to automatically replace it with your version in the application. Refer to Prez UI's base layer [source code](https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui) to help you override files.
 
-> [!NOTE]  
+> [!IMPORTANT]  
 > When updating to a newer version of `prez-ui`, ensure any overridden files that contain core logic are kept up-to-date.
 
 See our [theming documentation](https://github.com/rdflib/prez-ui/blob/main/docs/theming.md) for a more in-depth guide on customising Prez UI.
