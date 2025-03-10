@@ -41,7 +41,7 @@ To override Prez UI's colour scheme (e.g. `primary`, `secondary`, etc.), or add 
 
 @layer base {
     :root {
-        /* define your Tailwind CSS variables (in HSL values without the hsl()) here */
+        /* define your Tailwind CSS variables (in HSL values without the hsl(), no commas) here */
         --primary: 24.6 95% 53.1%;
         --primary-foreground: 60 9.1% 97.8%;
     }
@@ -71,6 +71,11 @@ module.exports = {
 
 You can also style your Prez UI theme using normal CSS by adding your styles to `assets/css/theme.css`.
 
+### Tailwind Variables
+Prez UI's Tailwind variables inherit from [shadcn-vue's variables](https://www.shadcn-vue.com/docs/theming.html#list-of-variables). See Prez UI's default Tailwind variables [here](https://github.com/RDFLib/prez-ui/blob/main/packages/prez-components/src/assets/index.css).
+
+![Prez UI's default Tailwind variables](./tailwind-variables.png)
+
 ## Extending the base layer
 This starter template uses [Nuxt layers](https://nuxt.com/docs/getting-started/layers) to extend upon the base Prez UI layer application, so you only need to customise what you need.
 
@@ -89,31 +94,11 @@ The layers system automatically replaces files of the same name with the same di
 Refer to Prez UI's base layer [source code](https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui) to help you override files.
 
 > [!WARNING]
-> Override files at your own risk, as copying code means that future updates to overridden components must be done manually
+> Override files at your own risk, as copying code means that future updates to overridden components must be done manually.
 
-The most common case of theming Prez UI is adding a header and footer to every page. This can easily be done by copying & overriding `layouts/default.vue` from the base layer and replacing the `<header>` & `<footer>` elements with your own content.
+The most common case of theming Prez UI is adding a header, a footer, and modifying the nav for every page. This can easily be done by copying & overriding `LayoutHeader.vue`, `LayoutNav.vue` & `LayoutFooter.vue` in the `components/` directory. If further layout modifications are needed, you can also override the default layout in `layouts/default.vue`.
 
-```HTML
-<!-- layouts/default.vue -->
-<template>
-    <div class="flex flex-col min-h-screen">
-
-        <!-- Header -->
-        <header>
-            <!-- your header content here -->
-        </header>
-        ...
-        <!-- Footer -->
-        <footer>
-            <!-- your footer content here -->
-        </footer>
-    </div>
-</template>
-```
-
-The main navigation can be customised as well in the same file.
-
-## Shadcn Components
+## shadcn-vue Components
 Prez UI uses the [prez-components](https://github.com/rdflib/prez-ui/tree/main/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template (`badge`, `button`, `input` & `pagination` are included as the base layer requires them), but if you need to add more shadcn components in your theme, run a command like the following to add the component:
 
 ```bash
