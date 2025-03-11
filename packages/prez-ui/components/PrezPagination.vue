@@ -33,7 +33,7 @@ const props = defineProps<{
                 </PaginationFirst>
                 <PaginationPrev as-child>
                     <Button class="w-10 h-10 p-0" variant="outline" as-child>
-                        <NuxtLink :to="{...route, query: { ...route.query, page: (parseInt(route.query.page as string) - 1).toString() }}">
+                        <NuxtLink :to="{...route, query: { ...route.query, page: (props.pagination.page - 1).toString() }}">
                             <ChevronLeft class="size-4" />
                         </NuxtLink>
                     </Button>
@@ -50,14 +50,14 @@ const props = defineProps<{
 
                 <PaginationNext as-child>
                     <Button class="w-10 h-10 p-0" variant="outline" as-child>
-                        <NuxtLink :to="{...route, query: { ...route.query, page: (parseInt(route.query.page as string) + 1).toString() }}">
+                        <NuxtLink :to="{...route, query: { ...route.query, page: (props.pagination.page + 1).toString() }}">
                             <ChevronRight class="size-4" />
                         </NuxtLink>
                     </Button>
                 </PaginationNext>
                 <PaginationLast as-child>
                     <Button class="w-10 h-10 p-0" variant="outline" as-child>
-                        <NuxtLink :to="{...route, query: { ...route.query, page: items.length.toString() }}">
+                        <NuxtLink :to="{...route, query: { ...route.query, page: Math.ceil(props.totalItems / props.pagination.limit).toString() }}">
                             <ChevronsRight class="size-4" />
                         </NuxtLink>
                     </Button>
