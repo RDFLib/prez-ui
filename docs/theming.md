@@ -128,3 +128,23 @@ export default defineNuxtConfig({
     ...
 });
 ```
+
+`app.config.ts` is where you can configure smaller content-related options such as the nav content, naming on certains items, and breadcrumbs. For overriding array variables such as `menu`, use the arrow function syntax instead of re-setting the variable:
+
+```typescript
+// app.config.ts example
+export default defineAppConfig({
+    ...
+    menu: () => [
+        { "label": "Home", "url": "/", "active": true },
+        { "label": "Catalogs", "url": "/catalogs", "active": true },
+        { "label": "Search", "url": "/search", "active": true },
+        { "label": "SPARQL", "url": "/sparql", "active": false },
+        { "label": "Profiles", "url": "/profiles", "active": true },
+        { "label": "About", "url": "/about", "active": true },
+        { "label": "API Documentation", "url": "/docs", "active": true },
+        { "label": "Custom link", "url": "/custom", "active": true },
+    ],
+    ...
+});
+```

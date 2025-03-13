@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<ObjectsProps>(), {
 <template>
     <!-- Objects -->
     <slot>
-        <div v-for="(obj, index) of props.objects" :key="index" >
+        <div v-for="(obj, index) of props.objects" :key="index" class="objects">
             <component
                 :is="props._components.term"
                 :term="obj"

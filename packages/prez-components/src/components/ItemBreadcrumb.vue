@@ -8,6 +8,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { ChevronRight } from 'lucide-vue-next';
 import { ItemBreadcrumbProps } from "@/types";
 import Literal from "./Literal.vue";
 import ItemLink from "./ItemLink.vue";
@@ -34,8 +35,8 @@ const lastUrl = links[links.length - 1]?.url;
 
 <template>
     <!-- ItemBreadcrumb -->
-    <Breadcrumb v-if="links">
-        <BreadcrumbList class="text-muted-foreground">
+    <Breadcrumb v-if="links" class="breadcrumbs">
+        <BreadcrumbList>
             <template v-for="item in links">
                 <BreadcrumbItem>
                     <component :is="item.url != lastUrl ? BreadcrumbLink : BreadcrumbPage" as-child>
@@ -49,7 +50,9 @@ const lastUrl = links[links.length - 1]?.url;
                         </component>
                     </component>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator v-if="item.url != lastUrl" />
+                <BreadcrumbSeparator v-if="item.url != lastUrl" class="breadcrumb-separator">
+                    <ChevronRight class="size-4" />
+                </BreadcrumbSeparator>
             </template>
         </BreadcrumbList>
     </Breadcrumb>

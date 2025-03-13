@@ -6,7 +6,7 @@ const altEndpoints = useGetPrezAPIAltEndpoints();
 </script>
 
 <template>
-    <footer class="bg-tertiary text-secondary-foreground pt-6 pb-10">
+    <footer class="bg-tertiary text-tertiary-foreground pt-6 pb-10">
         <div class="container mx-auto text-center">
             <div class="text-sm">
                 <div>

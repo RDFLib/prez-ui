@@ -23,9 +23,9 @@ const props = withDefaults(defineProps<SearchResultsProps>(), {
         <TableBody>
             <TableRow v-for="result in props.results.sort((a, b) => b.weight - a.weight)">
                 <TableCell>
-                    <span class="float-right">
-                        <Badge variant="outline" class="text-xs">
-                            <component :is="props._components.node" :term="result.predicate" variant="search-results" />
+                    <span class="float-right flex flex-row gap-1">
+                        <Badge v-for="type in result.resource.rdfTypes" variant="outline" class="text-xs">
+                            <component :is="props._components.node" :term="type" variant="search-results" />
                         </Badge>
                     </span>
                     <b><component :is="props._components.term" :term="result.resource" variant="search-results" /></b>

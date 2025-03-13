@@ -21,8 +21,8 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div class="flex flex-col gap-2 mt-4">
-        <Pagination v-if="props.totalItems > props.pagination.limit" v-slot="{ page }" :total="props.totalItems" :itemsPerPage="props.pagination.limit" :sibling-count="1" show-edges :page="props.pagination.page">
+    <div class="flex flex-col gap-2 mt-4 pagination">
+        <Pagination v-if="props.totalItems > props.pagination.limit" v-slot="{ page }" :total="props.totalItems" :itemsPerPage="props.pagination.limit" :sibling-count="1" show-edges :page="props.pagination.page" class="paginator">
             <PaginationList v-slot="{ items }" class="flex items-center gap-1 justify-center">
                 <PaginationFirst as-child>
                     <Button class="w-10 h-10 p-0" variant="outline" as-child>
@@ -64,7 +64,7 @@ const props = defineProps<{
                 </PaginationLast>
             </PaginationList>
         </Pagination>
-        <div v-if="props.totalItems > 0" class="text-sm text-muted-foreground text-center">
+        <div v-if="props.totalItems > 0" class="pagination-text text-sm text-muted-foreground text-center">
             Showing {{ props.pagination.first }} to 
                 {{ Math.min(props.pagination.first + props.pagination.limit - 1, props.totalItems) }} of 
                 {{ props.totalItems }}{{ props.maxReached ? '+' : '' }} items
