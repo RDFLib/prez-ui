@@ -3,6 +3,7 @@ import { computed, onMounted, nextTick } from "vue";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
 import mermaid from "mermaid";
+import { Link } from "lucide-vue-next";
 import { type PrezLiteral, SYSTEM_PREDICATES } from "prez-lib";
 import { LiteralProps } from "@/types";
 import { isHtmlDetected, isMarkdownDetected } from "@/utils/helpers";
@@ -140,7 +141,10 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
                 <slot name="text" :term="term" :text="term.value">
                     <span v-if="isMarkdown" v-html="renderedMarkdownContent"></span>
                     <span v-else-if="isHtml" :class="htmlClass" v-html="sanitizedHtml"></span>
-                    <span v-else :class="class">{{ term.value }}</span>
+                    <span v-else :class="class">
+                        <a v-if="term.value.startsWith('http')" :href="term.value" target="_blank" rel="noopener noreferrer" class="inline-flex gap-1 items-center">{{ term.value }} <Link class="size-4" /></a>
+                        <template v-else>{{ term.value }}</template>
+                    </span>
                 </slot>
                 <slot v-if="!hideLanguage && term.language !== undefined" name="language" :term="term" :language="term.language">
                     <div class="pt-1">

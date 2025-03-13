@@ -103,7 +103,7 @@ const linkClass = props.class ? defaultClasses + ' ' + props.class : defaultClas
                     <slot />
                 </RouterLink>
             </template>
-            <span v-else class="border-b-[2px] border-transparent">
+            <span v-else>
                 <slot />
             </span>
             <template v-if="secondaryUrl && !hideSecondaryLink">

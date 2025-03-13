@@ -181,6 +181,7 @@ export interface SearchResultsProps {
         node: Component;
         term: Component;
         literal: Component;
+        itemLink: Component;
     };
 };
 

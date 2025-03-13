@@ -102,7 +102,7 @@ The most common case of theming Prez UI is adding a header, a footer, and modify
 Prez UI uses the [prez-components](https://github.com/rdflib/prez-ui/tree/main/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template (`badge`, `button`, `input` & `pagination` are included as the base layer requires them), but if you need to add more shadcn components in your theme, run a command like the following to add the component:
 
 ```bash
-npx shadcn-vue@latest add button
+npx shadcn-vue@0 add button
 ```
 *(Note: for pnpm, run `pnpm dlx` instead of `npx`)*
 
