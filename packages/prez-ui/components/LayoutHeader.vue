@@ -1,5 +1,5 @@
 <template>
-    <header class="bg-tertiary text-secondary-foreground h-32">
+    <header class="bg-tertiary text-tertiary-foreground h-32">
         <div class="container mx-auto px-4 h-full flex justify-between items-center">
             <NuxtLink to="/" class="text-4xl hidden md:block">
                 <slot name="logo">

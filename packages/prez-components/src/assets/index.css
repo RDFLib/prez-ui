@@ -77,7 +77,7 @@
     }
 }
 
-a:not(header a):not(nav.main-nav a):not(.btn) {
+a:not(header a):not(nav.main-nav a):not(footer a):not(.btn) {
     color: hsl(var(--link));
 }
 

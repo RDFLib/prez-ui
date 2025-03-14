@@ -51,7 +51,7 @@ function loadMore() {
 </script>
 
 <template>
-    <div v-if="data?.data">
+    <div v-if="data?.data" class="concept-hierarchy">
         <div v-if="data.data.length == 0" class="text-muted-foreground text-sm">No concepts found</div>
         <div v-else v-for="concept of concepts" :key="concept.value" class="pz-concept flex flex-col gap-1">
             <div class="pz-concept-node h-9">

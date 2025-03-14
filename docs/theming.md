@@ -102,7 +102,7 @@ The most common case of theming Prez UI is adding a header, a footer, and modify
 Prez UI uses the [prez-components](https://github.com/rdflib/prez-ui/tree/main/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template (`badge`, `button`, `input` & `pagination` are included as the base layer requires them), but if you need to add more shadcn components in your theme, run a command like the following to add the component:
 
 ```bash
-npx shadcn-vue@latest add button
+npx shadcn-vue@0 add button
 ```
 *(Note: for pnpm, run `pnpm dlx` instead of `npx`)*
 
@@ -125,6 +125,26 @@ export default defineNuxtConfig({
             ]
         }
     },
+    ...
+});
+```
+
+`app.config.ts` is where you can configure smaller content-related options such as the nav content, naming on certains items, and breadcrumbs. For overriding array variables such as `menu`, use the arrow function syntax instead of re-setting the variable:
+
+```typescript
+// app.config.ts example
+export default defineAppConfig({
+    ...
+    menu: () => [
+        { "label": "Home", "url": "/", "active": true },
+        { "label": "Catalogs", "url": "/catalogs", "active": true },
+        { "label": "Search", "url": "/search", "active": true },
+        { "label": "SPARQL", "url": "/sparql", "active": false },
+        { "label": "Profiles", "url": "/profiles", "active": true },
+        { "label": "About", "url": "/about", "active": true },
+        { "label": "API Documentation", "url": "/docs", "active": true },
+        { "label": "Custom link", "url": "/custom", "active": true },
+    ],
     ...
 });
 ```

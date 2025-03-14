@@ -6,6 +6,7 @@ const props = defineProps<{
     contentonly?: boolean;
 }>();
 const runtimeConfig = useRuntimeConfig();
+const globalConfig = useGlobalConfig(); // needed for checking if SPARQL is enabled
 const expandSidePanel = ref(false);
 const showDebugPanel = ref(false);
 
