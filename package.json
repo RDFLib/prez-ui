@@ -12,5 +12,11 @@
     },
     "keywords": [],
     "author": "jamie.feiss@gmail.com",
-    "license": "BSD-3-Clause"
+    "license": "BSD-3-Clause",
+    "pnpm": {
+        "overrides": {
+            "dompurify@<3.2.4": ">=3.2.4",
+            "esbuild@<=0.24.2": ">=0.25.0"
+        }
+    }
 }
