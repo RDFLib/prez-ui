@@ -75,14 +75,7 @@ export class RDFStore {
                     } else {
                         console.warn(`[buildLists] Found sh:union for ${pathObject.value}, but its object ${listHead.value} is not a valid list head in linkedLists.`);
                     }
-                } else {
-                     // This blank node object of sh:path doesn't have an sh:union property
-                     // console.debug(`[buildLists] Blank node ${pathObject.value} (object of sh:path) has no sh:union property.`);
                 }
-            } else {
-                 // Object of sh:path wasn't a blank node, might be a direct list head (old style?) or something else.
-                 // Handle if necessary, or ignore if only the new structure is expected.
-                 // console.debug(`[buildLists] Object of sh:path ${pathObject.value} is not a BlankNode.`);
             }
         });
     }
@@ -96,7 +89,7 @@ export class RDFStore {
                 // Check if this blank node is the head of another list
                 if(lid in this.linkedLists) { // Use the originally extracted lists here
                     const subList = this.buildSubList(this.linkedLists[lid]!); // Recursive call
-                    // Complex merging logic - keep as is unless proven problematic
+                    // Merging logic
                     if(subList.length > 1) {
                         const existingList = items.find(i => i.node.value == subList[0]!.node.value);
                         if(existingList) {
@@ -107,10 +100,6 @@ export class RDFStore {
                     } else {
                         items.push(...subList);
                     }
-                } else {
-                    // It's a blank node but not a list head - treat as a regular node?
-                    // Or maybe it represents something else? For now, ignore if not a list head.
-                    // console.warn(`[buildSubList] Encountered BlankNode ${lid} which is not a list head.`);
                 }
             } else if(n.termType == 'NamedNode') {
                 // Skip the sh:union predicate itself if it appears *in* the list
@@ -118,12 +107,6 @@ export class RDFStore {
                     const nn = this.toPrezTerm(n as Term) as PrezNode; // Use 'n' directly
                     items.push({node: nn, list: []}); // Assume empty list unless proven otherwise
                 }
-            } else if (n.termType === 'Literal') {
-                 // Handle literals if they can appear in these lists
-                 // console.warn(`[buildSubList] Encountered Literal ${n.value}. How should it be handled?`);
-                 // Potentially convert to PrezLiteral and add?
-                 // const lit = this.toPrezTerm(n) as PrezLiteral;
-                 // items.push({ node: lit, list: [] }); // This might break PrezNodeList type, needs adjustment
             }
         }
         return items;
