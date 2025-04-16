@@ -1,5 +1,6 @@
 import { type HTMLAttributes, type Component } from "vue";
-import type { PrezTerm, PrezLiteral, PrezNodeList, PrezNode, PrezSearchResult, PrezLinkParent, PrezFocusNode, PrezProfileHeader, PrezDataTypes } from "prez-lib";
+import type { PrezTerm, PrezLiteral, PrezNodeList, PrezNode, PrezSearchResult, PrezLinkParent, PrezFocusNode, PrezProfileHeader, PrezDataTypes, PrezFacet, PrezFacetValue, PrezProfile } from "prez-lib";
+
 import type { ButtonVariants } from "./components/ui/button";
 
 export interface CopyButtonProps {
@@ -174,6 +175,26 @@ export interface MessageProps {
     severity?: "info" | "error";
     text?: string;
 };
+
+export interface FacetsProps {
+    facets: PrezFacet[];
+    _components?: {
+        node?: Component;
+        term?: Component;
+        literal?: Component;
+        itemLink?: Component;
+    };
+    profile: PrezProfile;
+};
+
+export type FacetEmitsPayload = {
+    facetName: PrezNode;
+    facetValue: PrezFacetValue;
+}
+
+export type FacetsEmits = {
+  (e: 'facet-selected', payload: FacetEmitsPayload): void
+}
 
 export interface SearchResultsProps {
     results: PrezSearchResult[];
