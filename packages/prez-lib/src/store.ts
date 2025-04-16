@@ -1,4 +1,4 @@
-import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad, NamedNode } from "n3";
+import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad } from "n3";
 import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezLinkParent, PrezNodeList } from "./types";
 import { DEFAULT_PREFIXES, PREZ_PREDICATES, SYSTEM_PREDICATES } from "./consts";
 import { defaultToIri, defaultFromIri } from "./helpers";
@@ -48,56 +48,68 @@ export class RDFStore {
         this.buildLists();
     }
 
+    /** build the top level node array from a linked list */
+    public buildLists() {
+        this.lists = {}; // Reset processed lists
+        const rawLinkedLists = this.linkedLists; // Keep reference if needed for debugging
+
+        // Find blank nodes that are objects of sh:path
+        this.store.getQuads(null, SYSTEM_PREDICATES.shaclPath, null, null).forEach(pathQuad => {
+            const pathObject = pathQuad.object; // This should be the blank node containing sh:union
+
+            if (pathObject.termType === 'BlankNode') {
+                // Get properties of this blank node (?bnode sh:union ?listHead)
+                const unionQuads = this.store.getQuads(pathObject, SYSTEM_PREDICATES.shaclUnion, null, null);
+
+                if (unionQuads.length > 0) {
+                    const listHead = unionQuads[0]!.object; // The object of sh:union should be the list head
+
+                    // Check if this list head exists in our extracted lists
+                    if (listHead.termType === 'BlankNode' && listHead.value in rawLinkedLists) {
+                        const listItems = rawLinkedLists[listHead.value]!;
+                        // Process the list items using buildSubList
+                        // We need a key for this.lists. Using the pathQuad subject or the pathObject BNode ID seems reasonable.
+                        // Let's use the pathObject BNode ID as it directly relates to the path structure.
+                        const listKey = pathObject.value;
+                        this.lists[listKey] = this.buildSubList(listItems);
+                    } else {
+                        console.warn(`[buildLists] Found sh:union for ${pathObject.value}, but its object ${listHead.value} is not a valid list head in linkedLists.`);
+                    }
+                }
+            }
+        });
+    }
+
     /** build sub linked lists */
     private buildSubList(list: RDF.Term[]): PrezNodeList[] {
         const items:PrezNodeList[] = [];
-
         for(const n of list) {
             if(n.termType == "BlankNode") {
                 const lid = n.value;
-                if(lid in this.linkedLists) {
-                    const subList = this.buildSubList(this.linkedLists[lid]!);
+                // Check if this blank node is the head of another list
+                if(lid in this.linkedLists) { // Use the originally extracted lists here
+                    const subList = this.buildSubList(this.linkedLists[lid]!); // Recursive call
+                    // Merging logic
                     if(subList.length > 1) {
-                        // check if the first item in the subList is a node that has been seen before
                         const existingList = items.find(i => i.node.value == subList[0]!.node.value);
                         if(existingList) {
-                            // node has been seen before, so add the rest of the list to the existing node
                             (existingList.list ??= []).push(...subList.slice(1));
                         } else {
-                            // first time this node has been seen, so create a new list with the rest of the subList
                             items.push({node: subList[0]!.node, list: subList.slice(1)});
                         }
                     } else {
-                        // only one item in the subList, so add it to the main list
                         items.push(...subList);
                     }
                 }
             } else if(n.termType == 'NamedNode') {
+                // Skip the sh:union predicate itself if it appears *in* the list
                 if(n.value != SYSTEM_PREDICATES.shaclUnion) {
-                    const nn = this.toPrezTerm(new NamedNode(n.value)) as PrezNode;
-                    items.push({node: nn, list: []});
-                }
-            }
-        }     
-        return items;
-    }
-
-    /** build the top level node array from a linked list */
-    public buildLists() {
-        this.lists = {};
-        const lists = this.linkedLists;
-
-        // get top level lists
-        for(const key in lists) {
-            const list = lists[key]!;
-            const isUnion = list.find(n=>n.termType == "NamedNode" && n.value == SYSTEM_PREDICATES.shaclUnion);
-            if(isUnion) {
-                const bnList = list.find(n=>n.termType == "BlankNode");
-                if(bnList && bnList.value in this.linkedLists) {
-                    this.lists[key] = this.buildSubList(this.linkedLists[bnList.value]!);
+                    const nn = this.toPrezTerm(n as Term) as PrezNode; // Use 'n' directly
+                    items.push({node: nn, list: []}); // Assume empty list unless proven otherwise
                 }
             }
         }
+        return items;
     }
 
     /**

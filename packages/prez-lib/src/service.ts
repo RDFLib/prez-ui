@@ -102,7 +102,7 @@ export async function apiGet(url: string) {
  */
 export async function getList(baseUrl:string, path: string): Promise<PrezDataList> {
     const url = baseUrl + path;
-    const pathOnly = new URL(url).pathname
+    const pathOnly = new URL(url).pathname;
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.setBaseUrl(baseUrl);
@@ -123,7 +123,7 @@ export async function getList(baseUrl:string, path: string): Promise<PrezDataLis
  */
 export async function getItem(baseUrl: string, path: string): Promise<PrezDataItem> {
     const url = baseUrl + path;
-    const pathOnly = new URL(url).pathname
+    const pathOnly = new URL(url).pathname;
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.setBaseUrl(baseUrl);
