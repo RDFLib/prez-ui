@@ -168,7 +168,7 @@ export const useGetItem = (baseUrl: string, urlPath: Ref<string>) => {
         data,
         status,
         error,
-        execute,
+        execute
     };
 };
 
@@ -194,6 +194,7 @@ export const useSearch = (baseUrl: string, urlPath: Ref<string>) => {
                 count: 0,
                 maxReached: false,
                 parents: [],
+                facets: []
             };
         }
 
