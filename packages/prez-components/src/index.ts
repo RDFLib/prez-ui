@@ -1,6 +1,7 @@
 import "./assets/index.css";
 import CopyButton from "./components/CopyButton.vue";
 import DataProvider from "./components/DataProvider.vue";
+import Facets from "./components/Facets.vue";
 import ItemBreadcrumb from "./components/ItemBreadcrumb.vue";
 import ItemHeader from "./components/ItemHeader.vue";
 import ItemLink from "./components/ItemLink.vue";
@@ -24,6 +25,7 @@ export * from "./types";
 export {
     CopyButton,
     DataProvider,
+    Facets,
     ItemBreadcrumb,
     ItemHeader,
     ItemLink,

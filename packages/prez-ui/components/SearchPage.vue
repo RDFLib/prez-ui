@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { Search } from "lucide-vue-next";
+import { PREZ_PREDICATES } from "prez-lib";
 
 const appConfig = useAppConfig();
+const { globalProfiles } = useGlobalProfiles();
+
 const apiEndpoint = useGetPrezAPIEndpoint();
 const { getPageUrl, pagination, formSubmitToNavigate } = usePageInfo();
 const route = useRoute();
 const urlPath = ref(getPageUrl());
+const currentFacetProfile = route.query.facet_profile?.toString() || undefined;
 
 const { status, error, data } = useSearch(apiEndpoint, urlPath);
 
@@ -50,6 +54,10 @@ const inSearchMode = computed(() => (route.query?.q || '').length > 0);
                         <div v-if="error"><Message severity="error">{{ error }}</Message></div>
                         <div v-if="data">
                             <div v-if="data" :key="urlPath">
+                                <Facets v-if="globalProfiles && currentFacetProfile && globalProfiles[PREZ_PREDICATES.profile + '/' + currentFacetProfile]" 
+                                    :facets="data.facets" 
+                                    :profile="globalProfiles[PREZ_PREDICATES.profile + '/' + currentFacetProfile]" 
+                                />
                                 <SearchResults :results="data.data" />
                                 <PrezPagination v-if="status == 'success' && data?.count > 0 && inSearchMode" :totalItems="data.count" :pagination="pagination" :maxReached="data.maxReached" />
                             </div>

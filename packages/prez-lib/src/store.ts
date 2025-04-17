@@ -1,5 +1,5 @@
 import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad } from "n3";
-import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezLinkParent, PrezNodeList } from "./types";
+import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezLinkParent, PrezNodeList, PrezFacet } from "./types";
 import { DEFAULT_PREFIXES, PREZ_PREDICATES, SYSTEM_PREDICATES } from "./consts";
 import { defaultToIri, defaultFromIri } from "./helpers";
 import { node, literal, bnode } from "./factory";
@@ -495,4 +495,60 @@ export class RDFStore {
         });
         return results;
     }
+
+
+    /**
+     * Returns a list of facets
+     * 
+     * @returns a list of facets
+     */
+    public getFacets(): PrezFacet[] {
+        const facets: PrezFacet[] = [];
+        this.store.getQuads(null, PREZ_PREDICATES.facetName, null, null).forEach(q => {
+            
+            if(q.subject.termType == "BlankNode") {
+
+                const b = bnode(q.subject.value);
+                b.properties = this.getProperties(q.subject);
+                const count = Number(b.properties?.[PREZ_PREDICATES.facetCount]?.objects?.[0].value) || 0;
+                const facetNameObj = b.properties?.[PREZ_PREDICATES.facetName]?.objects?.[0];
+                const facetValueObj = b.properties?.[PREZ_PREDICATES.facetValue]?.objects?.[0];
+
+                // Keep the PrezTerm object as facetName
+                const facetName = facetNameObj;
+
+                // Find existing facet by comparing the .value (IRI) of the PrezNode
+                const facet = facets.find(f => f.facetName.value == facetName?.value);
+
+                if(count > 0 && facetName !== undefined && facetValueObj !== undefined) {
+                    // Convert the raw RDF term to a PrezTerm first
+                    const prezTerm = this.toPrezTerm(facetValueObj as Term);
+
+                    // *** Check if the term is a Literal or NamedNode before proceeding ***
+                    if (prezTerm.termType === 'Literal' || prezTerm.termType === 'NamedNode') {
+                        const facetValueAndCount = {
+                            // Now prezTerm is guaranteed to be PrezLiteral | PrezNode
+                            term: prezTerm,
+                            count
+                        };
+
+                        if(facet) {
+                            facet.facetValues.push(facetValueAndCount); // Type matches PrezFacetValue
+                        } else {
+                            // Store the PrezNode object directly
+                            facets.push({
+                                facetName: facetName as PrezNode, // Asserting it's a PrezNode based on usage
+                                facetValues: [facetValueAndCount] // Type matches PrezFacetValue
+                            });
+                        }
+                    } else {
+                        // Optional: Log if a blank node was encountered as a facet value
+                        // console.warn(`Skipping facet value for ${facetName.value} because it resolved to a BlankNode: ${prezTerm.value}`);
+                    }
+                }
+            }
+        });
+        return facets;
+    }    
+    
 };

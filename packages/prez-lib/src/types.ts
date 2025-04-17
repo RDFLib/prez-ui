@@ -119,8 +119,10 @@ export type PrezNodeList = {
     list?: PrezNodeList[];
 }
 
+export type PrezProfile = PrezNodeList[];
+
 /** Used to define a set of profiles along with a node property list structure */
-export type PrezProfiles = Record<string, PrezNodeList[]>;
+export type PrezProfiles = Record<string, PrezProfile>;
 
 /**
  * Represents an RDF Blank Node
@@ -250,6 +252,7 @@ export interface PrezData {
     data: PrezFocusNode | PrezFocusNode[] | PrezSearchResult[];
     profiles: PrezProfileHeader[];
     parents: PrezLinkParent[];
+    facets: PrezFacet[];
 }
 
 export interface PrezDataList extends PrezData {
@@ -276,3 +279,14 @@ export interface PrezDataSearch extends PrezData {
     data: PrezSearchResult[];
     maxReached: boolean;
 }
+
+export type PrezFacetValue = {
+    term: (PrezLiteral | PrezNode);
+    count: number;
+}
+
+export type PrezFacet = {
+    facetName: PrezNode;
+    facetValues: PrezFacetValue[];
+}
+  

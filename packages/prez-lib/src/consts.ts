@@ -38,7 +38,11 @@ export const PREZ_PREDICATES = {
     searchResultPredicate: "https://prez.dev/searchResultPredicate",
     searchResultURI: "https://prez.dev/searchResultURI",
     searchResultMatch: "https://prez.dev/searchResultMatch",
-    hasChildren: "https://prez.dev/hasChildren"
+    hasChildren: "https://prez.dev/hasChildren",
+    facetCount: "https://prez.dev/facetCount",
+    facetName: "https://prez.dev/facetName",
+    facetValue: "https://prez.dev/facetValue",
+    profile: "https://prez.dev/profile"
 };
 
 export const SYSTEM_PREDICATES = {

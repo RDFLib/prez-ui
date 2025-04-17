@@ -107,9 +107,14 @@ export async function getList(baseUrl:string, path: string): Promise<PrezDataLis
     const store = new RDFStore();
     store.setBaseUrl(baseUrl);
     store.load(data);
-    return { type: 'list', data: store.getList(), profiles, 
-        maxReached: store.getMaxReached(), count: store.getCount(), 
-        parents: store.getParents(pathOnly)
+    return { 
+        type: 'list', 
+        data: store.getList(), 
+        profiles, 
+        maxReached: store.getMaxReached(), 
+        count: store.getCount(), 
+        parents: store.getParents(pathOnly),
+        facets: store.getFacets()
     };
 }
 
@@ -128,7 +133,14 @@ export async function getItem(baseUrl: string, path: string): Promise<PrezDataIt
     const store = new RDFStore();
     store.setBaseUrl(baseUrl);
     store.load(data);
-    return { type: 'item', data: store.getItem(), profiles, parents: store.getParents(pathOnly), store };
+    return { 
+        type: 'item', 
+        data: store.getItem(), 
+        profiles, 
+        parents: store.getParents(pathOnly), 
+        store, 
+        facets: store.getFacets() 
+    };
 }
 
 /**
@@ -145,10 +157,14 @@ export async function search(baseUrl: string, path: string): Promise<PrezDataSea
     const store = new RDFStore();
     store.setBaseUrl(baseUrl);
     store.load(data);
-    return { 
-        type: 'search', data: store.search(), profiles, 
-        maxReached: store.getMaxReached(), count: store.getCount(), 
-        parents: store.getParents(pathOnly)
+    return {
+        type: 'search', 
+        data: store.search(), 
+        profiles, 
+        maxReached: store.getMaxReached(), 
+        count: store.getCount(), 
+        parents: store.getParents(pathOnly),
+        facets: store.getFacets()
     };
 }
 
