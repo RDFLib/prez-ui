@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { FacetsProps, FacetsEmits } from '../types'; // Adjust import path if needed
-import { Button } from './ui/button'; // Import shadcn Button
+import type { FacetsProps, FacetsEmits } from '../types'; 
+import { Button } from './ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu'; // Import shadcn DropdownMenu components
+} from './ui/dropdown-menu';
 
 // Import Lucide icon
 import { ChevronDown } from 'lucide-vue-next';
@@ -16,7 +16,7 @@ import Node from "./Node.vue";
 import Term from "./Term.vue";
 import Literal from "./Literal.vue";
 import ItemLink from "./ItemLink.vue";
-import { PrezNode, PrezTerm, type PrezFacetValue } from 'prez-lib'; // Import PrezFacetValue type
+import { PrezNode, PrezTerm, type PrezFacetValue } from 'prez-lib';
 
 const props = withDefaults(defineProps<FacetsProps>(), {
     _components: () => {
