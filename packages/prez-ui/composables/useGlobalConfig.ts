@@ -68,7 +68,6 @@ export const useGlobalConfig = () => {
                 if (runtimeConfig.public.prezDebug) {
                     console.log('globalConfig (debug mode)', data);
                 }
-
  
                 const paths = data.filter((item:any)=>item['https://prez.dev/ont/apiPath']);
 
@@ -80,7 +79,12 @@ export const useGlobalConfig = () => {
                 const listingEndpoints = paths
                     .filter((item:any)=>item['@type'].includes('https://prez.dev/ont/ListingEndpoint'))
                     .flatMap((item:any)=>item['https://prez.dev/ont/apiPath'].map((i:any)=>i['@value']));
- 
+
+                if (runtimeConfig.public.prezDebug) {
+                    console.log('objectEndpoints (debug mode)', objectEndpoints);
+                    console.log('listingEndpoints (debug mode)', listingEndpoints);
+                }
+
                 const hasSparql = data.find((item: any) => item?.['https://prez.dev/sparqlEndpointEnabled']);
                 // update the sparql option if the endpoint supports it
                 updateAppConfig({ menu: appConfig.menu.map(item => item.url === '/sparql' ? { ...item, active: !!hasSparql } : item) });
@@ -91,7 +95,7 @@ export const useGlobalConfig = () => {
                     objectEndpoints: objectEndpoints,
                     listingEndpoints: listingEndpoints
                 };
-                
+
             } catch (err) {
                 console.error('Failed to fetch global config', err);
             }
