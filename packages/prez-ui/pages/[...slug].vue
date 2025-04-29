@@ -16,7 +16,6 @@
 </template>
 
 <script setup lang="ts">
-import { matchesAnyPattern } from '~/composables/useGlobalConfig';
 
 const route = useRoute();
 const globalConfig = useGlobalConfig();

@@ -1,36 +1,5 @@
 // composables/useGlobalConfig.ts
 
-// Simplified helper function to convert path patterns to RegExp
-export function convertPathToRegex(pattern: string): RegExp {
-    // 1. Escape all potential regex special characters in the pattern
-    const escapedPattern = pattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-
-    // 2. Replace escaped placeholders like \{name\} with ([^/]+)
-    //    ([^/]+) matches one or more characters that are NOT a slash
-    const regexString = escapedPattern.replace(/\\\{([^}]+)\\\}/g, '([^/]+)');
-
-    // 3. Add anchors to match the entire path
-    const finalRegexString = `^${regexString}$`;
-
-    try {
-        return new RegExp(finalRegexString);
-    } catch (e) {
-        console.error(`Failed to create RegExp for pattern: ${pattern}`);
-        console.error(`Generated regex string: ${finalRegexString}`);
-        console.error(e);
-        return new RegExp('(?!)'); // Regex that never matches
-    }
-}
-
-// Simplified helper function using Array.some()
-export function matchesAnyPattern(path: string, patterns: string[]): boolean {
-    // Check if 'some' pattern in the array matches the path
-    return patterns.some(pattern => {
-        const regex = convertPathToRegex(pattern);
-        return regex.test(path);
-    });
-}
-
 // Define the structure of the global config state
 interface GlobalConfigState {
     config: any; // Keep the original config data if needed
