@@ -12,6 +12,7 @@ export default defineConfig({
             name: "prez-lib",
             fileName: "prez-lib",
         },
+        sourcemap: true
     },
     resolve: {
         alias: {
