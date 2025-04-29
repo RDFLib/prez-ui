@@ -73,13 +73,23 @@ export const useGlobalConfig = () => {
 
                 // Extract endpoints
                 const objectEndpoints = paths
-                    .filter((item:any)=>item['@type'].includes('https://prez.dev/ont/ObjectEndpoint'))
-                    .flatMap((item:any)=>item['https://prez.dev/ont/apiPath'].map((i:any)=>i['@value']));
+                    .filter((item: any) =>
+                      Array.isArray(item['@type']) &&
+                      item['@type'].some((t: string) => t === 'https://prez.dev/ont/ObjectEndpoint')
+                    )
+                    .flatMap((item: any) =>
+                        item['https://prez.dev/ont/apiPath']?.map((i: any) => i['@value']) ?? []
+                    );
 
                 const listingEndpoints = paths
-                    .filter((item:any)=>item['@type'].includes('https://prez.dev/ont/ListingEndpoint'))
-                    .flatMap((item:any)=>item['https://prez.dev/ont/apiPath'].map((i:any)=>i['@value']));
-
+                    .filter((item: any) =>
+                        Array.isArray(item['@type']) &&
+                        item['@type'].some((t: string) => t === 'https://prez.dev/ont/ListingEndpoint')
+                    )
+                    .flatMap((item: any) =>
+                        item['https://prez.dev/ont/apiPath']?.map((i: any) => i['@value']) ?? []
+                    );
+                
                 if (runtimeConfig.public.prezDebug) {
                     console.log('objectEndpoints (debug mode)', objectEndpoints);
                     console.log('listingEndpoints (debug mode)', listingEndpoints);
