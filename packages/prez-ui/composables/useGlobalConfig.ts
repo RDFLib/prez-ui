@@ -68,9 +68,11 @@ export const useGlobalConfig = () => {
                 // update the sparql option if the endpoint supports it
                 updateAppConfig({ menu: appConfig.menu.map(item => item.url === '/sparql' ? { ...item, active: !!hasSparql } : item) });
 
-                // determine the root listing endpoint, set the main catalog entry point to it
+                // determine the root listing endpoint
                 const rootListingEndpoint = listingEndpoints.find((endpoint: string) => endpoint.split('/').length === 2);
-                if(rootListingEndpoint) {
+                
+                // update the root listing endpoint if it's not the default /catalogs
+                if(rootListingEndpoint != '/catalogs') {
                     updateAppConfig({ menu: appConfig.menu.map(item => item.url === '/catalogs' ? { ...item, url: rootListingEndpoint } : item) });
                 }
 
