@@ -62,6 +62,7 @@ watch(() => route.fullPath, () => {
                 <div v-else-if="data?.data">
                     <slot name="list-top" :data="data"></slot>
                     <ItemList v-if="globalProfiles && currentProfile" :fields="globalProfiles?.[currentProfile?.uri || '']" :list="data.data" :key="urlPath" />
+                    <Loading v-else />
 
                     <slot name="pagination" :data="data" :pagination="pagination">
                         <PrezPagination :totalItems="data.count" :pagination="pagination" :maxReached="data.maxReached" />

@@ -99,7 +99,7 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                             <slot name="item-members" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
                                 <p class="mt-6" v-if="data.data.members">
                                     <Button as-child>
-                                        <NuxtLink :to="data!.data.members!.value">Members</NuxtLink>
+                                        <ItemLink :to="data!.data.members!.value">Members</ItemLink>
                                     </Button>
                                 </p>
                             </slot>
