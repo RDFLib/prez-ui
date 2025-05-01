@@ -11,8 +11,7 @@ export default defineConfig({
             entry: resolve(__dirname, "src/index.ts"),
             name: "prez-lib",
             fileName: "prez-lib",
-        },
-        sourcemap: true
+        }
     },
     resolve: {
         alias: {
