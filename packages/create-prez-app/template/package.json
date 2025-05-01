@@ -1,6 +1,6 @@
 {
     "name": "prez-ui-starter",
-    "version": "4.0.5",
+    "version": "4.1.0",
     "private": true,
     "license": "BSD-3-Clause",
     "type": "module",
@@ -28,7 +28,7 @@
         "vue-router": "latest"
     },
     "devDependencies": {
-        "prez-ui": "^4.0.5",
+        "prez-ui": "^4.1.0",
         "typescript": "^5.8.2"
     },
     "overrides": {
