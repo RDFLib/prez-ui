@@ -56,7 +56,6 @@ export class RDFStore {
         // Find blank nodes that are objects of sh:path
         this.store.getQuads(null, SYSTEM_PREDICATES.shaclPath, null, null).forEach(pathQuad => {
             const pathObject = pathQuad.object; // This should be the blank node containing sh:union
-
             if (pathObject.termType === 'BlankNode') {
                 // Get properties of this blank node (?bnode sh:union ?listHead)
                 const unionQuads = this.store.getQuads(pathObject, SYSTEM_PREDICATES.shaclUnion, null, null);
@@ -99,6 +98,13 @@ export class RDFStore {
                         }
                     } else {
                         items.push(...subList);
+                    }
+                } else {
+                    // check for path alias, if found, use that as the node
+                    const pathAlias = this.store.getObjects(n, SYSTEM_PREDICATES.shaclPathAlias, null)?.[0];
+                    if(pathAlias) {
+                        const nn = this.toPrezTerm(pathAlias) as PrezNode;
+                        items.push({node: nn, list: []});
                     }
                 }
             } else if(n.termType == 'NamedNode') {

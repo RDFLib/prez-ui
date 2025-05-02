@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Search } from "lucide-vue-next";
-import { PREZ_PREDICATES } from "prez-lib";
 
 const appConfig = useAppConfig();
 const { globalProfiles } = useGlobalProfiles();
@@ -31,7 +30,6 @@ const inSearchMode = computed(() => (route.query?.q || '').length > 0);
                     <h1 class="text-2xl mt-8 text-center">
                         <slot name="search-text">Search</slot>
                     </h1>
-
                     <div class="flex items-center justify-center">
                         <div class="flex-grow max-w-lg p-4">
                             <form method="get" @submit="formSubmitToNavigate">
@@ -54,9 +52,9 @@ const inSearchMode = computed(() => (route.query?.q || '').length > 0);
                         <div v-if="error"><Message severity="error">{{ error }}</Message></div>
                         <div v-if="data">
                             <div v-if="data" :key="urlPath">
-                                <Facets v-if="globalProfiles && currentFacetProfile && globalProfiles[PREZ_PREDICATES.profile + '/' + currentFacetProfile]" 
+                                <Facets v-if="globalProfiles && currentFacetProfile && globalProfiles[currentFacetProfile]" 
                                     :facets="data.facets" 
-                                    :profile="globalProfiles[PREZ_PREDICATES.profile + '/' + currentFacetProfile]" 
+                                    :profile="globalProfiles[currentFacetProfile]" 
                                 />
                                 <SearchResults :results="data.data" />
                                 <PrezPagination v-if="status == 'success' && data?.count > 0 && inSearchMode" :totalItems="data.count" :pagination="pagination" :maxReached="data.maxReached" />
