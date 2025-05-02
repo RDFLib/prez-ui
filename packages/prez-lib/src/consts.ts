@@ -53,10 +53,13 @@ export const SYSTEM_PREDICATES = {
     xmlString: "http://www.w3.org/2001/XMLSchema#string",
     w3Html: "http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML",
     w3Markdown: "https://www.w3.org/ns/iana/media-types/text/markdown",
+    w3token: "http://www.w3.org/2001/XMLSchema#token",
     shaclAllPredicates: "http://example.com/shacl-extension#allPredicateValues",
+    shaclPathAlias: "http://example.com/shacl-extension#pathAlias",
     shaclProperty: "http://www.w3.org/ns/shacl#property",
     shaclPath: "http://www.w3.org/ns/shacl#path",
-    shaclUnion: "http://www.w3.org/ns/shacl#union"
+    shaclUnion: "http://www.w3.org/ns/shacl#union",
+    dctermsIdentifier: "http://purl.org/dc/terms/identifier"
 };
 
 

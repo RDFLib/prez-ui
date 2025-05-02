@@ -169,17 +169,26 @@ export async function search(baseUrl: string, path: string): Promise<PrezDataSea
 }
 
 /**
- * Returns a list of Prez Profiles used for rendering
+ * Returns the full list of Prez Profiles used for the global profile list
  * 
  * @param baseUrl API base URL
  * @returns A list of Prez Profiles
  */
 export async function getProfiles(baseUrl: string): Promise<PrezProfiles> {
-    const path = '/profiles?page=1&limit=999&_mediatype=application/anot%2Bturtle';
-    const { data } = await getList(baseUrl, path);
+
+    const url = baseUrl + '/profiles?page=1&limit=999&_mediatype=application/anot%2Bturtle';
+    const { data } = await apiGet(url);
+    const store = new RDFStore();
+    store.setBaseUrl(baseUrl);
+    store.load(data);
+
+    const profilesList = store.getList();
     const profiles: PrezProfiles = {};
-    for(const profile of data) {
-        profiles[profile.value] = [];
+    
+    for(const profile of profilesList) {
+
+        // construct the node list in each profile
+        let profileNodeList: PrezNodeList[] = [];
         if(profile.properties && profile.properties?.[SYSTEM_PREDICATES.shaclProperty]?.objects) {
             const objects = profile.properties[SYSTEM_PREDICATES.shaclProperty]!.objects;
             for(const obj of objects) {
@@ -188,12 +197,27 @@ export async function getProfiles(baseUrl: string): Promise<PrezProfiles> {
                     for(const obj2 of bn.properties[SYSTEM_PREDICATES.shaclPath]!.objects) {
                         const list = (obj2 as PrezBlankNode).list;
                         if(list) {
-                            profiles[profile.value] = list;
+                            profileNodeList = list;
                         }
                     }    
                 }
             }
         }
+
+        // set the profiles object using token, profile-uri:token & profile:token to the profile node list
+        // this makes the profile node list easier to lookup using the token, profile-uri:token or profile:token
+        profile.properties?.[SYSTEM_PREDICATES.dctermsIdentifier]?.objects?.filter(
+            (obj)=>obj?.termType == "Literal" && 
+            obj?.datatype?.value == SYSTEM_PREDICATES.w3token
+        )?.map(obj=>obj.value).forEach(token=>{
+            profiles[token] = profileNodeList;
+            profiles[profile.value] = profileNodeList;
+            const curie = store.fromIri(profile.value);
+            if(curie != profile.value) {
+                profiles[curie] = profileNodeList;
+            }
+        });
+
     }
     return profiles;
 }
