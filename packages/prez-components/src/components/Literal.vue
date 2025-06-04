@@ -132,7 +132,7 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
             <slot v-if="props?.term?.value" name="text" :term="term" :text="term.value">
                 <span v-if="isMarkdown" v-html="renderedMarkdownContent"></span>
                 <span v-else-if="isHtml" :class="htmlClass" v-html="sanitizedHtml"></span>
-                <span v-else :class="class">{{ term.value }}</span>
+                <span v-else :class="props.class">{{ term.value }}</span>
             </slot>
         </template>
         <!-- Full output -->
@@ -141,18 +141,18 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
                 <slot name="text" :term="term" :text="term.value">
                     <span v-if="isMarkdown" v-html="renderedMarkdownContent"></span>
                     <span v-else-if="isHtml" :class="htmlClass" v-html="sanitizedHtml"></span>
-                    <span v-else :class="class">
+                    <span v-else :class="props.class">
                         <a v-if="term.value.startsWith('http')" :href="term.value" target="_blank" rel="noopener noreferrer" class="inline-flex gap-1 items-center">{{ term.value }} <Link class="size-4" /></a>
                         <template v-else>{{ term.value }}</template>
                     </span>
                 </slot>
                 <slot v-if="!hideLanguage && term.language !== undefined" name="language" :term="term" :language="term.language">
-                    <div class="pt-1">
+                    <div class="ml-2">
                         <Badge variant="secondary" class="rounded-md">{{ term.language }}</Badge>
                     </div>
                 </slot>
                 <slot v-if="!hideDataType && term.datatype !== undefined" name="datatype" :term="term" :datatype="term.datatype">
-                    <div class="pt-1">
+                    <div class="ml-2">
                         <Badge variant="outline" class="rounded-md">
                             <component :is="props._components.term" :term="term.datatype" />
                         </Badge>

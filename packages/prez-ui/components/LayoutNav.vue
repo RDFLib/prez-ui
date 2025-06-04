@@ -14,7 +14,7 @@ const showDebugPanel = defineModel<boolean>();
             <NuxtLink
                 v-for="{ label, url } in appConfig.menu.filter(item => item.active !== false)"
                 :to="url"
-                :class="`border-b-[3px] hover:border-primary transition-all ${(url === '/' && route.path === '/') || (url !== '/' && route.path.startsWith(url)) ? 'text-primary border-primary' : 'border-transparent'}`"
+                :class="`border-b-[3px] hover:border-b-primary transition-all ${(url === '/' && route.path === '/') || (url !== '/' && route.path.startsWith(url)) ? 'text-primary border-b-primary' : 'border-transparent'}`"
             >{{ label }}</NuxtLink>
 
             <!-- debug -->

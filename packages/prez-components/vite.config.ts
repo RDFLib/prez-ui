@@ -1,19 +1,13 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
 import { fileURLToPath, URL } from "node:url";
 import { resolve } from "path";
-import autoprefixer from 'autoprefixer'
-import tailwind from 'tailwindcss'
-import dts from 'vite-plugin-dts'
+import tailwindcss from "@tailwindcss/vite";
+import dts from "vite-plugin-dts";
 
 // https://vite.dev/config/
 export default defineConfig({
-    plugins: [vue(), dts()],
-    css: {
-        postcss: {
-            plugins: [tailwind(), autoprefixer()],
-        },
-    },
+    plugins: [vue(), dts(), tailwindcss()],
     build: {
         lib: {
             entry: resolve(__dirname, "src/index.ts"),

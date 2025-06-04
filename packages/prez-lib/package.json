@@ -4,6 +4,15 @@
     "description": "A JS library for processing RDF data for use with Prez UI",
     "type": "module",
     "license": "BSD-3-Clause",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rdflib/prez-ui.git",
+        "directory": "packages/prez-lib"
+    },
+    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/prez-lib#readme",
+    "bugs": {
+        "url": "https://github.com/rdflib/prez-ui/issues"
+    },
     "files": [
         "dist"
     ],
@@ -17,11 +26,6 @@
         }
     },
     "types": "./dist/index.d.ts",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/rdflib/prez-ui.git",
-        "directory": "packages/prez-lib"
-    },
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
@@ -38,9 +42,5 @@
     },
     "dependencies": {
         "n3": "^1.23.1"
-    },
-    "bugs": {
-        "url": "https://github.com/rdflib/prez-ui/issues"
-    },
-    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/prez-lib#readme"
+    }
 }

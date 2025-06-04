@@ -11,11 +11,11 @@
         "url": "git+https://github.com/rdflib/prez-ui.git",
         "directory": "packages/create-prez-app"
     },
-    "keywords": [
-        "template"
-    ],
+    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/create-prez-app#readme",
     "bugs": {
         "url": "https://github.com/rdflib/prez-ui/issues"
     },
-    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/create-prez-app#readme"
+    "keywords": [
+        "template"
+    ]
 }

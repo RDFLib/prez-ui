@@ -32,7 +32,7 @@ function getParent(resource: PrezFocusNode): PrezLinkParent | undefined {
     <Table v-if="props.results.length" class="search-results">
         <TableBody>
             <TableRow v-for="result in props.results.sort((a, b) => b.weight - a.weight)">
-                <TableCell class="flex flex-col gap-1">
+                <TableCell class="flex flex-col gap-1 whitespace-normal">
                     <div class="flex flex-row items-center gap-2">
                         <template v-for="parent in [getParent(result.resource)]">
                             <span v-if="parent" class="inline-flex flex-row items-center gap-1">
