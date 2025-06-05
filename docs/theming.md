@@ -31,48 +31,39 @@ npm run dev
 ## Tailwind & CSS
 Prez UI uses [Tailwind](https://tailwindcss.com) for most of its styling, which you can use in this starter template to easily style using classes.
 
-To override Prez UI's colour scheme (e.g. `primary`, `secondary`, etc.), or add your own variables to use in Tailwind, simply add a CSS variable of the same name in `assets/css/tailwind.css` under `:root` with its colour values in HSL **without** the `hsl()` function, e.g.:
+To override Prez UI's colour scheme (e.g. `primary`, `secondary`, etc.), or add your own variables to use in Tailwind, simply add a CSS variable of the same name in `assets/css/tailwind.css` under `:root` with its colour values in HSL **without** commas between values. Dark mode variants of those variables goes in the `.dark` block. New variables are registered in the `@theme inline` block in the same file. For colours, prefix the variable with `--color-*`, e.g.:
 
 ```CSS
 /* assets/css/tailwind.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-@layer base {
-    :root {
-        /* define your Tailwind CSS variables (in HSL values without the hsl(), no commas) here */
-        --primary: 24.6 95% 53.1%;
-        --primary-foreground: 60 9.1% 97.8%;
-    }
+...
+
+:root {
+    /* define your Tailwind CSS variables (in HSL without commas) here */
+
+    /* overridden variables */
+    --primary: hsl(24.6 95% 53.1%); 
+    --primary-foreground: hsl(60 9.1% 97.8%);
+
+    /* new variable */
+    --my-new-variable: hsl(70 10.8% 91.3%);
 }
-```
 
-Then register those variables in `tailwind.config.js` wrapped in the `hsl()` function under `theme.extend.colors`, e.g.:
+.dark {
+    /* dark mode variants of CSS variables go here */
+}
 
-```javascript
-// tailwind.config.js
-module.exports = {
+@theme inline {
     ...
-    theme: {
-        extend: {
-            colors: {
-                // add your CSS variables here, e.g.:
-                primary: {
-                    DEFAULT: "hsl(var(--primary))",
-                    foreground: "hsl(var(--primary-foreground))",
-                },
-            }
-        }
-    }
-    ...
+    /* any new tailwind variables you declare go here. Colours are prefixed with --color-* */
+    --color-my-new-variable: var(--my-new-variable);
 }
 ```
 
 You can also style your Prez UI theme using normal CSS by adding your styles to `assets/css/theme.css`.
 
 ### Tailwind Variables
-Prez UI's Tailwind variables inherit from [shadcn-vue's variables](https://www.shadcn-vue.com/docs/theming.html#list-of-variables). See Prez UI's default Tailwind variables [here](https://github.com/RDFLib/prez-ui/blob/main/packages/prez-components/src/assets/index.css).
+Prez UI's Tailwind variables inherit from [shadcn-vue's variables](https://www.shadcn-vue.com/docs/theming.html#list-of-variables) (link content out of date). See Prez UI's default Tailwind variables [here](https://github.com/RDFLib/prez-ui/blob/main/packages/prez-components/src/assets/index.css).
 
 ![Prez UI's default Tailwind variables](./tailwind-variables.png)
 
@@ -102,14 +93,14 @@ The most common case of theming Prez UI is adding a header, a footer, and modify
 Prez UI uses the [prez-components](https://github.com/rdflib/prez-ui/tree/main/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template (`badge`, `button`, `input` & `pagination` are included as the base layer requires them), but if you need to add more shadcn components in your theme, run a command like the following to add the component:
 
 ```bash
-npx shadcn-vue@0 add button
+npx shadcn-vue@latest add <component>
 ```
 *(Note: for pnpm, run `pnpm dlx` instead of `npx`)*
 
 These components are stored in `components/ui`, which should be kept separate to your theme's components.
 
 ## Other helpful tips
-Assets such as images should go in the `public/` directory. You can also replace the favicon in this directory by providing your own with the same name and file extension.
+Assets such as images should go in the `public/` directory. You can also replace the favicon in this directory by providing your own with the same name and file extension. If the favicon isn't the same extension, you can add it in the `app` config below as a link element.
 
 `nuxt.config.ts` contains some useful config for customising your Prez UI theme further. Here you can customise the document title, add external CSS (such as fonts), the base URL, and more. See [Nuxt Configuration](https://nuxt.com/docs/api/nuxt-config) for more details.
 
@@ -129,7 +120,7 @@ export default defineNuxtConfig({
 });
 ```
 
-`app.config.ts` is where you can configure smaller content-related options such as the nav content, naming on certains items, and breadcrumbs. For overriding array variables such as `menu`, use the arrow function syntax instead of re-setting the variable:
+`app.config.ts` is where you can configure smaller content-related options such as the nav content, naming on certains items, and breadcrumbs. For overriding array variables such as `menu`, use the arrow function syntax `() => []` instead of re-setting the variable. Note you may get a false TypeScript error when doing this.
 
 ```typescript
 // app.config.ts example

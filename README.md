@@ -1,6 +1,8 @@
 # Prez UI
 Prez UI is the front end of [Prez](https://github.com/RDFLib/prez) - a linked data API - and is a suite of packages to interact with and render RDF in JavaScript.
 
+![Screenshot of a catalogue in Prez UI](/docs/catalog_example.png)
+
 ## Contents
 - [Running Prez UI](#running-prez-ui)
 - [Packages](#packages)
@@ -17,7 +19,10 @@ _(Note: for pnpm, run `pnpm dlx` instead of `npx`)_
 See the included README in the starter template from the above command, or the [theming documentation](./docs/theming.md) for more information on how to get started.
 
 > [!IMPORTANT]  
-> For v4.0.0, a few small changes need to be made to the starter template to be able to run your theme
+> If you're upgrading your Prez UI theme from < v4.2.0, you will need to [follow the upgrade guide](./docs/upgrade.md) to upgrade to Tailwind v4, which is a breaking change.
+
+> [!NOTE]  
+> For v4.0.0 only, a few small changes need to be made to the starter template to be able to run your theme
 > - the `prez-ui` dependency version should be set to `^4.0.0` ***before*** installing
 > - if you're enabling the SPARQL page, copy the `sparql.vue` page from the prez-ui source code into your template and install [`@triply/yasgui`](https://www.npmjs.com/package/@triply/yasgui)
 
