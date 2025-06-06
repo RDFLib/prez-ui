@@ -69,13 +69,14 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                         <slot name="header-description" :data="data"></slot>
                         <slot name="header-middle" :data="data"></slot>
                         <slot name="header-identifiers" :data="data">
-                            <div class="mb-2 mt-2 flex flex-row items-center">
-                                <Badge variant="secondary" class="mr-2 rounded-md">IRI</Badge><ItemLink :secondary-to="data.data.value" copy-link>{{ data.data.value }}</ItemLink>
+                            <div class="mb-2 mt-2 flex flex-row items-center bg-muted gap-3 p-2 rounded-md w-fit">
+                                IRI:
+                                <span class="font-mono"><ItemLink :secondary-to="data.data.value" copy-link >{{ data.data.value }}</ItemLink></span>
                             </div>
-                            <div class="flex flex-row gap-3" v-if="data?.data.rdfTypes">
-                                <Badge variant="secondary" class="self-start rounded-md">Type</Badge>
-                                <div>
-                                    <div v-for="rdfType in data.data.rdfTypes"><Node :term="rdfType" /></div>
+                            <div class="flex flex-row gap-3 text-sm ml-1" v-if="data?.data.rdfTypes">
+                                Type:
+                                <div class="flex flex-row gap-2">
+                                    <Badge v-for="rdfType in data.data.rdfTypes" variant="outline" class="rounded-md"><Node :term="rdfType" /></Badge>
                                 </div>
                             </div>
                         </slot>

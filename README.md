@@ -1,6 +1,8 @@
 # Prez UI
 Prez UI is the front end of [Prez](https://github.com/RDFLib/prez) - a linked data API - and is a suite of packages to interact with and render RDF in JavaScript.
 
+![Screenshot of a catalogue in Prez UI](/docs/catalog_example.png)
+
 ## Contents
 - [Running Prez UI](#running-prez-ui)
 - [Packages](#packages)
@@ -17,7 +19,10 @@ _(Note: for pnpm, run `pnpm dlx` instead of `npx`)_
 See the included README in the starter template from the above command, or the [theming documentation](./docs/theming.md) for more information on how to get started.
 
 > [!IMPORTANT]  
-> For v4.0.0, a few small changes need to be made to the starter template to be able to run your theme
+> If you're upgrading your Prez UI theme from < v4.2.0, you will need to [follow the upgrade guide](./docs/upgrade.md) to upgrade to Tailwind v4, which is a breaking change.
+
+> [!NOTE]  
+> For v4.0.0 only, a few small changes need to be made to the starter template to be able to run your theme
 > - the `prez-ui` dependency version should be set to `^4.0.0` ***before*** installing
 > - if you're enabling the SPARQL page, copy the `sparql.vue` page from the prez-ui source code into your template and install [`@triply/yasgui`](https://www.npmjs.com/package/@triply/yasgui)
 
@@ -41,6 +46,58 @@ flowchart LR
     D -->|No| E(prez-components)
     D -->|Yes| F(create-prez-app)
 ```
+
+## Development
+For running this workspace locally for development on the core codebase, [PNPM](https://pnpm.io) is required to be installed. First, install the workspace at the project root:
+
+```bash
+pnpm install
+```
+
+To run the Prez UI Nuxt application, you need to build `prez-lib`, then `prez-components` as they are dependencies. In `packages/prez-lib/`, run:
+
+```
+pnpm build
+```
+
+Then in `packages/prez-components/`, run:
+
+```
+pnpm build
+```
+
+Now that the package dependencies have been built, you can run Prez UI. In `packages/prez-ui`, run:
+
+```bash
+pnpm dev
+```
+
+See the READMEs for each package for more detailed developer documentation.
+
+### Taskfile
+A Taskfile has been provided for convenience for developers to easily get started running this workspace as an alternative to the above commands.
+
+For running Prez UI:
+
+```bash
+task run
+```
+
+This will run the install & build commands mentioned above before running the Nuxt application.
+
+For running `prez-lib` & `prez-components` separately, run:
+
+```bash
+task run:lib
+```
+
+or 
+
+```bash
+task run:components
+```
+
+See the [Taskfile](/Taskfile.yaml) for available commands.
 
 ## License
 This version of Prez UI and the contents of this repository are also available under the [BSD-3-Clause License](https://opensource.org/license/BSD-3-Clause). See this repository's [LICENSE](./LICENSE) file for details.

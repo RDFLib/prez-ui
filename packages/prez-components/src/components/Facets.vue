@@ -116,14 +116,14 @@ const computedProfile = computed(() => {
 }
 .max-h-60::-webkit-scrollbar-track {
     /* Specify .DEFAULT for the muted color */
-    background: theme('colors.muted.DEFAULT'); /* Use muted background color */
+    background: var(--color-muted); /* Use muted background color */
     border-radius: 3px;
 }
 .max-h-60::-webkit-scrollbar-thumb {
-    background: theme('colors.border'); /* Use border color */
+    background: var(--color-border); /* Use border color */
     border-radius: 3px;
 }
 .max-h-60::-webkit-scrollbar-thumb:hover {
-    background: theme('colors.input'); /* Use input background color on hover */
+    background: var(--color-input); /* Use input background color on hover */
 }
 </style>
