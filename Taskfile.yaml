@@ -19,7 +19,7 @@ tasks:
     cmd: pnpm dev
   
   build:components:
-    dir: packages/prez-lib
+    dir: packages/prez-components
     cmd: pnpm build
   
   run:ui:
