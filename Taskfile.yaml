@@ -1,0 +1,42 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  install:
+    cmd: pnpm install
+  
+  run:lib:
+    dir: packages/prez-lib
+    cmd: pnpm dev
+  
+  build:lib:
+    dir: packages/prez-lib
+    cmd: pnpm build
+  
+  run:components:
+    dir: packages/prez-components
+    cmd: pnpm dev
+  
+  build:components:
+    dir: packages/prez-lib
+    cmd: pnpm build
+  
+  run:ui:
+    dir: packages/prez-ui
+    cmd: pnpm dev
+  
+  generate:
+    dir: packages/prez-ui
+    cmd: pnpm generate
+  
+  run:generate:
+    dir: packages/prez-ui
+    cmd: npx serve .output/public
+  
+  run:
+    cmds:
+      - task: install
+      - task: build:lib
+      - task: build:components
+      - task: run:ui
