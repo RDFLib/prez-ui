@@ -44,7 +44,6 @@ const inSearchMode = computed(() => (route.query?.q || '').length > 0);
                     <div v-if="status == 'success' && data?.count == 0 && inSearchMode" class="w-full pl-4 text-sm text-muted-foreground">
                         No results found
                     </div>
-
                 </div>
 
                 <div class="flex justify-center mt-4 mb-12">
@@ -57,7 +56,12 @@ const inSearchMode = computed(() => (route.query?.q || '').length > 0);
                                     :profile="globalProfiles[currentFacetProfile]" 
                                 />
                                 <SearchResults :results="data.data" />
-                                <PrezPagination v-if="status == 'success' && data?.count > 0 && inSearchMode" :totalItems="data.count" :pagination="pagination" :maxReached="data.maxReached" />
+                                <PrezPagination
+                                    v-if="status == 'success' && data?.count > 0 && inSearchMode"
+                                    :totalItems="pagination.page > 1 && data.count <= pagination.limit ? data.count + pagination.limit * (pagination.page - 1) : data.count"
+                                    :pagination="pagination"
+                                    :maxReached="data.maxReached"
+                                />
                             </div>
                         </div>
                     </div>

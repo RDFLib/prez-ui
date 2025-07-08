@@ -418,7 +418,7 @@ export class RDFStore {
         const count = this.store.getObjects(null, PREZ_PREDICATES.count, null);
         if (count.length > 0) {
             /** follow up, expected in value without the quotes */
-            return count[0]!.value.includes(">");
+            return !count[0]!.value.includes(">");
         } else {
             return false;
         }
