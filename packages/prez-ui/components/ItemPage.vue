@@ -97,23 +97,11 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                             <slot name="item-middle" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
 
                             <slot name="item-members" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
-                                <p class="mt-6" v-if="data.data.members">
+                                <p class="mt-6" v-if="currentProfile?.uri !== 'https://prez.dev/OGCSchemesObjectProfile' && data.data.members">
                                     <Button as-child>
                                         <ItemLink :to="data!.data.members!.value">Members</ItemLink>
                                     </Button>
                                 </p>
-                            </slot>
-
-                            <slot name="item-concepts" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
-                                <div class="mt-6" v-if="isConceptScheme && topConceptsUrl != ''">
-                                    <p><b>Concepts</b></p>
-                                    <div class="mt-4">
-                                        <ConceptHierarchy
-                                            :base-url="apiEndpoint" 
-                                            :url-path="topConceptsUrl"
-                                        />
-                                    </div>
-                                </div>
                             </slot>
 
                             <slot name="item-collections" :data="data" :is-concept-scheme="isConceptScheme">
@@ -121,6 +109,18 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                                     <p><b>Collections</b></p>
                                     <div class="mt-4 flex flex-col gap-2">
                                         <Node v-for="collection in (data.data as PrezConceptSchemeNode).collections" :term="collection" />
+                                    </div>
+                                </div>
+                            </slot>
+
+                            <slot name="item-concepts" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
+                                <div class="mt-6" v-if="isConceptScheme && topConceptsUrl != ''">
+                                    <p><b>Concept Hierarchy</b></p>
+                                    <div class="mt-4">
+                                        <ConceptHierarchy
+                                            :base-url="apiEndpoint" 
+                                            :url-path="topConceptsUrl"
+                                        />
                                     </div>
                                 </div>
                             </slot>
