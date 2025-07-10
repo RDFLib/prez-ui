@@ -96,7 +96,8 @@ export interface PrezConceptSchemeNode extends PrezFocusNode {
     /**
      * the top level concepts found under this concept scheme
      */
-    topConcepts: PrezConceptNode;
+    // topConcepts: PrezConceptNode;
+    collections: PrezNode[];
 }
 
 /**

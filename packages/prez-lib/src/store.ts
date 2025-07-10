@@ -440,6 +440,24 @@ export class RDFStore {
         return items;
     }
 
+    public getSkosCollections(vocab: Quad_Object): PrezNode[] {
+        const inScheme = this.getSubjects("http://www.w3.org/2004/02/skos/core#inScheme", vocab.value);
+        const colls = this.getSubjects("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www.w3.org/2004/02/skos/core#Collection").filter(coll => inScheme.find(i => i.value === coll.value));
+        const collections = colls.map(c => this.toPrezTerm(c) as PrezNode).sort((a, b) => {
+            if (a.label && b.label) {
+                return a.label.value.localeCompare(b.label.value);
+            } else if (a.label) {
+                return -1;
+            } else if (b.label) {
+                return 1;
+            } else {
+                return a.value.localeCompare(b.value);
+            }
+        });
+
+        return collections;
+    }
+
     /**
      * Returns an item object
      * 
@@ -452,15 +470,22 @@ export class RDFStore {
         const item = this.toPrezFocusNode(obj[0]!);
 
         // if conceptscheme
-        if (item.rdfTypes?.map(t => t.value).includes(SYSTEM_PREDICATES.skosConcept)) {
-            const concepts = this.getConcepts(obj[0]!);
+        if (item.rdfTypes?.map(t => t.value).includes(SYSTEM_PREDICATES.skosConceptScheme)) {
+            const collections = this.getSkosCollections(obj[0]!);
             return {
                 ...item,
-                topConcepts: {
-                    narrowers: concepts,
-                    hasChildren: concepts.length > 0
-                }
+                collections,
             } as PrezConceptSchemeNode;
+
+            // const concepts = this.getConcepts(obj[0]!);
+            // console.log(concepts)
+            // return {
+            //     ...item,
+            //     topConcepts: {
+            //         narrowers: concepts,
+            //         hasChildren: concepts.length > 0
+            //     }
+            // } as PrezConceptSchemeNode;
         }
         
         return item;
