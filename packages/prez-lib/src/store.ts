@@ -19,6 +19,7 @@ export class RDFStore {
     private baseUrl: string;
     private linkedLists: Record<string, RDF.Term[]>;
     private lists: Record<string, PrezNodeList[]>;
+    private processingTerms: Set<string>;
 
     constructor() {
         this.store = new Store();
@@ -28,6 +29,7 @@ export class RDFStore {
         this.prefixes = DEFAULT_PREFIXES;
         this.linkedLists = {};
         this.lists = {};
+        this.processingTerms = new Set();
     }
 
     /**
@@ -36,6 +38,9 @@ export class RDFStore {
      * @param s RDF Turtle string
      */
     public load(s: string) {
+        // Clear any previous processing state
+        this.processingTerms.clear();
+        
         s = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + s; // temp fix for missing rdf: prefix from API
         const p = this.parser.parse(s, null, (prefixName, prefixNode) => {
             // callback for each prefix parsed --> no longer using default prefixes
@@ -211,63 +216,88 @@ export class RDFStore {
     }
 
     private toPrezTerm(term: Term): PrezTerm {
-        switch (term.termType) {
-            case "NamedNode":
-                const n = node(term.value);
+        const termKey = `${term.termType}:${term.value}`;
+        
+        // Check for circular reference
+        if (this.processingTerms.has(termKey)) {
+            // Return a minimal object to break the cycle
+            switch (term.termType) {
+                case "NamedNode":
+                    return node(term.value);
+                case "Literal":
+                    return literal(term.value);
+                case "BlankNode":
+                    return bnode(term.value);
+                default:
+                    throw new Error("Invalid n3 Term object");
+            }
+        }
 
-                n.label = this.getObjectLiteral(term.value, PREZ_PREDICATES.label);
-                n.description = this.getObjectLiteral(term.value, PREZ_PREDICATES.description);
-                n.provenance = this.getObjectLiteral(term.value, PREZ_PREDICATES.provenance);
+        // Mark as being processed
+        this.processingTerms.add(termKey);
 
-                const identifiers = this.getObjects(term.value, PREZ_PREDICATES.identifier);
-                if(identifiers.length > 0) {
-                    n.identifiers = identifiers.map(t => this.toPrezTerm(t));
-                }
+        try {
+            switch (term.termType) {
+                case "NamedNode":
+                    const n = node(term.value);
 
-                const links = this.getObjects(term.value, PREZ_PREDICATES.link);
-                if (links.length > 0) {
-                    n.links = links.map(l => {
-                        return { value: l.value, parents: this.getParents(l.value) }
-                    });
-                }
+                    n.label = this.getObjectLiteral(term.value, PREZ_PREDICATES.label);
+                    n.description = this.getObjectLiteral(term.value, PREZ_PREDICATES.description);
+                    n.provenance = this.getObjectLiteral(term.value, PREZ_PREDICATES.provenance);
 
-                const members = this.getObjects(term.value, PREZ_PREDICATES.members);
-                if (members.length > 0) {
-                    n.members = { value: members[0]!.value, parents: this.getParents(members[0]!.value) };
-                }
+                    const identifiers = this.getObjects(term.value, PREZ_PREDICATES.identifier);
+                    if(identifiers.length > 0) {
+                        n.identifiers = identifiers.map(t => this.toPrezTerm(t));
+                    }
 
-                // types
-                const types = this.getObjects(term.value, SYSTEM_PREDICATES.a);
-                if (types.length > 0) {
-                    n.rdfTypes = types.map(t => this.toPrezTerm(t) as PrezNode)
-                }
+                    const links = this.getObjects(term.value, PREZ_PREDICATES.link);
+                    if (links.length > 0) {
+                        n.links = links.map(l => {
+                            return { value: l.value, parents: this.getParents(l.value) }
+                        });
+                    }
 
-                return n;
-            case "Literal":
-                const l = literal(term.value);
+                    const members = this.getObjects(term.value, PREZ_PREDICATES.members);
+                    if (members.length > 0) {
+                        n.members = { value: members[0]!.value, parents: this.getParents(members[0]!.value) };
+                    }
 
-                if (term.datatype) {
-                    l.datatype = this.toPrezTerm(term.datatype) as PrezNode;
-                }
+                    // types
+                    const types = this.getObjects(term.value, SYSTEM_PREDICATES.a);
+                    if (types.length > 0) {
+                        n.rdfTypes = types.map(t => this.toPrezTerm(t) as PrezNode)
+                    }
 
-                if (term.language) {
-                    l.language = term.language;
-                }
+                    return n;
+                case "Literal":
+                    const l = literal(term.value);
 
-                return l;
-            case "BlankNode":
-                const b = bnode(term.value);
+                    if (term.datatype) {
+                        l.datatype = this.toPrezTerm(term.datatype) as PrezNode;
+                    }
 
-                b.properties = this.getProperties(term);
+                    if (term.language) {
+                        l.language = term.language;
+                    }
 
-                // see if this blank node is a list
-                if(term.value in this.lists) {
-                    b.list = this.lists[term.value];
-                }
+                    return l;
+                case "BlankNode":
+                    const b = bnode(term.value);
 
-                return b;
-            default:
-                throw ("Invalid n3 Term object")
+                    b.properties = this.getProperties(term);
+
+                    // see if this blank node is a list
+                    if(term.value in this.lists) {
+                        b.list = this.lists[term.value];
+                    }
+
+                    return b;
+                default:
+                    throw new Error("Invalid n3 Term object");
+            }
+        } finally {
+            // Always remove from processing set when done
+            this.processingTerms.delete(termKey);
         }
     }
 
