@@ -7,7 +7,13 @@ import type { RDFStore } from "./store";
  * @see PrezNode
  * @see PrezBlankNode
  */
-export type PrezTerm = PrezLiteral | PrezNode | PrezBlankNode | PrezFocusNode;
+export type PrezTerm = (PrezLiteral | PrezNode | PrezBlankNode | PrezFocusNode) & {
+    /**
+     * Internal property for cycle detection during term processing
+     * Points to the parent term being processed in the call chain
+     */
+    _cycleParent?: PrezTerm;
+};
 
 /**
  * Represents an RDF Literal
