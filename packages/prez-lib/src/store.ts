@@ -222,7 +222,6 @@ export class RDFStore {
             case "NamedNode":
                 const n = node(term.value);
 
-                // Set parent reference for cycle detection
                 (n as PrezTerm)._cycleParent = parent;
                 
                 n.label = this.getObjectLiteral(term.value, PREZ_PREDICATES.label, n);
@@ -256,7 +255,6 @@ export class RDFStore {
             case "Literal":
                 const l = literal(term.value);
                 
-                // Set parent reference for cycle detection
                 (l as PrezTerm)._cycleParent = parent;
 
                 if (term.datatype) {
@@ -271,7 +269,6 @@ export class RDFStore {
             case "BlankNode":
                 const b = bnode(term.value);
                 
-                // Set parent reference for cycle detection
                 (b as PrezTerm)._cycleParent = parent;
 
                 b.properties = this.getProperties(term, undefined, b);
@@ -293,11 +290,9 @@ export class RDFStore {
     private isAncestor(term: Term, parent: PrezTerm): boolean {
         let current: PrezTerm | undefined = parent;
         while (current) {
-            // Use the equals method from the existing PrezTerm
             if (current.equals(term as PrezTerm)) {
                 return true;
             }
-            // Navigate up the parent chain
             current = current._cycleParent;
         }
         return false;
@@ -318,7 +313,6 @@ export class RDFStore {
                 throw ("Invalid n3 Term object");
         }
     }
-
 
 
     /**
