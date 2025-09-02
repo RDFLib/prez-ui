@@ -9,6 +9,7 @@ import type { RDFStore } from "./store";
  */
 export type PrezTerm = (PrezLiteral | PrezNode | PrezBlankNode | PrezFocusNode) & {
     /**
+     * Address infinite recursion during term processing
      * Internal property for cycle detection during term processing
      * Points to the parent term being processed in the call chain
      */
