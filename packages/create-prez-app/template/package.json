@@ -31,7 +31,8 @@
         "nuxt": "3.17.7",
         "prez-ui": "^4.1.3",
         "shadcn-nuxt": "^2.2.0",
-        "typescript": "^5.8.2"
+        "typescript": "^5.8.2",
+        "vue-tsc": "2.2.10"
     },
     "overrides": {
         "@triply/yasgui": {

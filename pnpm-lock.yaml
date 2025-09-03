@@ -68,6 +68,9 @@ importers:
       typescript:
         specifier: ^5.8.2
         version: 5.8.3
+      vue-tsc:
+        specifier: 2.2.10
+        version: 2.2.10(typescript@5.8.3)
 
   packages/prez-components:
     dependencies:
