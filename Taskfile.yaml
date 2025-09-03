@@ -22,6 +22,11 @@ tasks:
     dir: packages/prez-components
     cmd: pnpm build
   
+  build:
+    cmds:
+      - task: build:lib
+      - task: build:components
+  
   run:ui:
     dir: packages/prez-ui
     cmd: pnpm dev
@@ -37,6 +42,5 @@ tasks:
   run:
     cmds:
       - task: install
-      - task: build:lib
-      - task: build:components
+      - task: build
       - task: run:ui

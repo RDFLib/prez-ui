@@ -23,7 +23,7 @@ const props = defineProps<{
 <template>
     <div class="flex flex-col gap-2 mt-4 pagination">
         <Pagination v-if="props.totalItems > props.pagination.limit" v-slot="{ page }" :total="props.totalItems" :itemsPerPage="props.pagination.limit" :sibling-count="1" show-edges :page="props.pagination.page" class="paginator">
-            <PaginationList v-slot="{ items }" class="flex items-center gap-1 justify-center">
+            <PaginationContent v-slot="{ items }" class="flex items-center gap-1 justify-center">
                 <PaginationFirst as-child>
                     <Button class="w-10 h-10 p-0" variant="outline" as-child>
                         <NuxtLink :to="{...route, query: { ...route.query, page: '1' }}">
@@ -31,13 +31,13 @@ const props = defineProps<{
                         </NuxtLink>
                     </Button>
                 </PaginationFirst>
-                <PaginationPrev as-child>
+                <PaginationPrevious as-child>
                     <Button class="w-10 h-10 p-0" variant="outline" as-child>
                         <NuxtLink :to="{...route, query: { ...route.query, page: (props.pagination.page - 1).toString() }}">
                             <ChevronLeft class="size-4" />
                         </NuxtLink>
                     </Button>
-                </PaginationPrev>
+                </PaginationPrevious>
 
                 <template v-for="(item, index) in items">
                     <PaginationItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>

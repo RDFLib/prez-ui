@@ -42,7 +42,7 @@
         "vue-router": "^4.5.1"
     },
     "devDependencies": {
-        "nuxt": "^3.17.4",
+        "nuxt": "3.17.7",
         "shadcn-nuxt": "^2.2.0",
         "typescript": "^5.8.3"
     }
