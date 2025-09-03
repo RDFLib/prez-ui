@@ -147,12 +147,12 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
                     </span>
                 </slot>
                 <slot v-if="!hideLanguage && term.language !== undefined" name="language" :term="term" :language="term.language">
-                    <div class="ml-2">
+                    <div class="pt-1">
                         <Badge variant="secondary" class="rounded-md">{{ term.language }}</Badge>
                     </div>
                 </slot>
                 <slot v-if="!hideDataType && term.datatype !== undefined" name="datatype" :term="term" :datatype="term.datatype">
-                    <div class="ml-2">
+                    <div class="pt-1">
                         <Badge variant="outline" class="rounded-md">
                             <component :is="props._components.term" :term="term.datatype" />
                         </Badge>

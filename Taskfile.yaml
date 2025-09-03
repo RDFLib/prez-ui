@@ -44,3 +44,26 @@ tasks:
       - task: install
       - task: build
       - task: run:ui
+  
+  type:lib:
+    dir: packages/prez-lib
+    cmd: pnpm types
+  
+  type:components:
+    dir: packages/prez-components
+    cmd: pnpm types
+  
+  type:ui:
+    dir: packages/prez-ui
+    cmd: pnpm types
+  
+  type:template:
+    dir: packages/create-prez-app/template
+    cmd: pnpm types
+  
+  type:
+    cmds:
+      - task: type:lib
+      - task: type:components
+      - task: type:ui
+      - task: type:template
