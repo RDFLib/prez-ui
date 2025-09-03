@@ -22,17 +22,8 @@ const props = defineProps<{
 
 <template>
     <div class="flex flex-col gap-2 mt-4 pagination">
-        <Pagination
-            v-if="props.totalItems > props.pagination.limit || !props.maxReached"
-            v-slot="{ page }"
-            :total="props.totalItems"
-            :itemsPerPage="props.pagination.limit"
-            :sibling-count="1"
-            show-edges
-            :page="props.pagination.page"
-            class="paginator"
-        >
-            <PaginationContent v-slot="{ items }" class="flex items-center gap-1 justify-center">
+        <Pagination v-if="props.totalItems > props.pagination.limit" v-slot="{ page }" :total="props.totalItems" :itemsPerPage="props.pagination.limit" :sibling-count="1" show-edges :page="props.pagination.page" class="paginator">
+            <PaginationList v-slot="{ items }" class="flex items-center gap-1 justify-center">
                 <PaginationFirst as-child>
                     <Button class="w-10 h-10 p-0" variant="outline" as-child>
                         <NuxtLink :to="{...route, query: { ...route.query, page: '1' }}">

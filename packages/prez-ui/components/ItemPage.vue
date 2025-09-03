@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezDataItem, type PrezNode } from 'prez-lib';
+import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezDataItem, type PrezNode } from 'prez-lib';
 
 const appConfig = useAppConfig();
 const { globalProfiles } = useGlobalProfiles();
@@ -98,16 +98,25 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                             <slot name="item-middle" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
 
                             <slot name="item-members" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
-                                <p class="mt-6" v-if="data.data.members">
+                                <p class="mt-6" v-if="currentProfile?.uri !== 'https://prez.dev/OGCSchemesObjectProfile' && data.data.members">
                                     <Button as-child>
                                         <ItemLink :to="data!.data.members!.value">Members</ItemLink>
                                     </Button>
                                 </p>
                             </slot>
 
+                            <slot name="item-collections" :data="data" :is-concept-scheme="isConceptScheme">
+                                <div class="mt-6" v-if="isConceptScheme && (data.data as PrezConceptSchemeNode).collections.length > 0">
+                                    <p><b>Collections</b></p>
+                                    <div class="mt-4 flex flex-col gap-2">
+                                        <Node v-for="collection in (data.data as PrezConceptSchemeNode).collections" :term="collection" />
+                                    </div>
+                                </div>
+                            </slot>
+
                             <slot name="item-concepts" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
                                 <div class="mt-6" v-if="isConceptScheme && topConceptsUrl != ''">
-                                    <p><b>Concepts</b></p>
+                                    <p><b>Concept Hierarchy</b></p>
                                     <div class="mt-4">
                                         <ConceptHierarchy
                                             :base-url="apiEndpoint" 
