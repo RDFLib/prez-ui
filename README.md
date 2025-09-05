@@ -48,56 +48,7 @@ flowchart LR
 ```
 
 ## Development
-For running this workspace locally for development on the core codebase, [PNPM](https://pnpm.io) is required to be installed. First, install the workspace at the project root:
-
-```bash
-pnpm install
-```
-
-To run the Prez UI Nuxt application, you need to build `prez-lib`, then `prez-components` as they are dependencies. In `packages/prez-lib/`, run:
-
-```
-pnpm build
-```
-
-Then in `packages/prez-components/`, run:
-
-```
-pnpm build
-```
-
-Now that the package dependencies have been built, you can run Prez UI. In `packages/prez-ui`, run:
-
-```bash
-pnpm dev
-```
-
-See the READMEs for each package for more detailed developer documentation.
-
-### Taskfile
-A Taskfile has been provided for convenience for developers to easily get started running this workspace as an alternative to the above commands.
-
-For running Prez UI:
-
-```bash
-task run
-```
-
-This will run the install & build commands mentioned above before running the Nuxt application.
-
-For running `prez-lib` & `prez-components` separately, run:
-
-```bash
-task run:lib
-```
-
-or 
-
-```bash
-task run:components
-```
-
-See the [Taskfile](/Taskfile.yaml) for available commands.
+For developer documentation, see the [developer docs](/docs/development.md).
 
 ## License
 This version of Prez UI and the contents of this repository are also available under the [BSD-3-Clause License](https://opensource.org/license/BSD-3-Clause). See this repository's [LICENSE](./LICENSE) file for details.
