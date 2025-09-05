@@ -1,0 +1,81 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  install:
+    cmd: pnpm install
+  
+  run:lib:
+    dir: packages/prez-lib
+    cmd: pnpm dev
+  
+  build:lib:
+    dir: packages/prez-lib
+    cmd: pnpm build
+  
+  run:components:
+    dir: packages/prez-components
+    cmd: pnpm dev
+  
+  build:components:
+    dir: packages/prez-components
+    cmd: pnpm build
+  
+  build:
+    cmds:
+      - task: build:lib
+      - task: build:components
+  
+  run:ui:
+    dir: packages/prez-ui
+    cmd: pnpm dev
+  
+  generate:
+    dir: packages/prez-ui
+    cmd: pnpm generate
+  
+  run:generate:
+    dir: packages/prez-ui
+    cmd: npx serve .output/public
+  
+  run:
+    cmds:
+      - task: install
+      - task: build
+      - task: run:ui
+  
+  type:lib:
+    dir: packages/prez-lib
+    cmd: pnpm types
+  
+  type:components:
+    dir: packages/prez-components
+    cmd: pnpm types
+  
+  type:ui:
+    dir: packages/prez-ui
+    cmd: pnpm types
+  
+  type:template:
+    dir: packages/create-prez-app/template
+    cmd: pnpm types
+  
+  type:
+    cmds:
+      - task: type:lib
+      - task: type:components
+      - task: type:ui
+      - task: type:template
+
+  playground:
+    dir: .playground
+    cmds:
+      - |
+        cp -r ../packages/create-prez-app/template/* .
+        mv vscode .vscode
+        mv gitignore .gitignore
+        mv env.example .env.example
+        sed "-i" "" "-e" 's/devtools: { enabled: true }/devtools: { enabled: false }/g' nuxt.config.ts
+        touch pnpm-workspace.yaml
+        pnpm -w add ../packages/prez-lib ../packages/prez-components ../packages/prez-ui

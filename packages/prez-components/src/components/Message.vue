@@ -8,7 +8,7 @@ const props = defineProps<MessageProps>();
 
 <template>
     <!-- Message -->
-    <Alert :variant="props.severity === 'error' ? 'destructive' : 'default'" class="message">
+    <Alert :variant="props.severity === 'error' ? 'destructive' : 'default'" :class="`message ${props.severity === 'error' ? 'border-destructive' : ''}`">
         <CircleX v-if="props.severity === 'error'" class="w-4 h-4" />
         <Info v-else class="w-4 h-4" />
         <AlertTitle>{{ props.severity === "error" ? "Error" : "Message" }}</AlertTitle>
