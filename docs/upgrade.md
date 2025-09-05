@@ -1,6 +1,12 @@
 # Upgrade guide from < v4.2.0
 This guide is for users with an existing Prez UI theme upgrading from v4.1.2 and below to v4.2.0 and above. This is required as Prez UI now uses Tailwind v4 and shadcn-vue v2, which is incompatible with the previous version.
 
+Running the script below will automate the upgrade process ***except*** converting Tailwind CSS variables, which you will have to do manually as per step [8](#8-update-tailwindcss) below.
+```bash
+curl -s https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/upgrade.sh | sh
+```
+Otherwise, follow the steps below.
+
 > [!NOTE]
 > If you use [pnpm](https://pnpm.io) (which we recommend), replace the npm commands below with the appropriate pnpm equivalents.
 
@@ -141,7 +147,7 @@ Then add any overridden or custom Tailwind CSS variables from your backup Tailwi
 }
 ```
 
-## 8. Install prez-ui
+## 9. Install prez-ui
 Lastly, install the latest version of Prez UI:
 
 ```bash

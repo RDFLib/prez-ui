@@ -1,0 +1,103 @@
+USE_PNPM=$([ -f pnpm-lock.yaml ]; echo $?)
+
+# 1. Uninstall old packages
+REMOVE_PACKAGES="@nuxtjs/tailwindcss radix-vue shadcn-nuxt prez-ui tailwind-merge"
+if [ $USE_PNPM ]; then
+    pnpm remove $REMOVE_PACKAGES
+else
+    npm uninstall $REMOVE_PACKAGES
+fi
+
+sed "-i" "" "-e" 's/\"@nuxtjs\/tailwindcss\"[,]\{0,1\}//g' nuxt.config.ts
+sed "-i" "" "-e" 's/\"shadcn-nuxt\"[,]\{0,1\}//g' nuxt.config.ts
+
+# 2. Remove required files & folders
+rm components.json
+rm tailwind.config.js
+rm -r components/ui
+
+# 3. Backup Tailwind variables
+mv assets/css/tailwind.css assets/css/tailwind.txt
+touch assets/css/tailwind.css
+
+# 4. Reinstall packages
+rm -r .nuxt
+rm -r .output
+rm -r node_modules
+
+if [ $USE_PNPM ]; then
+    pnpm install
+else
+    npm install
+fi
+
+# 5. Install Tailwind 4
+TAILWIND_PACKAGES="tailwindcss @tailwindcss/vite"
+if [ $USE_PNPM ]; then
+    pnpm add $TAILWIND_PACKAGES
+else
+    npm install $TAILWIND_PACKAGES
+fi
+
+echo '@import "tailwindcss";' > assets/css/tailwind.css
+
+sed "-i" "" "-e" '1s/^/import tailwindcss from "@tailwindcss\/vite";\n\n/' nuxt.config.ts
+sed "-i" "" '/vite: {/ a\
+        plugins: \[tailwindcss\(\)\],
+' nuxt.config.ts
+
+# 6. Install & initialise shadcn-vue
+SHAD_ADD="nuxi@latest module add shadcn-nuxt"
+if [ $USE_PNPM ]; then
+    pnpm dlx $SHAD_ADD
+else
+    npx $SHAD_ADD
+fi
+
+sed "-i" "" '/});$/ i\
+    shadcn: \{\
+        prefix: \"\",\
+        componentDir: \"\.\/components\/ui\"\
+    \},\
+' nuxt.config.ts
+
+PREPARE="nuxi prepare"
+if [ $USE_PNPM ]; then
+    pnpm dlx $PREPARE
+else
+    npx $PREPARE
+fi
+
+SHAD_INIT="shadcn-vue@latest init -d"
+if [ $USE_PNPM ]; then
+    pnpm dlx $SHAD_INIT
+else
+    npx $SHAD_INIT
+fi
+
+sed "-i" "" "-e" 's/zinc/slate/g' components.json
+
+git clone -n --depth=1 --filter=tree:0 -b feature/tailwind4 --single-branch https://github.com/rdflib/prez-ui
+cd prez-ui
+git sparse-checkout set --no-cone /packages/create-prez-app/template/components/ui
+git checkout
+cd ..
+mv prez-ui/packages/create-prez-app/template/components/ui components
+rm -rf prez-ui
+
+# 7. Install reka-ui
+if [ $USE_PNPM ]; then
+    pnpm add reka-ui
+else
+    npm install reka-ui
+fi
+
+# 8. Update tailwind.css
+curl https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/assets/css/tailwind.css > assets/css/tailwind.css
+
+# 9. Install prez-ui
+if [ $USE_PNPM ]; then
+    pnpm add -D ../prez-ui/packages/prez-ui
+else
+    npm install -D ../prez-ui/packages/prez-ui
+fi
