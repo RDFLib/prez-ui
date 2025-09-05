@@ -153,18 +153,13 @@ The [Taskfile](/Taskfile.yaml) also contains these commands, as well as a "type 
 ### Testing the template
 An important step for testing major changes is to ensure that the theming still works using the template.
 
-1. Copy the project in `create-prez-app/template/` to a local directory outside this project
-2. Remove `prez-ui` from devDependencies in `package.json`
-3. Change "extends" in `nuxt.config.ts` to the relative path to the `prez-ui` Nuxt project
-```typescript
-// nuxt.config.ts
-export default defineNuxtConfig({
-    extends: [
-        "../prez-ui/packages/prez-ui" // relative path to this project
-    ],
-});
+A command in the [Taskfile](/Taskfile.yaml) has been provided to easily create a local working theme using the template project. Simply run:
+
+```bash
+task playground
 ```
-4. Install dependencies and run
+
+Then set any environment variables and run the dev server from the new `.playground/` directory.
 
 From here, test various theming features such as styling changes and overriding components - *especially* overriding deep components, i.e. components that aren't called directly but are called by other components.
 
