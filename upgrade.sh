@@ -1,3 +1,9 @@
+UPGRADE_DONE=$(grep -Eq '\"tailwindcss\": \"\^?4' package.json && echo true || echo false)
+if $UPGRADE_DONE; then
+    echo "This theme has already been upgraded"
+    exit 0
+fi
+
 USE_PNPM=$([ -f pnpm-lock.yaml ]; echo $?)
 
 # 1. Uninstall old packages
@@ -54,6 +60,8 @@ else
     npx $SHAD_ADD
 fi
 
+sed "-i" "" "-e" 's/\(}\)$/\1,/g' nuxt.config.ts
+
 sed "-i" "" '/});$/ i\
     shadcn: \{\
         prefix: \"\",\
@@ -101,3 +109,8 @@ if [ $USE_PNPM ]; then
 else
     npm install -D ../prez-ui/packages/prez-ui
 fi
+
+echo "Upgrade complete!"
+echo "The next step is to convert your Tailwind CSS variables saved in 'tailwind.txt'"
+echo "Follow step 8 in the upgrade guide"
+echo "https://github.com/RDFLib/prez-ui/blob/feature/tailwind4/docs/upgrade.md#8-update-tailwindcss"
