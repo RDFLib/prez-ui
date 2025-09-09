@@ -21,7 +21,7 @@ function limitChange(limit: string) {
 <template>
     <div class="flex flex-row items-center justify-center gap-1 text-sm">
         Per page
-        <Select @update:modelValue="limitChange" :defaultValue="props.limit.toString()">
+        <Select @update:modelValue="limitChange($event as string)" :defaultValue="props.limit.toString()">
             <SelectTrigger class="w-20">
                 <SelectValue placeholder="Per page" />
             </SelectTrigger>
