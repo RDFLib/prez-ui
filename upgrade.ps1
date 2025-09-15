@@ -1,4 +1,4 @@
-$upgradeComplete = (get-content "package.json" | where-object {$_ -like "*"tailwindcss": "^4*" }).length -gt 0 
+$upgradeComplete = (get-content "package.json" | where-object {$_ -like "*`"tailwindcss`": `"`^4*" }).length -gt 0 
 if ($upgradeComplete){
     write-output "This theme has already been upgraded"
     return 
@@ -61,12 +61,12 @@ invoke-npmcommand -command "install" -pnpmCommand "add" -argslist "tailwindcss @
 # 6. Install & initialise shadcn-vue
 invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "nuxi@latest module add shadcn-nuxt"
 
-"import tailwindcss from "@tailwindcss/vite";`r`r" + (get-content -raw "nuxt.config.ts") | save-file -path "nuxt.config.ts"
+"import tailwindcss from `"@tailwindcss/vite`";`r`r" + (get-content -raw "nuxt.config.ts") | save-file -path "nuxt.config.ts"
 
 get-content -raw "nuxt.config.ts" |`
-    foreach { $_ -replace 'vite: {',"vite: {r`t`tplugins: [tailwindcss()]," } |
-    foreach { $_ -replace "}[r`n]+","},`r" } |
-    foreach { $_ -replace "\}\);?\s*$","tshadcn: {`r`t`tprefix: "",`r`t`tcomponentDir: "./components/ui`",r`t},`r});" } |
+    foreach { $_ -replace 'vite: {',"vite: {`r`t`tplugins: [tailwindcss()]," } |`
+    foreach { $_ -replace "}[`r`n]+","},`r" } |`
+    foreach { $_ -replace "\}\);?\s*$","`tshadcn: {`r`t`tprefix: `"`",`r`t`tcomponentDir: `"./components/ui`",`r`t},`r});" } |`
     save-file -path "nuxt.config.ts"
 
 invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "nuxi prepare"
