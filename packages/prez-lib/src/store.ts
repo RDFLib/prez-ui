@@ -229,63 +229,66 @@ export class RDFStore {
         }
         this.processedTerms.add(termKey);
 
-        switch (term.termType) {
-            case "NamedNode":
-                const n = node(term.value);
-                
-                n.label = this.getObjectLiteral(term.value, PREZ_PREDICATES.label);
-                n.description = this.getObjectLiteral(term.value, PREZ_PREDICATES.description);
-                n.provenance = this.getObjectLiteral(term.value, PREZ_PREDICATES.provenance);
+        try {
+            switch (term.termType) {
+                case "NamedNode":
+                    const n = node(term.value);
+                    
+                    n.label = this.getObjectLiteral(term.value, PREZ_PREDICATES.label);
+                    n.description = this.getObjectLiteral(term.value, PREZ_PREDICATES.description);
+                    n.provenance = this.getObjectLiteral(term.value, PREZ_PREDICATES.provenance);
 
-                const identifiers = this.getObjects(term.value, PREZ_PREDICATES.identifier);
-                if(identifiers.length > 0) {
-                    n.identifiers = identifiers.map(t => this.toPrezTerm(t));
-                }
+                    const identifiers = this.getObjects(term.value, PREZ_PREDICATES.identifier);
+                    if (identifiers.length > 0) {
+                        n.identifiers = identifiers.map(t => this.toPrezTerm(t));
+                    }
 
-                const links = this.getObjects(term.value, PREZ_PREDICATES.link);
-                if (links.length > 0) {
-                    n.links = links.map(l => {
-                        return { value: l.value, parents: this.getParents(l.value) }
-                    });
-                }
+                    const links = this.getObjects(term.value, PREZ_PREDICATES.link);
+                    if (links.length > 0) {
+                        n.links = links.map(l => {
+                            return { value: l.value, parents: this.getParents(l.value) }
+                        });
+                    }
 
-                const members = this.getObjects(term.value, PREZ_PREDICATES.members);
-                if (members.length > 0) {
-                    n.members = { value: members[0]!.value, parents: this.getParents(members[0]!.value) };
-                }
+                    const members = this.getObjects(term.value, PREZ_PREDICATES.members);
+                    if (members.length > 0) {
+                        n.members = { value: members[0]!.value, parents: this.getParents(members[0]!.value) };
+                    }
 
-                // types
-                const types = this.getObjects(term.value, SYSTEM_PREDICATES.a);
-                if (types.length > 0) {
-                    n.rdfTypes = types.map(t => this.toPrezTerm(t) as PrezNode)
-                }
+                    const types = this.getObjects(term.value, SYSTEM_PREDICATES.a);
+                    if (types.length > 0) {
+                        n.rdfTypes = types.map(t => this.toPrezTerm(t) as PrezNode)
+                    }
 
-                return n;
-            case "Literal":
-                const l = literal(term.value);
+                    return n;
+                case "Literal":
+                    const l = literal(term.value);
 
-                if (term.datatype) {
-                    l.datatype = this.toPrezTerm(term.datatype) as PrezNode;
-                }
+                    if (term.datatype) {
+                        l.datatype = this.toPrezTerm(term.datatype) as PrezNode;
+                    }
 
-                if (term.language) {
-                    l.language = term.language;
-                }
+                    if (term.language) {
+                        l.language = term.language;
+                    }
 
-                return l;
-            case "BlankNode":
-                const b = bnode(term.value);
+                    return l;
+                case "BlankNode":
+                    const b = bnode(term.value);
 
-                b.properties = this.getProperties(term, undefined);
+                    b.properties = this.getProperties(term, undefined);
 
-                // see if this blank node is a list
-                if(term.value in this.lists) {
-                    b.list = this.lists[term.value];
-                }
+                    // see if this blank node is a list
+                    if (term.value in this.lists) {
+                        b.list = this.lists[term.value];
+                    }
 
-                return b;
-            default:
-                throw ("Invalid n3 Term object")
+                    return b;
+                default:
+                    throw ("Invalid n3 Term object")
+            }
+        } finally {
+            this.processedTerms.delete(termKey);
         }
     }
 
