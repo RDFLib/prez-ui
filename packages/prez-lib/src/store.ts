@@ -19,6 +19,7 @@ export class RDFStore {
     private baseUrl: string;
     private linkedLists: Record<string, RDF.Term[]>;
     private lists: Record<string, PrezNodeList[]>;
+    private processedTerms: Set<string>;
 
     constructor() {
         this.store = new Store();
@@ -28,6 +29,7 @@ export class RDFStore {
         this.prefixes = DEFAULT_PREFIXES;
         this.linkedLists = {};
         this.lists = {};
+        this.processedTerms = new Set();
     }
 
     /**
@@ -36,6 +38,7 @@ export class RDFStore {
      * @param s RDF Turtle string
      */
     public load(s: string) {
+        this.processedTerms.clear();
         s = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + s; // temp fix for missing rdf: prefix from API
         const p = this.parser.parse(s, null, (prefixName, prefixNode) => {
             // callback for each prefix parsed --> no longer using default prefixes
@@ -156,11 +159,11 @@ export class RDFStore {
 
     // public getRdfList() { }
 
-    private getObjectLiteral(iri: string, predicate: string, parent?: PrezTerm): PrezLiteral | undefined {
-        return this.getObjects(iri, predicate).map(o => this.toPrezTerm(o, parent) as PrezLiteral)[0] || undefined;
+    private getObjectLiteral(iri: string, predicate: string): PrezLiteral | undefined {
+        return this.getObjects(iri, predicate).map(o => this.toPrezTerm(o) as PrezLiteral)[0] || undefined;
     }
 
-    public getProperties(term: Term, options?: {excludePrefix?: string, includePrefix?: string}, parent?: PrezTerm): PrezProperties {
+    public getProperties(term: Term, options?: {excludePrefix?: string, includePrefix?: string}): PrezProperties {
         const props: PrezProperties = {};
 
         this.store.forEach(q => {
@@ -169,11 +172,11 @@ export class RDFStore {
             if(options?.includePrefix && !q.predicate.value.startsWith(options.includePrefix)) return;
 
             props[q.predicate.value] ??= {
-                predicate: this.toPrezTerm(q.predicate, parent) as PrezNode,
+                predicate: this.toPrezTerm(q.predicate) as PrezNode,
                 objects: []
             };
 
-            props[q.predicate.value]!.objects.push(this.toPrezTerm(q.object, parent));
+            props[q.predicate.value]!.objects.push(this.toPrezTerm(q.object));
         }, term, null, null, null);
 
         if(term.termType === "BlankNode") {
@@ -210,110 +213,84 @@ export class RDFStore {
         return parents;
     }
 
-    private toPrezTerm(term: Term, parent?: PrezTerm): PrezTerm {
-        
-        // Check if this term is already being processed in the call chain to prevent cycles
-        if (parent && this.isAncestor(term, parent)) {
-            // We've detected a cycle - return a simplified version without recursive processing
-            return this.createCycleSafeTerm(term);
-        }
-
-        switch (term.termType) {
-            case "NamedNode":
-                const n = node(term.value);
-
-                (n as PrezTerm)._cycleParent = parent;
-                
-                n.label = this.getObjectLiteral(term.value, PREZ_PREDICATES.label, n);
-                n.description = this.getObjectLiteral(term.value, PREZ_PREDICATES.description, n);
-                n.provenance = this.getObjectLiteral(term.value, PREZ_PREDICATES.provenance, n);
-
-                const identifiers = this.getObjects(term.value, PREZ_PREDICATES.identifier);
-                if(identifiers.length > 0) {
-                    n.identifiers = identifiers.map(t => this.toPrezTerm(t, n));
-                }
-
-                const links = this.getObjects(term.value, PREZ_PREDICATES.link);
-                if (links.length > 0) {
-                    n.links = links.map(l => {
-                        return { value: l.value, parents: this.getParents(l.value) }
-                    });
-                }
-
-                const members = this.getObjects(term.value, PREZ_PREDICATES.members);
-                if (members.length > 0) {
-                    n.members = { value: members[0]!.value, parents: this.getParents(members[0]!.value) };
-                }
-
-                // types
-                const types = this.getObjects(term.value, SYSTEM_PREDICATES.a);
-                if (types.length > 0) {
-                    n.rdfTypes = types.map(t => this.toPrezTerm(t, n) as PrezNode)
-                }
-
-                return n;
-            case "Literal":
-                const l = literal(term.value);
-                
-                (l as PrezTerm)._cycleParent = parent;
-
-                if (term.datatype) {
-                    l.datatype = this.toPrezTerm(term.datatype, l) as PrezNode;
-                }
-
-                if (term.language) {
-                    l.language = term.language;
-                }
-
-                return l;
-            case "BlankNode":
-                const b = bnode(term.value);
-                
-                (b as PrezTerm)._cycleParent = parent;
-
-                b.properties = this.getProperties(term, undefined, b);
-
-                // see if this blank node is a list
-                if(term.value in this.lists) {
-                    b.list = this.lists[term.value];
-                }
-
-                return b;
-            default:
-                throw ("Invalid n3 Term object")
-        }
-    }
-
-    /**
-     * Checks if a term is an ancestor of the parent in the call chain
-     */
-    private isAncestor(term: Term, parent: PrezTerm): boolean {
-        let current: PrezTerm | undefined = parent;
-        while (current) {
-            if (current.equals(term as PrezTerm)) {
-                return true;
+    private toPrezTerm(term: Term): PrezTerm {
+        const termKey = `${term.termType}:${term.value}`;
+        if (this.processedTerms.has(termKey)) {
+            switch (term.termType) {
+                case "NamedNode":
+                    return node(term.value);
+                case "Literal":
+                    return literal(term.value);
+                case "BlankNode":
+                    return bnode(term.value);
+                default:
+                    throw new Error("Invalid n3 Term object");
             }
-            current = current._cycleParent;
         }
-        return false;
-    }
+        this.processedTerms.add(termKey);
 
-    /**
-     * Creates a cycle-safe version of a term without recursive processing
-     */
-    private createCycleSafeTerm(term: Term): PrezTerm {
-        switch (term.termType) {
-            case "NamedNode":
-                return node(term.value);
-            case "Literal":
-                return literal(term.value);
-            case "BlankNode":
-                return bnode(term.value);
-            default:
-                throw ("Invalid n3 Term object");
+        try {
+            switch (term.termType) {
+                case "NamedNode":
+                    const n = node(term.value);
+                    
+                    n.label = this.getObjectLiteral(term.value, PREZ_PREDICATES.label);
+                    n.description = this.getObjectLiteral(term.value, PREZ_PREDICATES.description);
+                    n.provenance = this.getObjectLiteral(term.value, PREZ_PREDICATES.provenance);
+
+                    const identifiers = this.getObjects(term.value, PREZ_PREDICATES.identifier);
+                    if (identifiers.length > 0) {
+                        n.identifiers = identifiers.map(t => this.toPrezTerm(t));
+                    }
+
+                    const links = this.getObjects(term.value, PREZ_PREDICATES.link);
+                    if (links.length > 0) {
+                        n.links = links.map(l => {
+                            return { value: l.value, parents: this.getParents(l.value) }
+                        });
+                    }
+
+                    const members = this.getObjects(term.value, PREZ_PREDICATES.members);
+                    if (members.length > 0) {
+                        n.members = { value: members[0]!.value, parents: this.getParents(members[0]!.value) };
+                    }
+
+                    const types = this.getObjects(term.value, SYSTEM_PREDICATES.a);
+                    if (types.length > 0) {
+                        n.rdfTypes = types.map(t => this.toPrezTerm(t) as PrezNode)
+                    }
+
+                    return n;
+                case "Literal":
+                    const l = literal(term.value);
+
+                    if (term.datatype) {
+                        l.datatype = this.toPrezTerm(term.datatype) as PrezNode;
+                    }
+
+                    if (term.language) {
+                        l.language = term.language;
+                    }
+
+                    return l;
+                case "BlankNode":
+                    const b = bnode(term.value);
+
+                    b.properties = this.getProperties(term, undefined);
+
+                    // see if this blank node is a list
+                    if (term.value in this.lists) {
+                        b.list = this.lists[term.value];
+                    }
+
+                    return b;
+                default:
+                    throw ("Invalid n3 Term object")
+            }
+        } finally {
+            this.processedTerms.delete(termKey);
         }
     }
-
 
     /**
      * Creates a PrezFocusNode object
@@ -323,8 +300,8 @@ export class RDFStore {
      */
     private toPrezFocusNode(obj: Quad_Object): PrezFocusNode {
         const focusNode: PrezFocusNode = this.toPrezTerm(obj) as PrezFocusNode;
-        focusNode.properties = this.getProperties(obj, { excludePrefix: PREZ_PREDICATES.namespace }, focusNode);
-        focusNode.systemProperties = this.getProperties(obj, { includePrefix: PREZ_PREDICATES.namespace }, focusNode);
+        focusNode.properties = this.getProperties(obj, { excludePrefix: PREZ_PREDICATES.namespace });
+        focusNode.systemProperties = this.getProperties(obj, { includePrefix: PREZ_PREDICATES.namespace });
         if(focusNode.rdfTypes?.map(t => t.value).includes(SYSTEM_PREDICATES.skosConcept)) {
             (focusNode as PrezConceptNode).hasChildren = focusNode.systemProperties?.[PREZ_PREDICATES.hasChildren]?.objects?.[0]?.value == 'true';
         }
