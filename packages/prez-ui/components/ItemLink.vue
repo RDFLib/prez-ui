@@ -4,6 +4,11 @@ import { ItemLink, type ItemLinkProps } from "prez-components";
 const props = defineProps<ItemLinkProps>();
 const copyButton = resolveComponent("CopyButton") as Component;
 </script>
+<script lang="ts">
+export default {
+    inheritAttrs: false
+}
+</script>
 
 <template>
     <ItemLink v-bind="props" :_components="{copyButton}">

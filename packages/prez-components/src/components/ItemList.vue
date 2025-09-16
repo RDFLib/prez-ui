@@ -32,7 +32,7 @@ const list = props.list;
         </TableHeader>
         <TableBody>
             <TableRow v-for="item in list" class="hover:bg-unset odd:bg-muted/50">
-                <TableCell>
+                <TableCell class="whitespace-normal">
                     <component :is="props._components.node" :term="item" variant="item-list" />
                 </TableCell>
                 <template v-if="fields">

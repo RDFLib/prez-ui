@@ -50,34 +50,42 @@ See our [theming documentation](https://github.com/rdflib/prez-ui/blob/main/docs
 ### Tailwind & CSS
 Prez UI uses [Tailwind](https://tailwindcss.com) for most of its styling, which you can use in this starter template to easily style using classes.
 
-To override Prez UI's colour scheme (e.g. `primary`, `secondary`, etc.), or add your own variables to use in Tailwind, simply add a CSS variable of the same name in `assets/css/tailwind.css` under `:root` with its colour values in HSL **without** the `hsl()` function. Then register those variables in `tailwind.config.js` wrapped in the `hsl()` function under `theme.extend.colors`, e.g.:
+To override Prez UI's colour scheme (e.g. `primary`, `secondary`, etc.), or add your own variables to use in Tailwind, simply add a CSS variable of the same name in `assets/css/tailwind.css` under `:root` with its colour values in HSL **without** commas between values. Dark mode variants of those variables goes in the `.dark` block. New variables are registered in the `@theme inline` block in the same file. For colours, prefix the variable with `--color-*`, e.g.:
 
-```javascript
-// tailwind.config.js
-module.exports = {
+```CSS
+/* assets/css/tailwind.css */
+
+...
+
+:root {
+    /* define your Tailwind CSS variables (in HSL without commas) here */
+
+    /* overridden variables */
+    --primary: hsl(24.6 95% 53.1%); 
+    --primary-foreground: hsl(60 9.1% 97.8%);
+
+    /* new variable */
+    --my-new-variable: hsl(70 10.8% 91.3%);
+}
+
+.dark {
+    /* dark mode variants of CSS variables go here */
+}
+
+@theme inline {
     ...
-    theme: {
-        extend: {
-            colors: {
-                // add your CSS variables here, e.g.:
-                primary: {
-                    DEFAULT: "hsl(var(--primary))",
-                    foreground: "hsl(var(--primary-foreground))",
-                },
-            }
-        }
-    }
-    ...
+    /* any new tailwind variables you declare go here. Colours are prefixed with --color-* */
+    --color-my-new-variable: var(--my-new-variable);
 }
 ```
 
 You can also style your Prez UI theme using normal CSS by adding your styles to `assets/css/theme.css`.
 
 ### Shadcn Components
-Prez UI uses the [prez-components](https://github.com/rdflib/prez-ui/tree/main/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template, but if you need to add shadcn components in your theme, run a command like the following:
+Prez UI uses the [prez-components](https://github.com/rdflib/prez-ui/tree/main/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template, but if you need to add more shadcn components in your theme, run a command like the following:
 
 ```bash
-npx shadcn-vue@latest add button
+npx shadcn-vue@latest add <component>
 ```
 *(Note: for pnpm, run `pnpm dlx` instead of `npx`)*
 

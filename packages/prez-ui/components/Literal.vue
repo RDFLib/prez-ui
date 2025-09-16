@@ -4,6 +4,11 @@ import { Literal, type LiteralProps } from "prez-components";
 const props = defineProps<LiteralProps>();
 const term = resolveComponent("Term") as Component;
 </script>
+<script lang="ts">
+export default {
+    inheritAttrs: false
+}
+</script>
 
 <template>
     <Literal v-bind="props" :_components="{term}">
