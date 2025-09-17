@@ -7,7 +7,7 @@ fi
 USE_PNPM=$([ -f pnpm-lock.yaml ]; echo $?)
 
 # 1. Uninstall old packages
-REMOVE_PACKAGES="@nuxtjs/tailwindcss radix-vue shadcn-nuxt prez-ui tailwind-merge"
+REMOVE_PACKAGES="@nuxtjs/tailwindcss radix-vue shadcn-nuxt prez-ui tailwind-merge nuxt"
 if [ $USE_PNPM ]; then
     pnpm remove $REMOVE_PACKAGES
 else
@@ -37,7 +37,19 @@ else
     npm install
 fi
 
-# 5. Install Tailwind 4
+# 5. Install Nuxt 4
+mkdir app
+mv -t app assets components composables layouts lib pages utils app.config.ts app.vue
+
+curl https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/tsconfig.json > tsconfig.json
+
+if [ $USE_PNPM ]; then
+    pnpm add -D nuxt
+else
+    npm install -D nuxt
+fi
+
+# 6. Install Tailwind 4
 TAILWIND_PACKAGES="tailwindcss @tailwindcss/vite"
 if [ $USE_PNPM ]; then
     pnpm add $TAILWIND_PACKAGES
@@ -45,14 +57,14 @@ else
     npm install $TAILWIND_PACKAGES
 fi
 
-echo '@import "tailwindcss";' > assets/css/tailwind.css
+echo '@import "tailwindcss";' > app/assets/css/tailwind.css
 
 sed "-i" "" "-e" '1s/^/import tailwindcss from "@tailwindcss\/vite";\n\n/' nuxt.config.ts
 sed "-i" "" '/vite: {/ a\
         plugins: \[tailwindcss\(\)\],
 ' nuxt.config.ts
 
-# 6. Install & initialise shadcn-vue
+# 7. Install & initialise shadcn-vue
 SHAD_ADD="nuxi@latest module add shadcn-nuxt"
 if [ $USE_PNPM ]; then
     pnpm dlx $SHAD_ADD
@@ -65,7 +77,7 @@ sed "-i" "" "-e" 's/\(}\)$/\1,/g' nuxt.config.ts
 sed "-i" "" '/});$/ i\
     shadcn: \{\
         prefix: \"\",\
-        componentDir: \"\.\/components\/ui\"\
+        componentDir: \"@\/components\/ui\"\
     \},\
 ' nuxt.config.ts
 
@@ -87,23 +99,23 @@ sed "-i" "" "-e" 's/zinc/slate/g' components.json
 
 git clone -n --depth=1 --filter=tree:0 -b feature/tailwind4 --single-branch https://github.com/rdflib/prez-ui
 cd prez-ui
-git sparse-checkout set --no-cone /packages/create-prez-app/template/components/ui
+git sparse-checkout set --no-cone /packages/create-prez-app/template/app/components/ui
 git checkout
 cd ..
-mv prez-ui/packages/create-prez-app/template/components/ui components
+mv prez-ui/packages/create-prez-app/template/app/components/ui app/components
 rm -rf prez-ui
 
-# 7. Install reka-ui
+# 8. Install reka-ui
 if [ $USE_PNPM ]; then
     pnpm add reka-ui
 else
     npm install reka-ui
 fi
 
-# 8. Update tailwind.css
-curl https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/assets/css/tailwind.css > assets/css/tailwind.css
+# 9. Update tailwind.css
+curl https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/app/assets/css/tailwind.css > app/assets/css/tailwind.css
 
-# 9. Install prez-ui
+# 10. Install prez-ui
 if [ $USE_PNPM ]; then
     pnpm add -D ../prez-ui/packages/prez-ui
 else
@@ -112,5 +124,5 @@ fi
 
 echo "Upgrade complete!"
 echo "The next step is to convert your Tailwind CSS variables saved in 'tailwind.txt'"
-echo "Follow step 8 in the upgrade guide"
-echo "https://github.com/RDFLib/prez-ui/blob/feature/tailwind4/docs/upgrade.md#8-update-tailwindcss"
+echo "Follow step 9 in the upgrade guide"
+echo "https://github.com/RDFLib/prez-ui/blob/feature/tailwind4/docs/upgrade.md#9-update-tailwindcss"
