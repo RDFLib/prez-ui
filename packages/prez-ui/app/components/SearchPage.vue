@@ -51,9 +51,10 @@ const inSearchMode = computed(() => (route.query?.q || '').length > 0);
                         <div v-if="error"><Message severity="error">{{ error }}</Message></div>
                         <div v-if="data">
                             <div v-if="data" :key="urlPath">
+                                <!-- @vue-ignore -->
                                 <Facets v-if="globalProfiles && currentFacetProfile && globalProfiles[currentFacetProfile]" 
-                                    :facets="data.facets" 
-                                    :profile="globalProfiles[currentFacetProfile]" 
+                                    :facets="data.facets"
+                                    :profile="globalProfiles[currentFacetProfile]"
                                 />
                                 <SearchResults :results="data.data" />
                                 <PrezPagination

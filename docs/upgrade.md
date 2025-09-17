@@ -1,7 +1,7 @@
 # Upgrade guide from < v4.2.0
-This guide is for users with an existing Prez UI theme upgrading from v4.1.2 and below to v4.2.0 and above. This is required as Prez UI now uses Tailwind v4 and shadcn-vue v2, which is incompatible with the previous version.
+This guide is for users with an existing Prez UI theme upgrading from v4.1.2 and below to v4.2.0 and above. This is required as Prez UI now uses Nuxt v4, Tailwind v4 and shadcn-vue v2, which is incompatible with the previous version.
 
-Running the script below will automate the upgrade process ***except*** converting Tailwind CSS variables, which you will have to do manually as per step [8](#8-update-tailwindcss) below.
+Running the script below will automate the upgrade process ***except*** converting Tailwind CSS variables, which you will have to do manually as per step [9](#9-update-tailwindcss) below.
 
 For Unix systems:
 ```bash
@@ -21,7 +21,7 @@ Otherwise, follow the steps below.
 First, uninstall the following packages by running:
 
 ```bash
-npm uninstall @nuxtjs/tailwindcss radix-vue shadcn-nuxt prez-ui tailwind-merge
+npm uninstall @nuxtjs/tailwindcss radix-vue shadcn-nuxt prez-ui tailwind-merge nuxt
 ```
 
 Remove `"@nuxtjs/tailwindcss"` & `"shadcn-nuxt"` from the modules array in `nuxt.config.ts`:
@@ -52,7 +52,57 @@ Delete `.nuxt/`, `.output/` & `node_modules/` then run:
 npm install
 ```
 
-## 5. Install Tailwind 4
+## 5. Install Nuxt 4
+Make a new top level directory `app/` and move the following files & directories into it where applicable:
+
+- `assets/`
+- `components/`
+- `composables/`
+- `layouts/`
+- `lib/`
+- `pages/`
+- `utils/`
+- `app.config.ts`
+- `app.vue`
+
+Then copy the following into `tsconfig.json` (available [here](/packages/create-prez-app/template/tsconfig.json)):
+
+```json
+{
+    // https://nuxt.com/docs/guide/concepts/typescript
+    "files": [],
+    "references": [
+        {
+            "path": "./.nuxt/tsconfig.app.json"
+        },
+        {
+            "path": "./.nuxt/tsconfig.server.json"
+        },
+        {
+            "path": "./.nuxt/tsconfig.shared.json"
+        },
+        {
+            "path": "./.nuxt/tsconfig.node.json"
+        }
+    ],
+    "compilerOptions": {
+        "baseUrl": "./app",
+        "paths": {
+            "@/*": [
+                "./*"
+            ]
+        }
+    }
+}
+```
+
+Then install the latest version of Nuxt:
+
+```bash
+npm install -D nuxt
+```
+
+## 6. Install Tailwind 4
 Run the following to install Tailwind 4:
 
 ```bash
@@ -78,7 +128,7 @@ export default defineNuxtConfig({
     ...
 })
 ```
-## 6. Install & initialise shadcn-vue
+## 7. Install & initialise shadcn-vue
 Install the shadcn-vue Nuxt module:
 
 ```bash
@@ -93,7 +143,7 @@ export default defineNuxtConfig({
     ...
     shadcn: {
         prefix: "",
-        componentDir: "./components/ui"
+        componentDir: "@/components/ui"
     },
     ...
 })
@@ -113,22 +163,22 @@ npx shadcn-vue@latest init
 
 (When prompted for the base colour, "slate" is the default base colour for Prez UI)
 
-Then copy the default shad components from the [template project](/packages/create-prez-app/template/components/ui/) into `components/ui/`.
+Then copy the default shad components from the [template project](/packages/create-prez-app/template/app/components/ui/) into `app/components/ui/`.
 
-## 7. Install reka-ui
+## 8. Install reka-ui
 If `reka-ui` is not installed by the previous command, run:
 
 ```bash
 npm install reka-ui
 ```
 
-## 8. Update `tailwind.css`
-Copy the contents of the [template CSS](/packages/create-prez-app/template/assets/css/tailwind.css) file into `tailwind.css`.
+## 9. Update `tailwind.css`
+Copy the contents of the [template CSS](/packages/create-prez-app/template/app/assets/css/tailwind.css) file into `tailwind.css`.
 
 Then add any overridden or custom Tailwind CSS variables from your backup Tailwind file back into `tailwind.css`. Variables are now declared using `hsl()` without commas between values in `:root`. You can add dark mode variants of these in `.dark`. To use new variables in Tailwind, register then in `@theme inline` below the default variables. Colours are prefixed with `--color-*`. For example:
 
 ```CSS
-/* assets/css/tailwind.css */
+/* app/assets/css/tailwind.css */
 
 ...
 
@@ -154,7 +204,7 @@ Then add any overridden or custom Tailwind CSS variables from your backup Tailwi
 }
 ```
 
-## 9. Install prez-ui
+## 10. Install prez-ui
 Lastly, install the latest version of Prez UI:
 
 ```bash
