@@ -41,7 +41,7 @@ fi
 mkdir app
 mv assets components composables layouts lib pages utils app.config.ts app.vue -t app
 
-curl https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/nuxt4/packages/create-prez-app/template/tsconfig.json > tsconfig.json
+curl https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/tsconfig.json > tsconfig.json
 
 if [ $USE_PNPM ]; then
     pnpm add -D nuxt
@@ -97,7 +97,7 @@ fi
 
 sed "-i" "" "-e" 's/zinc/slate/g' components.json
 
-git clone -n --depth=1 --filter=tree:0 -b feature/nuxt4 --single-branch https://github.com/rdflib/prez-ui
+git clone -n --depth=1 --filter=tree:0 -b feature/tailwind4 --single-branch https://github.com/rdflib/prez-ui
 cd prez-ui
 git sparse-checkout set --no-cone /packages/create-prez-app/template/app/components/ui
 git checkout
@@ -113,7 +113,7 @@ else
 fi
 
 # 9. Update tailwind.css
-curl https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/nuxt4/packages/create-prez-app/template/app/assets/css/tailwind.css > app/assets/css/tailwind.css
+curl https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/app/assets/css/tailwind.css > app/assets/css/tailwind.css
 
 # 10. Install prez-ui
 if [ $USE_PNPM ]; then
@@ -125,4 +125,4 @@ fi
 echo "Upgrade complete!"
 echo "The next step is to convert your Tailwind CSS variables saved in 'tailwind.txt'"
 echo "Follow step 9 in the upgrade guide"
-echo "https://github.com/RDFLib/prez-ui/blob/feature/nuxt4/docs/upgrade.md#9-update-tailwindcss"
+echo "https://github.com/RDFLib/prez-ui/blob/feature/tailwind4/docs/upgrade.md#9-update-tailwindcss"

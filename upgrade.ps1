@@ -61,7 +61,7 @@ invoke-npmcommand -command "install"
 New-Item -Path "app" -ItemType Directory 
 Move-Item -Path assets, components, composables, layouts, lib, pages, utils, app.config.ts, app.vue -Destination app
 
-Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/nuxt4/packages/create-prez-app/template/tsconfig.json' -OutFile "tsconfig.json"
+Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/tsconfig.json' -OutFile "tsconfig.json"
 
 invoke-npmcommand -command "install" -pnpmCommand "add" -argslist "-D nuxt"
 
@@ -85,7 +85,7 @@ invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "shadcn-vue@la
 
 (get-content -raw "components.json") -replace "zinc","slate" | save-file -path "components.json"
 
-& git clone -n --depth=1 --filter=tree:0 -b feature/nuxt4 --single-branch "https://github.com/rdflib/prez-ui"
+& git clone -n --depth=1 --filter=tree:0 -b feature/tailwind4 --single-branch "https://github.com/rdflib/prez-ui"
 push-location prez-ui
 & git sparse-checkout set --no-cone /packages/create-prez-app/template/app/components/ui
 & git checkout
@@ -97,7 +97,7 @@ remove-item -recurse -force "prez-ui"
 invoke-npmcommand -command "install" -pnpmCommand "add" -argslist "reka-ui"
 
 # 9. Update tailwind.css
-Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/nuxt4/packages/create-prez-app/template/app/assets/css/tailwind.css' -OutFile "app/assets/css/tailwind.css"
+Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/app/assets/css/tailwind.css' -OutFile "app/assets/css/tailwind.css"
 
 # 10. Install prez-ui
 invoke-npmcommand -command "install -D" -pnpmCommand "add -D" -argslist "../prez-ui/packages/prez-ui"
@@ -105,4 +105,4 @@ invoke-npmcommand -command "install -D" -pnpmCommand "add -D" -argslist "../prez
 write-output  "Upgrade complete!"
 write-output  "The next step is to convert your Tailwind CSS variables saved in 'tailwind.txt'"
 write-output  "Follow step 9 in the upgrade guide"
-write-output  "https://github.com/RDFLib/prez-ui/blob/feature/nuxt4/docs/upgrade.md#9-update-tailwindcss"
+write-output  "https://github.com/RDFLib/prez-ui/blob/feature/tailwind4/docs/upgrade.md#9-update-tailwindcss"
