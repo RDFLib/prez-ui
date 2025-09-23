@@ -63,7 +63,7 @@ watch(() => route.fullPath, () => {
 
                 <div v-else-if="data?.data">
                     <slot name="list-top" :data="data"></slot>
-
+                    <!-- @vue-ignore -->
                     <Facets v-if="globalProfiles && currentFacetProfile && globalProfiles[currentFacetProfile]" 
                         :facets="data.facets" 
                         :profile="globalProfiles[currentFacetProfile]" 
