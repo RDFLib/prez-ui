@@ -31,10 +31,10 @@ npm run dev
 ## Tailwind & CSS
 Prez UI uses [Tailwind](https://tailwindcss.com) for most of its styling, which you can use in this starter template to easily style using classes.
 
-To override Prez UI's colour scheme (e.g. `primary`, `secondary`, etc.), or add your own variables to use in Tailwind, simply add a CSS variable of the same name in `assets/css/tailwind.css` under `:root` with its colour values in HSL **without** commas between values. Dark mode variants of those variables goes in the `.dark` block. New variables are registered in the `@theme inline` block in the same file. For colours, prefix the variable with `--color-*`, e.g.:
+To override Prez UI's colour scheme (e.g. `primary`, `secondary`, etc.), or add your own variables to use in Tailwind, simply add a CSS variable of the same name in `app/assets/css/tailwind.css` under `:root` with its colour values in HSL **without** commas between values. Dark mode variants of those variables goes in the `.dark` block. New variables are registered in the `@theme inline` block in the same file. For colours, prefix the variable with `--color-*`, e.g.:
 
 ```CSS
-/* assets/css/tailwind.css */
+/* app/assets/css/tailwind.css */
 
 ...
 
@@ -60,7 +60,7 @@ To override Prez UI's colour scheme (e.g. `primary`, `secondary`, etc.), or add 
 }
 ```
 
-You can also style your Prez UI theme using normal CSS by adding your styles to `assets/css/theme.css`.
+You can also style your Prez UI theme using normal CSS by adding your styles to `app/assets/css/theme.css`.
 
 ### Tailwind Variables
 Prez UI's Tailwind variables inherit from [shadcn-vue's variables](https://www.shadcn-vue.com/docs/theming.html#list-of-variables) (link content out of date). See Prez UI's default Tailwind variables [here](https://github.com/RDFLib/prez-ui/blob/main/packages/prez-components/src/assets/index.css).
@@ -68,19 +68,19 @@ Prez UI's Tailwind variables inherit from [shadcn-vue's variables](https://www.s
 ![Prez UI's default Tailwind variables](./tailwind-variables.png)
 
 ## Extending the base layer
-This starter template uses [Nuxt layers](https://nuxt.com/docs/getting-started/layers) to extend upon the base Prez UI layer application, so you only need to customise what you need.
+This starter template uses [layers](https://nuxt.com/docs/getting-started/layers) to extend upon the base Prez UI layer application, so you only need to customise what you need.
 
 The layers system automatically replaces files of the same name with the same directory structure as previous layers. The files that can be overridden are:
 
-- `components/*` - Extend the default components
-- `composables/*` - Extend the default composables
-- `layouts/*` - Extend the default layouts
-- `pages/*` - Extend the default pages
-- `plugins/*` - Extend the default plugins
+- `app/components/*` - Extend the default components
+- `app/composables/*` - Extend the default composables
+- `app/layouts/*` - Extend the default layouts
+- `app/pages/*` - Extend the default pages
+- `app/plugins/*` - Extend the default plugins
+- `app/utils/*` - Extend the default utils
+- `app/app.config.ts` - Extend the default app config
 - `server/*` - Extend the default server endpoints & middleware
-- `utils/*` - Extend the default utils
 - `nuxt.config.ts` - Extend the default nuxt config
-- `app.config.ts` - Extend the default app config
 
 Refer to Prez UI's base layer [source code](https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui) to help you override files.
 
@@ -120,10 +120,10 @@ export default defineNuxtConfig({
 });
 ```
 
-`app.config.ts` is where you can configure smaller content-related options such as the nav content, naming on certains items, and breadcrumbs. For overriding array variables such as `menu`, use the arrow function syntax `() => []` instead of re-setting the variable. Note you may get a false TypeScript error when doing this.
+`app/app.config.ts` is where you can configure smaller content-related options such as the nav content, naming on certains items, and breadcrumbs. For overriding array variables such as `menu`, use the arrow function syntax `() => []` instead of re-setting the variable. Note you may get a false TypeScript error when doing this.
 
 ```typescript
-// app.config.ts example
+// app/app.config.ts example
 export default defineAppConfig({
     ...
     menu: () => [

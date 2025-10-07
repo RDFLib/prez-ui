@@ -89,7 +89,7 @@ const props = withDefaults(defineProps<MyComponentProps>(), {
 ```
 
 ### Prez UI
-For running prez-ui, *ensure you build the workspace dependencies first* - `prez-lib` and `prez-components`.
+For running prez-ui, ***ensure you build the workspace dependencies first*** - `prez-lib` and `prez-components`. Consult the [Taskfile](/Taskfile.yaml) for some convenient commands.
 
 For supporting deep overrides in extending Prez UI's base layer, any components that are made available to Nuxt from the `prez-components` component library must be re-exported in `prez-ui/components/` in the following way:
 

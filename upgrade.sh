@@ -4,6 +4,8 @@ if $UPGRADE_DONE; then
     exit 0
 fi
 
+MAC_OS=$([ $(uname -s) == Darwin ] && echo true || echo false)
+SED_FLAGS=$($MAC_OS && echo '"-i" ""' || echo "-i")
 USE_PNPM=$([ -f pnpm-lock.yaml ]; echo $?)
 
 # 1. Uninstall old packages
@@ -14,8 +16,8 @@ else
     npm uninstall $REMOVE_PACKAGES
 fi
 
-sed "-i" "" "-e" 's/\"@nuxtjs\/tailwindcss\"[,]\{0,1\}//g' nuxt.config.ts
-sed "-i" "" "-e" 's/\"shadcn-nuxt\"[,]\{0,1\}//g' nuxt.config.ts
+sed $SED_FLAGS "-e" 's/\"@nuxtjs\/tailwindcss\"[,]\{0,1\}//g' nuxt.config.ts
+sed $SED_FLAGS "-e" 's/\"shadcn-nuxt\"[,]\{0,1\}//g' nuxt.config.ts
 
 # 2. Remove required files & folders
 rm components.json
@@ -59,8 +61,8 @@ fi
 
 echo '@import "tailwindcss";' > app/assets/css/tailwind.css
 
-sed "-i" "" "-e" '1s/^/import tailwindcss from "@tailwindcss\/vite";\n\n/' nuxt.config.ts
-sed "-i" "" '/vite: {/ a\
+sed $SED_FLAGS "-e" '1s/^/import tailwindcss from "@tailwindcss\/vite";\n\n/' nuxt.config.ts
+sed $SED_FLAGS '/vite: {/ a\
         plugins: \[tailwindcss\(\)\],
 ' nuxt.config.ts
 
@@ -72,9 +74,9 @@ else
     npx $SHAD_ADD
 fi
 
-sed "-i" "" "-e" 's/\(}\)$/\1,/g' nuxt.config.ts
+sed $SED_FLAGS "-e" 's/\(}\)$/\1,/g' nuxt.config.ts
 
-sed "-i" "" '/});$/ i\
+sed $SED_FLAGS '/});$/ i\
     shadcn: \{\
         prefix: \"\",\
         componentDir: \"@\/components\/ui\"\
@@ -95,7 +97,7 @@ else
     npx $SHAD_INIT
 fi
 
-sed "-i" "" "-e" 's/zinc/slate/g' components.json
+sed $SED_FLAGS "-e" 's/zinc/slate/g' components.json
 
 git clone -n --depth=1 --filter=tree:0 -b feature/tailwind4 --single-branch https://github.com/rdflib/prez-ui
 cd prez-ui
