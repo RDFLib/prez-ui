@@ -67,7 +67,7 @@ You can also style your Prez UI theme using normal CSS by adding your styles to 
 ### Tailwind Variables
 Prez UI's Tailwind variables inherit from [shadcn-vue's variables](https://www.shadcn-vue.com/docs/theming.html#list-of-variables) (link content out of date). See Prez UI's default Tailwind variables [here](https://github.com/RDFLib/prez-ui/blob/main/packages/prez-components/src/assets/index.css).
 
-![Prez UI's default Tailwind variables](./tailwind-variables.png)
+![Prez UI's default Tailwind variables](./images/tailwind-variables.png)
 
 ## Extending the base layer
 This starter template uses [layers](https://nuxt.com/docs/getting-started/layers) to extend upon the base Prez UI layer application, so you only need to customise what you need.
