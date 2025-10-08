@@ -14,6 +14,8 @@ Then preview your theme by running:
 npm run dev
 ```
 
+You may need to open the dev server (http://localhost:3000) in a second window in a private tab or different browser on first load to resolve the layout rendering error.
+
 ## Configuration
 ### Environment Variables
 The main configuration required for running Prez UI are done with environment variables:

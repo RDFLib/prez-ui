@@ -5,55 +5,60 @@ if $UPGRADE_DONE; then
 fi
 
 MAC_OS=$([ $(uname -s) == Darwin ] && echo true || echo false)
-SED_FLAGS=$($MAC_OS && echo '"-i" ""' || echo "-i")
-USE_PNPM=$([ -f pnpm-lock.yaml ]; echo $?)
+USE_PNPM=$([ -f pnpm-lock.yaml ] && echo true || echo false)
+
+if $MAC_OS; then
+    SED_FLAGS=( -i '' )
+else
+    SED_FLAGS=( -i )
+fi
 
 # 1. Uninstall old packages
 REMOVE_PACKAGES="@nuxtjs/tailwindcss radix-vue shadcn-nuxt prez-ui tailwind-merge nuxt"
-if [ $USE_PNPM ]; then
+if $USE_PNPM; then
     pnpm remove $REMOVE_PACKAGES
 else
     npm uninstall $REMOVE_PACKAGES
 fi
 
-sed $SED_FLAGS "-e" 's/\"@nuxtjs\/tailwindcss\"[,]\{0,1\}//g' nuxt.config.ts
-sed $SED_FLAGS "-e" 's/\"shadcn-nuxt\"[,]\{0,1\}//g' nuxt.config.ts
+sed "${SED_FLAGS[@]}" "-e" 's/\"@nuxtjs\/tailwindcss\"[,]\{0,1\}//g' nuxt.config.ts
+sed "${SED_FLAGS[@]}" "-e" 's/\"shadcn-nuxt\"[,]\{0,1\}//g' nuxt.config.ts
 
-# 2. Remove required files & folders
-rm components.json
-rm tailwind.config.js
-rm -r components/ui
-
-# 3. Backup Tailwind variables
+# 2. Backup Tailwind variables
 mv assets/css/tailwind.css assets/css/tailwind.txt
 touch assets/css/tailwind.css
 
-# 4. Reinstall packages
-rm -r .nuxt
-rm -r .output
-rm -r node_modules
+# 3. Remove files
+rm -f components.json
+rm -f tailwind.config.js
+rm -rf components/ui
+rm -rf .nuxt
+rm -rf .output
+rm -rf node_modules
 
-if [ $USE_PNPM ]; then
-    pnpm install
-else
-    npm install
-fi
-
-# 5. Install Nuxt 4
+# 4. Reorganise folder structure
 mkdir app
-mv assets components composables layouts lib pages utils app.config.ts app.vue -t app
+mv assets components composables layouts lib pages utils app.config.ts app.vue -t app 2>/dev/null
 
 curl https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/tsconfig.json > tsconfig.json
 
-if [ $USE_PNPM ]; then
+# 5. Reinstall packages
+if $USE_PNPM; then
     pnpm add -D nuxt
 else
     npm install -D nuxt
 fi
 
+PREPARE="nuxi prepare"
+if $USE_PNPM; then
+    pnpm dlx $PREPARE
+else
+    npx $PREPARE
+fi
+
 # 6. Install Tailwind 4
 TAILWIND_PACKAGES="tailwindcss @tailwindcss/vite"
-if [ $USE_PNPM ]; then
+if $USE_PNPM; then
     pnpm add $TAILWIND_PACKAGES
 else
     npm install $TAILWIND_PACKAGES
@@ -61,43 +66,42 @@ fi
 
 echo '@import "tailwindcss";' > app/assets/css/tailwind.css
 
-sed $SED_FLAGS "-e" '1s/^/import tailwindcss from "@tailwindcss\/vite";\n\n/' nuxt.config.ts
-sed $SED_FLAGS '/vite: {/ a\
+sed "${SED_FLAGS[@]}" "-e" '1s/^/import tailwindcss from "@tailwindcss\/vite";\n\n/' nuxt.config.ts
+sed "${SED_FLAGS[@]}" '/vite: {/ a\
         plugins: \[tailwindcss\(\)\],
 ' nuxt.config.ts
 
 # 7. Install & initialise shadcn-vue
 SHAD_ADD="nuxi@latest module add shadcn-nuxt"
-if [ $USE_PNPM ]; then
+if $USE_PNPM; then
     pnpm dlx $SHAD_ADD
 else
     npx $SHAD_ADD
 fi
 
-sed $SED_FLAGS "-e" 's/\(}\)$/\1,/g' nuxt.config.ts
+sed "${SED_FLAGS[@]}" "-e" 's/\(}\)$/\1,/g' nuxt.config.ts
 
-sed $SED_FLAGS '/});$/ i\
+sed "${SED_FLAGS[@]}" '/});$/ i\
     shadcn: \{\
         prefix: \"\",\
         componentDir: \"@\/components\/ui\"\
     \},\
 ' nuxt.config.ts
 
-PREPARE="nuxi prepare"
-if [ $USE_PNPM ]; then
+if $USE_PNPM; then
     pnpm dlx $PREPARE
 else
     npx $PREPARE
 fi
 
 SHAD_INIT="shadcn-vue@latest init -d"
-if [ $USE_PNPM ]; then
+if $USE_PNPM; then
     pnpm dlx $SHAD_INIT
 else
     npx $SHAD_INIT
 fi
 
-sed $SED_FLAGS "-e" 's/zinc/slate/g' components.json
+sed "${SED_FLAGS[@]}" "-e" 's/zinc/slate/g' components.json
 
 git clone -n --depth=1 --filter=tree:0 -b feature/tailwind4 --single-branch https://github.com/rdflib/prez-ui
 cd prez-ui
@@ -108,7 +112,7 @@ mv prez-ui/packages/create-prez-app/template/app/components/ui app/components
 rm -rf prez-ui
 
 # 8. Install reka-ui
-if [ $USE_PNPM ]; then
+if $USE_PNPM; then
     pnpm add reka-ui
 else
     npm install reka-ui
@@ -118,7 +122,7 @@ fi
 curl https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/app/assets/css/tailwind.css > app/assets/css/tailwind.css
 
 # 10. Install prez-ui
-if [ $USE_PNPM ]; then
+if $USE_PNPM; then
     pnpm add -D ../prez-ui/packages/prez-ui
 else
     npm install -D ../prez-ui/packages/prez-ui
