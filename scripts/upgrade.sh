@@ -113,6 +113,7 @@ rm -rf prez-ui
 
 # 8. Install reka-ui
 if $USE_PNPM; then
+    pnpm install --force
     pnpm add reka-ui
 else
     npm install reka-ui

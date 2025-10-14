@@ -94,6 +94,7 @@ copy-item -recurse "prez-ui/packages/create-prez-app/template/app/components/ui"
 remove-item -recurse -force "prez-ui"
 
 # 8. Install reka-ui
+invoke-npmcommand -command "install" -pnpmCommand "install" -argslist "--force"
 invoke-npmcommand -command "install" -pnpmCommand "add" -argslist "reka-ui"
 
 # 9. Update tailwind.css
