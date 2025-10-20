@@ -12,13 +12,13 @@ export default defineNuxtConfig({
     modules: ["@nuxtjs/color-mode", "shadcn-nuxt"],
     css: [
         "prez-components/prez-components.css",
-        "@/assets/css/tailwind.css",
+        "~/assets/css/tailwind.css",
         join(currentDir, "app/assets/css/style.css"),
-        "@/assets/css/theme.css"
+        "~/assets/css/theme.css"
     ],
     shadcn: {
         prefix: "",
-        componentDir: "@/components/ui"
+        componentDir: "./app/components/ui"
     },
     ssr: false,
     runtimeConfig: {

@@ -8,7 +8,7 @@ export default defineNuxtConfig({
     extends: ["prez-ui"],
     shadcn: {
         prefix: "",
-        componentDir: "@/components/ui"
+        componentDir: "./app/components/ui"
     },
     vite: {
         plugins: [tailwindcss()],
