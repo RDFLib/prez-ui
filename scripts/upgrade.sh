@@ -14,7 +14,7 @@ else
 fi
 
 # 1. Uninstall old packages
-REMOVE_PACKAGES=(@nuxtjs/tailwindcss radix-vue tailwind-merge prez-ui)
+REMOVE_PACKAGES=(@nuxtjs/tailwindcss radix-vue tailwindcss-animate prez-ui)
 if $USE_PNPM; then
     pnpm remove "${REMOVE_PACKAGES[@]}"
 else
@@ -22,7 +22,20 @@ else
 fi
 
 # 2. Update packages
-UPDATE_PACKAGES=(nuxt shadcn-nuxt)
+UPDATE_PACKAGES=(tailwind-merge nuxt shadcn-nuxt)
+
+PREZ_PACKAGES=(prez-lib prez-components)
+if $USE_PNPM; then
+    MANAGER="pnpm"
+else
+    MANAGER="npm"
+fi
+for package in "${PREZ_PACKAGES[@]}"; do
+    if $MANAGER list --depth=0 | grep $package; then
+        UPDATE_PACKAGES+=($package)
+    fi
+done
+
 if $USE_PNPM; then
     pnpm update "${UPDATE_PACKAGES[@]}" --latest
 else
@@ -30,7 +43,7 @@ else
 fi
 
 # 3. Install packages
-INSTALL_PACKAGES=(tailwindcss @tailwindcss/vite tw-animate-css reka-ui)
+INSTALL_PACKAGES=(tailwindcss @tailwindcss/vite tw-animate-css reka-ui @vueuse/core)
 if $USE_PNPM; then
     pnpm add "${INSTALL_PACKAGES[@]}"
 else
@@ -109,6 +122,7 @@ else
     npx shadcn-vue@latest add "${DIFF_COMPONENTS[@]}"
 fi
 
+echo "-----------------------------"
 echo "Upgrade complete!"
 echo "The next step is to convert your Tailwind CSS variables saved in 'tailwind.txt'"
 echo "Follow step 9 in the upgrade guide"
