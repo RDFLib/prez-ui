@@ -7,6 +7,12 @@ fi
 MAC_OS=$([ $(uname -s) == Darwin ] && echo true || echo false)
 USE_PNPM=$([ -f pnpm-lock.yaml ] && echo true || echo false)
 
+if $USE_PNPM; then
+    MANAGER="pnpm"
+else
+    MANAGER="npm"
+fi
+
 if $MAC_OS; then
     SED_FLAGS=( -i '' )
 else
@@ -15,21 +21,21 @@ fi
 
 # 1. Uninstall old packages
 REMOVE_PACKAGES=(@nuxtjs/tailwindcss radix-vue tailwindcss-animate prez-ui)
-if $USE_PNPM; then
-    pnpm remove "${REMOVE_PACKAGES[@]}"
-else
-    npm uninstall "${REMOVE_PACKAGES[@]}"
-fi
+
+for package in "${REMOVE_PACKAGES[@]}"; do
+    if $MANAGER list --depth=0 | grep $package; then
+        if $USE_PNPM; then
+            pnpm remove $package
+        else
+            npm uninstall $package
+        fi
+    fi
+done
 
 # 2. Update packages
 UPDATE_PACKAGES=(tailwind-merge nuxt shadcn-nuxt)
-
 PREZ_PACKAGES=(prez-lib prez-components)
-if $USE_PNPM; then
-    MANAGER="pnpm"
-else
-    MANAGER="npm"
-fi
+
 for package in "${PREZ_PACKAGES[@]}"; do
     if $MANAGER list --depth=0 | grep $package; then
         UPDATE_PACKAGES+=($package)
@@ -117,9 +123,9 @@ else
 fi
 
 if $USE_PNPM; then
-    pnpm dlx shadcn-vue@latest add "${DIFF_COMPONENTS[@]}"
+    yes n | pnpm dlx shadcn-vue@latest add "${DIFF_COMPONENTS[@]}"
 else
-    npx shadcn-vue@latest add "${DIFF_COMPONENTS[@]}"
+    yes n | npx shadcn-vue@latest add "${DIFF_COMPONENTS[@]}"
 fi
 
 echo "-----------------------------"

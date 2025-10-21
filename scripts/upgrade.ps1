@@ -112,8 +112,10 @@ $templateShadComponents = (Get-ChildItem -Path app/components/ui).name
 $diffComponents = $shadComponents | Where-Object {$templateShadComponents -NotContains $_}
 
 invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "nuxi prepare"
-
-invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "shadcn-vue@latest add $diffComponents"
+if ($diffComponents.Length -gt 0) {
+    write-output  "Choose no (N) to overriding components if prompted below"
+    invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "shadcn-vue@latest add $diffComponents"
+}
 
 write-output  "-----------------------------"
 write-output  "Upgrade complete!"
