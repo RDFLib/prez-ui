@@ -33,57 +33,66 @@ function save-file {
 }
 
 # 1. Uninstall old packages
-$removePackages = "@nuxtjs/tailwindcss radix-vue shadcn-nuxt prez-ui tailwind-merge nuxt"
-invoke-npmcommand -command "uninstall" -pnpmCommand "remove" -argslist $removePackages
+$removePackages = "@nuxtjs/tailwindcss radix-vue tailwindcss-animate prez-ui"
 
-get-content -raw "nuxt.config.ts" |`
-    foreach { $_ -replace '\"@nuxtjs\/tailwindcss\"[,]{0,1}',"" } |`
-    foreach { $_ -replace '\"shadcn-nuxt\"[,]{0,1}',"" } | `
-    save-file -path "nuxt.config.ts"
+$removePackages.split(" ") | ForEach-Object {
+    $pkg=$_
+    if ((invoke-npmcommand -command "list" -pnpmCommand "list" -argslist "--depth=0 $_" | where-object {$_ -like "*$pkg*" }).length -gt 0) {
+        invoke-npmcommand -command "uninstall" -pnpmCommand "remove" -argslist $_
+    }
+}
 
-# 2. Remove required files & folders
-remove-item "components.json"
+# 2. Update packages
+$updatePackages = "tailwind-merge nuxt shadcn-nuxt"
+$prezPackages = "prez-lib prez-components"
+
+$prezPackages.split(" ") | ForEach-Object {
+    $pkg=$_
+    if ((invoke-npmcommand -command "list" -pnpmCommand "list" -argslist "--depth=0 $_" | where-object {$_ -like "*$pkg*" }).length -gt 0) {
+        $updatePackages += " $_"
+    }
+}
+
+if ($usePnpm) {
+    $up = "$updatePackages --latest"
+} else {
+    $up = $updatePackages.split(" ") | ForEach-Object {"$_@latest"} | join " "
+}
+invoke-npmcommand -command "install" -pnpmCommand "update" -argslist $up
+
+# 3. Install packages
+$installPackages = "tailwindcss @tailwindcss/vite tw-animate-css reka-ui @vueuse/core"
+invoke-npmcommand -command "install" -pnpmCommand "add" -argslist $installPackages
+
+# temp - install dev packages
+invoke-npmcommand -command "install" -pnpmCommand "add" -argslist "-D ../prez-ui/packages/prez-ui"
+
+# 4. Remove files
+$shadComponents = (Get-ChildItem -Path components/ui).name
 remove-item "tailwind.config.js"
 remove-item -recurse "components/ui"
 
-# 3. Backup Tailwind variables
-rename-item "assets/css/tailwind.css" "tailwind.txt"
-New-Item -Path "assets/css/tailwind.css" -ItemType File 
-
-# 4. Reinstall packages
-remove-item -recurse ".nuxt"
-remove-item -recurse ".output"
-remove-item -recurse "node_modules"
-
-invoke-npmcommand -command "install"
-
-# 5. Install Nuxt 4
+# 5. Move files into app/
 New-Item -Path "app" -ItemType Directory 
-Move-Item -Path assets, components, composables, layouts, lib, pages, utils, app.config.ts, app.vue -Destination app
+Move-Item -Path assets, components, composables, layouts, lib, pages, utils, app.config.ts, app.vue -Destination app -ErrorAction SilentlyContinue
 
-Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/tsconfig.json' -OutFile "tsconfig.json"
-
-invoke-npmcommand -command "install" -pnpmCommand "add" -argslist "-D nuxt"
-
-# 6. Install Tailwind 4
-invoke-npmcommand -command "install" -pnpmCommand "add" -argslist "tailwindcss @tailwindcss/vite"
-'@import "tailwindcss";' | save-file -path "app/assets/css/tailwind.css"
-
-# 7. Install & initialise shadcn-vue
-invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "nuxi@latest module add shadcn-nuxt"
-
+# 6. Update nuxt.config.ts
 "import tailwindcss from `"@tailwindcss/vite`";`r`r" + (get-content -raw "nuxt.config.ts") | save-file -path "nuxt.config.ts"
 
 get-content -raw "nuxt.config.ts" |`
-    foreach { $_ -replace 'vite: {',"vite: {`r`t`tplugins: [tailwindcss()]," } |`
-    foreach { $_ -replace "}[`r`n]+","},`r" } |`
-    foreach { $_ -replace "\}\);?\s*$","`tshadcn: {`r`t`tprefix: `"`",`r`t`tcomponentDir: `"@/components/ui`",`r`t},`r});" } |`
+    ForEach-Object { $_ -replace '\"@nuxtjs\/tailwindcss\"[,]{0,1}',"" } |`
+    ForEach-Object { $_ -replace 'vite: {',"vite: {`r`t`tplugins: [tailwindcss()]," } |`
+    ForEach-Object { $_ -replace "}[`r`n]+","},`r" } |`
+    ForEach-Object { $_ -replace "\}\);?\s*$","`tshadcn: {`r`t`tprefix: `"`",`r`t`tcomponentDir: `"./app/components/ui`",`r`t},`r});" } |`
     save-file -path "nuxt.config.ts"
 
-invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "nuxi prepare"
-invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "shadcn-vue@latest init -d"
+# 7. Update tsconfig.json
+Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/tsconfig.json' -OutFile "tsconfig.json"
 
-(get-content -raw "components.json") -replace "zinc","slate" | save-file -path "components.json"
+# 8. Copy shadcn components
+Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/components.json' -OutFile "components.json"
+
+Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/app/lib/utils.ts' -OutFile "app/lib/utils.ts"
 
 & git clone -n --depth=1 --filter=tree:0 -b feature/tailwind4 --single-branch "https://github.com/rdflib/prez-ui"
 push-location prez-ui
@@ -91,19 +100,24 @@ push-location prez-ui
 & git checkout
 pop-location
 copy-item -recurse "prez-ui/packages/create-prez-app/template/app/components/ui" "app/components"
-remove-item -recurse -force "prez-ui"
+remove-item -recurse -force "prez-ui" -ErrorAction SilentlyContinue
 
-# 8. Install reka-ui
-invoke-npmcommand -command "install" -pnpmCommand "install" -argslist "--force"
-invoke-npmcommand -command "install" -pnpmCommand "add" -argslist "reka-ui"
-
-# 9. Update tailwind.css
+# 9. Update Tailwind variables
+rename-item "app/assets/css/tailwind.css" "tailwind.txt"
+New-Item -Path "app/assets/css/tailwind.css" -ItemType File
 Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/app/assets/css/tailwind.css' -OutFile "app/assets/css/tailwind.css"
 
-# 10. Install prez-ui
-invoke-npmcommand -command "install -D" -pnpmCommand "add -D" -argslist "../prez-ui/packages/prez-ui"
+# 10. (Optional) Re-install extra shadcn components
+$templateShadComponents = (Get-ChildItem -Path app/components/ui).name
+$diffComponents = $shadComponents | Where-Object {$templateShadComponents -NotContains $_}
 
+invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "nuxi prepare"
+
+invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "shadcn-vue@latest add $diffComponents"
+
+write-output  "-----------------------------"
 write-output  "Upgrade complete!"
 write-output  "The next step is to convert your Tailwind CSS variables saved in 'tailwind.txt'"
 write-output  "Follow step 9 in the upgrade guide"
 write-output  "https://github.com/RDFLib/prez-ui/blob/feature/tailwind4/docs/upgrade.md#9-update-tailwindcss"
+write-output  "(Note: You may need to remove the prez-ui folder as it may not have been deleted properly)"
