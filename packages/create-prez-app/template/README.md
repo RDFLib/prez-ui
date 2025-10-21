@@ -8,10 +8,22 @@ In the project root directory, install with your NPM package manager of choice (
 npm install
 ```
 
+or for pnpm:
+
+```bash
+pnpm install
+```
+
 Then preview your theme by running:
 
 ```bash
 npm run dev
+```
+
+or for pnpm:
+
+```bash
+pnpm dev
 ```
 
 You may need to open the dev server (http://localhost:3000) in a second window in a private tab or different browser on first load to resolve the layout rendering error.
@@ -37,7 +49,7 @@ The `nuxt.config.ts` file contains your configuration for Nuxt, which extends up
 See the [Nuxt config docs](https://nuxt.com/docs/getting-started/configuration) for more info on how to configure Nuxt.
 
 ### App Config
-The `app.config.ts` file contains your app-level config, where you can customise the navigation items, renaming items throughout the application, customising prepended items in the breadcrumbs, and pagination config. This app config extends upon Prez UI's [base layer app config](https://github.com/RDFLib/prez-ui/blob/feature/tailwind4/packages/prez-ui/app/app.config.ts).
+The `app/app.config.ts` file contains your app-level config, where you can customise the navigation items, renaming items throughout the application, customising prepended items in the breadcrumbs, and pagination config. This app config extends upon Prez UI's [base layer app config](https://github.com/RDFLib/prez-ui/blob/main/packages/prez-ui/app/app.config.ts).
 
 ## Extending your theme
 This starter template uses [layers](https://nuxt.com/docs/getting-started/layers) to extend upon the base Prez UI layer application, so you only need to customise what you need.
@@ -89,6 +101,11 @@ Prez UI uses the [prez-components](https://github.com/rdflib/prez-ui/tree/main/p
 ```bash
 npx shadcn-vue@latest add <component>
 ```
-*(Note: for pnpm, run `pnpm dlx` instead of `npx`)*
+
+or
+
+```bash
+pnpm dlx shadcn-vue@latest add <component>
+```
 
 These components are stored in `app/components/ui`, which should be kept separate to your theme's components.

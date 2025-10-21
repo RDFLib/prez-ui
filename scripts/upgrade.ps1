@@ -33,7 +33,7 @@ function save-file {
 }
 
 # 1. Uninstall old packages
-$removePackages = "@nuxtjs/tailwindcss radix-vue tailwindcss-animate prez-ui"
+$removePackages = "@nuxtjs/tailwindcss radix-vue tailwindcss-animate"
 
 $removePackages.split(" ") | ForEach-Object {
     $pkg=$_
@@ -43,7 +43,7 @@ $removePackages.split(" ") | ForEach-Object {
 }
 
 # 2. Update packages
-$updatePackages = "tailwind-merge nuxt shadcn-nuxt"
+$updatePackages = "tailwind-merge nuxt shadcn-nuxt prez-ui"
 $prezPackages = "prez-lib prez-components"
 
 $prezPackages.split(" ") | ForEach-Object {
@@ -63,9 +63,6 @@ invoke-npmcommand -command "install" -pnpmCommand "update" -argslist $up
 # 3. Install packages
 $installPackages = "tailwindcss @tailwindcss/vite tw-animate-css reka-ui @vueuse/core"
 invoke-npmcommand -command "install" -pnpmCommand "add" -argslist $installPackages
-
-# temp - install dev packages
-invoke-npmcommand -command "install" -pnpmCommand "add" -argslist "-D ../prez-ui/packages/prez-ui"
 
 # 4. Remove files
 $shadComponents = (Get-ChildItem -Path components/ui).name
@@ -87,14 +84,14 @@ get-content -raw "nuxt.config.ts" |`
     save-file -path "nuxt.config.ts"
 
 # 7. Update tsconfig.json
-Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/tsconfig.json' -OutFile "tsconfig.json"
+Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@main/packages/create-prez-app/template/tsconfig.json' -OutFile "tsconfig.json"
 
 # 8. Copy shadcn components
-Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/components.json' -OutFile "components.json"
+Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@main/packages/create-prez-app/template/components.json' -OutFile "components.json"
 
-Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/app/lib/utils.ts' -OutFile "app/lib/utils.ts"
+Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@main/packages/create-prez-app/template/app/lib/utils.ts' -OutFile "app/lib/utils.ts"
 
-& git clone -n --depth=1 --filter=tree:0 -b feature/tailwind4 --single-branch "https://github.com/rdflib/prez-ui"
+& git clone -n --depth=1 --filter=tree:0 -b main --single-branch "https://github.com/rdflib/prez-ui"
 push-location prez-ui
 & git sparse-checkout set --no-cone /packages/create-prez-app/template/app/components/ui
 & git checkout
@@ -105,21 +102,23 @@ remove-item -recurse -force "prez-ui" -ErrorAction SilentlyContinue
 # 9. Update Tailwind variables
 rename-item "app/assets/css/tailwind.css" "tailwind.txt"
 New-Item -Path "app/assets/css/tailwind.css" -ItemType File
-Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@feature/tailwind4/packages/create-prez-app/template/app/assets/css/tailwind.css' -OutFile "app/assets/css/tailwind.css"
+Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/gh/rdflib/prez-ui@main/packages/create-prez-app/template/app/assets/css/tailwind.css' -OutFile "app/assets/css/tailwind.css"
 
 # 10. (Optional) Re-install extra shadcn components
 $templateShadComponents = (Get-ChildItem -Path app/components/ui).name
 $diffComponents = $shadComponents | Where-Object {$templateShadComponents -NotContains $_}
 
 invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "nuxi prepare"
-if ($diffComponents.Length -gt 0) {
-    write-output  "Choose no (N) to overriding components if prompted below"
-    invoke-npmCommand -command "exec --" -pnpmCommand "dlx" -argslist "shadcn-vue@latest add $diffComponents"
-}
 
 write-output  "-----------------------------"
 write-output  "Upgrade complete!"
 write-output  "The next step is to convert your Tailwind CSS variables saved in 'tailwind.txt'"
 write-output  "Follow step 9 in the upgrade guide"
-write-output  "https://github.com/RDFLib/prez-ui/blob/feature/tailwind4/docs/upgrade.md#9-update-tailwindcss"
+write-output  "https://github.com/RDFLib/prez-ui/blob/main/docs/upgrade.md#9-update-tailwindcss"
 write-output  "(Note: You may need to remove the prez-ui folder as it may not have been deleted properly)"
+
+if ($diffComponents.Length -gt 0) {
+    write-output  "-----------------------------"
+    write-output  "There are remaining shadcn components to add to your project - $diffComponents"
+    write-output  "See https://www.shadcn-vue.com/docs/cli.html#add for details"
+}

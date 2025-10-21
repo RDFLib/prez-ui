@@ -6,12 +6,21 @@ To get started running your own Prez UI instance, simply run the following to ge
 ```bash
 npx create-prez-app@latest <project_name>
 ```
-*(Note: for pnpm, run `pnpm dlx` instead of `npx`)*
 
-or
+or for pnpm:
+```bash
+npm dlx create-prez-app@latest <project_name>
+```
+
+Alternatively you can use the `create` command:
 
 ```bash
 npm create prez-app@latest <project_name>
+```
+
+or for pnpm:
+```bash
+pnpm create create-prez-app@latest <project_name>
 ```
 
 This will download a starter template [Nuxt](https://nuxt.com) project extending Prez UI's [base layer](https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui).
@@ -22,10 +31,22 @@ In the project root directory, install with your NPM package manager of choice:
 npm install
 ```
 
+or:
+
+```bash
+pnpm install
+```
+
 Then preview your theme by running:
 
 ```bash
 npm run dev
+```
+
+or
+
+```bash
+pnpm dev
 ```
 
 You may need to open the dev server (http://localhost:3000) in a second window in a private tab or different browser on first load to resolve the layout rendering error.
@@ -89,17 +110,22 @@ Refer to Prez UI's base layer [source code](https://github.com/rdflib/prez-ui/tr
 > [!WARNING]
 > Override files at your own risk, as copying code means that future updates to overridden components must be done manually.
 
-The most common case of theming Prez UI is adding a header, a footer, and modifying the nav for every page. This can easily be done by copying & overriding `LayoutHeader.vue`, `LayoutNav.vue` & `LayoutFooter.vue` in the `components/` directory. If further layout modifications are needed, you can also override the default layout in `layouts/default.vue`.
+The most common case of theming Prez UI is adding a header, a footer, and modifying the nav for every page. This can easily be done by copying & overriding `LayoutHeader.vue`, `LayoutNav.vue` & `LayoutFooter.vue` in the `components/` directory. If further layout modifications are needed, you can also override the default layout in `app/layouts/default.vue`.
 
 ## shadcn-vue Components
-Prez UI uses the [prez-components](https://github.com/rdflib/prez-ui/tree/main/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template (`badge`, `button`, `input` & `pagination` are included as the base layer requires them), but if you need to add more shadcn components in your theme, run a command like the following to add the component:
+Prez UI uses the [prez-components](https://github.com/rdflib/prez-ui/tree/main/packages/prez-components) component library, which is based on the [shadcn-vue](https://www.shadcn-vue.com) component library. Shad comes preinstalled in this starter template (`badge`, `button`, `input`, `pagination` & `select` are included as the base layer requires them), but if you need to add more shadcn components in your theme, run a command like the following to add the component:
 
 ```bash
 npx shadcn-vue@latest add <component>
 ```
-*(Note: for pnpm, run `pnpm dlx` instead of `npx`)*
 
-These components are stored in `components/ui`, which should be kept separate to your theme's components.
+or
+
+```bash
+pnpm dlx shadcn-vue@latest add <component>
+```
+
+These components are stored in `app/components/ui`, which should be kept separate to your theme's components.
 
 ## Other helpful tips
 Assets such as images should go in the `public/` directory. You can also replace the favicon in this directory by providing your own with the same name and file extension. If the favicon isn't the same extension, you can add it in the `app` config below as a link element.
