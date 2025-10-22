@@ -1,0 +1,12 @@
+version: "3"
+name: prez-ui
+services:
+  prezui:
+    build:
+      context: .
+      args:
+        NUXT_PUBLIC_PREZ_API_ENDPOINT: https://localhost:8000
+        NUXT_PUBLIC_PREZ_AUTO_DETECT_HTML: true
+        NUXT_PUBLIC_PREZ_AUTO_DETECT_MARKDOWN: true
+    ports:
+      - "3000:80"
