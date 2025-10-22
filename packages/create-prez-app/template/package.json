@@ -1,6 +1,6 @@
 {
     "name": "prez-ui-starter",
-    "version": "4.1.4",
+    "version": "4.2.0",
     "private": true,
     "license": "BSD-3-Clause",
     "type": "module",
@@ -29,7 +29,7 @@
     },
     "devDependencies": {
         "nuxt": "^4.1.2",
-        "prez-ui": "^4.1.4",
+        "prez-ui": "^4.2.0",
         "shadcn-nuxt": "^2.2.0",
         "typescript": "^5.9.2",
         "vue-tsc": "^3.0.7"
