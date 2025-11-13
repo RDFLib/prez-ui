@@ -136,7 +136,7 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
 
         <template #sidepanel>
             <slot name="profiles" :data="data" :apiUrl="apiUrl" :status="status">
-                <ItemProfiles :key="status" :objectUri="(route.query.uri as string)" :apiUrl="apiUrl" :loading="status == 'pending'" :profiles="data?.profiles" />
+                <ItemProfiles :key="status" :objectUri="data?.data.value" :apiUrl="apiUrl" :loading="status == 'pending'" :profiles="data?.profiles" />
             </slot>
         </template>
 
