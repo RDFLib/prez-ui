@@ -22,20 +22,22 @@ const props = defineProps<{
 
 <template>
     <div class="flex flex-col gap-2 mt-4 pagination">
-        <Pagination v-if="props.totalItems > props.pagination.limit" v-slot="{ page }" :total="props.totalItems" :itemsPerPage="props.pagination.limit" :sibling-count="1" show-edges :page="props.pagination.page" class="paginator">
-            <PaginationContent v-slot="{ items }" class="flex items-center gap-1 justify-center">
+        <Pagination v-if="props.totalItems > props.pagination.limit" v-slot="{ page, pageCount }" :total="props.totalItems" :itemsPerPage="props.pagination.limit" :sibling-count="1" show-edges :page="props.pagination.page" class="paginator">
+	        <PaginationContent v-slot="{ items }" class="flex items-center gap-1 justify-center">
                 <PaginationFirst as-child>
-                    <Button class="w-10 h-10 p-0" variant="outline" as-child>
-                        <NuxtLink :to="{...route, query: { ...route.query, page: '1' }}">
+                    <Button class="w-10 h-10 p-0" variant="outline" :disabled="page === 1" :as-child="page > 1">
+                        <NuxtLink v-if="page > 1" :to="{...route, query: { ...route.query, page: '1' }}">
                             <ChevronsLeft class="size-4" />
                         </NuxtLink>
+	                    <ChevronsLeft v-else class="size-4" />
                     </Button>
                 </PaginationFirst>
                 <PaginationPrevious as-child>
-                    <Button class="w-10 h-10 p-0" variant="outline" as-child>
-                        <NuxtLink :to="{...route, query: { ...route.query, page: (props.pagination.page - 1).toString() }}">
+                    <Button class="w-10 h-10 p-0" variant="outline" :disabled="page === 1" :as-child="page > 1">
+                        <NuxtLink v-if="page > 1" :to="{...route, query: { ...route.query, page: (props.pagination.page - 1).toString() }}">
                             <ChevronLeft class="size-4" />
                         </NuxtLink>
+	                    <ChevronLeft v-else class="size-4" />
                     </Button>
                 </PaginationPrevious>
 
@@ -48,18 +50,20 @@ const props = defineProps<{
                     <PaginationEllipsis v-else :key="item.type" :index="index" />
                 </template>
 
-                <PaginationNext as-child :disabled="props.maxReached">
-                    <Button class="w-10 h-10 p-0" variant="outline" as-child>
-                        <NuxtLink :to="{...route, query: { ...route.query, page: (props.pagination.page + 1).toString() }}">
+                <PaginationNext as-child>
+                    <Button class="w-10 h-10 p-0" variant="outline" :disabled="page === pageCount" :as-child="page < pageCount">
+                        <NuxtLink v-if="page < pageCount" :to="{...route, query: { ...route.query, page: (props.pagination.page + 1).toString() }}">
                             <ChevronRight class="size-4" />
                         </NuxtLink>
+	                    <ChevronRight v-else class="size-4" />
                     </Button>
                 </PaginationNext>
                 <PaginationLast as-child>
-                    <Button class="w-10 h-10 p-0" variant="outline" as-child>
-                        <NuxtLink :to="{...route, query: { ...route.query, page: Math.ceil(props.totalItems / props.pagination.limit).toString() }}">
+                    <Button class="w-10 h-10 p-0" variant="outline" :disabled="page === pageCount" :as-child="page < pageCount">
+                        <NuxtLink v-if="page < pageCount" :to="{...route, query: { ...route.query, page: Math.ceil(props.totalItems / props.pagination.limit).toString() }}">
                             <ChevronsRight class="size-4" />
                         </NuxtLink>
+	                    <ChevronsRight v-else class="size-4" />
                     </Button>
                 </PaginationLast>
             </PaginationContent>

@@ -162,6 +162,7 @@ export interface ItemTableProps {
     term: PrezTerm;
     renderHtml?: boolean;
     renderMarkdown?: boolean;
+    sortProperties?: boolean;
     _components?: {
         itemTableRow: Component;
     };
@@ -268,4 +269,8 @@ export interface DataProviderProps {
         loading: Component;
         message: Component;
     };
+};
+
+export interface ExpandableProps {
+    class?: HTMLAttributes["class"];
 };

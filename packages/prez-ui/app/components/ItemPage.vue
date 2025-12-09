@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezDataItem, type PrezNode } from 'prez-lib';
+import { Expandable } from "prez-components";
 
 const appConfig = useAppConfig();
 const { globalProfiles } = useGlobalProfiles();
@@ -17,7 +18,7 @@ const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.c
 // Watch for changes in both globalProfiles and currentProfile
 // Apply profile to item uses the current profile to order properties
 // To do: use a loader to show that the profile is being applied
-watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfiles, newCurrentProfile]) => {
+watch([globalProfiles, currentProfile], ([newGlobalProfiles, newCurrentProfile]) => {
   if (newGlobalProfiles && newCurrentProfile && newGlobalProfiles[newCurrentProfile.uri] ) {
     const profile = newGlobalProfiles[newCurrentProfile.uri];
     if (data.value && profile) {
@@ -69,13 +70,14 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                         <slot name="header-description" :data="data"></slot>
                         <slot name="header-middle" :data="data"></slot>
                         <slot name="header-identifiers" :data="data">
-                            <div class="mb-2 mt-2 flex flex-row items-center">
-                                <Badge variant="secondary" class="mr-2 rounded-md">IRI</Badge><ItemLink :secondary-to="data.data.value" copy-link>{{ data.data.value }}</ItemLink>
+                            <div class="mb-2 mt-2 flex flex-row items-center gap-2">
+                                <span class="font-bold">IRI:</span>
+	                            <ItemLink :secondary-to="data.data.value" copy-link class="font-mono">{{ data.data.value }}</ItemLink>
                             </div>
-                            <div class="flex flex-row gap-3" v-if="data?.data.rdfTypes">
-                                <Badge variant="secondary" class="self-start rounded-md">Type</Badge>
-                                <div>
-                                    <div v-for="rdfType in data.data.rdfTypes"><Node :term="rdfType" /></div>
+                            <div class="flex flex-row gap-2" v-if="data?.data.rdfTypes">
+	                            <span class="font-bold">Type:</span>
+                                <div class="flex flex-row items-center gap-2">
+                                    <Badge v-for="rdfType in data.data.rdfTypes" variant="secondary"><Node :term="rdfType" /></Badge>
                                 </div>
                             </div>
                         </slot>
@@ -83,7 +85,11 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                     </slot>
                     <div class="mt-4 mb-12 overflow-auto">
                         <slot name="item-section" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
-                            <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
+                            <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
+	                            <Expandable>
+		                            <p v-if="data.data.description" class="mt-2 mb-4 italic text-muted-foreground">{{data.data.description.value}}</p>
+	                            </Expandable>
+                            </slot>
                             <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
 
                                 <ItemTable

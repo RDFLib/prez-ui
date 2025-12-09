@@ -9,6 +9,7 @@ import { LiteralProps } from "@/types";
 import { isHtmlDetected, isMarkdownDetected } from "@/utils/helpers";
 import { Badge } from "@/components/ui/badge";
 import Term from "@/components/Term.vue";
+import Expandable from "@/components/Expandable.vue";
 
 const props = withDefaults(defineProps<LiteralProps>(), {
     _components: () => {
@@ -132,7 +133,7 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
             <slot v-if="props?.term?.value" name="text" :term="term" :text="term.value">
                 <span v-if="isMarkdown" v-html="renderedMarkdownContent"></span>
                 <span v-else-if="isHtml" :class="htmlClass" v-html="sanitizedHtml"></span>
-                <span v-else :class="props.class">{{ term.value }}</span>
+                <Expandable v-else :class="props.class">{{ term.value }}</Expandable>
             </slot>
         </template>
         <!-- Full output -->
@@ -143,12 +144,12 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
                     <span v-else-if="isHtml" :class="htmlClass" v-html="sanitizedHtml"></span>
                     <span v-else :class="props.class">
                         <a v-if="term.value.startsWith('http')" :href="term.value" target="_blank" rel="noopener noreferrer" class="inline-flex gap-1 items-center">{{ term.value }} <Link class="size-4" /></a>
-                        <template v-else>{{ term.value }}</template>
+                        <Expandable v-else>{{ term.value }}</Expandable>
                     </span>
                 </slot>
                 <slot v-if="!hideLanguage && term.language !== undefined" name="language" :term="term" :language="term.language">
                     <div class="pt-1">
-                        <Badge variant="secondary" class="rounded-md">{{ term.language }}</Badge>
+                        <Badge variant="outline" class="rounded-md">{{ term.language }}</Badge>
                     </div>
                 </slot>
                 <slot v-if="!hideDataType && term.datatype !== undefined" name="datatype" :term="term" :datatype="term.datatype">

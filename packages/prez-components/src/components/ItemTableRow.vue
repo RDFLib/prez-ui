@@ -27,7 +27,7 @@ const isFullWidth = computed(()=>
     <slot name="row">
         <TableRow class="hover:bg-unset even:bg-muted/50 border-y">
             <slot name="columns">
-                <TableCell v-if="isFullWidth" colspan="2">
+                <TableCell v-if="isFullWidth" colspan="2" class="whitespace-normal">
                     <div><component :is="props._components.predicate" :predicate="predicate" :objects="objects" :term="term" variant="item-table" /></div>
                     <div class="border-l pl-4 mt-2 ml-2">
                         <component
@@ -42,10 +42,10 @@ const isFullWidth = computed(()=>
                     </div>
                 </TableCell>
                 <template v-else>
-                    <TableCell class="w-[1%] whitespace-nowrap">
+                    <TableCell class="align-top font-bold">
                         <component :is="props._components.predicate" :predicate="predicate" :objects="objects" :term="term" variant="item-table" />
                     </TableCell>
-                    <TableCell class="w-[100%]">
+                    <TableCell class="whitespace-normal w-full">
                         <component
                             :is="props._components.objects"
                             :predicate="predicate"

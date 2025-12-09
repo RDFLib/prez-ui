@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import { Copy } from "lucide-vue-next";
+import { Copy, Check } from "lucide-vue-next";
 import { cn } from "@/lib/utils";
 import type { CopyButtonProps } from "@/types";
 import Button from "./ui/button/Button.vue";
@@ -22,8 +22,16 @@ function onClick() {
 </script>
 
 <template>
-    <Button title="Copy to clipboard" @click="onClick" :class="cn('copy-btn', props.class)" aria-label="Copy" :variant="props.variant" :size="props.size">
-        <Copy class="w-4 h-4" />
+    <Button
+	    title="Copy to clipboard"
+	    @click="onClick"
+	    :class="cn('copy-btn', props.class)"
+	    aria-label="Copy"
+	    :variant="props.variant"
+	    :size="props.size"
+    >
+	    <Check v-if="clicked" class="w-4 h-4" />
+        <Copy v-else class="w-4 h-4" />
         <template v-if="!props.iconOnly">{{ clicked ? 'Copied!' : 'Copy' }}</template>
     </Button>
 </template>
