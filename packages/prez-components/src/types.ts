@@ -248,6 +248,7 @@ export interface ItemProfilesProps {
     objectUri?: string;
     profiles?: PrezProfileHeader[];
     loading?: boolean;
+    class?: HTMLAttributes["class"];
     _components?: {
         itemLink: Component;
         loading: Component;

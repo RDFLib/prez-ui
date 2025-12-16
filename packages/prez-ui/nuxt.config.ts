@@ -38,6 +38,8 @@ export default defineNuxtConfig({
             prezAutoDetectHtml: true,
             // new
             prezSortTableProperties: true,
+            prezEnableDarkMode: true,
+            prezAllowedProperties: [],
         }
     },
     vite: {
@@ -49,5 +51,10 @@ export default defineNuxtConfig({
                 target: "es2020"
             }
         }
+    },
+    colorMode: {
+
+        classPrefix: "",
+        classSuffix: "",
     },
 });

@@ -3,7 +3,7 @@ import { computed, onMounted, nextTick } from "vue";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
 import mermaid from "mermaid";
-import { Link } from "lucide-vue-next";
+import { Link, Languages } from "lucide-vue-next";
 import { type PrezLiteral, SYSTEM_PREDICATES } from "prez-lib";
 import { LiteralProps } from "@/types";
 import { isHtmlDetected, isMarkdownDetected } from "@/utils/helpers";
@@ -149,7 +149,10 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
                 </slot>
                 <slot v-if="!hideLanguage && term.language !== undefined" name="language" :term="term" :language="term.language">
                     <div class="pt-1">
-                        <Badge variant="outline" class="rounded-md">{{ term.language }}</Badge>
+                        <Badge variant="outline" class="rounded-md" title="Language">
+	                        <Languages />
+	                        {{ term.language }}
+                        </Badge>
                     </div>
                 </slot>
                 <slot v-if="!hideDataType && term.datatype !== undefined" name="datatype" :term="term" :datatype="term.datatype">
