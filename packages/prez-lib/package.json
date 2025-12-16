@@ -35,12 +35,12 @@
     },
     "devDependencies": {
         "@rdfjs/types": "^1.1.2",
-        "@types/n3": "^1.21.1",
+        "@types/n3": "^1.26.1",
         "typescript": "5.9.2",
-        "vite": "^7.1.5",
+        "vite": "^7.3.0",
         "vite-plugin-dts": "^4.5.4"
     },
     "dependencies": {
-        "n3": "^1.23.1"
+        "n3": "^1.26.0"
     }
 }
