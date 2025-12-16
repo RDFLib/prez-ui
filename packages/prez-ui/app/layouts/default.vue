@@ -21,21 +21,52 @@ onBeforeMount(() => {
 </script>
 
 <template>
-    <div class="flex flex-col min-h-screen">
+    <div class="flex flex-col min-h-screen relative">
         <LayoutHeader />
 
         <LayoutNav v-model="showDebugPanel" />
 
         <!-- page heading -->
-        <slot v-if="!contentonly" name="header">
-            <div class="bg-muted">
-                <div class="container mx-auto flex flex-row">
+        <slot v-if="!props.contentonly" name="header">
+            <div class="bg-muted dark:bg-muted/50">
+                <div class="container mx-auto flex flex-row relative">
                     <div class="px-4 py-4 flex-grow">
                         <slot name="breadcrumb" />
                         <h1 class="text-3xl pb-4 pt-3">
                             <slot name="header-text" />
                         </h1>
                     </div>
+
+	                <Sheet v-if="props.sidepanel">
+		                <SheetTrigger as-child>
+			                <Button variant="outline" size="icon" class="absolute right-2 bottom-2 lg:hidden" title="Show sidepanel">
+				                <ChevronLeft class="size-4" />
+			                </Button>
+		                </SheetTrigger>
+		                <SheetContent side="right" class="p-2" hideClose>
+			                <SheetHeader class="grid grid-cols-[1fr_3fr_1fr] gap-2 p-2">
+				                <SheetClose as-child>
+					                <Button variant="ghost" size="icon">
+						                <ChevronRight class="size-4" />
+					                </Button>
+				                </SheetClose>
+				                <div></div>
+				                <div></div>
+			                </SheetHeader>
+			                <slot name="sidepanel" />
+		                </SheetContent>
+	                </Sheet>
+	                <Button
+		                v-if="props.sidepanel"
+	                    variant="outline"
+	                    size="icon"
+	                    class="absolute right-2 bottom-2 hidden lg:flex"
+	                    :title="`${expandSidePanel ? 'Hide sidepanel' : 'Show sidepanel'}`"
+	                    @click="expandSidePanel = !expandSidePanel"
+	                >
+		                <ChevronRight v-if="expandSidePanel" class="size-4" />
+		                <ChevronLeft v-else class="size-4" />
+	                </Button>
                     
                     <div v-if="showDebugPanel" class="m-2 bg-gray-200 rounded-lg text-[12px] leading-[12px]">
                         <slot name="debug" />
@@ -51,35 +82,13 @@ onBeforeMount(() => {
 
         <!-- content -->
         <div class="container mx-auto flex-grow">
-            <div v-if="sidepanel" class="grid grid-cols-4 gap-4 px-4 py-4">
-                <div :class="expandSidePanel ? 'col-span-3 relative' : 'col-span-4 relative'">
+            <div :class="`${props.sidepanel ? 'flex flex-row gap-4' : ''} p-4`">
+                <div class="grow">
                     <slot />
-                    <Button
-                        v-if="!expandSidePanel"
-                        title="Show sidepanel"
-                        variant="ghost"
-                        size="icon"
-                        class="absolute right-0 top-[-5px] pointer-events-auto"
-                        @click="expandSidePanel = !expandSidePanel"
-                    >
-                        <ChevronLeft class="size-4" />
-                    </Button>
                 </div>
-                <div v-if="expandSidePanel" class="relative">
+                <div v-if="props.sidepanel" :class="`lg:max-w-[350px] lg:transition-[width] lg:overflow-hidden hidden lg:shrink-0 lg:relative lg:flex ${expandSidePanel ? 'lg:w-1/4' : 'lg:w-0'}`">
                     <slot name="sidepanel" />
-                    <Button
-                        title="Hide sidepanel"
-                        variant="ghost"
-                        size="icon"
-                        class="absolute right-0 top-[-5px] pointer-events-auto"
-                        @click="expandSidePanel = !expandSidePanel"
-                    >
-                        <ChevronRight class="size-4" />
-                    </Button>
                 </div>
-            </div>
-            <div v-else class="px-4 py-4">
-                <slot />
             </div>
         </div>
 

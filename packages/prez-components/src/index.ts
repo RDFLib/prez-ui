@@ -19,6 +19,7 @@ import Predicate from "./components/Predicate.vue";
 import SearchResults from "./components/SearchResults.vue";
 import Term from "./components/Term.vue";
 import TermList from "./components/TermList.vue";
+import Expandable from "./components/Expandable.vue";
 
 export * from "./types";
 
@@ -43,5 +44,6 @@ export {
     SearchResults,
     Term,
     TermList,
+    Expandable,
 };
 

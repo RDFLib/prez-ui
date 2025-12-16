@@ -10,8 +10,9 @@ const itemTableRow = resolveComponent("ItemTableRow") as Component;
 <template>
     <ItemTable
         v-bind="props"
+        :sortProperties="runtimeConfig.public.prezSortTableProperties"
         :_components="{itemTableRow}"
-        :renderMarkdown="!!runtimeConfig.public.prezAutoDetectMarkdown"
-        :renderHtml="!!runtimeConfig.public.prezAutoDetectHtml"
+        :renderMarkdown="runtimeConfig.public.prezAutoDetectMarkdown"
+        :renderHtml="runtimeConfig.public.prezAutoDetectHtml"
     />
 </template>

@@ -26,14 +26,20 @@ export default defineNuxtConfig({
             version: pkg.version,
         },
         public: {
-            prezApiEndpoint: "http://localhost:8000",
+            // dev
             prezApiEndpointAlt: "",
             prezApiEndpointAltNames: "",
             prezUtilsTestPath: "/catalogs/ns:catId/collections/ns:colId/items/ns:itemId",
             prezDebug: false,
             prezAllowApiEndpointChange: false,
-            prezAutoDetectMarkdown: false,
-            prezAutoDetectHtml: false
+            // current
+            prezApiEndpoint: "http://localhost:8000",
+            prezAutoDetectMarkdown: true,
+            prezAutoDetectHtml: true,
+            // new
+            prezSortTableProperties: true,
+            prezEnableDarkMode: true,
+            prezAllowedProperties: [],
         }
     },
     vite: {
@@ -45,5 +51,10 @@ export default defineNuxtConfig({
                 target: "es2020"
             }
         }
+    },
+    colorMode: {
+
+        classPrefix: "",
+        classSuffix: "",
     },
 });

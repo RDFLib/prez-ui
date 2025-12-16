@@ -2,6 +2,7 @@
 import { RouterLink } from "vue-router"; 
 import { ExternalLink, MoveRight } from "lucide-vue-next";
 import { ItemLinkProps } from "@/types";
+import { cn } from "@/lib/utils";
 import CopyButton from "./CopyButton.vue";
 
 const props = withDefaults(defineProps<ItemLinkProps>(), {
@@ -49,13 +50,6 @@ const secondaryUrl = props.secondaryTo !== undefined
     ? (typeof(props.secondaryTo) == 'string' ? props.secondaryTo : props.secondaryTo?.value || '')
     : props.to && typeof(props.to) == 'object' ? props.to.value : '';
 
-
-/** determine the secondary link url */
-// const secondaryUrl = usePrimaryLinkOnly ? primaryLink : secondaryLink;
-
-/** determine the primary url */
-// const url = (useSecondaryLinkOnly ? secondaryUrl : primaryLink || secondaryLink) || '';
-
 /** determine the url is an external link */
 const isExtLink = url ? url.startsWith('http') || url.startsWith('mailto') : false;
 
@@ -74,14 +68,6 @@ const isSecondaryExtLink = secondaryUrl ? secondaryUrl.startsWith('http') || sec
 //         }
 //     }
 // };
-
-// const defaultClasses = 'border-b-[2px] hover:no-underline hover:border-primary ' + 
-//     (hideUnderline ? 'border-transparent' : 'border-gray-300 border-dashed hover:border-solid');
-
-const defaultClasses = "item-link";
-
-const linkClass = props.class ? defaultClasses + ' ' + props.class : defaultClasses;
-
 </script>
 
 <template>
@@ -90,40 +76,47 @@ const linkClass = props.class ? defaultClasses + ' ' + props.class : defaultClas
         <span class="inline-flex gap-1 items-center">
             <template v-if="url && !props.hidePrimaryLink">
                 <a v-if="isExtLink"
-                    :class="linkClass"
+                    :class="cn('item-link', props.class)"
                     :href="url" :title="hideTitle ? undefined : props.title" 
                     :target="props.target" :rel="props.rel"
                 >
                     <slot />
                 </a>
                 <RouterLink v-else
-                    :class="linkClass"
+                    :class="cn('item-link', props.class)"
                     :to="url" :title="hideTitle ? undefined : props.title" 
                 >
                     <slot />
                 </RouterLink>
             </template>
-            <span v-else>
+            <span v-else :class="cn('item-link', props.class)">
                 <slot />
             </span>
             <template v-if="secondaryUrl && !hideSecondaryLink">
                 <a v-if="isSecondaryExtLink"
                     :href="secondaryUrl" :title="hideTitle ? undefined : props.title"
                     :target="props.target" :rel="props.rel"
-                    :class="linkClass"
+                    :class="cn('item-link', props.class)"
                 >
                     <ExternalLink class="w-4 h-4" />
                 </a>
                 <RouterLink v-else 
                     :to="secondaryUrl" :title="hideTitle ? undefined : props.title"
-                    :class="linkClass"
+                    :class="cn('item-link', props.class)"
                 >
                     <!-- unlikely scenario, but we if our secondary link points internal show an arrow not window out -->
                     <MoveRight class="w-4 h-4" />
                 </RouterLink>
             </template>
             
-            <component :is="props._components.copyButton" v-if="props.copyLink" icon-only :value="typeof(copyLink) == 'string' ? copyLink : url || secondaryUrl" size="icon" variant="outline" />
+            <component
+	            :is="props._components.copyButton"
+	            v-if="props.copyLink"
+	            icon-only
+	            :value="typeof(copyLink) == 'string' ? copyLink : url || secondaryUrl"
+	            size="icon"
+	            variant="outline"
+            />
         </span>
     </slot>
 </template>

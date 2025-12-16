@@ -19,7 +19,7 @@ const list = props.list;
 
 <template>
     <!-- ItemList -->
-    <Table v-if="list" class="item-list min-w-[50rem]">
+    <Table v-if="list" class="item-list">
         <TableHeader>
             <TableRow>
                 <TableHead><b>Item</b></TableHead>
