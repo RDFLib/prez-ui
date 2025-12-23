@@ -101,6 +101,18 @@ export interface PrezConceptSchemeNode extends PrezFocusNode {
 }
 
 /**
+ * A FocusNode for an Ontology
+ */
+export interface PrezOntologyNode extends PrezFocusNode {
+    ontologyClasses: PrezNode[];
+    ontologyProperties: PrezNode[];
+}
+
+/** A FocusNode for a combination of an Ontology and a Concept Scheme */
+export interface PrezConceptSchemeOntologyNode extends PrezConceptSchemeNode, PrezOntologyNode {
+}
+
+/**
  * A recursive list of child concept schemes
  */
 export interface PrezConceptNode extends PrezFocusNode {
@@ -148,12 +160,12 @@ export interface PrezBlankNode extends Omit<BlankNode, "equals"> {
 };
 
 /**
- * 
+ *
  * example: /catalogs/prefix:cat1/collections
- * 
+ *
  * labels = the resolved label value of the id
  * segments = the url part for the parent
- * 
+ *
  */
 export type PrezLinkParent = {
     label?: PrezLiteral;
@@ -290,4 +302,3 @@ export type PrezFacet = {
     facetName: PrezNode;
     facetValues: PrezFacetValue[];
 }
-  

@@ -1,5 +1,5 @@
 import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad } from "n3";
-import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezLinkParent, PrezNodeList, PrezFacet } from "./types";
+import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezOntologyNode, PrezConceptSchemeOntologyNode, PrezLinkParent, PrezNodeList, PrezFacet } from "./types";
 import { DEFAULT_PREFIXES, PREZ_PREDICATES, SYSTEM_PREDICATES } from "./consts";
 import { defaultToIri, defaultFromIri } from "./helpers";
 import { node, literal, bnode } from "./factory";
@@ -34,7 +34,7 @@ export class RDFStore {
 
     /**
      * Parses an RDF string in Turtle format into a store
-     * 
+     *
      * @param s RDF Turtle string
      */
     public load(s: string) {
@@ -123,7 +123,7 @@ export class RDFStore {
 
     /**
      * getParents uses the base path to remove the base path from the parent URL (for breadcrumbs)
-     * 
+     *
      * @param url
      */
     public setBaseUrl(url: string) {
@@ -133,9 +133,9 @@ export class RDFStore {
 
     /**
      * Interprets a predicate curie into its full IRI
-     * 
+     *
      * Note: must be called after `load()`
-     * 
+     *
      * @param s curie string
      * @returns Predicate IRI string
      */
@@ -145,9 +145,9 @@ export class RDFStore {
 
     /**
      * Generates a curie from a IRI
-     * 
+     *
      * Note: must be called after `load()`
-     * 
+     *
      * @param iri the IRI string
      * @returns Generated curie
      */
@@ -233,7 +233,7 @@ export class RDFStore {
             switch (term.termType) {
                 case "NamedNode":
                     const n = node(term.value);
-                    
+
                     n.label = this.getObjectLiteral(term.value, PREZ_PREDICATES.label);
                     n.description = this.getObjectLiteral(term.value, PREZ_PREDICATES.description);
                     n.provenance = this.getObjectLiteral(term.value, PREZ_PREDICATES.provenance);
@@ -294,9 +294,9 @@ export class RDFStore {
 
     /**
      * Creates a PrezFocusNode object
-     * 
-     * @param obj 
-     * @returns 
+     *
+     * @param obj
+     * @returns
      */
     private toPrezFocusNode(obj: Quad_Object): PrezFocusNode {
         const focusNode: PrezFocusNode = this.toPrezTerm(obj) as PrezFocusNode;
@@ -310,7 +310,7 @@ export class RDFStore {
 
     /**
      * Gets an array of N3 `Quad_Objects` from a `Store` by providing a predicate or an array of predicates
-     * 
+     *
      * @param predicate a string or string array of predicate IRIs
      * @param object the object IRI
      * @returns the array of objects
@@ -321,7 +321,7 @@ export class RDFStore {
 
     /**
      * Gets an array of N3 `Quad_Objects` from a `Store` by providing a predicate or an array of predicates
-     * 
+     *
      * @param subject the subject IRI
      * @param predicate a string or string array of predicate IRIs
      * @returns the array of objects
@@ -351,8 +351,8 @@ export class RDFStore {
 
     /**
      * Returns the concept hierarchy for a vocab
-     * 
-     * @param vocab 
+     *
+     * @param vocab
      * @return the concept hierarchy
      */
     public getConcepts(vocab: Quad_Object): PrezConceptNode[] {
@@ -405,7 +405,7 @@ export class RDFStore {
 
     /**
      * Gets a one or more subjects based on having a prez FocusNode identifier
-     * 
+     *
      * @param id optional id to match to get one subject
      * @returns one or more subjects
      */
@@ -417,7 +417,7 @@ export class RDFStore {
         this.store.forEach(q => {
             ids.push(q);
         }, null, null, namedNode('https://prez.dev/FocusNode'), null);
-        
+
         if (id) {
             return ids.find(q => q.object.value === id)!.subject;
         } else {
@@ -447,12 +447,12 @@ export class RDFStore {
 
     /**
      * Returns a list of item objects
-     * 
+     *
      * @returns a list of item objects
      */
     public getList(): PrezFocusNode[] {
         const items: PrezFocusNode[] = [];
-        
+
         // assume only and all list items have dcterms:identifier - can't select by baseClass
         const objs = this.getByPrezId();
         objs.forEach(obj => {
@@ -479,9 +479,49 @@ export class RDFStore {
         return collections;
     }
 
+    /* Returns all owl:Classes an ontology defines.
+    * Note that this requires a Prez profile that serves all triples with the http://www.w3.org/2000/01/rdf-schema#isDefinedBy back to the ontology, as well as the rdf:type of these subjects.
+    */
+    public getOntologyClasses(vocab: Quad_Object): PrezNode[] {
+        const isDefinedBy = this.getSubjects("http://www.w3.org/2000/01/rdf-schema#isDefinedBy", vocab.value);
+        const classIRIs = this.getSubjects("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www.w3.org/2002/07/owl#Class").filter(subj => isDefinedBy.find(i => i.value === subj.value));
+        const ontologyClasses = classIRIs.map(c => this.toPrezTerm(c) as PrezNode).sort((a, b) => {
+            if (a.label && b.label) {
+                return a.label.value.localeCompare(b.label.value);
+            } else if (a.label) {
+                return -1;
+            } else if (b.label) {
+                return 1;
+            } else {
+                return a.value.localeCompare(b.value);
+            }
+        });
+        return ontologyClasses;
+    }
+
+    /* Returns all owl:ObjectProperties an ontology defines.
+    * Note that this requires a Prez profile that serves all triples with the http://www.w3.org/2000/01/rdf-schema#isDefinedBy back to the ontology, as well as the rdf:type of these subjects.
+    */
+    public getOntologyProperties(vocab: Quad_Object): PrezNode[] {
+        const isDefinedBy = this.getSubjects("http://www.w3.org/2000/01/rdf-schema#isDefinedBy", vocab.value);
+        const propertyIRIs = this.getSubjects("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www.w3.org/2002/07/owl#ObjectProperty").filter(subj => isDefinedBy.find(i => i.value === subj.value));
+        const ontologyProperties = propertyIRIs.map(p => this.toPrezTerm(p) as PrezNode).sort((a, b) => {
+            if (a.label && b.label) {
+                return a.label.value.localeCompare(b.label.value);
+            } else if (a.label) {
+                return -1;
+            } else if (b.label) {
+                return 1;
+            } else {
+                return a.value.localeCompare(b.value);
+            }
+        });
+        return ontologyProperties;
+    }
+
     /**
      * Returns an item object
-     * 
+     *
      * @param id the id of the object to return
      * @returns the item object
      */
@@ -490,6 +530,26 @@ export class RDFStore {
         if(obj.length == 0) throw new Error('Unable to find item');
         const item = this.toPrezFocusNode(obj[0]!);
 
+        if (item.rdfTypes?.map(t => t.value).includes(SYSTEM_PREDICATES.owlOntology) && item.rdfTypes?.map(t => t.value).includes(SYSTEM_PREDICATES.skosConceptScheme)) {
+          const ontologyClasses = this.getOntologyClasses(obj[0]!);
+          const ontologyProperties = this.getOntologyProperties(obj[0]!);
+          const collections = this.getSkosCollections(obj[0]!);
+          return {
+            ...item,
+            collections,
+            ontologyClasses,
+            ontologyProperties
+          } as PrezConceptSchemeOntologyNode;
+        }
+        if (item.rdfTypes?.map(t => t.value).includes(SYSTEM_PREDICATES.owlOntology)) {
+          const ontologyClasses = this.getOntologyClasses(obj[0]!);
+          const ontologyProperties = this.getOntologyProperties(obj[0]!);
+          return {
+            ...item,
+            ontologyClasses,
+            ontologyProperties
+          } as PrezOntologyNode;
+        }
         // if conceptscheme
         if (item.rdfTypes?.map(t => t.value).includes(SYSTEM_PREDICATES.skosConceptScheme)) {
             const collections = this.getSkosCollections(obj[0]!);
@@ -508,15 +568,15 @@ export class RDFStore {
             //     }
             // } as PrezConceptSchemeNode;
         }
-        
+
         return item;
     }
 
     /**
      * Return nested subitems for a given predicate
-     * 
+     *
      * @param predicate Predicate IRI to lookup
-     * @returns 
+     * @returns
      */
     public getSubItems(predicate:string) {
         const nodes = this.store.getQuads(null, predicate, null, null);
@@ -551,13 +611,13 @@ export class RDFStore {
 
     /**
      * Returns a list of facets
-     * 
+     *
      * @returns a list of facets
      */
     public getFacets(): PrezFacet[] {
         const facets: PrezFacet[] = [];
         this.store.getQuads(null, PREZ_PREDICATES.facetName, null, null).forEach(q => {
-            
+
             if(q.subject.termType == "BlankNode") {
 
                 const b = bnode(q.subject.value);
@@ -601,6 +661,6 @@ export class RDFStore {
             }
         });
         return facets;
-    }    
-    
+    }
+
 };
