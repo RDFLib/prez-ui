@@ -28,6 +28,14 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
     }
   }
 });
+
+const navigateToNode = (bblockNode) => {
+  console.log(bblockNode);
+  if (bblockNode?.links?.length > 0 && bblockNode.links[0].value) {
+    router.push({ path: bblockNode.links[0].value });
+  }
+}
+
 </script>
 
 <template>
