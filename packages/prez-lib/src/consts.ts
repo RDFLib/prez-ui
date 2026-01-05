@@ -60,7 +60,8 @@ export const SYSTEM_PREDICATES = {
     shaclPath: "http://www.w3.org/ns/shacl#path",
     shaclUnion: "http://www.w3.org/ns/shacl#union",
     dctermsIdentifier: "http://purl.org/dc/terms/identifier",
-    owlOntology: "http://www.w3.org/2002/07/owl#Ontology"
+    owlOntology: "http://www.w3.org/2002/07/owl#Ontology",
+    bblock: "https://www.opengis.net/def/bblocks/Schema"
 };
 
 

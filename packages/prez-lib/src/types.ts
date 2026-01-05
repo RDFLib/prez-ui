@@ -126,6 +126,13 @@ export interface PrezConceptNode extends PrezFocusNode {
     hasChildren: boolean;
 }
 
+/**
+ * A FocusNode for an OGC Building Block
+ */
+export interface PrezBBlockNode extends PrezFocusNode {
+    dependsOn: PrezNode[];
+}
+
 /** Represents a node and list of subnodes */
 export type PrezNodeList = {
     node: PrezNode;

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezDataItem, type PrezNode } from 'prez-lib';
+import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezBBlockNode, type PrezDataItem, type PrezNode } from 'prez-lib';
+import DependencyViewer from '@/components/bblock/DependencyViewer';
 
 const appConfig = useAppConfig();
 const { globalProfiles } = useGlobalProfiles();
@@ -11,6 +12,7 @@ const apiEndpoint = useGetPrezAPIEndpoint();
 const { status, error, data } = useGetItem(apiEndpoint, urlPath);
 const isConceptScheme = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.skosConceptScheme));
 const isOntology = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.owlOntology));
+const isBBlock = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.bblock));
 const topConceptsUrl = computed(()=>isConceptScheme.value ? getTopConceptsUrl(data.value!.data) : '');
 const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
@@ -141,6 +143,18 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
                                     <p><b>Properties</b></p>
                                     <div class="mt-4 flex flex-col gap-2">
                                         <Node v-for="ontologyProperty in (data.data as PrezOntologyNode).ontologyProperties" :term="ontologyProperty" />
+                                    </div>
+                                </div>
+                            </slot>
+
+                            <slot name="item-bblock-dependencies" :data="data">
+                                <div class="mt-6" v-if="isBBlock && (data.data as PrezBBlockNode).dependsOn.length > 0">
+                                    <p><b>Dependencies</b></p>
+                                    <div class="mt-4 flex flex-col gap-2">
+                                      <DependencyViewer v-if="isBBlock"
+                                        :data="data.data"
+                                        @node:click="navigateToNode"
+                                      />
                                     </div>
                                 </div>
                             </slot>
