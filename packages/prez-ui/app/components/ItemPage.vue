@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezBBlockNode, type PrezDataItem, type PrezNode } from 'prez-lib';
-import DependencyViewer from '@/components/bblock/DependencyViewer';
+import DependencyViewer from './bblock/DependencyViewer';
+import { getProvenance } from '../lib/prov';
+import { ProvenanceDiagram } from "prez-components";
 
 const appConfig = useAppConfig();
 const { globalProfiles } = useGlobalProfiles();
@@ -16,7 +18,9 @@ const isBBlock = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYS
 const topConceptsUrl = computed(()=>isConceptScheme.value ? getTopConceptsUrl(data.value!.data) : '');
 const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
-
+const resourceUri = data.value?.data.value;
+const resourceLabel = data.value?.data.label?.value;
+const provenance = ref(await getProvenance(resourceUri, resourceLabel, apiEndpoint));
 // Watch for changes in both globalProfiles and currentProfile
 // Apply profile to item uses the current profile to order properties
 // To do: use a loader to show that the profile is being applied
@@ -29,8 +33,7 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
   }
 });
 
-const navigateToNode = (bblockNode) => {
-  console.log(bblockNode);
+const navigateToNode = (bblockNode: any) => {
   if (bblockNode?.links?.length > 0 && bblockNode.links[0].value) {
     router.push({ path: bblockNode.links[0].value });
   }
@@ -163,6 +166,15 @@ const navigateToNode = (bblockNode) => {
                                         :data="data.data"
                                         @node:click="navigateToNode"
                                       />
+                                    </div>
+                                </div>
+                            </slot>
+
+                            <slot name="item-provenance" :data="data">
+                                <div class="mt-6" v-if="provenance?.wasDerivedFrom">
+                                    <p><b>Provenance</b></p>
+                                    <div class="mt-4 flex flex-col gap-2">
+                                      <ProvenanceDiagram :data="provenance" />
                                     </div>
                                 </div>
                             </slot>

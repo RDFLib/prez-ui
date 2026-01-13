@@ -111,7 +111,7 @@ export interface ItemTableRowProps {
     /** parent term or root focus node */
     term: PrezTerm;
     /** index of the row */
-    index: number; 
+    index: number;
     /** the main predicate to render */
     predicate: PrezNode;
     /** objects to render */
@@ -269,3 +269,18 @@ export interface DataProviderProps {
         message: Component;
     };
 };
+
+export interface ProvenanceDiagramProps {
+  data: any;
+}
+export interface ProvenanceNode {
+  id: string;
+  name: string;
+  label?: any;
+}
+export interface ProvenanceLink {
+  source: string;
+  target: string;
+  value: number;
+  edgeLabel: object;
+}
