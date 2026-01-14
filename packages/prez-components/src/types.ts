@@ -111,7 +111,7 @@ export interface ItemTableRowProps {
     /** parent term or root focus node */
     term: PrezTerm;
     /** index of the row */
-    index: number; 
+    index: number;
     /** the main predicate to render */
     predicate: PrezNode;
     /** objects to render */
@@ -268,4 +268,17 @@ export interface DataProviderProps {
         loading: Component;
         message: Component;
     };
+};
+
+export interface DependencyViewerProps {
+  data: any
+  nodeSize?: number
+};
+
+export interface GraphNodeProps {
+  itemClass?: string;
+  radius: number;
+  scale: number;
+  fill: string;
+  stroke: string;
 };

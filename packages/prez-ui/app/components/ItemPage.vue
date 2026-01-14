@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezBBlockNode, type PrezDataItem, type PrezNode } from 'prez-lib';
-import DependencyViewer from '@/components/bblock/DependencyViewer';
+import { DependencyViewer } from 'prez-components';
 
 const appConfig = useAppConfig();
 const { globalProfiles } = useGlobalProfiles();
@@ -29,8 +29,7 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
   }
 });
 
-const navigateToNode = (bblockNode) => {
-  console.log(bblockNode);
+const navigateToNode = (bblockNode: any) => {
   if (bblockNode?.links?.length > 0 && bblockNode.links[0].value) {
     router.push({ path: bblockNode.links[0].value });
   }
