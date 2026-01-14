@@ -270,6 +270,18 @@ export interface DataProviderProps {
     };
 };
 
+export interface DependencyViewerProps {
+  data: any
+  nodeSize?: number
+};
+
+export interface GraphNodeProps {
+  itemClass?: string;
+  radius: number;
+  scale: number;
+  fill: string;
+  stroke: string;
+};
 export interface ProvenanceDiagramProps {
   data: any;
 }

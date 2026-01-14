@@ -30,7 +30,6 @@
         "axios": "^1.13.2",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
-        "dagre": "^0.8.5",
         "lucide-vue-next": "^0.544.0",
         "marked": "^16.3.0",
         "mermaid": "^11.11.0",
@@ -40,13 +39,11 @@
         "tailwind-merge": "^3.3.1",
         "tailwindcss": "^4.1.13",
         "tw-animate-css": "^1.3.8",
-        "v-network-graph": "^0.9.21",
         "vue": "^3.5.21",
         "vue-router": "^4.5.1"
     },
     "devDependencies": {
         "nuxt": "^4.1.2",
-        "sass-embedded": "^1.95.1",
         "shadcn-nuxt": "^2.2.0",
         "typescript": "^5.9.2",
         "vue-tsc": "^3.0.7"

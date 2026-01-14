@@ -44,46 +44,23 @@
           :font-size="`${radius * scale * 1.3}px`" font-weight="bold" color="#444">?</text>
   </g>
 </template>
-<script>
-// import {getLabel as getItemClassLabel} from "@/models/itemClass";
-export default {
-  props: {
-    itemClass: {
-      type: String,
-    },
-    radius: {
-      type: Number,
-      required: true,
-    },
-    scale: {
-      type: Number,
-      default: 1,
-    },
-    fill: {
-      type: String,
-      default: 'none',
-    },
-    stroke: {
-      type: String,
-      default: '',
-    },
-  },
-  data() {
-    return {
-      points: {
-        triangle: [[0, -1], [1.155, 1], [-1.155, 1]],
-        hexagon: [[-1, 0], [-0.5, -0.866], [0.5, -0.866], [1, 0], [0.5, 0.866], [-0.5, 0.866]],
-      },
-      rotate180: 'rotate(180, 0.5, 0.5)',
-    };
-  },
-  methods: {
-    // getItemClassLabel,
-    resize(points, size) {
-      return points.map(p => p.map(c => c * size));
-    },
-  },
-  computed: {
-  },
-}
+
+<script lang="ts" setup>
+  import { GraphNodeProps } from "@/types";
+  withDefaults(defineProps<GraphNodeProps>(),{
+    itemClass: '',
+    scale: 1,
+    fill: 'none',
+    stroke: ''
+  });
+
+  const points = {
+    triangle: [[0, -1], [1.155, 1], [-1.155, 1]],
+    hexagon: [[-1, 0], [-0.5, -0.866], [0.5, -0.866], [1, 0], [0.5, 0.866], [-0.5, 0.866]],
+  };
+  const rotate180 = 'rotate(180, 0.5, 0.5)';
+
+  const resize = (points: any, size: number) => {
+    return points.map((p: any) => p.map((c: any) => c * size));
+  }
 </script>

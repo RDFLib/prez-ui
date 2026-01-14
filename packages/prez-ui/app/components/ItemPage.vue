@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezBBlockNode, type PrezDataItem, type PrezNode } from 'prez-lib';
-import DependencyViewer from './bblock/DependencyViewer';
 import { getProvenance } from '../lib/prov';
-import { ProvenanceDiagram } from "prez-components";
+import { DependencyViewer, ProvenanceDiagram } from "prez-components";
 import { onMounted } from 'vue';
 
 const appConfig = useAppConfig();
