@@ -3,6 +3,7 @@ import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES
 import DependencyViewer from './bblock/DependencyViewer';
 import { getProvenance } from '../lib/prov';
 import { ProvenanceDiagram } from "prez-components";
+import { onMounted } from 'vue';
 
 const appConfig = useAppConfig();
 const { globalProfiles } = useGlobalProfiles();
@@ -18,9 +19,14 @@ const isBBlock = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYS
 const topConceptsUrl = computed(()=>isConceptScheme.value ? getTopConceptsUrl(data.value!.data) : '');
 const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
-const resourceUri = data.value?.data.value;
-const resourceLabel = data.value?.data.label?.value;
-const provenance = ref(await getProvenance(resourceUri, resourceLabel, apiEndpoint));
+const resourceUri = computed(()=>data.value ? data.value.data.value : undefined);
+const resourceLabel = computed(()=>data.value?.data.label ? data.value.data.label.value : undefined);
+const provenance = ref(await getProvenance(resourceUri.value, resourceLabel.value, apiEndpoint));
+
+watch([() => resourceUri.value, () => resourceLabel.value], async ([newResourceUri, newResourceLabel]) => {
+  provenance.value = await getProvenance(resourceUri.value, resourceLabel.value, apiEndpoint);
+})
+
 // Watch for changes in both globalProfiles and currentProfile
 // Apply profile to item uses the current profile to order properties
 // To do: use a loader to show that the profile is being applied

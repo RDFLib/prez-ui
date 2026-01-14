@@ -2,7 +2,7 @@
 import { ProvenanceDiagramProps, ProvenanceNode, ProvenanceLink } from "@/types";
 
 import { use } from "echarts/core";
-import { CanvasRenderer } from "echarts/renderers";
+import { SVGRenderer } from "echarts/renderers";
 // import type EChartsOption from "echarts";
 import { SankeyChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, LegendComponent } from "echarts/components";
@@ -53,17 +53,21 @@ if (props.data?.label && props.data?.wasDerivedFrom) {
   addNode(props.data);
 }
 
-use([CanvasRenderer, SankeyChart, TitleComponent, TooltipComponent, LegendComponent]);
+use([SVGRenderer, SankeyChart, TitleComponent, TooltipComponent, LegendComponent]);
 
 const option = ref({
   series: {
     type: 'sankey',
     layout: 'none',
     emphasis: {
-      focus: 'adjacency'
+      focus: 'adjacency',
+      label: {
+        show: true
+      }
     },
     tooltip: {
-      trigger: 'item'
+      trigger: 'item',
+      triggerOn: 'mousemove'
     },
     data: nodes,
     links: links
@@ -77,9 +81,21 @@ const option = ref({
   </div>
 </template>
 
-<style scoped>
-.chart {
-  height: 500px;
+<style>
+.provenance-sankey-diagram {
+  overflow: visible;
+}
+.provenance-sankey-diagram .chart {
+  min-height: 500px;
   width: 100%;
+  overflow: visible;
+}
+
+.provenance-sankey-diagram .chart > div {
+  overflow: visible !important;
+}
+
+.provenance-sankey-diagram .chart > div > svg {
+  overflow: visible;
 }
 </style>

@@ -1,5 +1,6 @@
 import axios from "axios";
-const PROVENENCE_CHAIN_MAX_LENGTH = 5;
+const runtimeConfig = useRuntimeConfig();
+const maxLength = runtimeConfig.public.prezProvenancePathMaxLength;
 
 const queryProvenance = async (resourceUri: String, label: String, apiEndpoint: String, remainingSteps: Number) => {
   if (resourceUri && remainingSteps > 0) {
@@ -10,12 +11,29 @@ const queryProvenance = async (resourceUri: String, label: String, apiEndpoint: 
           PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
           PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
           PREFIX schema: <https://schema.org/>
+          PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-          SELECT ?wasDerivedFrom (COALESCE(?rdfsLabel, ?prefLabel, ?name, ?wasDerivedFrom) AS ?label) WHERE {
+          SELECT
+            ?wasDerivedFrom
+            (COALESCE(?rdfsLabel, ?prefLabel, ?name, ?wasDerivedFrom) AS ?label)
+            ?attributedTo
+            (COALESCE(?attributedToRdfsLabel, ?attributedToPrefLabel, ?attributedToName) AS ?attributedToLabel)
+          WHERE {
             <${resourceUri}> prov:wasDerivedFrom ?wasDerivedFrom .
             OPTIONAL { ?wasDerivedFrom rdfs:label ?rdfsLabel . }
             OPTIONAL { ?wasDerivedFrom skos:prefLabel ?prefLabel . }
             OPTIONAL { ?wasDerivedFrom schema:name ?name . }
+            OPTIONAL {
+              <${resourceUri}> prov:wasAttributedTo ?attributedTo .
+              OPTIONAL { ?attributedTo rdfs:label ?attributedToRdfsLabel . }
+              OPTIONAL { ?attributedTo skos:prefLabel ?attributedToPrefLabel . }
+              OPTIONAL { ?attributedTo foaf:firstName ?attributedToFirstName . }
+              OPTIONAL { ?attributedTo foaf:family_name ?attributedToFamilyName . }
+              BIND(IF(BOUND(?attributedToFamilyName),
+                      CONCAT(IF(BOUND(?attributedToFirstName), CONCAT(?attributedToFirstName, " "), ""), ?attributedToFamilyName),
+                      STR(?attributedTo))
+              AS ?attributedToName)
+            }
           }
         `),
     );
@@ -39,6 +57,6 @@ const queryProvenance = async (resourceUri: String, label: String, apiEndpoint: 
 
 export async function getProvenance(resourceUri: String, label: String, apiEndpoint: String) {
   // get derivation chain
-  let provenance = await queryProvenance(resourceUri, label, apiEndpoint, PROVENENCE_CHAIN_MAX_LENGTH);
+  let provenance = await queryProvenance(resourceUri, label, apiEndpoint, maxLength);
   return provenance;
 }
