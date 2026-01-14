@@ -2,7 +2,7 @@ import axios from "axios";
 const runtimeConfig = useRuntimeConfig();
 const maxLength = runtimeConfig.public.prezProvenancePathMaxLength;
 
-const queryProvenance = async (resourceUri: String, label: String, apiEndpoint: String, remainingSteps: Number) => {
+const queryProvenance: any = async (resourceUri: String | undefined, label: String | undefined, apiEndpoint: String | undefined, remainingSteps: number) => {
   if (resourceUri && remainingSteps > 0) {
     const queryResults = await axios.get(
       apiEndpoint +
@@ -55,8 +55,8 @@ const queryProvenance = async (resourceUri: String, label: String, apiEndpoint: 
   };
 }
 
-export async function getProvenance(resourceUri: String, label: String, apiEndpoint: String) {
+export async function getProvenance(resourceUri: String | undefined, label: String | undefined, apiEndpoint: String | undefined) {
   // get derivation chain
-  let provenance = await queryProvenance(resourceUri, label, apiEndpoint, maxLength);
+  let provenance: any = await queryProvenance(resourceUri, label, apiEndpoint, maxLength);
   return provenance;
 }
