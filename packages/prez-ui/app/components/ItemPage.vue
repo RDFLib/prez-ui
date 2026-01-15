@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezDataItem, type PrezNode } from 'prez-lib';
+import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezBBlockNode, type PrezDataItem, type PrezNode } from 'prez-lib';
 import { ChevronRight, ChevronDown } from "lucide-vue-next";
 import { DependencyViewer } from 'prez-components';
 
