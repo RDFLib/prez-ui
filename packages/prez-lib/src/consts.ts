@@ -60,10 +60,19 @@ export const SYSTEM_PREDICATES = {
     shaclPath: "http://www.w3.org/ns/shacl#path",
     shaclUnion: "http://www.w3.org/ns/shacl#union",
     dctermsIdentifier: "http://purl.org/dc/terms/identifier",
-    owlOntology: "http://www.w3.org/2002/07/owl#Ontology",
-    bblock: "https://www.opengis.net/def/bblocks/Schema"
+    owlOntology: "http://www.w3.org/2002/07/owl#Ontology"
 };
 
+export const BBLOCK_TYPES = {
+  bblock: "https://www.opengis.net/def/bblocks/BuildingBlock",
+  bblockSchema: "https://www.opengis.net/def/bblocks/Schema",
+  bblockModel: "https://www.opengis.net/def/bblocks/Model",
+  bblockApi: "https://www.opengis.net/def/bblocks/Api",
+  bblockPath: "https://www.opengis.net/def/bblocks/Response",
+  bblockResponse: "https://www.opengis.net/def/bblocks/Datatype",
+  bblockParameter: "https://www.opengis.net/def/bblocks/Parameter",
+  bblockDatatype: "https://www.opengis.net/def/bblocks/Datatype"
+};
 
 export const ANNOTATION_PREDICATES = {
     label: [
