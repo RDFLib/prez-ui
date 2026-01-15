@@ -107,6 +107,51 @@ const navigateToNode = (bblockNode: any) => {
                     <div class="mt-4 mb-12 overflow-auto">
                         <slot name="item-section" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl" :is-ontology="isOntology">
                             <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl" :is-ontology="isOntology"></slot>
+
+                            <div class="ontology-widget" v-if="isOntology">
+                              <slot name="item-ontology-classes" :data="data" :is-concept-scheme="isConceptScheme" :is-ontology="isOntology">
+                                  <div class="mt-6" v-if="isOntology && (data.data as PrezOntologyNode).ontologyClasses.length > 0">
+                                      <div class="pz-concept-node h-9">
+                                        <b>Classes</b>
+                                        <Button variant="ghost" size="icon" @click="toggleOpen('classes')">
+                                            <ChevronRight v-if="!open.includes('classes')" class="size-4" />
+                                            <ChevronDown v-else class="size-4" />
+                                        </Button>
+                                      </div>
+                                      <div v-if="open.includes('classes')" class="mt-4 flex flex-col gap-2 pz-concept-children">
+                                          <Node v-for="ontologyClass in (data.data as PrezOntologyNode).ontologyClasses" :term="ontologyClass" />
+                                      </div>
+                                  </div>
+                              </slot>
+
+                              <slot name="item-ontology-properties" :data="data" :is-concept-scheme="isConceptScheme" :is-ontology="isOntology">
+                                  <div class="mt-6" v-if="isOntology && (data.data as PrezOntologyNode).ontologyProperties.length > 0">
+                                      <div class="pz-concept-node h-9">
+                                        <b>Properties</b>
+                                        <Button variant="ghost" size="icon" @click="toggleOpen('properties')">
+                                            <ChevronRight v-if="!open.includes('properties')" class="size-4" />
+                                            <ChevronDown v-else class="size-4" />
+                                        </Button>
+                                      </div>
+                                      <div v-if="open.includes('properties')" class="mt-4 flex flex-col gap-2 pz-concept-children">
+                                          <Node v-for="ontologyProperty in (data.data as PrezOntologyNode).ontologyProperties" :term="ontologyProperty" />
+                                      </div>
+                                  </div>
+                              </slot>
+                            </div>
+
+                            <slot name="item-bblock-dependencies" :data="data">
+                                <div class="mt-6" v-if="isBBlock && (data.data as PrezBBlockNode).dependsOn.length > 0">
+                                    <p><b>Dependencies</b></p>
+                                    <div class="mt-4 flex flex-col gap-2">
+                                      <DependencyViewer v-if="isBBlock"
+                                        :data="data.data"
+                                        @node:click="navigateToNode"
+                                      />
+                                    </div>
+                                </div>
+                            </slot>
+
                             <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl" :is-ontology="isOntology">
 
                                 <ItemTable
@@ -149,48 +194,6 @@ const navigateToNode = (bblockNode: any) => {
                                 </div>
                             </slot>
 
-                            <slot name="item-ontology-classes" :data="data" :is-concept-scheme="isConceptScheme" :is-ontology="isOntology">
-                                <div class="mt-6" v-if="isOntology && (data.data as PrezOntologyNode).ontologyClasses.length > 0">
-                                    <div class="pz-concept-node h-9">
-                                      <b>Classes</b>
-                                      <Button variant="ghost" size="icon" @click="toggleOpen('classes')">
-                                          <ChevronRight v-if="!open.includes('classes')" class="size-4" />
-                                          <ChevronDown v-else class="size-4" />
-                                      </Button>
-                                    </div>
-                                    <div v-if="open.includes('classes')" class="mt-4 flex flex-col gap-2 pz-concept-children">
-                                        <Node v-for="ontologyClass in (data.data as PrezOntologyNode).ontologyClasses" :term="ontologyClass" />
-                                    </div>
-                                </div>
-                            </slot>
-
-                            <slot name="item-ontology-properties" :data="data" :is-concept-scheme="isConceptScheme" :is-ontology="isOntology">
-                                <div class="mt-6" v-if="isOntology && (data.data as PrezOntologyNode).ontologyProperties.length > 0">
-                                    <div class="pz-concept-node h-9">
-                                      <b>Properties</b>
-                                      <Button variant="ghost" size="icon" @click="toggleOpen('properties')">
-                                          <ChevronRight v-if="!open.includes('properties')" class="size-4" />
-                                          <ChevronDown v-else class="size-4" />
-                                      </Button>
-                                    </div>
-                                    <div v-if="open.includes('properties')" class="mt-4 flex flex-col gap-2 pz-concept-children">
-                                        <Node v-for="ontologyProperty in (data.data as PrezOntologyNode).ontologyProperties" :term="ontologyProperty" />
-                                    </div>
-                                </div>
-                            </slot>
-
-                            <slot name="item-bblock-dependencies" :data="data">
-                                <div class="mt-6" v-if="isBBlock && (data.data as PrezBBlockNode).dependsOn.length > 0">
-                                    <p><b>Dependencies</b></p>
-                                    <div class="mt-4 flex flex-col gap-2">
-                                      <DependencyViewer v-if="isBBlock"
-                                        :data="data.data"
-                                        @node:click="navigateToNode"
-                                      />
-                                    </div>
-                                </div>
-                            </slot>
-
                             <slot name="item-bottom" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl" :is-ontology="isOntology"></slot>
                         </slot>
                     </div>
@@ -219,5 +222,8 @@ const navigateToNode = (bblockNode: any) => {
 }
 .pz-concept .pz-concept {
     padding-left:20px;
+}
+.ontology-widget {
+  margin-bottom: 1em;
 }
 </style>
