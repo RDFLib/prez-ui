@@ -13,7 +13,7 @@ const apiEndpoint = useGetPrezAPIEndpoint();
 const { status, error, data } = useGetItem(apiEndpoint, urlPath);
 const isConceptScheme = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.skosConceptScheme));
 const isOntology = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.owlOntology));
-const isBBlock = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.bblock));
+const isBBlock = computed(()=> data.value?.data.isBBlock);
 const topConceptsUrl = computed(()=>isConceptScheme.value ? getTopConceptsUrl(data.value!.data) : '');
 const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
@@ -141,7 +141,7 @@ const navigateToNode = (bblockNode: any) => {
                             </div>
 
                             <slot name="item-bblock-dependencies" :data="data">
-                                <div class="mt-6" v-if="isBBlock && (data.data as PrezBBlockNode).dependsOn.length > 0">
+                                <div class="mt-6" v-if="isBBlock && (data.data as PrezBBlockNode).dependsOn?.length > 0">
                                     <p><b>Dependencies</b></p>
                                     <div class="mt-4 flex flex-col gap-2">
                                       <DependencyViewer v-if="isBBlock"

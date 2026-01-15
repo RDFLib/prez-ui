@@ -131,6 +131,7 @@ export interface PrezConceptNode extends PrezFocusNode {
  */
 export interface PrezBBlockNode extends PrezFocusNode {
     dependsOn: PrezNode[];
+    isBBlock: boolean;
 }
 
 /** Represents a node and list of subnodes */
