@@ -13,7 +13,13 @@ const apiEndpoint = useGetPrezAPIEndpoint();
 const { status, error, data } = useGetItem(apiEndpoint, urlPath);
 const isConceptScheme = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.skosConceptScheme));
 const isOntology = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.owlOntology));
-const isBBlock = computed(()=> data.value?.data.isBBlock);
+const isBBlock = computed(()=> {
+  if (data.value?.data) {
+    const prezBBlockNode: PrezBBlockNode = { dependsOn: [], isBBlock: false, ...data.value?.data };//this little hack is necessary for TypeScript
+    return prezBBlockNode.isBBlock;
+  }
+  return false;
+});
 const topConceptsUrl = computed(()=>isConceptScheme.value ? getTopConceptsUrl(data.value!.data) : '');
 const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);

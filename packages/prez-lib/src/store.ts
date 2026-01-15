@@ -542,7 +542,7 @@ export class RDFStore {
      * @param id the id of the object to return
      * @returns the item object
      */
-    public getItem(): PrezFocusNode {
+    public getItem(): PrezFocusNode | PrezConceptSchemeNode | PrezOntologyNode | PrezConceptSchemeOntologyNode | PrezBBlockNode {
         const obj = this.getByPrezId();
         if(obj.length == 0) throw new Error('Unable to find item');
         const item = this.toPrezFocusNode(obj[0]!);

@@ -285,13 +285,8 @@ export interface PrezDataList extends PrezData {
 
 export interface PrezDataItem extends PrezData {
     type: 'item';
-    data: PrezFocusNode | PrezConceptSchemeNode;
+    data: PrezFocusNode | PrezConceptSchemeNode | PrezOntologyNode | PrezConceptSchemeOntologyNode | PrezBBlockNode;
     store: RDFStore;
-}
-
-export interface PrezDataItem extends PrezData {
-    type: 'item';
-    data: PrezFocusNode | PrezConceptSchemeNode;
 }
 
 export interface PrezDataSearch extends PrezData {
