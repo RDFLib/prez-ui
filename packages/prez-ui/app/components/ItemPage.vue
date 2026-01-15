@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezBBlockNode, type PrezDataItem, type PrezNode } from 'prez-lib';
+import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezDataItem, type PrezNode } from 'prez-lib';
+import { ChevronRight, ChevronDown } from "lucide-vue-next";
 import { DependencyViewer } from 'prez-components';
 
 const appConfig = useAppConfig();
@@ -29,6 +30,18 @@ watch([() => globalProfiles.value, () => currentProfile.value], ([newGlobalProfi
   }
 });
 
+// toggle functionality for ontologies
+const open = ref<string[]>([]);
+const page = ref(1);
+
+function toggleOpen(value:string) {
+    const idx = open.value.indexOf(value);
+    if(idx >= 0) {
+        open.value.splice(idx, 1);
+    } else {
+        open.value.push(value);
+    }
+}
 const navigateToNode = (bblockNode: any) => {
   if (bblockNode?.links?.length > 0 && bblockNode.links[0].value) {
     router.push({ path: bblockNode.links[0].value });
@@ -138,8 +151,14 @@ const navigateToNode = (bblockNode: any) => {
 
                             <slot name="item-ontology-classes" :data="data" :is-concept-scheme="isConceptScheme" :is-ontology="isOntology">
                                 <div class="mt-6" v-if="isOntology && (data.data as PrezOntologyNode).ontologyClasses.length > 0">
-                                    <p><b>Classes</b></p>
-                                    <div class="mt-4 flex flex-col gap-2">
+                                    <div class="pz-concept-node h-9">
+                                      <b>Classes</b>
+                                      <Button variant="ghost" size="icon" @click="toggleOpen('classes')">
+                                          <ChevronRight v-if="!open.includes('classes')" class="size-4" />
+                                          <ChevronDown v-else class="size-4" />
+                                      </Button>
+                                    </div>
+                                    <div v-if="open.includes('classes')" class="mt-4 flex flex-col gap-2 pz-concept-children">
                                         <Node v-for="ontologyClass in (data.data as PrezOntologyNode).ontologyClasses" :term="ontologyClass" />
                                     </div>
                                 </div>
@@ -147,8 +166,14 @@ const navigateToNode = (bblockNode: any) => {
 
                             <slot name="item-ontology-properties" :data="data" :is-concept-scheme="isConceptScheme" :is-ontology="isOntology">
                                 <div class="mt-6" v-if="isOntology && (data.data as PrezOntologyNode).ontologyProperties.length > 0">
-                                    <p><b>Properties</b></p>
-                                    <div class="mt-4 flex flex-col gap-2">
+                                    <div class="pz-concept-node h-9">
+                                      <b>Properties</b>
+                                      <Button variant="ghost" size="icon" @click="toggleOpen('properties')">
+                                          <ChevronRight v-if="!open.includes('properties')" class="size-4" />
+                                          <ChevronDown v-else class="size-4" />
+                                      </Button>
+                                    </div>
+                                    <div v-if="open.includes('properties')" class="mt-4 flex flex-col gap-2 pz-concept-children">
                                         <Node v-for="ontologyProperty in (data.data as PrezOntologyNode).ontologyProperties" :term="ontologyProperty" />
                                     </div>
                                 </div>
@@ -183,3 +208,16 @@ const navigateToNode = (bblockNode: any) => {
 
     </NuxtLayout>
 </template>
+
+<style scoped>
+.pz-concept-node {
+    place-items: end;
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    /* margin-bottom: 10px; */
+}
+.pz-concept .pz-concept {
+    padding-left:20px;
+}
+</style>
