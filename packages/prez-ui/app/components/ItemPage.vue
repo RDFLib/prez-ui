@@ -63,6 +63,11 @@ const navigateToNode = (bblockNode: any) => {
   }
 }
 
+const navigateToUri = (uri?: string) => {
+  if (uri && uri.length) {
+    window.location.href = `/object?uri=${uri}`; // this needs a full refresh to reload the data
+  }
+}
 </script>
 
 <template>
@@ -210,10 +215,10 @@ const navigateToNode = (bblockNode: any) => {
                             </slot>
 
                             <slot name="item-provenance" :data="data">
-                                <div class="mt-6" v-if="provenance?.wasDerivedFrom">
+                                <div class="mt-6" v-if="provenance?.wasDerivedFrom?.length">
                                     <p><b>Provenance</b></p>
                                     <div class="mt-4 flex flex-col gap-2">
-                                      <ProvenanceDiagram :data="provenance" />
+                                      <ProvenanceDiagram :data="provenance" @node:click="(n)=>{ navigateToUri(n.id); }" />
                                     </div>
                                 </div>
                             </slot>

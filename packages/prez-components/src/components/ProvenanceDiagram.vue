@@ -27,6 +27,9 @@ const addNode = (nodeToAdd: any, linkFromNode?: any) => {
       position: 'bottom',
       rotate: '0',
       formatter: '{b}'
+    },
+    data: {
+      attributedTo: nodeToAdd.attributedTo
     }
   };
   if (!nodeAlreadyAdded(newNode)) {
@@ -65,19 +68,37 @@ const option = ref({
         show: true
       }
     },
-    tooltip: {
-      trigger: 'item',
-      triggerOn: 'mousemove'
-    },
     data: nodes,
     links: links
+  },
+  tooltip: {
+    trigger: 'item',
+    triggerOn: 'mousemove',
+    formatter: (tooltipData: any) => {
+      if (tooltipData?.data?.source && tooltipData?.data?.target) {
+        return `&lt;${tooltipData?.data?.source}&gt; prov:wasDerivedFrom &lt;${tooltipData?.data?.target}&gt;`;
+      }
+      if (tooltipData?.data?.data?.attributedTo?.label || tooltipData?.data?.data?.attributedTo?.uri) {
+        return `<h1>${tooltipData?.name}</h1>
+                <p>was attributed to: ${tooltipData?.data?.data?.attributedTo?.label || tooltipData?.data?.data?.attributedTo?.uri}</p>`
+      }
+      return tooltipData?.name;
+    }
   }
 });
+
+const emit = defineEmits(['node:click']);
+
+const onClick = (e: any) => {
+  if (e?.data?.id) {
+    emit('node:click', e?.data);
+  }
+}
 </script>
 
 <template>
   <div class="provenance-sankey-diagram">
-    <VChart class="chart" :option="option" />
+    <VChart class="chart" :option="option" @click="onClick" />
   </div>
 </template>
 

@@ -289,6 +289,7 @@ export interface ProvenanceNode {
   id: string;
   name: string;
   label?: any;
+  data?: any;
 }
 export interface ProvenanceLink {
   source: string;
