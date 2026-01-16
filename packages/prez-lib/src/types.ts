@@ -101,6 +101,18 @@ export interface PrezConceptSchemeNode extends PrezFocusNode {
 }
 
 /**
+ * A FocusNode for an Ontology
+ */
+export interface PrezOntologyNode extends PrezFocusNode {
+    ontologyClasses: PrezNode[];
+    ontologyProperties: PrezNode[];
+}
+
+/** A FocusNode for a combination of an Ontology and a Concept Scheme */
+export interface PrezConceptSchemeOntologyNode extends PrezConceptSchemeNode, PrezOntologyNode {
+}
+
+/**
  * A recursive list of child concept schemes
  */
 export interface PrezConceptNode extends PrezFocusNode {
@@ -112,6 +124,14 @@ export interface PrezConceptNode extends PrezFocusNode {
      * A boolean indicating if there are narrowers (children)
      */
     hasChildren: boolean;
+}
+
+/**
+ * A FocusNode for an OGC Building Block
+ */
+export interface PrezBBlockNode extends PrezFocusNode {
+    dependsOn: PrezNode[];
+    isBBlock: boolean;
 }
 
 /** Represents a node and list of subnodes */
@@ -148,12 +168,12 @@ export interface PrezBlankNode extends Omit<BlankNode, "equals"> {
 };
 
 /**
- * 
+ *
  * example: /catalogs/prefix:cat1/collections
- * 
+ *
  * labels = the resolved label value of the id
  * segments = the url part for the parent
- * 
+ *
  */
 export type PrezLinkParent = {
     label?: PrezLiteral;
@@ -265,13 +285,8 @@ export interface PrezDataList extends PrezData {
 
 export interface PrezDataItem extends PrezData {
     type: 'item';
-    data: PrezFocusNode | PrezConceptSchemeNode;
+    data: PrezFocusNode | PrezConceptSchemeNode | PrezOntologyNode | PrezConceptSchemeOntologyNode | PrezBBlockNode;
     store: RDFStore;
-}
-
-export interface PrezDataItem extends PrezData {
-    type: 'item';
-    data: PrezFocusNode | PrezConceptSchemeNode;
 }
 
 export interface PrezDataSearch extends PrezData {
@@ -290,4 +305,3 @@ export type PrezFacet = {
     facetName: PrezNode;
     facetValues: PrezFacetValue[];
 }
-  

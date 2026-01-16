@@ -33,7 +33,8 @@ export default defineNuxtConfig({
             prezDebug: false,
             prezAllowApiEndpointChange: false,
             prezAutoDetectMarkdown: false,
-            prezAutoDetectHtml: false
+            prezAutoDetectHtml: false,
+            prezProvenancePathMaxLength: 5
         }
     },
     vite: {
