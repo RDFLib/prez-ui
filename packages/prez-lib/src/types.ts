@@ -126,6 +126,14 @@ export interface PrezConceptNode extends PrezFocusNode {
     hasChildren: boolean;
 }
 
+/**
+ * A FocusNode for an OGC Building Block
+ */
+export interface PrezBBlockNode extends PrezFocusNode {
+    dependsOn: PrezNode[];
+    isBBlock: boolean;
+}
+
 /** Represents a node and list of subnodes */
 export type PrezNodeList = {
     node: PrezNode;
@@ -277,13 +285,8 @@ export interface PrezDataList extends PrezData {
 
 export interface PrezDataItem extends PrezData {
     type: 'item';
-    data: PrezFocusNode | PrezConceptSchemeNode;
+    data: PrezFocusNode | PrezConceptSchemeNode | PrezOntologyNode | PrezConceptSchemeOntologyNode | PrezBBlockNode;
     store: RDFStore;
-}
-
-export interface PrezDataItem extends PrezData {
-    type: 'item';
-    data: PrezFocusNode | PrezConceptSchemeNode;
 }
 
 export interface PrezDataSearch extends PrezData {

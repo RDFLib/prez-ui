@@ -1,6 +1,9 @@
 <script lang="ts" setup>
-import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezDataItem, type PrezNode } from 'prez-lib';
 import { ChevronRight, ChevronDown } from "lucide-vue-next";
+import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezBBlockNode, type PrezDataItem, type PrezNode } from 'prez-lib';
+import { getProvenance } from '../lib/prov';
+import { DependencyViewer, ProvenanceDiagram } from "prez-components";
+import { onMounted } from 'vue';
 
 const appConfig = useAppConfig();
 const { globalProfiles } = useGlobalProfiles();
@@ -12,9 +15,23 @@ const apiEndpoint = useGetPrezAPIEndpoint();
 const { status, error, data } = useGetItem(apiEndpoint, urlPath);
 const isConceptScheme = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.skosConceptScheme));
 const isOntology = computed(()=> data.value?.data.rdfTypes?.find(n=>n.value == SYSTEM_PREDICATES.owlOntology));
+const isBBlock = computed(()=> {
+  if (data.value?.data) {
+    const prezBBlockNode: PrezBBlockNode = { dependsOn: [], isBBlock: false, ...data.value?.data };//this little hack is necessary for TypeScript
+    return prezBBlockNode.isBBlock;
+  }
+  return false;
+});
 const topConceptsUrl = computed(()=>isConceptScheme.value ? getTopConceptsUrl(data.value!.data) : '');
 const apiUrl = (apiEndpoint + urlPath.value).split('?')[0];
 const currentProfile = computed(()=>data.value ? data.value.profiles.find(p=>p.current) : undefined);
+const resourceUri = computed(()=>data.value ? data.value.data.value : undefined);
+const resourceLabel = computed(()=>data.value?.data.label ? data.value.data.label.value : undefined);
+const provenance = ref(await getProvenance(resourceUri.value, resourceLabel.value, apiEndpoint));
+
+watch([() => resourceUri.value, () => resourceLabel.value], async ([newResourceUri, newResourceLabel]) => {
+  provenance.value = await getProvenance(resourceUri.value, resourceLabel.value, apiEndpoint);
+})
 
 // Watch for changes in both globalProfiles and currentProfile
 // Apply profile to item uses the current profile to order properties
@@ -39,6 +56,17 @@ function toggleOpen(value:string) {
     } else {
         open.value.push(value);
     }
+}
+const navigateToNode = (bblockNode: any) => {
+  if (bblockNode?.links?.length > 0 && bblockNode.links[0].value) {
+    router.push({ path: bblockNode.links[0].value });
+  }
+}
+
+const navigateToUri = (uri?: string) => {
+  if (uri && uri.length) {
+    window.location.href = `/object?uri=${uri}`; // this needs a full refresh to reload the data
+  }
 }
 </script>
 
@@ -132,6 +160,18 @@ function toggleOpen(value:string) {
                               </slot>
                             </div>
 
+                            <slot name="item-bblock-dependencies" :data="data">
+                                <div class="mt-6" v-if="isBBlock && (data.data as PrezBBlockNode).dependsOn?.length > 0">
+                                    <p><b>Dependencies</b></p>
+                                    <div class="mt-4 flex flex-col gap-2">
+                                      <DependencyViewer v-if="isBBlock"
+                                        :data="data.data"
+                                        @node:click="navigateToNode"
+                                      />
+                                    </div>
+                                </div>
+                            </slot>
+
                             <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl" :is-ontology="isOntology">
 
                                 <ItemTable
@@ -170,6 +210,15 @@ function toggleOpen(value:string) {
                                             :base-url="apiEndpoint"
                                             :url-path="topConceptsUrl"
                                         />
+                                    </div>
+                                </div>
+                            </slot>
+
+                            <slot name="item-provenance" :data="data">
+                                <div class="mt-6" v-if="provenance?.wasDerivedFrom?.length">
+                                    <p><b>Provenance</b></p>
+                                    <div class="mt-4 flex flex-col gap-2">
+                                      <ProvenanceDiagram :data="provenance" @node:click="(n)=>{ navigateToUri(n.id); }" />
                                     </div>
                                 </div>
                             </slot>

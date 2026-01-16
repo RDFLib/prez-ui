@@ -1,6 +1,6 @@
 import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad } from "n3";
-import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezOntologyNode, PrezConceptSchemeOntologyNode, PrezLinkParent, PrezNodeList, PrezFacet } from "./types";
-import { DEFAULT_PREFIXES, PREZ_PREDICATES, SYSTEM_PREDICATES } from "./consts";
+import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezOntologyNode, PrezConceptSchemeOntologyNode, PrezBBlockNode, PrezLinkParent, PrezNodeList, PrezFacet } from "./types";
+import { DEFAULT_PREFIXES, PREZ_PREDICATES, SYSTEM_PREDICATES, BBLOCK_TYPES } from "./consts";
 import { defaultToIri, defaultFromIri } from "./helpers";
 import { node, literal, bnode } from "./factory";
 import * as RDF from "@rdfjs/types";
@@ -519,13 +519,30 @@ export class RDFStore {
         return ontologyProperties;
     }
 
+    public getBBlockDependencies(vocab: Quad_Object): PrezNode[] {
+        const dependsOn = this.getObjects(vocab.value, "https://www.opengis.net/def/bblocks/dependsOn");
+
+        const bblockDependencies = dependsOn.map(p => this.toPrezTerm(p) as PrezNode).sort((a, b) => {
+            if (a.label && b.label) {
+                return a.label.value.localeCompare(b.label.value);
+            } else if (a.label) {
+                return -1;
+            } else if (b.label) {
+                return 1;
+            } else {
+                return a.value.localeCompare(b.value);
+            }
+        });
+        return bblockDependencies;
+    }
+
     /**
      * Returns an item object
      *
      * @param id the id of the object to return
      * @returns the item object
      */
-    public getItem(): PrezFocusNode {
+    public getItem(): PrezFocusNode | PrezConceptSchemeNode | PrezOntologyNode | PrezConceptSchemeOntologyNode | PrezBBlockNode {
         const obj = this.getByPrezId();
         if(obj.length == 0) throw new Error('Unable to find item');
         const item = this.toPrezFocusNode(obj[0]!);
@@ -567,6 +584,24 @@ export class RDFStore {
             //         hasChildren: concepts.length > 0
             //     }
             // } as PrezConceptSchemeNode;
+        }
+
+        // Check if the resource is an OGC BuildingBlock with dependencies
+        let isBBlock = false;
+        if (item.rdfTypes && item.rdfTypes.length) {
+          for (let i = 0; !isBBlock && i < item.rdfTypes.length; i++) {
+            if (Object.values(BBLOCK_TYPES).includes(item.rdfTypes[i].value)) {
+              isBBlock = true;
+            }
+          }
+        }
+        if (isBBlock) {
+          const dependsOn = this.getBBlockDependencies(obj[0]!);
+          return {
+              ...item,
+              dependsOn,
+              isBBlock
+          } as PrezBBlockNode;
         }
 
         return item;
