@@ -282,3 +282,18 @@ export interface GraphNodeProps {
   fill: string;
   stroke: string;
 };
+export interface ProvenanceDiagramProps {
+  data: any;
+}
+export interface ProvenanceNode {
+  id: string;
+  name: string;
+  label?: any;
+  data?: any;
+}
+export interface ProvenanceLink {
+  source: string;
+  target: string;
+  value: number;
+  edgeLabel: object;
+}

@@ -17,6 +17,7 @@ import Node from "./components/Node.vue";
 import NodeList from "./components/NodeList.vue";
 import Objects from "./components/Objects.vue";
 import Predicate from "./components/Predicate.vue";
+import ProvenanceDiagram from "./components/ProvenanceDiagram.vue";
 import SearchResults from "./components/SearchResults.vue";
 import Term from "./components/Term.vue";
 import TermList from "./components/TermList.vue";
@@ -42,6 +43,7 @@ export {
     NodeList,
     Objects,
     Predicate,
+    ProvenanceDiagram,
     SearchResults,
     Term,
     TermList,
