@@ -6,12 +6,12 @@
     "license": "BSD-3-Clause",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/rdflib/prez-ui.git",
+        "url": "git+https://github.com/RDFLib/prez-ui.git",
         "directory": "packages/prez-components"
     },
-    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/prez-components#readme",
+    "homepage": "https://github.com/RDFLib/prez-ui/tree/main/packages/prez-components#readme",
     "bugs": {
-        "url": "https://github.com/rdflib/prez-ui/issues"
+        "url": "https://github.com/RDFLib/prez-ui/issues"
     },
     "files": [
         "dist"

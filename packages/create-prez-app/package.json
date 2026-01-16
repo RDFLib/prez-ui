@@ -8,12 +8,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/rdflib/prez-ui.git",
+        "url": "git+https://github.com/RDFLib/prez-ui.git",
         "directory": "packages/create-prez-app"
     },
-    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/create-prez-app#readme",
+    "homepage": "https://github.com/RDFLib/prez-ui/tree/main/packages/create-prez-app#readme",
     "bugs": {
-        "url": "https://github.com/rdflib/prez-ui/issues"
+        "url": "https://github.com/RDFLib/prez-ui/issues"
     },
     "keywords": [
         "template"

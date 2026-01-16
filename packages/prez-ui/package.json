@@ -6,12 +6,12 @@
     "type": "module",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/rdflib/prez-ui.git",
+        "url": "git+https://github.com/RDFLib/prez-ui.git",
         "directory": "packages/prez-ui"
     },
-    "homepage": "https://github.com/rdflib/prez-ui/tree/main/packages/prez-ui#readme",
+    "homepage": "https://github.com/RDFLib/prez-ui/tree/main/packages/prez-ui#readme",
     "bugs": {
-        "url": "https://github.com/rdflib/prez-ui/issues"
+        "url": "https://github.com/RDFLib/prez-ui/issues"
     },
     "main": "./nuxt.config.ts",
     "scripts": {
