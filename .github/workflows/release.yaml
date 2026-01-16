@@ -14,7 +14,8 @@ on:
           - 'major'
 
 permissions:
-  contents: write
+  contents: write # for making commits
+  id-token: write # for OIDC trusted publisher for NPM
 
 jobs:
   release:
@@ -27,12 +28,12 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
           run_install: false
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: "https://registry.npmjs.org"
           cache: 'pnpm'
       - name: Install workspace
@@ -56,8 +57,6 @@ jobs:
         run: pnpm build
       - name: Publish prez-lib to NPM
         working-directory: packages/prez-lib
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish --no-git-checks
       # prez-components
       - name: Build prez-components
@@ -65,14 +64,10 @@ jobs:
         run: pnpm build
       - name: Publish prez-components to NPM
         working-directory: packages/prez-components
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish --no-git-checks
       # prez-ui layer
       - name: Publish prez-ui to NPM
         working-directory: packages/prez-ui
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish --no-git-checks
       # create-prez-app
       - name: Update prez-ui dependency in template
@@ -80,8 +75,6 @@ jobs:
         run: pnpm up prez-ui
       - name: Publish create-prez-app to NPM
         working-directory: packages/create-prez-app
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish --no-git-checks
       - name: Git configuration
         run: |
