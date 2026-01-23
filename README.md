@@ -1,11 +1,16 @@
 # Prez UI
 Prez UI is the front end of [Prez](https://github.com/RDFLib/prez) - a linked data API - and is a suite of packages to interact with and render RDF in JavaScript.
 
+See the docs [here](https://dev.prez.dev/prezui)
+
+See the demo [here](https://demo.prez.dev)
+
 ![Screenshot of a catalogue in Prez UI](/docs/images/catalog_example.png)
 
 ## Contents
 - [Running Prez UI](#running-prez-ui)
 - [Packages](#packages)
+- [Development](#development)
 - [License](#license)
 
 ## Running Prez UI
