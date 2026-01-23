@@ -40,6 +40,12 @@ jobs:
           cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install
+      - name: Build prez-lib
+        working-directory: packages/prez-lib
+        run: pnpm build
+      - name: Build prez-components
+        working-directory: packages/prez-components
+        run: pnpm build
       - name: Generate static site
         env:
           NUXT_PUBLIC_PREZ_API_ENDPOINT: ${{ secrets.NUXT_PUBLIC_PREZ_API_ENDPOINT }}
