@@ -1,0 +1,86 @@
+name: Deploy Prez UI demo & PR previews to Azure SWA
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [ opened, synchronize, reopened, closed ]
+    branches:
+      - main
+
+permissions:
+  issues: write
+  contents: read
+  pull-requests: write
+
+defaults:
+  run:
+    working-directory: packages/prez-ui
+
+jobs:
+  build_and_deploy:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 10
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build prez-lib
+        working-directory: packages/prez-lib
+        run: pnpm build
+      - name: Build prez-components
+        working-directory: packages/prez-components
+        run: pnpm build
+      - name: Generate static site
+        env:
+          NUXT_PUBLIC_PREZ_API_ENDPOINT: ${{ secrets.NUXT_PUBLIC_PREZ_API_ENDPOINT }}
+          NUXT_PUBLIC_PREZ_AUTO_DETECT_HTML: true
+          NUXT_PUBLIC_PREZ_AUTO_DETECT_MARKDOWN: true
+        run: pnpm generate
+      - name: Put SWA config in output directory
+        run: |
+          echo $'{
+            "navigationFallback": {
+              "rewrite": "/index.html",
+              "exclude": [
+                "/assets/*",
+                "/images/*",
+                "/css/*"
+              ]
+            }
+          }' > .output/public/staticwebapp.config.json
+      - name: Build And Deploy
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "packages/prez-ui/.output/public"
+          output_location: ""
+          skip_app_build: true
+
+  close_pull_request:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request
+    steps:
+      - name: Close Pull Request
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: "close"
