@@ -1,4 +1,4 @@
-import type { PrezPrefixes, PrezConceptNode, PrezFocusNode } from "./types";
+import type {PrezPrefixes, PrezConceptNode, PrezFocusNode, PrezNode} from "./types";
 import { DEFAULT_PREFIXES, SYSTEM_PREDICATES } from "./consts";
 
 /**
@@ -210,4 +210,23 @@ export function nodeArrayToTree(obj:any, prefix = '') {
 /** this function is used to dump a profile node array into a simple string tree */
 export function dumpNodeArray(obj:any) {
     return obj ? nodeArrayToTree(simplifyNodeArray(obj)) : '';
+}
+
+/**
+ * Sorts PrezNode objects by label, then by IRI
+ *
+ * @param a
+ * @param b
+ * @returns order score
+ */
+export function sortNodesByLabel(a: PrezNode, b: PrezNode): number {
+    if (a.label && b.label) {
+        return a.label.value.localeCompare(b.label.value);
+    } else if (a.label) {
+        return -1;
+    } else if (b.label) {
+        return 1;
+    } else {
+        return a.value.localeCompare(b.value);
+    }
 }

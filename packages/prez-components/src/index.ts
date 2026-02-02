@@ -21,6 +21,7 @@ import Term from "./components/Term.vue";
 import TermList from "./components/TermList.vue";
 import Expandable from "./components/Expandable.vue";
 
+export * from "./utils/helpers";
 export * from "./types";
 
 export {

@@ -1,7 +1,7 @@
 import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad } from "n3";
 import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezLinkParent, PrezNodeList, PrezFacet } from "./types";
 import { DEFAULT_PREFIXES, PREZ_PREDICATES, SYSTEM_PREDICATES } from "./consts";
-import { defaultToIri, defaultFromIri } from "./helpers";
+import {defaultToIri, defaultFromIri} from "./helpers";
 import { node, literal, bnode } from "./factory";
 import * as RDF from "@rdfjs/types";
 
@@ -451,14 +451,8 @@ export class RDFStore {
      * @returns a list of item objects
      */
     public getList(): PrezFocusNode[] {
-        const items: PrezFocusNode[] = [];
-        
         // assume only and all list items have dcterms:identifier - can't select by baseClass
-        const objs = this.getByPrezId();
-        objs.forEach(obj => {
-            items.push(this.toPrezFocusNode(obj));
-        });
-        return items;
+        return this.getByPrezId().map(item => this.toPrezFocusNode(item));
     }
 
     public getSkosCollections(vocab: Quad_Object): PrezNode[] {

@@ -77,7 +77,7 @@ watch([globalProfiles, currentProfile], ([newGlobalProfiles, newCurrentProfile])
                             <div class="flex flex-row gap-2" v-if="data?.data.rdfTypes">
 	                            <span class="font-bold">Type:</span>
                                 <div class="flex flex-row items-center gap-2">
-                                    <Badge v-for="rdfType in data.data.rdfTypes" variant="secondary"><Node :term="rdfType" /></Badge>
+                                    <Badge v-for="rdfType in data.data.rdfTypes" variant="secondary" class="!text-secondary-foreground [&_a]:!text-secondary-foreground"><Node :term="rdfType" /></Badge>
                                 </div>
                             </div>
                         </slot>
@@ -86,9 +86,7 @@ watch([globalProfiles, currentProfile], ([newGlobalProfiles, newCurrentProfile])
                     <div class="mt-4 mb-12 overflow-auto">
                         <slot name="item-section" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
                             <slot name="item-top" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
-	                            <Expandable>
-		                            <p v-if="data.data.description" class="mt-2 mb-4 italic text-muted-foreground">{{data.data.description.value}}</p>
-	                            </Expandable>
+	                            <Literal v-if="data.data.description" :term="data.data.description" renderMarkdown renderHTML class="mt-2 mb-4 italic !text-muted-foreground" />
                             </slot>
                             <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
 

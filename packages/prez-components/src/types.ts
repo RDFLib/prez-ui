@@ -29,7 +29,7 @@ export interface LiteralProps {
     term: PrezLiteral;
     hideLanguage?: boolean;
     hideDataType?: boolean;
-    class?: string;
+    class?: HTMLAttributes["class"];
     textOnly?: boolean;
     variant?: 'item-table' | 'item-list' | 'item-header' | 'search-results' | 'item-profiles';
     renderHtml?: boolean;
@@ -273,5 +273,10 @@ export interface DataProviderProps {
 };
 
 export interface ExpandableProps {
+    class?: HTMLAttributes["class"];
+};
+
+export interface PrezTooltipProps {
+    tooltip?: string | PrezLiteral;
     class?: HTMLAttributes["class"];
 };

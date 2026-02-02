@@ -42,7 +42,7 @@ const uriComponent = props.objectUri ? `uri=${encodeURIComponent(props.objectUri
 					    <File class="w-4 h-4" />
 				    </RouterLink>
 			    </div>
-			    <!--	                <Badge v-if="profile.default" variant="outline" class="text-sm text-muted">(default)</Badge>-->
+			    <!-- <Badge v-if="profile.default" variant="outline" class="text-sm text-muted">(default)</Badge>-->
 			    <ul class="text-sm flex flex-row flex-wrap gap-2 mt-2">
 				    <li v-for="mediatype in profile.mediatypes" :key="mediatype.mediatype">
 					    <Badge variant="outline" class="transition-colors" as-child>

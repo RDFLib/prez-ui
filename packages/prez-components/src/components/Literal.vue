@@ -10,6 +10,7 @@ import { isHtmlDetected, isMarkdownDetected } from "@/utils/helpers";
 import { Badge } from "@/components/ui/badge";
 import Term from "@/components/Term.vue";
 import Expandable from "@/components/Expandable.vue";
+import {cn} from "@/lib/utils";
 
 const props = withDefaults(defineProps<LiteralProps>(), {
     _components: () => {
@@ -122,7 +123,7 @@ onMounted(async () => {
     }
 });
 
-const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
+const htmlClass = cn('no-tailwind', props.class);
 </script>
 
 <template>
@@ -133,7 +134,7 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
             <slot v-if="props?.term?.value" name="text" :term="term" :text="term.value">
                 <span v-if="isMarkdown" v-html="renderedMarkdownContent"></span>
                 <span v-else-if="isHtml" :class="htmlClass" v-html="sanitizedHtml"></span>
-                <Expandable v-else :class="props.class">{{ term.value }}</Expandable>
+                <Expandable v-else :class="cn('', props.class)">{{ term.value }}</Expandable>
             </slot>
         </template>
         <!-- Full output -->
@@ -142,7 +143,7 @@ const htmlClass = 'no-tailwind' + (props.class ? ' ' + props.class : '');
                 <slot name="text" :term="term" :text="term.value">
                     <span v-if="isMarkdown" v-html="renderedMarkdownContent"></span>
                     <span v-else-if="isHtml" :class="htmlClass" v-html="sanitizedHtml"></span>
-                    <span v-else :class="props.class">
+                    <span v-else :class="cn('', props.class)">
                         <a v-if="term.value.startsWith('http')" :href="term.value" target="_blank" rel="noopener noreferrer" class="inline-flex gap-1 items-center">{{ term.value }} <Link class="size-4" /></a>
                         <Expandable v-else>{{ term.value }}</Expandable>
                     </span>

@@ -86,7 +86,7 @@ onBeforeMount(() => {
                 <div class="grow">
                     <slot />
                 </div>
-                <div v-if="props.sidepanel" :class="`lg:max-w-[350px] lg:transition-[width] lg:overflow-hidden hidden lg:shrink-0 lg:relative lg:flex ${expandSidePanel ? 'lg:w-1/4' : 'lg:w-0'}`">
+                <div v-if="props.sidepanel" :class="`lg:max-w-[350px] lg:transition-[width,opacity]  lg:overflow-hidden hidden lg:shrink-0 lg:relative lg:flex ${expandSidePanel ? 'lg:w-1/4 lg:opacity-100' : 'lg:w-0 lg:opacity-0'}`">
                     <slot name="sidepanel" />
                 </div>
             </div>

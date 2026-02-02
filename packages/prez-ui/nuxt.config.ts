@@ -38,6 +38,7 @@ export default defineNuxtConfig({
             prezAutoDetectHtml: true,
             // new
             prezSortTableProperties: true,
+            // custom sort here
             prezEnableDarkMode: true,
             prezAllowedProperties: [],
         }
@@ -53,7 +54,6 @@ export default defineNuxtConfig({
         }
     },
     colorMode: {
-
         classPrefix: "",
         classSuffix: "",
     },

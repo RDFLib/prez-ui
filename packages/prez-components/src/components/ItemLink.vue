@@ -4,6 +4,7 @@ import { ExternalLink, MoveRight } from "lucide-vue-next";
 import { ItemLinkProps } from "@/types";
 import { cn } from "@/lib/utils";
 import CopyButton from "./CopyButton.vue";
+import PrezTooltip from "@/components/PrezTooltip.vue";
 
 const props = withDefaults(defineProps<ItemLinkProps>(), {
     target: '_blank',
@@ -72,51 +73,53 @@ const isSecondaryExtLink = secondaryUrl ? secondaryUrl.startsWith('http') || sec
 
 <template>
     <!-- ItemLink -->
-    <slot name="wrapper" :url="url" :title="props.title" :secondaryUrl="secondaryUrl" :target="target">
-        <span class="inline-flex gap-1 items-center">
-            <template v-if="url && !props.hidePrimaryLink">
-                <a v-if="isExtLink"
-                    :class="cn('item-link', props.class)"
-                    :href="url" :title="hideTitle ? undefined : props.title" 
-                    :target="props.target" :rel="props.rel"
-                >
-                    <slot />
-                </a>
-                <RouterLink v-else
-                    :class="cn('item-link', props.class)"
-                    :to="url" :title="hideTitle ? undefined : props.title" 
-                >
-                    <slot />
-                </RouterLink>
-            </template>
-            <span v-else :class="cn('item-link', props.class)">
-                <slot />
-            </span>
-            <template v-if="secondaryUrl && !hideSecondaryLink">
-                <a v-if="isSecondaryExtLink"
-                    :href="secondaryUrl" :title="hideTitle ? undefined : props.title"
-                    :target="props.target" :rel="props.rel"
-                    :class="cn('item-link', props.class)"
-                >
-                    <ExternalLink class="w-4 h-4" />
-                </a>
-                <RouterLink v-else 
-                    :to="secondaryUrl" :title="hideTitle ? undefined : props.title"
-                    :class="cn('item-link', props.class)"
-                >
-                    <!-- unlikely scenario, but we if our secondary link points internal show an arrow not window out -->
-                    <MoveRight class="w-4 h-4" />
-                </RouterLink>
-            </template>
-            
-            <component
-	            :is="props._components.copyButton"
-	            v-if="props.copyLink"
-	            icon-only
-	            :value="typeof(copyLink) == 'string' ? copyLink : url || secondaryUrl"
-	            size="icon"
-	            variant="outline"
-            />
-        </span>
-    </slot>
+	<component :is="!hideTitle && props.title ? PrezTooltip : 'slot'" :tooltip="!hideTitle && props.title ? props.title : undefined">
+		<slot name="wrapper" :url="url" :secondaryUrl="secondaryUrl" :target="target">
+	        <span :class="`inline-flex gap-1 items-center ${!hideTitle && props.title ? 'underline decoration-dashed decoration-muted-foreground' : ''}`">
+	            <template v-if="url && !props.hidePrimaryLink">
+	                <a v-if="isExtLink"
+	                   :class="cn('item-link', props.class)"
+	                   :href="url"
+	                   :target="props.target" :rel="props.rel"
+	                >
+	                    <slot />
+	                </a>
+	                <RouterLink v-else
+	                            :class="cn('item-link', props.class)"
+	                            :to="url"
+	                >
+	                    <slot />
+	                </RouterLink>
+	            </template>
+	            <span v-else :class="cn('item-link', props.class)">
+	                <slot />
+	            </span>
+	            <template v-if="secondaryUrl && !hideSecondaryLink">
+	                <a v-if="isSecondaryExtLink"
+	                   :href="secondaryUrl"
+	                   :target="props.target" :rel="props.rel"
+	                   :class="cn('item-link', props.class)"
+	                >
+	                    <ExternalLink class="w-4 h-4" />
+	                </a>
+	                <RouterLink v-else
+	                            :to="secondaryUrl"
+	                            :class="cn('item-link', props.class)"
+	                >
+	                    <!-- unlikely scenario, but we if our secondary link points internal show an arrow not window out -->
+	                    <MoveRight class="w-4 h-4" />
+	                </RouterLink>
+	            </template>
+
+	            <component
+		            :is="props._components.copyButton"
+		            v-if="props.copyLink"
+		            icon-only
+		            :value="typeof(copyLink) == 'string' ? copyLink : url || secondaryUrl"
+		            size="icon"
+		            variant="outline"
+	            />
+	        </span>
+		</slot>
+	</component>
 </template>
