@@ -12,9 +12,12 @@ const { status, error, data } = useGetList(apiEndpoint, urlPath);
 const { getPageUrl, pagination } = usePageInfo(data);
 
 const apiUrl = (apiEndpoint + urlPath.value).split("?")[0];
+
+const orderBy = ref(route.query.order_by as string || "label");
+const orderByDirection = ref(route.query.order_by_direction as string || "ASC");
+
 const currentProfile = computed(() => data.value ? data.value.profiles.find(p => p.current) : undefined);
 const currentFacetProfile = route.query.facet_profile?.toString() || undefined;
-
 
 const header = computed(() => {
     const lastParent = data.value && data.value.parents?.length > 0
@@ -25,6 +28,31 @@ const header = computed(() => {
 // when a new page is navigated to
 watch(() => route.fullPath, () => {
     urlPath.value = getPageUrl();
+});
+
+watch(orderBy, (newValue, oldValue) => {
+	if (newValue !== oldValue) {
+		navigateTo({
+			...route,
+			query: {
+				...route.query,
+				order_by: newValue === "label" ? undefined : newValue,
+			}
+		});
+	}
+});
+
+watch(orderByDirection, (newValue, oldValue) => {
+	if (newValue !== oldValue) {
+		navigateTo({
+			...route,
+			query: {
+				...route.query,
+				order_by: orderBy.value === "label" ? undefined : route.query?.order_by,
+				order_by_direction: newValue,
+			}
+		});
+	}
 });
 </script>
 
@@ -69,7 +97,14 @@ watch(() => route.fullPath, () => {
                         :profile="globalProfiles[currentFacetProfile]" 
                     />
 
-                    <ItemList v-if="globalProfiles && currentProfile" :fields="globalProfiles?.[currentProfile?.uri || '']" :list="data.data" :key="urlPath" />
+                    <ItemList
+	                    v-if="globalProfiles && currentProfile"
+	                    :fields="globalProfiles?.[currentProfile?.uri || '']"
+	                    :list="data.data"
+	                    :key="urlPath"
+	                    v-model:sortBy="orderBy"
+	                    v-model:sortDirection="orderByDirection"
+                    />
                     <Loading v-else />
 
                     <slot name="pagination" :data="data" :pagination="pagination">

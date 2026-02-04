@@ -141,4 +141,3 @@ a:not(header a):not(nav.main-nav a):not(footer a):not(.btn) {
 a:not(header a):not(nav.main-nav a):not(.btn):hover {
     text-decoration: underline;
 }
-

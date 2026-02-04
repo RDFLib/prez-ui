@@ -1,5 +1,19 @@
 import { type HTMLAttributes, type Component } from "vue";
-import type { PrezTerm, PrezLiteral, PrezNodeList, PrezNode, PrezSearchResult, PrezLinkParent, PrezFocusNode, PrezProfileHeader, PrezDataTypes, PrezFacet, PrezFacetValue, PrezProfile } from "prez-lib";
+import type {
+    PrezTerm,
+    PrezLiteral,
+    PrezNodeList,
+    PrezNode,
+    PrezSearchResult,
+    PrezLinkParent,
+    PrezFocusNode,
+    PrezProfileHeader,
+    PrezDataTypes,
+    PrezFacet,
+    PrezFacetValue,
+    PrezProfile,
+    PrezBlankNode
+} from "prez-lib";
 
 import type { ButtonVariants } from "./components/ui/button";
 
@@ -155,14 +169,12 @@ export interface ObjectsProps {
 };
 
 export interface ItemTableProps {
-    /** optional, fields in order to display */
-    // fields?: PrezNodeList[];
-
-    /** parent term or root focus node */
-    term: PrezTerm;
+    term: PrezFocusNode | PrezBlankNode;
     renderHtml?: boolean;
     renderMarkdown?: boolean;
-    sortProperties?: boolean;
+    shownProperties?: string[];
+    hiddenProperties?: string[];
+    sortByShownProperties?: boolean;
     _components?: {
         itemTableRow: Component;
     };
@@ -236,6 +248,7 @@ export interface ItemListProps {
     /** optional, fields in order to display */
     fields?: PrezNodeList[];
     list: PrezFocusNode[];
+    showMembersButton?: boolean;
     _components?: {
         predicate: Component;
         node: Component;

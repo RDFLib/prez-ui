@@ -3,6 +3,7 @@ import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES
 import { Expandable } from "prez-components";
 
 const appConfig = useAppConfig();
+const runtimeConfig = useRuntimeConfig();
 const { globalProfiles } = useGlobalProfiles();
 const router = useRouter();
 const route = useRoute();
@@ -89,14 +90,13 @@ watch([globalProfiles, currentProfile], ([newGlobalProfiles, newCurrentProfile])
 	                            <Literal v-if="data.data.description" :term="data.data.description" renderMarkdown renderHTML class="mt-2 mb-4 italic !text-muted-foreground" />
                             </slot>
                             <slot name="item-table" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl">
-
                                 <ItemTable
-                                    :term="data.data" 
-                                    :key="urlPath + globalProfiles?.length + currentProfile?.uri" 
-                                    :is-concept-scheme="isConceptScheme"
-                                    :top-concepts-url="topConceptsUrl"
+                                    :term="data.data"
+                                    :key="urlPath + globalProfiles?.length + currentProfile?.uri"
+                                    :shownProperties="runtimeConfig.public.prezShownTableProperties"
+                                    :hiddenProperties="runtimeConfig.public.prezHiddenTableProperties"
+                                    :sortByShownProperties="runtimeConfig.public.prezSortByShownTableProperties"
                                 />
-
                             </slot>
                             <slot name="item-middle" :data="data" :is-concept-scheme="isConceptScheme" :top-concepts-url="topConceptsUrl"></slot>
 

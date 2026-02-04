@@ -37,22 +37,22 @@ export default defineNuxtConfig({
             prezAutoDetectMarkdown: true,
             prezAutoDetectHtml: true,
             // new
-            prezSortTableProperties: true,
-            // custom sort here
             prezEnableDarkMode: true,
-            prezAllowedProperties: [],
+            prezShownTableProperties: [],
+            prezHiddenTableProperties: [],
+            prezSortByShownTableProperties: false,
         }
     },
     vite: {
         plugins: [tailwindcss()],
     },
-    nitro: {
-        esbuild: {
-            options: {
-                target: "es2020"
-            }
-        }
-    },
+    // nitro: {
+    //     esbuild: {
+    //         options: {
+    //             target: "esnext"
+    //         }
+    //     }
+    // },
     colorMode: {
         classPrefix: "",
         classSuffix: "",

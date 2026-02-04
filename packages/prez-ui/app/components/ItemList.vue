@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { ItemList, type ItemListProps } from "prez-components";
 
-const props = defineProps<ItemListProps>();
+const props = withDefaults(defineProps<ItemListProps>(), {
+	showMembersButton: true,
+});
 const predicate = resolveComponent("Predicate") as Component;
 const node = resolveComponent("Node") as Component;
 const objects = resolveComponent("Objects") as Component;
