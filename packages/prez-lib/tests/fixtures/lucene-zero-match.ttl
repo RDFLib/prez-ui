@@ -1,0 +1,12 @@
+PREFIX prez: <https://prez.dev/>
+PREFIX ex: <https://example.com/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+<urn:hash:lucene-3> a prez:SearchResult ;
+    prez:searchResultWeight "1.75"^^xsd:float ;
+    prez:searchResultURI ex:item-4 .
+
+ex:item-4 a ex:Thing ;
+    prez:label "Zero Match Item" .
+
+ex:Thing prez:label "Thing" .

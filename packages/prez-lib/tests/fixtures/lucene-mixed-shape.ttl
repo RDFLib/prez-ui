@@ -1,0 +1,21 @@
+PREFIX prez: <https://prez.dev/>
+PREFIX ex: <https://example.com/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+<urn:hash:mixed-1> a prez:SearchResult ;
+    prez:searchResultWeight "3.14"^^xsd:float ;
+    prez:searchResultPredicate ex:legacy ;
+    prez:searchResultMatch "Legacy flat snippet" ;
+    prez:searchResultURI ex:item-5 ;
+    prez:hasSearchMatch <urn:match:5> .
+
+<urn:match:5> a prez:SearchResultMatch ;
+    prez:searchResultPredicate ex:nested ;
+    prez:searchResultMatch "Nested snippet wins" .
+
+ex:item-5 a ex:Thing ;
+    prez:label "Mixed Shape Item" .
+
+ex:legacy prez:label "Legacy" .
+ex:nested prez:label "Nested" .
+ex:Thing prez:label "Thing" .
