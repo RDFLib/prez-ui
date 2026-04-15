@@ -211,16 +211,56 @@ export interface PrezProperties {
     [predicateIri: string]: PrezProperty;
 };
 
+export type PrezSearchParserMode = "default" | "jena-lucene-shacl";
+
+export type PrezSearchOptionsDefault = {
+    parserMode?: "default";
+};
+
+export type PrezSearchOptionsLuceneShacl = {
+    parserMode: "jena-lucene-shacl";
+};
+
+export type PrezSearchOptions = PrezSearchOptionsDefault | PrezSearchOptionsLuceneShacl;
+
 /**
- * Represents a search result
+ * Represents a single predicate/snippet pair inside a Lucene SHACL search result.
  */
-export type PrezSearchResult = {
+export type PrezSearchMatch = {
+    predicate: PrezNode;
+    match: PrezLiteral;
+};
+
+/**
+ * Represents the default flat Prez search result shape.
+ */
+export type PrezFlatSearchResult = {
     hash: string;
     weight: number;
     predicate: PrezNode;
     match: PrezLiteral;
     resource: PrezFocusNode;
 };
+
+/**
+ * Backwards-compatible alias for the default flat search result shape.
+ */
+export type PrezSearchResult = PrezFlatSearchResult;
+
+/**
+ * Represents the Jena Lucene SHACL search result shape.
+ */
+export type PrezLuceneShaclSearchResult = {
+    hash: string;
+    weight: number;
+    resource: PrezFocusNode;
+    matches: PrezSearchMatch[];
+};
+
+/**
+ * Represents any supported Prez search result shape.
+ */
+export type PrezAnySearchResult = PrezFlatSearchResult | PrezLuceneShaclSearchResult;
 
 /**
  * Represents an item in Prez that contains node info and its related properties
@@ -270,7 +310,7 @@ export type PrezDataTypes = 'item' | 'list' | 'search';
 
 export interface PrezData {
     type: PrezDataTypes;
-    data: PrezFocusNode | PrezFocusNode[] | PrezSearchResult[];
+    data: PrezFocusNode | PrezFocusNode[] | PrezAnySearchResult[];
     profiles: PrezProfileHeader[];
     parents: PrezLinkParent[];
     facets: PrezFacet[];
@@ -289,12 +329,24 @@ export interface PrezDataItem extends PrezData {
     store: RDFStore;
 }
 
-export interface PrezDataSearch extends PrezData {
+export interface PrezDataSearchBase extends Omit<PrezData, "type" | "data"> {
     type: 'search';
+    parserMode: PrezSearchParserMode;
     count: number;
-    data: PrezSearchResult[];
     maxReached: boolean;
 }
+
+export interface PrezDataSearchDefault extends PrezDataSearchBase {
+    parserMode: "default";
+    data: PrezFlatSearchResult[];
+}
+
+export interface PrezDataSearchLuceneShacl extends PrezDataSearchBase {
+    parserMode: "jena-lucene-shacl";
+    data: PrezLuceneShaclSearchResult[];
+}
+
+export type PrezDataSearch = PrezDataSearchDefault | PrezDataSearchLuceneShacl;
 
 export type PrezFacetValue = {
     term: (PrezLiteral | PrezNode);

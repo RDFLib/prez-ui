@@ -1,4 +1,19 @@
-import type { PrezBlankNode, PrezDataItem, PrezDataList, PrezDataSearch, PrezNodeList, PrezProfileHeader, PrezProfiles, PrezProperties, PrezProperty } from "./types";
+import type {
+    PrezBlankNode,
+    PrezDataItem,
+    PrezDataList,
+    PrezDataSearch,
+    PrezDataSearchDefault,
+    PrezDataSearchLuceneShacl,
+    PrezNodeList,
+    PrezProfileHeader,
+    PrezProfiles,
+    PrezProperties,
+    PrezProperty,
+    PrezSearchOptions,
+    PrezSearchOptionsDefault,
+    PrezSearchOptionsLuceneShacl
+} from "./types";
 import { RDFStore } from "./store";
 import { SYSTEM_PREDICATES } from "./consts";
 
@@ -150,19 +165,37 @@ export async function getItem(baseUrl: string, path: string): Promise<PrezDataIt
  * @param path Search path along with any query parameters
  * @returns 
  */
-export async function search(baseUrl: string, path: string): Promise<PrezDataSearch> {
+export async function search(baseUrl: string, path: string, options?: PrezSearchOptionsDefault): Promise<PrezDataSearchDefault>;
+export async function search(baseUrl: string, path: string, options: PrezSearchOptionsLuceneShacl): Promise<PrezDataSearchLuceneShacl>;
+export async function search(baseUrl: string, path: string, options: PrezSearchOptions = {}): Promise<PrezDataSearch> {
     const url = baseUrl + path;
-    const pathOnly = new URL(url).pathname
+    const pathOnly = new URL(url).pathname;
     const { data, profiles } = await apiGet(url);
     const store = new RDFStore();
     store.setBaseUrl(baseUrl);
     store.load(data);
+    const parserMode = options.parserMode ?? "default";
+
+    if (parserMode === "jena-lucene-shacl") {
+        return {
+            type: 'search',
+            parserMode,
+            data: store.search({ parserMode }),
+            profiles,
+            maxReached: store.getMaxReached(),
+            count: store.getCount(),
+            parents: store.getParents(pathOnly),
+            facets: store.getFacets()
+        };
+    }
+
     return {
-        type: 'search', 
-        data: store.search(), 
-        profiles, 
-        maxReached: store.getMaxReached(), 
-        count: store.getCount(), 
+        type: 'search',
+        parserMode: "default",
+        data: store.search(),
+        profiles,
+        maxReached: store.getMaxReached(),
+        count: store.getCount(),
         parents: store.getParents(pathOnly),
         facets: store.getFacets()
     };

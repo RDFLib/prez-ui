@@ -1,5 +1,27 @@
 import { Store, Parser, DataFactory, type Quad_Object, type Quad_Subject, type Term, type Quad } from "n3";
-import type { PrezLiteral, PrezNode, PrezTerm, PrezProperties, PrezSearchResult, PrezFocusNode, PrezLink, PrezConceptSchemeNode, PrezConceptNode, PrezOntologyNode, PrezConceptSchemeOntologyNode, PrezBBlockNode, PrezLinkParent, PrezNodeList, PrezFacet } from "./types";
+import type {
+    PrezAnySearchResult,
+    PrezBBlockNode,
+    PrezConceptNode,
+    PrezConceptSchemeNode,
+    PrezConceptSchemeOntologyNode,
+    PrezFacet,
+    PrezFlatSearchResult,
+    PrezFocusNode,
+    PrezLink,
+    PrezLinkParent,
+    PrezLiteral,
+    PrezLuceneShaclSearchResult,
+    PrezNode,
+    PrezNodeList,
+    PrezOntologyNode,
+    PrezProperties,
+    PrezSearchMatch,
+    PrezSearchOptions,
+    PrezSearchOptionsDefault,
+    PrezSearchOptionsLuceneShacl,
+    PrezTerm
+} from "./types";
 import { DEFAULT_PREFIXES, PREZ_PREDICATES, SYSTEM_PREDICATES, BBLOCK_TYPES } from "./consts";
 import { defaultToIri, defaultFromIri } from "./helpers";
 import { node, literal, bnode } from "./factory";
@@ -161,6 +183,29 @@ export class RDFStore {
 
     private getObjectLiteral(iri: string, predicate: string): PrezLiteral | undefined {
         return this.getObjects(iri, predicate).map(o => this.toPrezTerm(o) as PrezLiteral)[0] || undefined;
+    }
+
+    private toSubjectTerm(subject: string | Quad_Subject | Quad_Object): Quad_Subject {
+        if (typeof subject === "string") {
+            return namedNode(subject);
+        }
+
+        if (subject.termType === "Literal") {
+            throw new Error(`Cannot use literal ${subject.value} as a subject.`);
+        }
+
+        return subject;
+    }
+
+    private getRequiredObject(subject: string | Quad_Subject | Quad_Object, predicate: string, description: string): Quad_Object {
+        const object = this.getObjects(subject, predicate)[0];
+
+        if (!object) {
+            const subjectValue = typeof subject === "string" ? subject : subject.value;
+            throw new Error(`Missing ${description} for ${subjectValue}.`);
+        }
+
+        return object;
     }
 
     public getProperties(term: Term, options?: {excludePrefix?: string, includePrefix?: string}): PrezProperties {
@@ -326,13 +371,14 @@ export class RDFStore {
      * @param predicate a string or string array of predicate IRIs
      * @returns the array of objects
      */
-    public getObjects(subject: string, predicate: string | string[]): Quad_Object[] {
+    public getObjects(subject: string | Quad_Subject | Quad_Object, predicate: string | string[]): Quad_Object[] {
+        const subjectTerm = this.toSubjectTerm(subject);
         if (typeof predicate === "string") {
-            return this.store.getObjects(namedNode(subject), namedNode(predicate), null);
+            return this.store.getObjects(subjectTerm, namedNode(predicate), null);
         } else {
             const objs: Quad_Object[] = [];
             predicate.forEach(p => {
-                objs.push(...this.store.getObjects(namedNode(subject), namedNode(p), null));
+                objs.push(...this.store.getObjects(subjectTerm, namedNode(p), null));
             });
             return objs;
         }
@@ -628,19 +674,89 @@ export class RDFStore {
     /**
      * Returns search results
      */
-    public search(): PrezSearchResult[] {
+    private extractSearchResultHash(subject: Quad_Subject): string {
+        return subject.value.startsWith("urn:hash:") ? subject.value.slice("urn:hash:".length) : subject.value;
+    }
+
+    private getSearchResultBase(subject: Quad_Subject) {
+        const weightObject = this.getRequiredObject(subject, PREZ_PREDICATES.searchResultWeight, "search result weight");
+        const resourceObject = this.getRequiredObject(subject, PREZ_PREDICATES.searchResultURI, "search result URI");
+
+        return {
+            hash: this.extractSearchResultHash(subject),
+            weight: Number(weightObject.value),
+            resource: this.toPrezFocusNode(resourceObject)
+        };
+    }
+
+    private getOptionalFlatSearchMatch(subject: Quad_Subject): PrezSearchMatch | undefined {
+        const predicateObject = this.getObjects(subject, PREZ_PREDICATES.searchResultPredicate)[0];
+        const matchObject = this.getObjects(subject, PREZ_PREDICATES.searchResultMatch)[0];
+
+        if (!predicateObject && !matchObject) {
+            return undefined;
+        }
+
+        if (!predicateObject || !matchObject) {
+            throw new Error(`Incomplete flat search match for ${subject.value}.`);
+        }
+
+        return {
+            predicate: this.toPrezTerm(predicateObject) as PrezNode,
+            match: this.toPrezTerm(matchObject) as PrezLiteral
+        };
+    }
+
+    private parseSearchMatch(subject: Quad_Object): PrezSearchMatch {
+        const predicateObject = this.getRequiredObject(subject, PREZ_PREDICATES.searchResultPredicate, "search match predicate");
+        const matchObject = this.getRequiredObject(subject, PREZ_PREDICATES.searchResultMatch, "search match literal");
+
+        return {
+            predicate: this.toPrezTerm(predicateObject) as PrezNode,
+            match: this.toPrezTerm(matchObject) as PrezLiteral
+        };
+    }
+
+    private parseDefaultSearchResult(subject: Quad_Subject): PrezFlatSearchResult {
+        if (this.getObjects(subject, PREZ_PREDICATES.hasSearchMatch).length > 0) {
+            throw new Error(`Received Lucene SHACL search matches for ${subject.value} while parserMode is default.`);
+        }
+
+        const flatMatch = this.getOptionalFlatSearchMatch(subject);
+
+        if (!flatMatch) {
+            throw new Error(`Missing flat search match data for ${subject.value}.`);
+        }
+
+        return {
+            ...this.getSearchResultBase(subject),
+            ...flatMatch
+        };
+    }
+
+    private parseJenaLuceneShaclSearchResult(subject: Quad_Subject): PrezLuceneShaclSearchResult {
+        const nestedMatchNodes = this.getObjects(subject, PREZ_PREDICATES.hasSearchMatch);
+        if (this.getOptionalFlatSearchMatch(subject)) {
+            throw new Error(`Received flat search match fields for ${subject.value} while parserMode is jena-lucene-shacl.`);
+        }
+
+        return {
+            ...this.getSearchResultBase(subject),
+            matches: nestedMatchNodes.map(matchNode => this.parseSearchMatch(matchNode))
+        };
+    }
+
+    public search(options?: PrezSearchOptionsDefault): PrezFlatSearchResult[];
+    public search(options: PrezSearchOptionsLuceneShacl): PrezLuceneShaclSearchResult[];
+    public search(options: PrezSearchOptions = {}): PrezAnySearchResult[] {
+        const parserMode = options.parserMode ?? "default";
         const resultSubjects = this.getSubjects(SYSTEM_PREDICATES.a, PREZ_PREDICATES.searchResult);
-        const results: PrezSearchResult[] = resultSubjects.map(s => {
-            const result: PrezSearchResult = {
-                hash: s.value.split("urn:hash:").slice(-1)[0]!,
-                weight: Number(this.getObjects(s.value, PREZ_PREDICATES.searchResultWeight)[0]!.value),
-                predicate: this.toPrezTerm(this.getObjects(s.value, PREZ_PREDICATES.searchResultPredicate)[0]!) as PrezNode,
-                match: this.toPrezTerm(this.getObjects(s.value, PREZ_PREDICATES.searchResultMatch)[0]!) as PrezLiteral,
-                resource: this.toPrezFocusNode(this.getObjects(s.value, PREZ_PREDICATES.searchResultURI)[0]!)
-            };
-            return result;
-        });
-        return results;
+
+        if (parserMode === "jena-lucene-shacl") {
+            return resultSubjects.map(subject => this.parseJenaLuceneShaclSearchResult(subject));
+        }
+
+        return resultSubjects.map(subject => this.parseDefaultSearchResult(subject));
     }
 
 
