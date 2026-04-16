@@ -1,0 +1,16 @@
+PREFIX prez: <https://prez.dev/>
+PREFIX ex: <https://example.com/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+<urn:hash:flat-1> a prez:SearchResult ;
+    prez:searchResultWeight "2.5"^^xsd:float ;
+    prez:searchResultPredicate ex:title ;
+    prez:searchResultMatch "Flat result match" ;
+    prez:searchResultURI ex:item-1 .
+
+ex:item-1 a ex:Thing ;
+    prez:label "Flat Item" ;
+    prez:description "Flat item description" .
+
+ex:title prez:label "Title" .
+ex:Thing prez:label "Thing" .

@@ -38,6 +38,7 @@ export const PREZ_PREDICATES = {
     searchResultPredicate: "https://prez.dev/searchResultPredicate",
     searchResultURI: "https://prez.dev/searchResultURI",
     searchResultMatch: "https://prez.dev/searchResultMatch",
+    hasSearchMatch: "https://prez.dev/hasSearchMatch",
     hasChildren: "https://prez.dev/hasChildren",
     facetCount: "https://prez.dev/facetCount",
     facetName: "https://prez.dev/facetName",

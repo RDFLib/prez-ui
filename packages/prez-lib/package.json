@@ -29,6 +29,7 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
+        "test": "node --test tests/**/*.test.mjs",
         "types": "tsc",
         "preview": "vite preview",
         "preinstall": "npx only-allow pnpm"

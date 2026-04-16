@@ -1,0 +1,28 @@
+PREFIX prez: <https://prez.dev/>
+PREFIX ex: <https://example.com/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+<urn:hash:lucene-2> a prez:SearchResult ;
+    prez:searchResultWeight "5.5"^^xsd:float ;
+    prez:searchResultURI ex:item-3 ;
+    prez:hasSearchMatch <urn:match:2>, <urn:match:3>, <urn:match:4> .
+
+<urn:match:2> a prez:SearchResultMatch ;
+    prez:searchResultPredicate ex:title ;
+    prez:searchResultMatch "First nested snippet" .
+
+<urn:match:3> a prez:SearchResultMatch ;
+    prez:searchResultPredicate ex:comment ;
+    prez:searchResultMatch "Second nested snippet" .
+
+<urn:match:4> a prez:SearchResultMatch ;
+    prez:searchResultPredicate ex:summary ;
+    prez:searchResultMatch "Third nested snippet" .
+
+ex:item-3 a ex:Thing ;
+    prez:label "Multi Match Item" .
+
+ex:title prez:label "Title" .
+ex:comment prez:label "Comment" .
+ex:summary prez:label "Summary" .
+ex:Thing prez:label "Thing" .
