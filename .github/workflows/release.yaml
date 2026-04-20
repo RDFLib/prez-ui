@@ -72,7 +72,8 @@ jobs:
       # create-prez-app
       - name: Update prez-ui dependency in template
         working-directory: packages/create-prez-app/template
-        run: pnpm up prez-ui
+        run: |
+          sed -i -E "s/\"prez-ui\": \"\^[0-9.]+\"/\"prez-ui\": \"\^${NEW_VERSION/v/}\"/g" package.json
       - name: Publish create-prez-app to NPM
         working-directory: packages/create-prez-app
         run: pnpm publish --no-git-checks
