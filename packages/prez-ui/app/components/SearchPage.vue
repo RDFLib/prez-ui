@@ -56,7 +56,7 @@ const inSearchMode = computed(() => (route.query?.q || '').length > 0);
                                     :facets="data.facets"
                                     :profile="globalProfiles[currentFacetProfile]"
                                 />
-                                <SearchResults :results="data.data" />
+                                <SearchResults v-if="data.parserMode === 'default'" :results="data.data" />
                                 <PrezPagination
                                     v-if="status == 'success' && data?.count > 0 && inSearchMode"
                                     :totalItems="pagination.page > 1 && data.count <= pagination.limit ? data.count + pagination.limit * (pagination.page - 1) : data.count"
