@@ -1,0 +1,16 @@
+PREFIX prez: <https://prez.dev/>
+PREFIX ex: <https://example.com/>
+
+<urn:hash:lucene-no-weight-1> a prez:SearchResult ;
+    prez:searchResultURI ex:item-2 ;
+    prez:hasSearchMatch <urn:match:1> .
+
+<urn:match:1> a prez:SearchResultMatch ;
+    prez:searchResultPredicate ex:comment ;
+    prez:searchResultMatch "Single nested snippet without weight" .
+
+ex:item-2 a ex:Thing ;
+    prez:label "Nested Item" .
+
+ex:comment prez:label "Comment" .
+ex:Thing prez:label "Thing" .
