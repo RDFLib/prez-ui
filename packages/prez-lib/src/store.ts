@@ -679,12 +679,12 @@ export class RDFStore {
     }
 
     private getSearchResultBase(subject: Quad_Subject) {
-        const weightObject = this.getRequiredObject(subject, PREZ_PREDICATES.searchResultWeight, "search result weight");
+        const weightObject = this.getObjects(subject, PREZ_PREDICATES.searchResultWeight)[0];
         const resourceObject = this.getRequiredObject(subject, PREZ_PREDICATES.searchResultURI, "search result URI");
 
         return {
             hash: this.extractSearchResultHash(subject),
-            weight: Number(weightObject.value),
+            ...(weightObject ? { weight: Number(weightObject.value) } : {}),
             resource: this.toPrezFocusNode(resourceObject)
         };
     }

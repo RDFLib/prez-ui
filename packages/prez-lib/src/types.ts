@@ -236,7 +236,7 @@ export type PrezSearchMatch = {
  */
 export type PrezFlatSearchResult = {
     hash: string;
-    weight: number;
+    weight?: number;
     predicate: PrezNode;
     match: PrezLiteral;
     resource: PrezFocusNode;
@@ -252,7 +252,7 @@ export type PrezSearchResult = PrezFlatSearchResult;
  */
 export type PrezLuceneShaclSearchResult = {
     hash: string;
-    weight: number;
+    weight?: number;
     resource: PrezFocusNode;
     matches: PrezSearchMatch[];
 };

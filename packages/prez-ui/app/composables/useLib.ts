@@ -189,6 +189,7 @@ export const useSearch = (baseUrl: string, urlPath: Ref<string>) => {
             data.value = undefined;
             return {
                 type: 'search',
+                parserMode: 'default',
                 data: [],
                 profiles: [],
                 count: 0,

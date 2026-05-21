@@ -80,3 +80,25 @@ test("rejects mixed payloads in Lucene SHACL mode", () => {
         /parserMode is jena-lucene-shacl/
     );
 });
+
+test("parses a default flat result that omits searchResultWeight", () => {
+    const results = parseFixture("flat-search-no-weight.ttl");
+
+    assert.equal(results.length, 1);
+    assert.equal(results[0].hash, "flat-no-weight-1");
+    assert.equal(results[0].weight, undefined);
+    assert.equal(results[0].predicate.value, "https://example.com/title");
+    assert.equal(results[0].match.value, "Flat result match without weight");
+    assert.equal(results[0].resource.value, "https://example.com/item-1");
+});
+
+test("parses a Lucene SHACL result that omits searchResultWeight", () => {
+    const results = parseFixture("lucene-no-weight.ttl", "jena-lucene-shacl");
+
+    assert.equal(results.length, 1);
+    assert.equal(results[0].hash, "lucene-no-weight-1");
+    assert.equal(results[0].weight, undefined);
+    assert.equal(results[0].resource.value, "https://example.com/item-2");
+    assert.equal(results[0].matches.length, 1);
+    assert.equal(results[0].matches[0].match.value, "Single nested snippet without weight");
+});

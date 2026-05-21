@@ -1,0 +1,14 @@
+PREFIX prez: <https://prez.dev/>
+PREFIX ex: <https://example.com/>
+
+<urn:hash:flat-no-weight-1> a prez:SearchResult ;
+    prez:searchResultPredicate ex:title ;
+    prez:searchResultMatch "Flat result match without weight" ;
+    prez:searchResultURI ex:item-1 .
+
+ex:item-1 a ex:Thing ;
+    prez:label "Flat Item" ;
+    prez:description "Flat item description" .
+
+ex:title prez:label "Title" .
+ex:Thing prez:label "Thing" .
