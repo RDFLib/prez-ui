@@ -1,9 +1,7 @@
 <script lang="ts" setup>
 import { ChevronRight, ChevronDown } from "lucide-vue-next";
 import { applyProfileToItem, dumpNodeArray, getTopConceptsUrl, SYSTEM_PREDICATES, type PrezConceptSchemeNode, type PrezOntologyNode, type PrezBBlockNode, type PrezDataItem, type PrezNode } from 'prez-lib';
-import { getProvenance } from '../lib/prov';
 import { DependencyViewer, ProvenanceDiagram } from "prez-components";
-import { onMounted } from 'vue';
 
 const appConfig = useAppConfig();
 const { globalProfiles } = useGlobalProfiles();
