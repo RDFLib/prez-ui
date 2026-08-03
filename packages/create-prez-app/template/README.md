@@ -14,6 +14,10 @@ or for pnpm:
 pnpm install
 ```
 
+> [!NOTE]
+> Some package managers (such as PNPM) require you to allow/disallow builds for some dependencies when installing
+
+
 Then preview your theme by running:
 
 ```bash

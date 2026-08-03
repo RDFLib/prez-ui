@@ -35,13 +35,13 @@
         "preinstall": "npx only-allow pnpm"
     },
     "devDependencies": {
-        "@rdfjs/types": "^1.1.2",
+        "@rdfjs/types": "^2.0.1",
         "@types/n3": "^1.26.1",
-        "typescript": "5.9.2",
-        "vite": "^7.3.0",
-        "vite-plugin-dts": "^4.5.4"
+        "typescript": "6.0.3",
+        "vite": "^8.2.0",
+        "vite-plugin-dts": "^5.0.3"
     },
     "dependencies": {
-        "n3": "^1.26.0"
+        "n3": "^2.1.1"
     }
 }
