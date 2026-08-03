@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import Yasgui from "@triply/yasgui";
-import "@triply/yasgui/build/yasgui.min.css";
+import Yasgui from "@zazuko/yasgui";
+import "@zazuko/yasgui/build/yasgui.min.css";
 
 const apiEndpoint = useGetPrezAPIEndpoint();
 const appConfig = useAppConfig();
