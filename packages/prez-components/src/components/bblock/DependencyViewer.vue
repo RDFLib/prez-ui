@@ -327,7 +327,7 @@ const eventHandlers = {
   },
 };
 </script>
-<style scoped lang="scss">
+<style scoped>
 
 .dependency-viewer {
   position: relative;
@@ -372,7 +372,7 @@ const eventHandlers = {
   }
 }
 </style>
-<style lang="scss">
+<style>
 .dependency-viewer {
   .v-ng-layer-edges {
     .v-ng-line-background {
