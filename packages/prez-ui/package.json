@@ -23,7 +23,6 @@
         "postinstall": "nuxt prepare"
     },
     "dependencies": {
-        "@nuxtjs/color-mode": "^4.0.1",
         "@tailwindcss/vite": "^4.3.3",
         "@vueuse/core": "^14.4.0",
         "@zazuko/yasgui": "^4.6.1",
