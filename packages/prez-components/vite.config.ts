@@ -10,7 +10,7 @@ export default defineConfig({
     plugins: [vue(), dts(), tailwindcss()],
     build: {
         lib: {
-            entry: resolve(__dirname, "src/index.ts"),
+            entry: resolve(import.meta.dirname, "src/index.ts"),
             name: "prez-components",
             fileName: "prez-components",
         },

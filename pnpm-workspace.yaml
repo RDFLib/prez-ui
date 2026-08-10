@@ -2,3 +2,12 @@ packages:
   - packages/*
   - packages/create-prez-app/template
   - "!.playground"
+allowBuilds:
+  '@fortawesome/fontawesome-common-types': true
+  '@fortawesome/free-solid-svg-icons': true
+  '@parcel/watcher': true
+  esbuild: true
+  prez-components: true
+  prez-lib: true
+  prez-ui: true
+  vue-demi: true
