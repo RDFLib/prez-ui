@@ -40,19 +40,19 @@ jobs:
         run: pnpm install
       - name: Update version for all packages
         run: |
-          NEW_VERSION=$(pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false)
+          NEW_VERSION=$(pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version)
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "NEW_VERSION_NO_V=${NEW_VERSION#v}" >> $GITHUB_ENV
           cd packages/prez-lib
-          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+          pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version
           cd ../prez-components
-          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+          pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version
           cd ../prez-ui
-          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+          pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version
           cd ../create-prez-app
-          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+          pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version
           cd template
-          pnpm version ${{ github.event.inputs.release-type }} --git-tag-version false
+          pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version
       # prez-lib
       - name: Build prez-lib
         working-directory: packages/prez-lib
