@@ -43,9 +43,8 @@ jobs:
         run: pnpm install
       - name: Update version for all packages
         run: |
-          NEW_VERSION=$(pnpm version patch --no-git-tag-version --no-git-checks)
+          NEW_VERSION=$(pnpm version patch --no-git-tag-version --no-git-checks --json | jq '.[0].newVersion')
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-          echo "NEW_VERSION_NO_V=${NEW_VERSION#v}" >> $GITHUB_ENV
           cd packages/prez-lib
           pnpm version patch --no-git-tag-version --no-git-checks
           cd ../prez-components
@@ -78,7 +77,7 @@ jobs:
       - name: Update prez-ui dependency in template
         working-directory: packages/create-prez-app/template
         run: |
-          sed -i -e "s/\"prez\-ui\": \"\^.\{5,8\}\"/\"prez\-ui\": \"\^${{ env.NEW_VERSION_NO_V }}\"/g" package.json
+          sed -i -e "s/\"prez\-ui\": \"\^.\{5,8\}\"/\"prez\-ui\": \"\^${{ env.NEW_VERSION }}\"/g" package.json
       - name: Publish create-prez-app to NPM
         working-directory: packages/create-prez-app
         run: pnpm publish --dry-run --no-git-checks
