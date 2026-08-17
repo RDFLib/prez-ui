@@ -1,20 +1,17 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - jamie/release-workflow-fix-2
-#  workflow_dispatch:
-#    inputs:
-#      release-type:
-#        type: choice
-#        required: true
-#        description: 'Release type:'
-#        default: 'patch'
-#        options:
-#          - 'patch'
-#          - 'minor'
-#          - 'major'
+  workflow_dispatch:
+    inputs:
+      release-type:
+        type: choice
+        required: true
+        description: 'Release type:'
+        default: 'patch'
+        options:
+          - 'patch'
+          - 'minor'
+          - 'major'
 
 permissions:
   contents: write # for making commits
@@ -43,36 +40,36 @@ jobs:
         run: pnpm install
       - name: Update version for all packages
         run: |
-          NEW_VERSION=$(pnpm version patch --no-git-tag-version --no-git-checks --json | jq '.[0].newVersion')
+          NEW_VERSION=$(pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version --no-git-checks --json | jq '.[0].newVersion')
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           cd packages/prez-lib
-          pnpm version patch --no-git-tag-version --no-git-checks
+          pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version --no-git-checks
           cd ../prez-components
-          pnpm version patch --no-git-tag-version --no-git-checks
+          pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version --no-git-checks
           cd ../prez-ui
-          pnpm version patch --no-git-tag-version --no-git-checks
+          pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version --no-git-checks
           cd ../create-prez-app
-          pnpm version patch --no-git-tag-version --no-git-checks
+          pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version --no-git-checks
           cd template
-          pnpm version patch --no-git-tag-version --no-git-checks
+          pnpm version ${{ github.event.inputs.release-type }} --no-git-tag-version --no-git-checks
       # prez-lib
       - name: Build prez-lib
         working-directory: packages/prez-lib
         run: pnpm build
       - name: Publish prez-lib to NPM
         working-directory: packages/prez-lib
-        run: pnpm publish --dry-run --no-git-checks
+        run: pnpm publish --no-git-checks
       # prez-components
       - name: Build prez-components
         working-directory: packages/prez-components
         run: pnpm build
       - name: Publish prez-components to NPM
         working-directory: packages/prez-components
-        run: pnpm publish --dry-run --no-git-checks
+        run: pnpm publish --no-git-checks
       # prez-ui layer
       - name: Publish prez-ui to NPM
         working-directory: packages/prez-ui
-        run: pnpm publish --dry-run --no-git-checks
+        run: pnpm publish --no-git-checks
       # create-prez-app
       - name: Update prez-ui dependency in template
         working-directory: packages/create-prez-app/template
@@ -80,19 +77,19 @@ jobs:
           sed -i -e "s/\"prez\-ui\": \"\^.\{5,8\}\"/\"prez\-ui\": \"\^${{ env.NEW_VERSION }}\"/g" package.json
       - name: Publish create-prez-app to NPM
         working-directory: packages/create-prez-app
-        run: pnpm publish --dry-run --no-git-checks
-#      - name: Git configuration
-#        run: |
-#          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-#          git config --global user.name "GitHub Actions"
-#      - name: Commit & push changes with tag
-#        run: |
-#          git add -A
-#          git commit -m "chore: release ${{ env.NEW_VERSION }}"
-#          git tag ${{ env.NEW_VERSION }}
-#          git push origin && git push --tags
-#      - name: Create GitHub release
-#        uses: softprops/action-gh-release@v3
-#        with:
-#          tag_name: ${{ env.NEW_VERSION }}
-#          generate_release_notes: true
+        run: pnpm publish --no-git-checks
+      - name: Git configuration
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+      - name: Commit & push changes with tag
+        run: |
+          git add -A
+          git commit -m "chore: release v${{ env.NEW_VERSION }}"
+          git tag v${{ env.NEW_VERSION }}
+          git push origin && git push --tags
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ env.NEW_VERSION }}
+          generate_release_notes: true
